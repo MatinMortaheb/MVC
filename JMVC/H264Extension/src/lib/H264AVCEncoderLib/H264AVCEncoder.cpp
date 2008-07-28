@@ -1922,7 +1922,7 @@ H264AVCEncoder::finish( ExtBinDataAccessorList&  rcExtBinDataAccessorList,
                         UInt&                    ruiNumCodedFrames,
                         Double&                  rdHighestLayerOutputRate )
 {
-  UInt  uiLayer;
+  //UInt  uiLayer;
 	UInt	uiScalableLayer = 0;
   UInt  uiNumLayers = m_pcCodingParameter->getNumberOfLayers();
   //ying

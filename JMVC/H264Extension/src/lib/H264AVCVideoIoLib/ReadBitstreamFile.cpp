@@ -97,7 +97,7 @@ ReadBitstreamFile::~ReadBitstreamFile()
 
 ErrVal ReadBitstreamFile::releasePacket( BinData* pcBinData )
 {
-  ROT( NULL == pcBinData );
+  ROFRS( pcBinData, Err::m_nOK );
   pcBinData->deleteData();
   delete pcBinData;
   return Err::m_nOK;
@@ -150,6 +150,12 @@ ErrVal ReadBitstreamFile::extractPacket( BinData*& rpcBinData, Bool& rbEOS )
 
 	do
 	{
+    if( dwBytesRead == 1 )
+    {
+      n = 1;
+      break;
+    }
+
     puc = Buffer;
     uiCond = 0;
 
