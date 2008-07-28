@@ -543,11 +543,11 @@ Bool MotionEstimation::OmitPDISearch( Int x, Int y, Bool bQPel ) // x, y: motion
 		UInt uiConstrainedMBNumMinus1 = getConstrainedMBNum()-1;
 		UInt uiMBXDelay = uiConstrainedMBNumMinus1%m_uiFrameWidthInMbs;
 		UInt uiMBYDelay = uiConstrainedMBNumMinus1/m_uiFrameWidthInMbs;
-		UInt uiSearchLimitMBX  = (uiMBXDelay + m_uiCurrMBX)%m_uiFrameWidthInMbs;
+//		UInt uiSearchLimitMBX  = (uiMBXDelay + m_uiCurrMBX)%m_uiFrameWidthInMbs;
 		UInt uiSearchLimitMBY  = (uiMBXDelay + m_uiCurrMBX)/m_uiFrameWidthInMbs + m_uiCurrMBY + uiMBYDelay;
-		Int  iSearchLimitX     = uiSearchLimitMBX*16;
+//		Int  iSearchLimitX     = uiSearchLimitMBX*16;
 		Int  iSearchLimitY     = uiSearchLimitMBY*16;
-		Int  iCurrXPel         = m_uiCurrMBX*16;
+//		Int  iCurrXPel         = m_uiCurrMBX*16;
 		Int  iCurrYPel         = m_uiCurrMBY*16;
 		if( !bQPel ) // full pel
 		{
@@ -556,9 +556,9 @@ Bool MotionEstimation::OmitPDISearch( Int x, Int y, Bool bQPel ) // x, y: motion
 		}
 		else //sub pel
 		{
-		  Int  iSearchLimitXQ    = iSearchLimitX<<2;
+//		  Int  iSearchLimitXQ    = iSearchLimitX<<2;
 	 	  Int  iSearchLimitYQ    = iSearchLimitY<<2;
-	 	  Int  iCurrXQPel        = iCurrXPel<<2;
+//	 	  Int  iCurrXQPel        = iCurrXPel<<2;
 		  Int  iCurrYQPel        = iCurrYPel<<2;
 			if(y+iCurrYQPel >= -24+iSearchLimitYQ )  //downwards 
 			{

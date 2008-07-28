@@ -1835,8 +1835,8 @@ H264AVCEncoder::writeParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor, Bo
 
     if( m_pcCodingParameter->getNumberOfLayers() )
     {
-      UInt  uiLayer = rcSPS.getLayerId();
-      UInt  uiSize  = pcExtBinDataAccessor->size();
+//      UInt  uiLayer = rcSPS.getLayerId();
+//      UInt  uiSize  = pcExtBinDataAccessor->size();
 //      RNOK( m_apcMCTFEncoder[uiLayer]->addParameterSetBits( 8*(uiSize+4) ) ); ying
     }
     
@@ -1857,8 +1857,8 @@ H264AVCEncoder::writeParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor, Bo
         SequenceParameterSet* pcSPS;
         RNOK( m_pcParameterSetMng->get( pcSPS, uiSPSId ) );
 
-        UInt  uiLayer = pcSPS->getLayerId();
-        UInt  uiSize  = pcExtBinDataAccessor->size();
+//        UInt  uiLayer = pcSPS->getLayerId();
+//        UInt  uiSize  = pcExtBinDataAccessor->size();
 //        RNOK( m_apcMCTFEncoder[uiLayer]->addParameterSetBits( 8*(uiSize+4) ) ); ying
       }
       
@@ -1923,8 +1923,8 @@ H264AVCEncoder::finish( ExtBinDataAccessorList&  rcExtBinDataAccessorList,
                         Double&                  rdHighestLayerOutputRate )
 {
   //UInt  uiLayer;
-	UInt	uiScalableLayer = 0;
-  UInt  uiNumLayers = m_pcCodingParameter->getNumberOfLayers();
+//  UInt	uiScalableLayer = 0;
+//  UInt  uiNumLayers = m_pcCodingParameter->getNumberOfLayers();
   //ying
 /*
   for( uiLayer = 0; uiLayer < uiNumLayers; uiLayer++ )
@@ -1958,7 +1958,7 @@ H264AVCEncoder::finish( ExtBinDataAccessorList&  rcExtBinDataAccessorList,
 /*
 ErrVal
 H264AVCEncoder::xProcessGOP( UInt                     uiLayer,
-														 UInt&										uiScalableLayer,
+UInt&										uiScalableLayer,
                              PicBuffer*               pcOriginalPicBuffer,
                              PicBuffer*               pcReconstructPicBuffer,
                              PicBufferList&           rcPicBufferOutputList,
@@ -1980,11 +1980,11 @@ H264AVCEncoder::xProcessGOP( UInt                     uiLayer,
                                                  m_acOrgPicBufferList[uiLayer],
                                                  m_acRecPicBufferList[uiLayer],
                                                  rcPicBufferUnusedList,
-																								 m_aaauidSeqBits ) );
+                                                 m_aaauidSeqBits ) );
    		uiScalableLayer = m_apcMCTFEncoder[uiLayer]->getScalableLayer();
       rcPicBufferOutputList += m_acRecPicBufferList[uiLayer];
     }
-//* //ying
+ //ying
     rcPicBufferUnusedList += m_acOrgPicBufferList[uiLayer];
     rcPicBufferUnusedList += m_acRecPicBufferList[uiLayer];
 

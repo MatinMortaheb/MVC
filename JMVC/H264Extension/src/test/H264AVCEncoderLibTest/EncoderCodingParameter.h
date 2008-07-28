@@ -686,9 +686,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
                                          UInt            uiViewId,
                                          std::string&    rcBitstreamFile)
 {
-  std::string acLayerConfigName[MAX_LAYERS];
   std::string acTags[4];
-  UInt        uiLayerCnt   = 0;
   UInt        uiParLnCount = 0;
   std::string cFileNameStringTemp, cInputFilename,  cInputFile, cReconFile;
   std::string cAcquisitionFile; // SEI JVT-W060

@@ -96,7 +96,6 @@ AssemblerParameter::xPrintUsage( Char **argv )
 ErrVal
 AssemblerParameter::xReadFromFile( std::string& rcFilename )
 {
-  std::string acLayerConfigName[MAX_LAYERS];
   std::string acTags[4];
   UInt        uiParLnCount = 0;
   UInt        uiLayerCnt   = 0;

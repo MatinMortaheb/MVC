@@ -221,7 +221,6 @@ Assembler::xAnalyse()
   h264::SEI::ViewScalabilityInfoSei*  pcFinalViewScalSei;
   RNOK( h264::SEI::ViewScalabilityInfoSei::create(pcFinalViewScalSei) );
 //SEI }
-  UInt                    uiPosSPS = 0; 
   Int64                   i64Start;
 //  UInt                    uiEnd;
 // Dec. 1
