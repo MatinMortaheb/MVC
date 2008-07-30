@@ -1,10 +1,10 @@
 JMVC_1_0 -> JMVC_1_1
-Date						: July 28, 2008
-Authors					: TUT/Thomson (Software coordinators)
+Date            : July 28, 2008
+Authors         : TUT/Thomson (Software coordinators)
 Contribution    : Software improvements
 Changes         :
 - Added VS8 solution files
-- Address some warnings during compile time
+- Address some warnings during compile time, especially for Linux
 
 JMVC_1_0 (Initial version)
 Date            : May 31, 2008

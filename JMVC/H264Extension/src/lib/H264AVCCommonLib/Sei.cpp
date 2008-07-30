@@ -621,8 +621,8 @@ SEI::FullframeSnapshotSei::write( HeaderSymbolWriteIf *pcWriteIf )
 {
 	UInt uiStart = pcWriteIf->getNumberOfWrittenBits();
 	UInt uiPayloadSize = 0;
-	UInt m_uiSnapShotId = getSnapShotId();
-	RNOK( pcWriteIf->writeUvlc( m_uiSnapShotId, "FullframeSnapshotSei: SnapshotId" ) );
+	// bug fix for LSJ, ying
+	RNOK( pcWriteIf->writeUvlc( getSnapShotId(), "FullframeSnapshotSei: SnapshotId" ) );
 
 	uiPayloadSize = ( pcWriteIf->getNumberOfWrittenBits() - uiStart + 7 )/8;
 
@@ -928,7 +928,9 @@ SEI::xRead( HeaderSymbolReadIf* pcReadIf,
 //JVT-W080, omit parsing
   if( eMessageType == PARALLEL_DEC_SEI )
 	{
-		ParallelDecodingSEI* pcPdSEI = (ParallelDecodingSEI*)rpcSEIMessage;
+//		ParallelDecodingSEI* pcPdSEI = (ParallelDecodingSEI*)rpcSEIMessage;
+// fix for Liu Hui, Ying
+
 		return Err::m_nOK;   
 	}
 //~JVT-W080

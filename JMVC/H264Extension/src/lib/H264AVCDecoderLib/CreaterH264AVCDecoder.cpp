@@ -847,46 +847,49 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
       }
 
 	  case SEI::ACTIVE_VIEWINFO_SEI:
+    {
+      Bool bOpPresentFlag;
+      UInt uiOperationPointId;
+      UInt uiNumActiveViewsMinus1;
+      UInt *puiViewId; // fix for LSJ, ying
+
+      SEI::ActiveViewInfoSei* pcSEI = (SEI::ActiveViewInfoSei*)pcSEIMessage;
+      bOpPresentFlag = pcSEI->getOpPresentFlag();
+      if( bOpPresentFlag )
       {
-		Bool bOpPresentFlag;
-        UInt uiOperationPointId;
-		UInt uiNumActiveViewsMinus1;
-		UInt *uiViewId;
-
-		SEI::ActiveViewInfoSei* pcSEI = (SEI::ActiveViewInfoSei*)pcSEIMessage;
-		bOpPresentFlag = pcSEI->getOpPresentFlag();
-        if( bOpPresentFlag )
-        {
-			uiOperationPointId = pcSEI->getOperationPointId();
-		}
-		else
-		{
-		  uiNumActiveViewsMinus1 = pcSEI->getNumActiveViewsMinus1();
-          uiViewId = new UInt[uiNumActiveViewsMinus1+1];
-          for( UInt uiIndex = 0; uiIndex <= uiNumActiveViewsMinus1; uiIndex++ )
-          {
-            uiViewId[uiIndex] = pcSEI->getViewId(uiIndex);
-          }
-
-          delete uiViewId;
-        }
-              bApplyToNext = true;
-        break;
+        uiOperationPointId = pcSEI->getOperationPointId();
       }
+      else
+      {
+        uiNumActiveViewsMinus1 = pcSEI->getNumActiveViewsMinus1();
+        puiViewId = new UInt[uiNumActiveViewsMinus1+1];
+        for( UInt uiIndex = 0; uiIndex <= uiNumActiveViewsMinus1; uiIndex++ )
+        {
+          puiViewId[uiIndex] = pcSEI->getViewId(uiIndex);
+        }
+
+        delete puiViewId;
+      }
+      bApplyToNext = true;
+      break;
+      // fixed format for LSJ, ying
+    }
 //SEI }
 	  case SEI::MULTIVIEW_SCENE_INFO_SEI: // SEI JVT-W060
       {
         UInt uiMaxDisparity;
 		
-		SEI::MultiviewSceneInfoSei* pcSEI = (SEI::MultiviewSceneInfoSei*)pcSEIMessage;
-		uiMaxDisparity = pcSEI->getMaxDisparity();
+		    SEI::MultiviewSceneInfoSei* pcSEI = (SEI::MultiviewSceneInfoSei*)pcSEIMessage;
+		    uiMaxDisparity = pcSEI->getMaxDisparity();
         bApplyToNext = true;
         break;
       }
 	  case SEI::MULTIVIEW_ACQUISITION_INFO_SEI: // SEI JVT-W060
       {
-        
-        SEI::MultiviewAcquisitionInfoSei* pcSEI = (SEI::MultiviewAcquisitionInfoSei*)pcSEIMessage;
+        // I comment the following line to remove the warning
+        //SEI::MultiviewAcquisitionInfoSei* pcSEI = (SEI::MultiviewAcquisitionInfoSei*)pcSEIMessage; 
+        // This is introduced by MERL, it should be checked
+        // ying
         bApplyToNext = true;
         break;
       }

@@ -1756,7 +1756,7 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 					printf("\n Multiview Acquisition Info SEI message received\n");
 					m_uiMultiviewAcquisitionInfoSeiFlag = 1;					
 					UInt uiIndex;
-					int i,j;
+					int j = 0; //fix for MERL, ying
 
 					UInt NumViewMinus1 = (UInt) ((SEI::MultiviewAcquisitionInfoSei*)pcSEIMessage)->getNumViewMinus1();
 					Bool m_bIntrinsicParamFlag=(Bool)((SEI::MultiviewAcquisitionInfoSei*)pcSEIMessage)->getIntrinsicParamFlag();
@@ -2358,7 +2358,8 @@ H264AVCDecoder::process( PicBuffer*       pcPicBuffer,
 // JVT-Q054 Red. Picture }
       
       PicBufferList   cDummyList;
-      PicBufferList&  rcOutputList  = ( m_uiLastLayerId == m_uiRecLayerId ? rcPicBufferOutputList : cDummyList );
+//      PicBufferList&  rcOutputList  = ( m_uiLastLayerId == m_uiRecLayerId ? rcPicBufferOutputList : cDummyList );
+// fixed by ying July 29, 2008
 //JVT-T054{
       Bool bHighestLayer;
       if(m_bFGSRefInAU)
