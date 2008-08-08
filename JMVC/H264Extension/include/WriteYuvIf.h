@@ -121,7 +121,7 @@ public:
 
 //JVT-V054
   virtual ErrVal xInitMVC( const std::string& rcFileName, UInt *vcOrder, 
-                           UInt uiNumOfViews ,UInt *vcActive  ) = 0;//SEI LSJ
+                           UInt uiNumOfViews ) = 0;// JVT-AB024
 
   virtual Bool getFileInitDone() = 0;
 

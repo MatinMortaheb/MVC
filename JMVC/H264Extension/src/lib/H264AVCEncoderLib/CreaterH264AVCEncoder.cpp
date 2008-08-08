@@ -230,13 +230,6 @@ ErrVal CreaterH264AVCEncoder::writeNestingSEIMessage( ExtBinDataAccessor* pcExtB
 
 }
 
-ErrVal CreaterH264AVCEncoder::writeActiveViewInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor )
-{
-  RNOK( m_pcH264AVCEncoder->writeActiveViewInfoSEIMessage( pcExtBinDataAccessor, m_pcPicEncoder->dMVCGetSeqBits() ) );
-  return Err::m_nOK;
-
-}
-
 ErrVal CreaterH264AVCEncoder::writeMultiviewSceneInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor ) // SEI JVT-W060
 {
   RNOK( m_pcH264AVCEncoder->writeMultiviewSceneInfoSEIMessage( pcExtBinDataAccessor, m_pcPicEncoder->dMVCGetSeqBits() ) );

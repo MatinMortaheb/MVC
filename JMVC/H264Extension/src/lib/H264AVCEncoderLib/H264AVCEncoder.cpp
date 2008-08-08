@@ -400,54 +400,6 @@ ErrVal H264AVCEncoder::writeNestingSEIMessage( ExtBinDataAccessor* pcExtBinDataA
 	return Err::m_nOK;
 }
 
-ErrVal H264AVCEncoder::writeActiveViewInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor, Double* dSeqBits ) 
-{
-	SEI::ActiveViewInfoSei* pcActiveViewInfoSei;
-	RNOK( SEI::ActiveViewInfoSei::create(pcActiveViewInfoSei) );
-
-	//===== set message =====
-	//may be changed here
-	Bool bOpPresentFlag = false;
-
-	pcActiveViewInfoSei->setOpPresentFlag( bOpPresentFlag );
-	if( bOpPresentFlag )
-	{
-		UInt uiOperationPointId = 0;
-		pcActiveViewInfoSei->setOperationPointId(uiOperationPointId);
-	}
-	else
-	{		
-		UInt uiNumActiveViewsMinus1;
-
-		// assign value, may be changed here
-    uiNumActiveViewsMinus1 = m_pcCodingParameter->getSpsMVC()->getNumViewMinus1();
-    UInt *uiViewCodingOrder = m_pcCodingParameter->getSpsMVC()->getViewCodingOrder();
-	UInt *uiViewId = new UInt[uiNumActiveViewsMinus1+1];
-	UInt uiIndex;
-
-    for( uiIndex = 0; uiIndex <= uiNumActiveViewsMinus1; uiIndex++ )
-    {
-      uiViewId[uiIndex] = uiViewCodingOrder[uiIndex];
-    }
-
-		pcActiveViewInfoSei->setNumActiveViewsMinus1( uiNumActiveViewsMinus1 );
-		for( uiIndex = 0; uiIndex <= uiNumActiveViewsMinus1; uiIndex++ )
-		{
-			pcActiveViewInfoSei->setViewId( uiIndex, uiViewId[uiIndex] );
-		}
-		delete uiViewId;
-	}
-
-	UInt              uiBits = 0;
-	SEI::MessageList  cSEIMessageList;
-	cSEIMessageList.push_back                 ( pcActiveViewInfoSei );
-	RNOK ( m_pcNalUnitEncoder->initNalUnit    ( pcExtBinDataAccessor ) );
-	RNOK ( m_pcNalUnitEncoder->write	      ( cSEIMessageList ) );
-	RNOK ( m_pcNalUnitEncoder->closeNalUnit   ( uiBits ) );
-	dSeqBits[0] += uiBits+4*8;
-	return Err::m_nOK;
-}
-
 ErrVal H264AVCEncoder::writeMultiviewSceneInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor, Double* dSeqBits ) // SEI JVT-W060
 {
 	SEI::MultiviewSceneInfoSei* pcMultiviewSceneInfoSei;

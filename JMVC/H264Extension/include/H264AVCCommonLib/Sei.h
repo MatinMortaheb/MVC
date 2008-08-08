@@ -136,13 +136,16 @@ public:
 //SEI }
 	MULTIVIEW_SCENE_INFO_SEI				  = 30, // SEI JVT-W060
 	MULTIVIEW_ACQUISITION_INFO_SEI			  = 31, // SEI JVT-W060
-	RESERVED_SEI                          = 32, // SEI JVT-W060
+	RESERVED_SEI                          = 36, //JVT-AB025
 //JVT-W080
 	 PARALLEL_DEC_SEI                      =29,
   /* RESERVED_SEI                          = 30, */ // SEI JVT-W060
   /*RESERVED_SEI                          = 28,*/
 //~JVT-W080   
-
+   TARGET_VIEW_INFO_SEI             = 32,  //JVT-AB025
+   NON_REQ_VIEW_INFO_SEI                 = 33,  //JVT-AB025
+   VIEW_DEPENDENCY_STRUCTURE_SEI         = 34,  //JVT-AB025
+   OP_NOT_PRESENT_SEI                    = 35,  //JVT-AB025
 	// JVT-S080 LMI }
   	NON_REQUIRED_SEI					            = 24
   };
@@ -1003,38 +1006,6 @@ public:
   };
 
 #define MAX_VIEWS 100
- class H264AVCCOMMONLIB_API ActiveViewInfoSei : public SEIMessage
- {
- protected:
-   ActiveViewInfoSei() 
-	 : SEIMessage(ACTIVE_VIEWINFO_SEI)
-	 , m_bOpPresentFlag		   (false)
-	 , m_uiOperationPointId   (0)
-	 , m_uiNumActiveViewsMinus1(0)
-     {}
- public:
-   static ErrVal create( ActiveViewInfoSei*& rpcSeiMessage );
-   ErrVal    destroy ();
-   ErrVal	 write ( HeaderSymbolWriteIf* pcWriteIf );
-   ErrVal	 read ( HeaderSymbolReadIf*   pcReadIf );
-
-   Bool getOpPresentFlag()			const { return m_bOpPresentFlag; }
-   UInt getOperationPointId()		const { return m_uiOperationPointId; }
-   UInt getNumActiveViewsMinus1()	const { return m_uiNumActiveViewsMinus1; }
-   UInt getViewId( UInt uiIndex )		  { return m_uiViewId[uiIndex]; }
-
-   Void setOpPresentFlag( Bool bFlag )			{ m_bOpPresentFlag = bFlag; }
-   Void setOperationPointId( UInt uiId )		{ m_uiOperationPointId = uiId; }
-   Void setNumActiveViewsMinus1( UInt uiNum )   { m_uiNumActiveViewsMinus1 = uiNum; }
-   Void setViewId( UInt uiIndex, UInt uiId )	{ m_uiViewId[uiIndex] = uiId; }
-
- private:
-   Bool		m_bOpPresentFlag;
-   UInt	    m_uiOperationPointId;
-   UInt		m_uiNumActiveViewsMinus1;
-   UInt		m_uiViewId[MAX_VIEWS];
- };
-
  class H264AVCCOMMONLIB_API MultiviewSceneInfoSei : public SEIMessage // SEI JVT-W060
  {
  protected:
@@ -1339,6 +1310,108 @@ class H264AVCCOMMONLIB_API MultiviewAcquisitionInfoSei : public SEIMessage // SE
    
  };
 
+ class H264AVCCOMMONLIB_API TargetViewInfoSei:public SEIMessage
+ {
+ protected:
+   TargetViewInfoSei() :SEIMessage(TARGET_VIEW_INFO_SEI)
+   {}
+ public:
+   static ErrVal create(TargetViewInfoSei*& rpcTargetViewInfoSei);
+   ErrVal destory();
+   ErrVal write(HeaderSymbolWriteIf* pcWriteIf);
+   ErrVal read(HeaderSymbolReadIf* pcReadIf);
+   UInt getTargetViewId()           const{ return m_uiTargetViewId; }
+   Void setTargetViewId(UInt uiTargetViewId)            { m_uiTargetViewId = uiTargetViewId; }
+ private:
+   UInt m_uiTargetViewId;
+ };
+ //JVT-AB025 {{
+ class H264AVCCOMMONLIB_API NonReqViewInfoSei:public SEIMessage
+ {
+ protected:
+   NonReqViewInfoSei();
+   ~NonReqViewInfoSei();
+ public:
+   static ErrVal create( NonReqViewInfoSei*& rpcNonReqViewInfoSei);
+   ErrVal write( HeaderSymbolWriteIf* pcWriteIf);
+   ErrVal read ( HeaderSymbolReadIf* pcReadIf);
+   ErrVal init ( UInt uiNumOfTargetViewMinus1
+     ,UInt* puiViewOrderIndex);
+   UInt   getNumTargetViewMinus1()  const { return m_uiNumOfTargetViewMinus1;}
+   UInt*  getTargetViewOrderIndex() const { return m_puiViewOrderIndex;}
+   UInt*  getNumNonReqViewCopMinus1() const { return m_puiNumNonReqViewCopMinus1;}
+   UInt** getindexDeltaMinus1()     const { return m_ppuiIndexDeltaMinus1;}
+
+ private:
+   UInt m_uiNumOfTargetViewMinus1;
+   UInt *m_puiViewOrderIndex;
+   UInt *m_puiNumNonReqViewCopMinus1;
+   UInt **m_ppuiNonReqViewOrderIndex;
+   UInt **m_ppuiIndexDeltaMinus1;
+ };
+ class H264AVCCOMMONLIB_API ViewDependencyStructureSei:public SEIMessage
+ {
+ protected:
+   ViewDependencyStructureSei();
+   ~ViewDependencyStructureSei();
+ public:
+   static ErrVal create( ViewDependencyStructureSei*& rpcViewDepStruSei);
+   ErrVal write( HeaderSymbolWriteIf* pcWriteIf );
+   ErrVal read ( HeaderSymbolReadIf*  pcReadIf);
+   ErrVal init ( UInt uiNumOfViews
+     ,UInt* puinum_refs_list0_anc
+     ,UInt* puinum_refs_list1_anc
+     ,UInt* puinum_refs_list0_nonanc
+     ,UInt* puinum_refs_list1_nonanc
+     ,Bool bEnc_Dec_Flag); // True:encder False:decoder
+
+   Bool  getAnchorUpdateFlag()  const { return m_bAnchorUpdateFlag;}
+   Bool  getNonAnchorUpdateFlag()  const { return m_bNonAnchorUpdateFlag;}
+   Void  setAnchorUpdateFlag( Bool flag ){ m_bAnchorUpdateFlag = flag;}
+   Void  setNonAnchorUpdateFlag( Bool flag){ m_bNonAnchorUpdateFlag = flag;}
+   Bool** getAnchorRefL0Flag()  const { return m_ppbAnchorRefL0Flag;}
+   Bool** getAnchorRefL1Flag()  const { return m_ppbAnchorRefL1Flag;}
+   Bool** getNonAnchorRefL0Flag() const{ return m_ppbNonAnchorRefL0Flag;}
+   Bool** getNonAnchorRefL1Flag() const{ return m_ppbNonAnchorRefL1Flag;}
+ private:
+   UInt m_uiNumOfViews;
+   UInt *m_puiNumAnchorL0Refs;
+   UInt *m_puiNumAnchorL1Refs;
+   UInt *m_puiNumNonAnchorL0Refs;
+   UInt *m_puiNumNonAnchorL1Refs;
+   Bool m_bAnchorUpdateFlag;
+   Bool m_bNonAnchorUpdateFlag;
+   Bool **m_ppbAnchorRefL0Flag;
+   Bool **m_ppbAnchorRefL1Flag;
+   Bool **m_ppbNonAnchorRefL0Flag;
+   Bool **m_ppbNonAnchorRefL1Flag;
+ };
+ class H264AVCCOMMONLIB_API OPNotPresentSei : public SEIMessage
+ {
+ protected:
+   OPNotPresentSei();
+   ~OPNotPresentSei();
+ public:
+   static ErrVal create( OPNotPresentSei*& rpcSeiMessage);
+   ErrVal destroy();
+   ErrVal write( HeaderSymbolWriteIf * pcWriteIf);
+   ErrVal read( HeaderSymbolReadIf* pcReadIf);
+   ErrVal init( UInt m_uiNumNotPresentOP );
+   Void   setNumNotPresentOP( UInt uiNumNotPresentOP ) { m_uiNumNotPresentOP = uiNumNotPresentOP;}
+   UInt   getNumNotPresentOP() { return m_uiNumNotPresentOP;}
+   Void   setNotPresentOPId( UInt* OperationPointId)
+   {
+     for (UInt i = 0; i< m_uiNumNotPresentOP; i++)
+     {
+       m_uiNotPresentOPId[i] = OperationPointId[i];
+     }
+   }
+   UInt*  getNotPresentOPId(){ return m_uiNotPresentOPId;}
+ private:
+   UInt  m_uiNumNotPresentOP;
+   UInt* m_uiNotPresentOPId;
+ };
+ //JVT-AB025 }}
   typedef MyList<SEIMessage*> MessageList;
   static ErrVal writeNesting        ( HeaderSymbolWriteIf*  pcWriteIf,
                                       HeaderSymbolWriteIf*  pcWriteTestIf,
@@ -1356,6 +1429,22 @@ class H264AVCCOMMONLIB_API MultiviewAcquisitionInfoSei : public SEIMessage // SE
   static ErrVal write ( HeaderSymbolWriteIf*  pcWriteIf,
                         HeaderSymbolWriteIf*  pcWriteTestIf,
                         MessageList*          rpcSEIMessageList );
+  //JVT-AB025 {{
+  static ErrVal read  (  HeaderSymbolReadIf* pcReadIf
+    , MessageList& rcSEIMessageList
+    , UInt uiNumOfViews
+    , UInt* puinum_refs_list0_anc
+    , UInt* puinum_refs_list1_anc
+    , UInt* puinum_refs_list0_nonanc
+    , UInt* puinum_refs_list1_nonanc);
+  static ErrVal xRead (  HeaderSymbolReadIf*   pcReadIf
+    , SEIMessage*&          rpcSEIMessage
+    , UInt uiNumOfViews
+    , UInt* puinum_refs_list0_anc
+    , UInt* puinum_refs_list1_anc
+    , UInt* puinum_refs_list0_nonanc
+    , UInt* puinum_refs_list1_nonanc);
+  //JVT-AB025 }}
 
 protected:
   //static ErrVal xRead               ( HeaderSymbolReadIf*   pcReadIf,

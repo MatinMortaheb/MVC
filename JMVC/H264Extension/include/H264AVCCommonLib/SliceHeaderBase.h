@@ -677,8 +677,7 @@ public:
 //TMM_WP
   ErrVal copyWeightedPred(PredWeightTable& pcPredWeightTable, UInt uiLumaLogWeightDenom,
                           UInt uiChromaWeightDenom, ListIdx eListIdx, Bool bDecoder);
-//TMM_WP
-
+//TMM_WP   
   Bool                              getDirectSpatialMvPredFlag    ()  const { return m_bDirectSpatialMvPredFlag; }
   Int							    getSnapShotId                 ()  const { return m_uiSnapShotId; } //SEI LSJ
   Bool                              getKeyPictureFlag             ()  const { return m_bKeyPictureFlag; }

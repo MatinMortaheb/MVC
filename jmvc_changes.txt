@@ -1,3 +1,11 @@
+JMVC_1_1 -> JMVC_1_2
+Date            : Aug. 08, 2008
+Authors         : USTC/TUT/Nokia (Software coordinators)
+Contribution    : JVT-AB025, JVT-AB026 and JVT-AB027, SEI messages
+Changes         :
+- Added decoder supports for the SEI messages (view dependency change, non-required view component, op not present)
+- Removed active view SEI
+
 JMVC_1_0 -> JMVC_1_1
 Date            : July 28, 2008
 Authors         : TUT/Thomson (Software coordinators)

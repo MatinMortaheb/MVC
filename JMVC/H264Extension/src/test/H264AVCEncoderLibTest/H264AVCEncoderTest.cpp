@@ -499,21 +499,6 @@ H264AVCEncoderTest::go()
 	}
 //~JVT-W080
   //SEI {
-  if( m_pcEncoderCodingParameter->getActiveViewSEIEnable() && m_pcEncoderCodingParameter->getCurentViewId() == 0 )
-  {
-	  //active view information sei message
-	  UChar aucParameterSetBuffer[1000];
-      BinData cBinData;
-      cBinData.reset();
-      cBinData.set( aucParameterSetBuffer, 1000 );
-      ExtBinDataAccessor cExtBinDataAccessor;
-      cBinData.setMemAccessor( cExtBinDataAccessor );
-	  RNOK( m_pcH264AVCEncoder ->writeActiveViewInfoSEIMessage( &cExtBinDataAccessor ) );
-	  RNOK( m_pcWriteBitstreamToFile->writePacket( &m_cBinDataStartCode ) );
-	  RNOK( m_pcWriteBitstreamToFile->writePacket( &cExtBinDataAccessor ) );
-	  uiWrittenBytes += 4 + cExtBinDataAccessor.size();
-	  cBinData.reset();
-  }
   if( m_pcEncoderCodingParameter->getMultiviewSceneInfoSEIEnable() ) // SEI JVT-W060
   {
 	  // Multiview scene information sei message

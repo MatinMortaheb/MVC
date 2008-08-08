@@ -145,9 +145,7 @@ public:
   //JVT-V054
   UInt* getViewCodingOrder();
 
-  ErrVal uninit     ( Bool bCloseTrace );
-  Bool	DecideDecodeView();             //SEI  
-  Bool getActiveViewFlag( UInt ViewId );//SEI  
+  ErrVal uninit     ( Bool bCloseTrace ); 
   ErrVal process    ( PicBuffer*        pcPicBuffer,
                       PicBufferList&    rcPicBufferOutputList,
                       PicBufferList&    rcPicBufferUnusedList,

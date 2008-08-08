@@ -155,18 +155,6 @@ CreaterH264AVCDecoder::~CreaterH264AVCDecoder()
 {
 }
 
-//SEI {
-Bool	
-CreaterH264AVCDecoder::DecideDecodeView()
-{
-	return m_pcH264AVCDecoder->DecideDecodeView();
-}
-Bool
-CreaterH264AVCDecoder::getActiveViewFlag(UInt ViewId)
-{
-  return m_pcH264AVCDecoder->getActiveViewFlag( ViewId );
-}
-//SEI }
 ErrVal
 CreaterH264AVCDecoder::process( PicBuffer*     pcPicBuffer,
                              PicBufferList& rcPicBufferOutputList,
@@ -846,34 +834,6 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
         break;
       }
 
-	  case SEI::ACTIVE_VIEWINFO_SEI:
-    {
-      Bool bOpPresentFlag;
-      UInt uiOperationPointId;
-      UInt uiNumActiveViewsMinus1;
-      UInt *puiViewId; // fix for LSJ, ying
-
-      SEI::ActiveViewInfoSei* pcSEI = (SEI::ActiveViewInfoSei*)pcSEIMessage;
-      bOpPresentFlag = pcSEI->getOpPresentFlag();
-      if( bOpPresentFlag )
-      {
-        uiOperationPointId = pcSEI->getOperationPointId();
-      }
-      else
-      {
-        uiNumActiveViewsMinus1 = pcSEI->getNumActiveViewsMinus1();
-        puiViewId = new UInt[uiNumActiveViewsMinus1+1];
-        for( UInt uiIndex = 0; uiIndex <= uiNumActiveViewsMinus1; uiIndex++ )
-        {
-          puiViewId[uiIndex] = pcSEI->getViewId(uiIndex);
-        }
-
-        delete puiViewId;
-      }
-      bApplyToNext = true;
-      break;
-      // fixed format for LSJ, ying
-    }
 //SEI }
 	  case SEI::MULTIVIEW_SCENE_INFO_SEI: // SEI JVT-W060
       {

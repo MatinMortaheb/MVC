@@ -221,7 +221,7 @@ ErrVal WriteYuvToFile::createMVC( WriteYuvIf*& rpcWriteYuv, const std::string& r
 
 
 ErrVal WriteYuvToFile::xInitMVC( const std::string& rcFileName, UInt *vcOrder, 
-                                 UInt uiNumOfViews  ,UInt *vcActive )
+                                 UInt uiNumOfViews )  // remove active view SEI
 {
 
   std::string cFileName = rcFileName;
@@ -237,7 +237,7 @@ ErrVal WriteYuvToFile::xInitMVC( const std::string& rcFileName, UInt *vcOrder,
   {
     view_id = vcOrder ? vcOrder[i] : 0 ; // Dec. 1 fix 
 
-	if( !vcActive[i] && vcOrder )	continue;//Dec. 1
+	//if( !vcActive[i] && vcOrder )	continue;// JVT-AB024 modified remove active view info SEI
 
     sprintf(t, "%d", view_id);
     cFileName = cTemp;

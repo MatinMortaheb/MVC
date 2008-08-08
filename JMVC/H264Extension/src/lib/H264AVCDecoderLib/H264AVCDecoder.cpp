@@ -147,8 +147,6 @@ H264AVCDecoder::H264AVCDecoder()
 , m_uiTemporalId				  ( 0 )
 , m_uiSnapShotId				  ( 0 )
 , m_uiPoc						  ( -1 )
-//, m_pcActiveViewInfoSei			  ( NULL )
-, m_uiActiveViewInfoSeiFlag		  ( 0 )
 , m_bOpPresentFlag				  ( false )
 , m_uiOperationPointId			  ( 0 )
 , m_uiNumActiveViews   		      ( 0 )
@@ -187,6 +185,13 @@ H264AVCDecoder::H264AVCDecoder()
 , m_bCGSSNRInAU                   ( false )
 , m_bOnlyAVCAtLayer               ( false )
 //JVT-T054}
+//JVT-AB025 {{
+, m_uiTargetViewId        ( 0 )    
+, m_bAnchorUpdateFlag     ( false)
+, m_bNonAnchorUpdateFlag  ( false)
+, m_bRefUpdateFlag            ( false) 
+, m_uiOPNotPresentSeiFlag (0)
+//JVT-AB025 }}
 , m_puiViewOrder                  ( NULL ) //Dec. 1
 {
   //::memset( m_apcMCTFDecoder, 0x00, MAX_LAYERS * sizeof( Void* ) );
@@ -1570,10 +1575,42 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
       //===== just for trace file =====
       SEI::MessageList  cMessageList;
 	  UInt	i;
+    UInt uiNumOfViews;
 	  //RNOK( SEI::read( m_pcHeaderSymbolReadIf, cMessageList ) );
-	
-	  
-	  RNOK( SEI::read( m_pcHeaderSymbolReadIf, cMessageList  ) );
+    //JVT-AB025 {{
+    SequenceParameterSet* pcSPS = NULL;
+    //m_pcParameterSetMng->get( pcSPS, 1 );
+    if(!m_pcParameterSetMng->isValidSPS(1))
+     {
+       RNOK( SEI::read( m_pcHeaderSymbolReadIf, cMessageList  ) );
+     }   
+    else
+    {
+      m_pcParameterSetMng->get( pcSPS, 1 );
+      uiNumOfViews = pcSPS->SpsMVC->getNumViewMinus1() + 1;
+      UInt* puinum_refs_list0_anc = new UInt [uiNumOfViews];
+      UInt* puinum_refs_list1_anc = new UInt [uiNumOfViews];
+      UInt* puinum_refs_list0_nonanc = new UInt [uiNumOfViews];
+      UInt* puinum_refs_list1_nonanc = new UInt [uiNumOfViews];
+
+      for( UInt i0 = 0; i0 < uiNumOfViews; i0++ )
+      {
+        puinum_refs_list0_anc[i0]    = pcSPS->SpsMVC->getNumAnchorRefsForListX( i0, 0 );
+        puinum_refs_list1_anc[i0]    = pcSPS->SpsMVC->getNumAnchorRefsForListX( i0, 1 );
+        puinum_refs_list0_nonanc[i0] = pcSPS->SpsMVC->getNumNonAnchorRefsForListX( i0, 0 );
+        puinum_refs_list1_nonanc[i0] = pcSPS->SpsMVC->getNumNonAnchorRefsForListX( i0, 1 );		  
+      }
+      RNOK( SEI::read( m_pcHeaderSymbolReadIf, cMessageList, uiNumOfViews, puinum_refs_list0_anc, puinum_refs_list1_anc, puinum_refs_list0_nonanc, puinum_refs_list1_nonanc) );
+      delete[] puinum_refs_list0_anc;
+      delete[] puinum_refs_list1_anc;
+      delete[] puinum_refs_list0_nonanc;
+      delete[] puinum_refs_list1_nonanc;
+      puinum_refs_list0_anc = NULL;
+      puinum_refs_list1_anc = NULL;
+      puinum_refs_list0_nonanc = NULL;
+      puinum_refs_list1_nonanc = NULL;
+    }
+    //JVT-AB025 }}
 	  
       while( ! cMessageList.empty() )
       {
@@ -1629,108 +1666,6 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 						  m_uiSnapshotSeiFlag = 1;
 					  }
 				  }
-
-				  else if( pcSEIMessage->getMessageType() == SEI::ACTIVE_VIEWINFO_SEI )
-				  {
-					  //active view information sei message
-					  m_uiActiveViewInfoSeiFlag = 1;
-					  m_bOpPresentFlag = ((SEI::ActiveViewInfoSei*)pcSEIMessage)->getOpPresentFlag();
-					  if( m_bOpPresentFlag )
-					  {
-						  m_uiOperationPointId = ((SEI::ActiveViewInfoSei*)pcSEIMessage)->getOperationPointId();
-						  m_uiNumActiveViews = m_uiNumViews[m_uiOperationPointId];
-					      for(UInt uiView = 0; uiView < m_uiNumActiveViews; uiView++ )
-						    m_uiViewId[uiView] = m_OpViewId[m_uiOperationPointId][uiView];
-						  m_bOpPresentFlag = false;
-						  
-					  }
-					  else
-					  {
-						  m_uiNumActiveViews = ((SEI::ActiveViewInfoSei*)pcSEIMessage)->getNumActiveViewsMinus1()+1;
-						  for( UInt index = 0; index < m_uiNumActiveViews; index++ )
-							  m_uiViewId[index] = ((SEI::ActiveViewInfoSei*)pcSEIMessage)->getViewId(index);
-					  }
-
-					  m_uiNumDecodeViews = m_uiNumActiveViews;
-					  UInt uiView;
-					  for( uiView = 0; uiView < m_uiNumDecodeViews; uiView++ )
-						 m_uiDecodeView[uiView] = m_uiViewId[uiView];
-
-					  SequenceParameterSet* pcSPS = NULL;
-			 		  m_pcParameterSetMng->get( pcSPS, 0 );
-			
-					  for( uiView = 0; uiView < m_uiNumDecodeViews; uiView++ )
-					  {
-						UInt uiId = m_uiDecodeView[uiView];
-
-						// for anchor pictures
-						UInt uiNumRefL0 = pcSPS->SpsMVC->getNumAnchorRefsForListX( uiId, LIST_0 );
-						UInt uiNumRefL1 = pcSPS->SpsMVC->getNumAnchorRefsForListX( uiId, LIST_1 );
-						UInt uiL0;
-						UInt uiL1;
-
-						for( uiL0 = 0; uiL0 < uiNumRefL0; uiL0++ )
-						{
-						  UInt uiIdL0 = pcSPS->SpsMVC->getAnchorRefForListX( uiId, uiL0, LIST_0 );
-						  UInt uiOrig;
-						  for( uiOrig = 0; uiOrig < m_uiNumDecodeViews; uiOrig++ )
-							if( m_uiDecodeView[uiOrig] == uiIdL0 )
-								break;
-						  if(uiOrig >= m_uiNumDecodeViews)
-						  {
-							m_uiDecodeView[m_uiNumDecodeViews] = uiIdL0;
-							m_uiNumDecodeViews++;
-						  }
-						}
-
-						for( uiL1 = 0; uiL1 < uiNumRefL1; uiL1++ )
-						{
-						  UInt uiIdL1 = pcSPS->SpsMVC->getAnchorRefForListX( uiId, uiL1, LIST_1 );
-						  UInt uiOrig;
-						  for( uiOrig = 0; uiOrig < m_uiNumDecodeViews; uiOrig++ )
-							if( m_uiDecodeView[uiOrig] == uiIdL1 )
-								break;
-						  if(uiOrig >= m_uiNumDecodeViews)
-						  {
-							m_uiDecodeView[m_uiNumDecodeViews] = uiIdL1;
-							m_uiNumDecodeViews++;
-						  }
-						}
-
-						//for non anchor picture
-						uiNumRefL0 = pcSPS->SpsMVC->getNumNonAnchorRefsForListX( uiId, LIST_0 );
-						uiNumRefL1 = pcSPS->SpsMVC->getNumNonAnchorRefsForListX( uiId, LIST_1 );
-						
-						for( uiL0 = 0; uiL0 < uiNumRefL0; uiL0++ )
-						{
-						  UInt uiIdL0 = pcSPS->SpsMVC->getNonAnchorRefForListX( uiId, uiL0, LIST_0 );
-						  UInt uiOrig;
-						  for( uiOrig = 0; uiOrig < m_uiNumDecodeViews; uiOrig++ )
-							if( m_uiDecodeView[uiOrig] == uiIdL0 )
-								break;
-						  if(uiOrig >= m_uiNumDecodeViews)
-						  {
-							m_uiDecodeView[m_uiNumDecodeViews] = uiIdL0;
-							m_uiNumDecodeViews++;
-						  }
-						}
-
-						for( uiL1 = 0; uiL1 < uiNumRefL1; uiL1++ )
-						{
-						  UInt uiIdL1 = pcSPS->SpsMVC->getNonAnchorRefForListX( uiId, uiL1, LIST_1 );
-						  UInt uiOrig;
-						  for( uiOrig = 0; uiOrig < m_uiNumDecodeViews; uiOrig++ )
-							if( m_uiDecodeView[uiOrig] == uiIdL1 )
-								break;
-						  if(uiOrig >= m_uiNumDecodeViews)
-						  {
-							m_uiDecodeView[m_uiNumDecodeViews] = uiIdL1;
-							m_uiNumDecodeViews++;
-						  }
-						}
-					  }
-				  }
-
 				  else if( pcSEIMessage->getMessageType() == SEI::VIEW_SCALABILITY_INFO_SEI )
 				  {
 					m_uiNumOpMinus1 = ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getNumOperationPointsMinus1();
@@ -1864,6 +1799,94 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 						}	
 					}
 				}
+        //JVT-AB025 {{
+        else if ( pcSEIMessage->getMessageType() == SEI::TARGET_VIEW_INFO_SEI)
+        {
+          m_uiTargetViewId = ((SEI::TargetViewInfoSei*)pcSEIMessage)->getTargetViewId();
+        }
+        else if (pcSEIMessage->getMessageType() == SEI::NON_REQ_VIEW_INFO_SEI)
+        {
+          m_uiNumTargetViewMinus1 = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getNumTargetViewMinus1();
+          for (UInt i =0; i<= m_uiNumTargetViewMinus1; i++)
+          {
+            m_auiViewOrderIndex[i] = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getTargetViewOrderIndex()[i];
+            m_auiNumNonReqViewCop[i] = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getNumNonReqViewCopMinus1()[i] + 1;
+            for (UInt j = 0; j < m_auiNumNonReqViewCop[i]; j++)
+            {
+              m_aauiIndexDelta[i][j] = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getindexDeltaMinus1()[i][j];
+              m_aauiNonReqViewOrderIndex[i][j] = m_auiViewOrderIndex[i] - m_aauiIndexDelta[i][j] - 1;
+            }
+          }
+        }
+        else if (pcSEIMessage->getMessageType() == SEI::VIEW_DEPENDENCY_STRUCTURE_SEI)
+        {
+          m_bRefUpdateFlag = true;
+          m_bAnchorUpdateFlag = ((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getAnchorUpdateFlag();
+          m_bNonAnchorUpdateFlag = ((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getNonAnchorUpdateFlag();
+
+          for( UInt uiView = 0; uiView < uiNumOfViews; uiView++ )
+          {
+            UInt uiL0;
+            UInt uiL1;
+            if( m_bAnchorUpdateFlag)
+            {
+              // for anchor pictures
+              UInt uiNumRefL0 = pcSPS->SpsMVC->getNumAnchorRefsForListX( uiView, LIST_0 );
+              UInt uiNumRefL1 = pcSPS->SpsMVC->getNumAnchorRefsForListX( uiView, LIST_1 );
+              for( uiL0 = 0; uiL0 < uiNumRefL0; uiL0++ )
+              {
+                UInt uiIdL0 = pcSPS->SpsMVC->getAnchorRefForListX( uiView, uiL0, LIST_0 );
+                if (!((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getAnchorRefL0Flag()[uiView][uiL0])
+                  m_aabUpdateAnchorRefL0ViewIdFlag[uiView][uiIdL0] = true;
+                else
+                  m_aabUpdateAnchorRefL0ViewIdFlag[uiView][uiIdL0] = false;
+              }
+
+              for( uiL1 = 0; uiL1 < uiNumRefL1; uiL1++ )
+              {
+                UInt uiIdL1 = pcSPS->SpsMVC->getAnchorRefForListX( uiView, uiL1, LIST_1 );
+                if (!((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getAnchorRefL1Flag()[uiView][uiL1])
+                  m_aabUpdateAnchorRefL1ViewIdFlag[uiView][uiIdL1] = true;
+                else
+                  m_aabUpdateAnchorRefL1ViewIdFlag[uiView][uiIdL1] = false;
+              }
+            }
+            if (m_bNonAnchorUpdateFlag)
+            {
+              //for non anchor picture
+              UInt uiNumRefL0 = pcSPS->SpsMVC->getNumNonAnchorRefsForListX( uiView, LIST_0 );
+              UInt uiNumRefL1 = pcSPS->SpsMVC->getNumNonAnchorRefsForListX( uiView, LIST_1 );
+
+              for( uiL0 = 0; uiL0 < uiNumRefL0; uiL0++ )
+              {
+                UInt uiIdL0 = pcSPS->SpsMVC->getNonAnchorRefForListX( uiView, uiL0, LIST_0 );
+                if (!((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getNonAnchorRefL0Flag()[uiView][uiL0])
+                  m_aabUpdateNonAnchorRefL0ViewIdFlag[uiView][uiIdL0] = true;
+                else
+                  m_aabUpdateNonAnchorRefL0ViewIdFlag[uiView][uiIdL0] = false;
+              }
+
+              for( uiL1 = 0; uiL1 < uiNumRefL1; uiL1++ )
+              {
+                UInt uiIdL1 = pcSPS->SpsMVC->getNonAnchorRefForListX( uiView, uiL1, LIST_1 );
+                if (!((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getNonAnchorRefL1Flag()[uiView][uiL1])
+                  m_aabUpdateNonAnchorRefL1ViewIdFlag[uiView][uiIdL1] = true;
+                else
+                  m_aabUpdateNonAnchorRefL1ViewIdFlag[uiView][uiIdL1] = false;
+              }
+            }
+          }
+        }
+        else if (pcSEIMessage->getMessageType() == SEI::OP_NOT_PRESENT_SEI)
+        {
+          m_uiOPNotPresentSeiFlag = 1;
+          m_uiNumNotPresentOP = ((SEI::OPNotPresentSei*)pcSEIMessage)->getNumNotPresentOP();
+          for (UInt i = 0; i< m_uiNumNotPresentOP; i++)
+          {
+            m_auiNotPresentOPID[i] = ((SEI::OPNotPresentSei*)pcSEIMessage)->getNotPresentOPId()[i];
+          }
+        }
+        //JVT-AB025 }}
 			    delete pcSEIMessage;
 		}
       }
@@ -1965,24 +1988,6 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
   return Err::m_nOK;
 }
 
-//SEI {
-Bool
-H264AVCDecoder::getActiveViewFlag( UInt ViewId )
-{
-  Bool bFlag;
-  bFlag = true;
-  if( m_uiActiveViewInfoSeiFlag == 1 )
-  {
-	  UInt index;
-	  for( index = 0; index< m_uiNumActiveViews; index++)
-	  if( ViewId == m_uiViewId[index] )
-		  break;
-	  if( index >= m_uiNumActiveViews )
-		  bFlag = false;
-  }
-  return(bFlag);
-}
-//SEI }
 //JVT-P031
 ErrVal
 H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor)
@@ -2170,27 +2175,7 @@ H264AVCDecoder::getBaseLayerData( IntFrame*&      pcFrame,
 //JVT-T054}
   return Err::m_nOK;
 }
-*/
-//SEI 
-Bool
-H264AVCDecoder::DecideDecodeView()
-{
-  int uiId = -1;
-  if( m_pcSliceHeader && m_uiActiveViewInfoSeiFlag )
-  {
-	  UInt uiViewId = m_pcSliceHeader->getViewId();
-	  for( uiId = 0; uiId < (int)m_uiNumDecodeViews; uiId++ )
-		if( m_uiDecodeView[uiId] == uiViewId )
-		  break;
-  }
-  if(uiId < (int)m_uiNumDecodeViews)
-	return true;
-  
-  //  RNOK( m_pcNalUnitParser->closeNalUnit() );
-  m_pcNalUnitParser->closeNalUnit() ;
-	return false;
-}
-//SEI 
+*/ 
 ErrVal
 H264AVCDecoder::process( PicBuffer*       pcPicBuffer,
                          PicBufferList&   rcPicBufferOutputList,

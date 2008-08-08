@@ -413,12 +413,6 @@ ErrVal H264AVCDecoderTest::go()
     }
     
 
-
-//SEI {	
-	if (!m_pcH264AVCDecoder->DecideDecodeView())
-	   m_cActivePicBufferList.pop_back();
-    else
-//SEI }
     // decode the NAL unit
     RNOK( m_pcH264AVCDecoder->process( pcPicBuffer, cPicBufferOutputList, cPicBufferUnusedList, cPicBufferReleaseList ) );
 
@@ -433,16 +427,7 @@ ErrVal H264AVCDecoderTest::go()
       if(!m_pcWriteYuv->getFileInitDone() )
       {
         UInt *vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
-	//SEI { 
-	      if (vcOrder) // Dec. 1
-	      {
-	        for( UInt index = 0; index < m_pcParameter->getNumOfViews(); index++ )
-	        {
-		        vcActive[index] = m_pcH264AVCDecoder->getActiveViewFlag( vcOrder[index] );
-	        } //added
-	      }
-       	m_pcWriteYuv->xInitMVC(m_pcParameter->cYuvFile, vcOrder, m_pcParameter->getNumOfViews()	,vcActive ); // modified
-    //SEI 			
+       	m_pcWriteYuv->xInitMVC(m_pcParameter->cYuvFile, vcOrder, m_pcParameter->getNumOfViews()); // JVT-AB024 modified remove active view info SEI  			
       }
 
         PicBuffer* pcPicBufferTmp = cPicBufferOutputList.front();
@@ -450,7 +435,6 @@ ErrVal H264AVCDecoderTest::go()
         if( pcPicBufferTmp != NULL )
       {
         // HS: decoder robustness
-       if( m_pcH264AVCDecoder->getActiveViewFlag(pcPicBufferTmp->getViewId()) ) //SEI 
           while( uiLastPoc + uiMaxPocDiff < (UInt)pcPicBufferTmp->getCts() )
         {
           RNOK( m_pcWriteYuv->writeFrame( pcLastFrame + uiLumOffset, 
@@ -466,7 +450,6 @@ ErrVal H264AVCDecoderTest::go()
 
           if(m_pcParameter->getNumOfViews() > 0)
           {
-		    if( m_pcH264AVCDecoder->getActiveViewFlag(pcPicBufferTmp->getViewId()) ) //SEI 
               RNOK( m_pcWriteYuv->writeFrame( *pcPicBufferTmp + uiLumOffset, 
                                               *pcPicBufferTmp + uiCbOffset, 
                                               *pcPicBufferTmp + uiCrOffset,
@@ -476,7 +459,6 @@ ErrVal H264AVCDecoderTest::go()
                                               (UInt)pcPicBufferTmp->getViewId()) );
           }
           else
-	  if( m_pcH264AVCDecoder->getActiveViewFlag(pcPicBufferTmp->getViewId()) )       //SEI 
         RNOK( m_pcWriteYuv->writeFrame( *pcPicBufferTmp + uiLumOffset, 
                                         *pcPicBufferTmp + uiCbOffset, 
                                         *pcPicBufferTmp + uiCrOffset,

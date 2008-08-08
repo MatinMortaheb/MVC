@@ -147,6 +147,71 @@ SEI::write( HeaderSymbolWriteIf*  pcWriteIf,
   return Err::m_nOK;
 }
 
+//JVT-AB025 {{
+ErrVal
+SEI::read( HeaderSymbolReadIf* pcReadIf
+          ,MessageList&        rcSEIMessageList
+          ,UInt uiNumOfViews
+          ,UInt* puinum_refs_list0_anc
+          ,UInt* puinum_refs_list1_anc
+          ,UInt* puinum_refs_list0_nonanc
+          ,UInt* puinum_refs_list1_nonanc)  
+{
+  ROT( NULL == pcReadIf);
+
+  while( pcReadIf->moreRBSPData() )
+  {
+    SEIMessage* pcActualSEIMessage = NULL;
+
+    //    RNOK( xRead( pcReadIf, pcActualSEIMessage ));
+    RNOK( xRead( pcReadIf, pcActualSEIMessage, uiNumOfViews, puinum_refs_list0_anc,puinum_refs_list1_anc, puinum_refs_list0_nonanc, puinum_refs_list1_nonanc)); 
+
+
+    rcSEIMessageList.push_back( pcActualSEIMessage );
+    //JVT-W080, stop parsing any more
+    if( pcActualSEIMessage->getMessageType() == PARALLEL_DEC_SEI )
+      return Err::m_nOK;
+    //~JVT-W080
+  }
+  return Err::m_nOK;
+}
+
+ErrVal
+SEI::xRead( HeaderSymbolReadIf* pcReadIf
+           ,SEIMessage*&        rpcSEIMessage 
+           ,UInt uiNumOfViews
+           ,UInt* puinum_refs_list0_anc
+           ,UInt* puinum_refs_list1_anc
+           ,UInt* puinum_refs_list0_nonanc
+           ,UInt* puinum_refs_list1_nonanc) 
+{
+  MessageType eMessageType = RESERVED_SEI;
+  UInt        uiSize       = 0;
+
+  RNOK( xReadPayloadHeader( pcReadIf, eMessageType, uiSize) );
+
+  RNOK( xCreate( rpcSEIMessage, eMessageType, uiSize ) )
+
+    //  rpcSEIMessage->NumOfViewMinus1 = NumViewsMinus1; // SEI JVT-W060 Nov. 30
+
+    //JVT-W080, omit parsing
+    if( eMessageType == PARALLEL_DEC_SEI )
+    {
+      ParallelDecodingSEI* pcPdSEI = (ParallelDecodingSEI*)rpcSEIMessage;
+      return Err::m_nOK;   
+    }
+    //~JVT-W080
+
+    if( eMessageType == VIEW_DEPENDENCY_STRUCTURE_SEI)
+    {
+      ViewDependencyStructureSei* pcVDSSEI = (ViewDependencyStructureSei*) rpcSEIMessage;
+      pcVDSSEI->init( uiNumOfViews, puinum_refs_list0_anc, puinum_refs_list1_anc, puinum_refs_list0_nonanc, puinum_refs_list1_nonanc, false);
+    }
+    RNOK( rpcSEIMessage->read( pcReadIf) );
+    RNOK( pcReadIf->readByteAlign() );
+    return Err::m_nOK;
+}
+//JVT-AB025 }}
 //SEI LSJ{
 ErrVal
 SEI::writeNesting( HeaderSymbolWriteIf*  pcWriteIf,
@@ -638,73 +703,6 @@ SEI::FullframeSnapshotSei::read( HeaderSymbolReadIf *pcReadIf )
 }
 //////////////////////////////////////////////////////////////////////////
 //
-//			ACTIVE VIEW INFORMATION SEI MESSAGE
-//
-//////////////////////////////////////////////////////////////////////////
-ErrVal
-SEI::ActiveViewInfoSei::create( ActiveViewInfoSei*& rpcSeiMessage )
-{
-    rpcSeiMessage = new ActiveViewInfoSei();
-	ROT( NULL == rpcSeiMessage );
-	return Err::m_nOK;
-}
-ErrVal
-SEI::ActiveViewInfoSei::destroy()
-{
-    delete this;
-	return Err::m_nOK;
-}
-
-ErrVal
-SEI::ActiveViewInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
-{
-    UInt uiStartBits  = pcWriteIf->getNumberOfWrittenBits();
-	UInt uiPayloadSize = 0;
-	UInt uiIndex;
-	RNOK( pcWriteIf->writeFlag( m_bOpPresentFlag, " ActiveViewInfoSei:OpPresentFlag " ) );
-	if( m_bOpPresentFlag )
-	{
-		RNOK( pcWriteIf->writeUvlc( m_uiOperationPointId, "ActiveViewInfoSei:OperationPointId" ) );
-	}
-	else
-	{
-		RNOK( pcWriteIf->writeUvlc( m_uiNumActiveViewsMinus1, "ActiveViewInfoSei:NumActiveViewsMinus1" ) );
-
-		for( uiIndex = 0; uiIndex <= m_uiNumActiveViewsMinus1; uiIndex++ )
-		{
-			RNOK( pcWriteIf->writeUvlc( m_uiViewId[uiIndex], " ActiveViewInfoSei:ViewId " ) );
-		}
-	}
-	UInt uiBits = pcWriteIf->getNumberOfWrittenBits()-uiStartBits;
-
-	uiPayloadSize = (uiBits+7)/8;
-
-	return Err::m_nOK;
-}
-
-ErrVal
-SEI::ActiveViewInfoSei::read( HeaderSymbolReadIf *pcReadIf )
-{
-	RNOK( pcReadIf->getFlag( m_bOpPresentFlag, " ActiveViewInfoSei:OpPresentFlag " ) );
-	if( m_bOpPresentFlag )
-	{
-		RNOK( pcReadIf->getUvlc( m_uiOperationPointId, "ActiveViewInfoSei:OperationPointId" ) );
-	}
-	else
-	{
-		RNOK( pcReadIf->getUvlc( m_uiNumActiveViewsMinus1, "ActiveViewInfoSei:NumActiveViewsMinus1" ) );
-		for( UInt uiIndex = 0; uiIndex <= m_uiNumActiveViewsMinus1; uiIndex++ )
-		{
-			RNOK( pcReadIf->getUvlc( m_uiViewId[uiIndex], " ActiveViewInfoSei:ViewId " ) );
-		}	
-
-	}
-
-	return Err::m_nOK;
-}
-
-//////////////////////////////////////////////////////////////////////////
-//
 //			MULTIVIEW_SCENE_INFO SEI MESSAGE // SEI JVT-W060
 //
 //////////////////////////////////////////////////////////////////////////
@@ -1018,7 +1016,6 @@ SEI::xCreate( SEIMessage*&  rpcSEIMessage,
 	case SCALABLE_SEI_DEPENDENCY_CHANGE:   return ScalableSeiDependencyChange::create( (ScalableSeiDependencyChange*&) rpcSEIMessage );
 	// JVT-S080 LMI }
 	case SCALABLE_NESTING_SEI: return ScalableNestingSei::create( (ScalableNestingSei*&) rpcSEIMessage ); // SEI
-	case ACTIVE_VIEWINFO_SEI:  return ActiveViewInfoSei::create( (ActiveViewInfoSei*&) rpcSEIMessage ); //SEI
 	case VIEW_SCALABILITY_INFO_SEI: return ViewScalabilityInfoSei ::create( (ViewScalabilityInfoSei*&) rpcSEIMessage ); //SEI
 	case MULTIVIEW_SCENE_INFO_SEI:  return MultiviewSceneInfoSei::create( (MultiviewSceneInfoSei*&) rpcSEIMessage ); //SEI JVT-W060
 	case MULTIVIEW_ACQUISITION_INFO_SEI:  return MultiviewAcquisitionInfoSei::create( (MultiviewAcquisitionInfoSei*&) rpcSEIMessage ); //SEI JVT-W060
@@ -1026,6 +1023,10 @@ SEI::xCreate( SEIMessage*&  rpcSEIMessage,
 //JVT-W080
 		case PARALLEL_DEC_SEI: return ParallelDecodingSEI::create(( ParallelDecodingSEI*&) rpcSEIMessage );
 //~JVT-W080
+    case TARGET_VIEW_INFO_SEI: return TargetViewInfoSei::create((TargetViewInfoSei*&) rpcSEIMessage);   //JVT-AB025
+    case NON_REQ_VIEW_INFO_SEI: return NonReqViewInfoSei::create((NonReqViewInfoSei*&)rpcSEIMessage);   //JVT-AB025
+    case VIEW_DEPENDENCY_STRUCTURE_SEI: return ViewDependencyStructureSei::create((ViewDependencyStructureSei*&)rpcSEIMessage); //JVT-AB025
+    case OP_NOT_PRESENT_SEI: return OPNotPresentSei:: create((OPNotPresentSei*&) rpcSEIMessage);//JVT-AB025
 		default :           return ReservedSei::create( (ReservedSei*&) rpcSEIMessage, uiSize );
   }
   //return Err::m_nOK;
@@ -2293,4 +2294,443 @@ SEI::ParallelDecodingSEI::read ( HeaderSymbolReadIf *pcReadIf )
 	return Err::m_nOK;
 }
 //~JVT-W080
+//////////////////////////////////////////////////////////////////////////
+//
+//			Target View Id Info //JVT-AB025  
+//
+//////////////////////////////////////////////////////////////////////////
+ErrVal
+SEI::TargetViewInfoSei::create(TargetViewInfoSei*& rpcSeiMessage)
+{
+  rpcSeiMessage =new TargetViewInfoSei();
+  ROT(NULL == rpcSeiMessage);
+  return Err::m_nOK;
+}
+ErrVal
+SEI::TargetViewInfoSei::destory()
+{
+  delete this;
+  return Err::m_nOK;
+}
+ErrVal
+SEI::TargetViewInfoSei::write(HeaderSymbolWriteIf* pcWriteIf)
+{
+  UInt uiStartBits  = pcWriteIf->getNumberOfWrittenBits();
+  UInt uiPayloadSize = 0;
+
+  RNOK( pcWriteIf->writeUvlc( m_uiTargetViewId, "TargetViewInfoSei::TargetViewId" ) );
+
+  UInt uiBits = pcWriteIf->getNumberOfWrittenBits()-uiStartBits;
+
+  uiPayloadSize = (uiBits+7)/8;
+
+  return Err::m_nOK;
+}
+ErrVal
+SEI::TargetViewInfoSei::read(HeaderSymbolReadIf* pcReadIf)
+{
+  RNOK( pcReadIf->getUvlc( m_uiTargetViewId, "TargetViewInfoSei::TargetViewId" ) );
+
+  return Err::m_nOK;
+}
+
+//JVT-AB025 {{
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Nonrequired View Component  Info //JVT-AB025 
+//
+///////////////////////////////////////////////////////////////////////////////
+SEI::NonReqViewInfoSei::NonReqViewInfoSei()
+:SEIMessage(NON_REQ_VIEW_INFO_SEI)
+,m_uiNumOfTargetViewMinus1( 0 )
+,m_puiViewOrderIndex( 0 )
+,m_puiNumNonReqViewCopMinus1( 0 )
+,m_ppuiNonReqViewOrderIndex(0)
+,m_ppuiIndexDeltaMinus1( 0 )
+{}
+SEI::NonReqViewInfoSei::~NonReqViewInfoSei()
+{
+  UInt NumOfTargetView = m_uiNumOfTargetViewMinus1 + 1;
+  if( m_uiNumOfTargetViewMinus1 >= 0)
+  {
+    for (UInt i=0; i<= m_uiNumOfTargetViewMinus1; i++)
+    {
+      delete []m_ppuiNonReqViewOrderIndex[i];
+      m_ppuiNonReqViewOrderIndex[i] = NULL;
+      delete []m_ppuiIndexDeltaMinus1[i];
+      m_ppuiIndexDeltaMinus1[i] = NULL;
+    }
+    delete []m_ppuiIndexDeltaMinus1;
+    delete []m_ppuiNonReqViewOrderIndex;
+    delete []m_puiNumNonReqViewCopMinus1;
+    delete []m_puiViewOrderIndex;
+
+    m_ppuiIndexDeltaMinus1 = NULL;
+    m_ppuiNonReqViewOrderIndex = NULL;
+    m_puiNumNonReqViewCopMinus1 = NULL;
+    m_puiViewOrderIndex = NULL;
+    m_uiNumOfTargetViewMinus1 = 0;
+  }
+}
+ErrVal
+SEI::NonReqViewInfoSei::create(NonReqViewInfoSei*& rpcSeiMessage)
+{
+  rpcSeiMessage = new NonReqViewInfoSei();
+  ROT( NULL == rpcSeiMessage);
+  return Err::m_nOK;
+}
+ErrVal
+SEI::NonReqViewInfoSei::init( UInt uiNumOfTargetViewMinus1, UInt* puiViewOrderIndex)
+{
+  UInt NumOfTargetView = uiNumOfTargetViewMinus1 + 1;
+  m_uiNumOfTargetViewMinus1 = uiNumOfTargetViewMinus1;
+  m_puiViewOrderIndex = new UInt[NumOfTargetView];
+  m_puiNumNonReqViewCopMinus1 = new UInt[NumOfTargetView];
+  m_ppuiNonReqViewOrderIndex = new UInt*[NumOfTargetView];
+  m_ppuiIndexDeltaMinus1 = new UInt*[NumOfTargetView];
+  for (UInt i = 0; i<= uiNumOfTargetViewMinus1; i++)
+  {
+    m_puiViewOrderIndex[i] = puiViewOrderIndex[2*i+1];  // designed for View Order 0-2-1-4-3-6-5..
+    m_puiNumNonReqViewCopMinus1[i] = m_puiViewOrderIndex[i]-1;
+    m_ppuiNonReqViewOrderIndex[i] = new UInt[m_puiNumNonReqViewCopMinus1[i] + 1];
+    m_ppuiIndexDeltaMinus1[i] = new UInt[m_puiNumNonReqViewCopMinus1[i] + 1];
+    for (UInt j = 0; j<= m_puiNumNonReqViewCopMinus1[i]; j++)
+    {
+      m_ppuiNonReqViewOrderIndex[i][j] = j;
+      m_ppuiIndexDeltaMinus1[i][j] = m_puiViewOrderIndex[i] - m_ppuiNonReqViewOrderIndex[i][j] - 1;
+    }
+  }
+  return Err::m_nOK;
+}
+ErrVal
+SEI::NonReqViewInfoSei::write( HeaderSymbolWriteIf* pcWriteIf )
+{
+  UInt NumOfTargetView = m_uiNumOfTargetViewMinus1 + 1;
+  pcWriteIf->writeUvlc( m_uiNumOfTargetViewMinus1, "NonReqViewInfoSei:uiNumOfTargetViewMinus1");
+  for( UInt i = 0; i< NumOfTargetView; i++)
+  {
+    pcWriteIf->writeUvlc(m_puiViewOrderIndex[i],"NonReqViewInfoSei:TargetViewOrderIndex");
+    pcWriteIf->writeUvlc(m_puiNumNonReqViewCopMinus1[i],"NonReqViewInfoSei:NumNonReqViewComponentMinus1");
+    for(UInt j = 0; j<= m_puiNumNonReqViewCopMinus1[i]; j++)
+    {
+      pcWriteIf->writeUvlc(m_ppuiIndexDeltaMinus1[i][j],"NonReqViewInfoSei:DeltaViewOrderIndexMinus1");
+    }
+  }
+  return Err::m_nOK;
+}
+ErrVal
+SEI::NonReqViewInfoSei::read( HeaderSymbolReadIf* pcReadIf)
+{
+  pcReadIf->getUvlc( m_uiNumOfTargetViewMinus1, "NonReqViewInfoSei:uiNumOfTargetViewMinus1");
+  UInt NumOfTargetView = m_uiNumOfTargetViewMinus1 + 1;
+  m_puiViewOrderIndex = new UInt[NumOfTargetView];
+  m_puiNumNonReqViewCopMinus1 = new UInt[NumOfTargetView];
+  m_ppuiNonReqViewOrderIndex = new UInt*[NumOfTargetView];
+  m_ppuiIndexDeltaMinus1 = new UInt*[NumOfTargetView];
+  for( UInt i = 0; i< NumOfTargetView; i++)
+  {
+    pcReadIf->getUvlc(m_puiViewOrderIndex[i],"NonReqViewInfoSei:TargetViewOrderIndex");
+    pcReadIf->getUvlc(m_puiNumNonReqViewCopMinus1[i],"NonReqViewInfoSei:NumNonReqViewComponentMinus1");
+    m_ppuiIndexDeltaMinus1[i] = new UInt[m_puiNumNonReqViewCopMinus1[i]+1];
+    m_ppuiNonReqViewOrderIndex[i] = new UInt[m_puiNumNonReqViewCopMinus1[i] + 1];
+    for(UInt j = 0; j<= m_puiNumNonReqViewCopMinus1[i]; j++)
+    {
+      pcReadIf->getUvlc(m_ppuiIndexDeltaMinus1[i][j],"NonReqViewInfoSei:DeltaViewOrderIndexMinus1");
+      m_ppuiNonReqViewOrderIndex[i][j] = m_puiViewOrderIndex[i] - m_ppuiIndexDeltaMinus1[i][j];
+    }
+  }
+  return Err::m_nOK;
+}
+////////////////////////////////////////////////////////////////////////////////
+//
+//  View Dependency Structure 
+//
+///////////////////////////////////////////////////////////////////////////////
+SEI::ViewDependencyStructureSei::ViewDependencyStructureSei()
+:SEIMessage(VIEW_DEPENDENCY_STRUCTURE_SEI)
+,m_uiNumOfViews(0)
+,m_puiNumAnchorL0Refs(NULL)
+,m_puiNumAnchorL1Refs(NULL)
+,m_puiNumNonAnchorL0Refs(NULL)
+,m_puiNumNonAnchorL1Refs(NULL)
+,m_bAnchorUpdateFlag(false)
+,m_bNonAnchorUpdateFlag(false)
+,m_ppbAnchorRefL0Flag(NULL)
+,m_ppbAnchorRefL1Flag(NULL)
+,m_ppbNonAnchorRefL0Flag(NULL)
+,m_ppbNonAnchorRefL1Flag(NULL)
+{}
+SEI::ViewDependencyStructureSei::~ViewDependencyStructureSei()
+{
+  if (m_bAnchorUpdateFlag)
+  {
+    for( UInt i = 0; i<m_uiNumOfViews; i++)
+    {
+      if (m_puiNumAnchorL0Refs[i])
+      {
+        delete []m_ppbAnchorRefL0Flag[i];
+        m_ppbAnchorRefL0Flag[i] = NULL;
+      }
+      if (m_puiNumAnchorL1Refs[i])
+      {
+        delete []m_ppbAnchorRefL0Flag[i];
+        m_ppbAnchorRefL0Flag[i] = NULL;
+      }
+    }
+    delete []m_puiNumAnchorL0Refs;
+    delete []m_ppbAnchorRefL0Flag;
+    m_puiNumAnchorL0Refs = NULL;
+    m_ppbAnchorRefL0Flag = NULL;
+    delete []m_puiNumAnchorL1Refs;
+    delete []m_ppbAnchorRefL1Flag;
+    m_puiNumAnchorL1Refs = NULL;
+    m_ppbAnchorRefL1Flag = NULL;
+  }
+  if (m_bNonAnchorUpdateFlag)
+  {
+    for( UInt i = 0; i<m_uiNumOfViews; i++)
+    {
+      if (m_puiNumNonAnchorL0Refs[i])
+      {
+        delete []m_ppbNonAnchorRefL0Flag[i];
+        m_ppbNonAnchorRefL0Flag[i] = NULL;
+      }
+      if (m_puiNumNonAnchorL1Refs[i])
+      {
+        delete []m_ppbNonAnchorRefL0Flag[i];
+        m_ppbNonAnchorRefL0Flag[i] = NULL;
+      }
+    }
+    delete []m_ppbNonAnchorRefL0Flag;
+    delete []m_puiNumNonAnchorL0Refs;
+    m_ppbNonAnchorRefL0Flag = NULL;
+    m_puiNumNonAnchorL0Refs = NULL;
+    delete []m_ppbNonAnchorRefL1Flag;
+    delete []m_puiNumNonAnchorL1Refs;
+    m_ppbNonAnchorRefL1Flag = NULL;
+    m_puiNumNonAnchorL1Refs = NULL;
+  }
+}
+ErrVal
+SEI::ViewDependencyStructureSei::create(ViewDependencyStructureSei*& rpcViewDepStruSei)
+{
+  rpcViewDepStruSei = new ViewDependencyStructureSei();
+  ROT( NULL == rpcViewDepStruSei);
+  return Err::m_nOK;
+}
+ErrVal
+SEI::ViewDependencyStructureSei::init( UInt uiNumOfViews 
+                                      ,UInt* puinum_refs_list0_anc 
+                                      ,UInt* puinum_refs_list1_anc 
+                                      ,UInt* puinum_refs_list0_nonanc 
+                                      ,UInt* puinum_refs_list1_nonanc
+                                      ,Bool  bEnc_Dec_Flag)
+{
+  m_uiNumOfViews = uiNumOfViews;
+  m_puiNumAnchorL0Refs = new UInt[uiNumOfViews];
+  m_puiNumAnchorL1Refs = new UInt[uiNumOfViews];
+  m_puiNumNonAnchorL1Refs = new UInt[uiNumOfViews];
+  m_puiNumNonAnchorL0Refs = new UInt[uiNumOfViews];
+  m_ppbAnchorRefL0Flag = new Bool*[uiNumOfViews];
+  m_ppbAnchorRefL1Flag = new Bool*[uiNumOfViews];
+  m_ppbNonAnchorRefL0Flag = new Bool*[uiNumOfViews];
+  m_ppbNonAnchorRefL1Flag = new Bool*[uiNumOfViews];
+  if(bEnc_Dec_Flag)
+  {
+    if (m_bAnchorUpdateFlag)
+    {
+      for( UInt i = 0; i<uiNumOfViews; i++)
+      {
+        m_puiNumAnchorL0Refs[i] = puinum_refs_list0_anc[i];
+        if (puinum_refs_list0_anc[i])
+        {
+          m_ppbAnchorRefL0Flag[i] = new Bool[puinum_refs_list0_anc[i]];
+          for (UInt j = 0; j< puinum_refs_list0_anc[i]; j++)
+          {
+            m_ppbAnchorRefL0Flag[i][j] = 0;
+          }
+        }
+        m_puiNumAnchorL1Refs[i] = puinum_refs_list1_anc[i];
+        if (puinum_refs_list1_anc[i])
+        {
+          m_ppbAnchorRefL1Flag[i] = new Bool[puinum_refs_list1_anc[i]];
+          for (UInt j = 0; j< puinum_refs_list1_anc[i]; j++)
+          {
+            m_ppbAnchorRefL0Flag[i][j] = 0;
+          }
+        }
+      }
+    }
+    if (m_bNonAnchorUpdateFlag)
+    {
+      for( UInt i = 0; i<uiNumOfViews; i++)
+      {
+        m_puiNumNonAnchorL0Refs[i] = puinum_refs_list0_nonanc[i];
+        if (puinum_refs_list0_nonanc[i])
+        {
+          m_ppbNonAnchorRefL0Flag[i] = new Bool[puinum_refs_list0_nonanc[i]];
+          for (UInt j = 0; j< puinum_refs_list0_nonanc[i]; j++)
+          {
+            m_ppbNonAnchorRefL0Flag[i][j] = 0;
+          }
+        }
+        m_puiNumNonAnchorL1Refs[i] = puinum_refs_list1_nonanc[i];
+        if (puinum_refs_list1_nonanc[i])
+        {
+          m_ppbNonAnchorRefL1Flag[i] = new Bool[puinum_refs_list1_nonanc[i]];
+          for (UInt j = 0; j< puinum_refs_list1_nonanc[i]; j++)
+          {
+            m_ppbNonAnchorRefL1Flag[i][j] = 0;
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+    for( UInt i = 0; i<uiNumOfViews; i++)
+    {
+      m_puiNumAnchorL0Refs[i] = puinum_refs_list0_anc[i];
+      m_puiNumAnchorL1Refs[i] = puinum_refs_list1_anc[i];
+    }
+    for( UInt i = 0; i<uiNumOfViews; i++)
+    {
+      m_puiNumNonAnchorL0Refs[i] = puinum_refs_list0_nonanc[i];
+      m_puiNumNonAnchorL1Refs[i] = puinum_refs_list1_nonanc[i];
+    }
+  }
+  return Err::m_nOK;
+}
+ErrVal
+SEI::ViewDependencyStructureSei::write(HeaderSymbolWriteIf* pcWriteIf )
+{
+  RNOK(pcWriteIf->writeFlag(m_bAnchorUpdateFlag,"ViewDependencyStructureSei: anchor_update_flag"));
+  RNOK(pcWriteIf->writeFlag(m_bNonAnchorUpdateFlag, "ViewDependencyStructureSei: non_anchor_update_flag"));
+  if (m_bAnchorUpdateFlag)
+  {
+    for ( UInt i = 0; i< m_uiNumOfViews; i++)
+    {
+      for ( UInt j = 0; j< m_puiNumAnchorL0Refs[i]; j++)
+      {
+        pcWriteIf->writeFlag( m_ppbAnchorRefL0Flag[i][j], "ViewDependencyStructureSei: anchor_ref_l0_flag");
+      }
+      for ( UInt j = 0; j< m_puiNumAnchorL1Refs[i]; j++)
+      {
+        pcWriteIf->writeFlag( m_ppbAnchorRefL1Flag[i][j], "ViewDependencyStructureSei: anchor_ref_l1_flag");
+      }
+    }
+  }
+  if (m_bNonAnchorUpdateFlag)
+  {
+    for ( UInt i = 0; i< m_uiNumOfViews; i++)
+    {
+      for ( UInt j = 0; j< m_puiNumNonAnchorL0Refs[i]; j++)
+      {
+        pcWriteIf->writeFlag( m_ppbNonAnchorRefL0Flag[i][j], "ViewDependencyStructureSei: non_anchor_ref_l0_flag");
+      }
+      for ( UInt j = 0; j< m_puiNumNonAnchorL1Refs[i]; j++)
+      {
+        pcWriteIf->writeFlag( m_ppbNonAnchorRefL1Flag[i][j], "ViewDependencyStructureSei: non_anchor_ref_l1_flag");
+      }
+    }
+  }
+  return Err::m_nOK;
+}
+ErrVal
+SEI::ViewDependencyStructureSei::read(HeaderSymbolReadIf* pcReadIf)
+{
+  RNOK(pcReadIf->getFlag(m_bAnchorUpdateFlag,"ViewDependencyStructureSei: anchor_update_flag"));
+  RNOK(pcReadIf->getFlag(m_bNonAnchorUpdateFlag, "ViewDependencyStructureSei: non_anchor_update_flag"));
+  if (m_bAnchorUpdateFlag)
+  {
+    for ( UInt i = 0; i< m_uiNumOfViews; i++)
+    {
+      m_ppbAnchorRefL0Flag[i] = new Bool[m_puiNumAnchorL0Refs[i]];
+      m_ppbAnchorRefL1Flag[i] = new Bool[m_puiNumAnchorL1Refs[i]];
+      for ( UInt j = 0; j< m_puiNumAnchorL0Refs[i]; j++)
+      {
+        pcReadIf->getFlag( m_ppbAnchorRefL0Flag[i][j], "ViewDependencyStructureSei: anchor_ref_l0_flag");
+      }
+      for ( UInt j = 0; j< m_puiNumAnchorL1Refs[i]; j++)
+      {
+        pcReadIf->getFlag( m_ppbAnchorRefL1Flag[i][j], "ViewDependencyStructureSei: anchor_ref_l1_flag");
+      }
+    }
+  }
+  if (m_bNonAnchorUpdateFlag)
+  {
+    for ( UInt i = 0; i< m_uiNumOfViews; i++)
+    {
+      //m_puiNumNonAnchorL0Refs[i] = num_refs_list0_nonanc[i];
+      //m_puiNumNonAnchorL1Refs[i] = num_refs_list1_nonanc[i];
+      m_ppbNonAnchorRefL0Flag[i] = new Bool[m_puiNumNonAnchorL0Refs[i]];
+      m_ppbNonAnchorRefL1Flag[i] = new Bool[m_puiNumNonAnchorL1Refs[i]];
+      for ( UInt j = 0; j< m_puiNumNonAnchorL0Refs[i]; j++)
+      {
+        pcReadIf->getFlag( m_ppbNonAnchorRefL0Flag[i][j], "ViewDependencyStructureSei: non_anchor_ref_l0_flag");
+      }
+      for ( UInt j = 0; j< m_puiNumNonAnchorL1Refs[i]; j++)
+      {
+        pcReadIf->getFlag( m_ppbNonAnchorRefL1Flag[i][j], "ViewDependencyStructureSei: non_anchor_ref_l1_flag");
+      }
+    }
+  }
+  return Err::m_nOK;
+}
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Operation Point Not Present //JVT-AB025
+//
+///////////////////////////////////////////////////////////////////////////////
+SEI::OPNotPresentSei::OPNotPresentSei()
+:SEIMessage(OP_NOT_PRESENT_SEI)
+,m_uiNumNotPresentOP(0)
+,m_uiNotPresentOPId(NULL)
+{}
+SEI::OPNotPresentSei::~OPNotPresentSei()
+{
+  delete []m_uiNotPresentOPId;
+  m_uiNotPresentOPId = NULL;
+}
+ErrVal
+SEI::OPNotPresentSei::destroy()
+{
+  delete this;
+  return Err::m_nOK;
+}
+ErrVal
+SEI::OPNotPresentSei::create(OPNotPresentSei*& rpcSeiMessage)
+{
+  rpcSeiMessage = new OPNotPresentSei();
+  ROT(NULL == rpcSeiMessage);
+  return Err::m_nOK;
+}
+ErrVal
+SEI::OPNotPresentSei::init( UInt m_uiNumNotPresentOP)
+{
+  m_uiNotPresentOPId = new UInt[m_uiNumNotPresentOP];
+  return Err::m_nOK;
+}
+ErrVal
+SEI::OPNotPresentSei::write(HeaderSymbolWriteIf * pcWriteIf)
+{
+  pcWriteIf->writeUvlc( m_uiNumNotPresentOP, "OPNotPresentSei: uiNumNotPresentOP");
+  for ( UInt i = 0; i < m_uiNumNotPresentOP; i++ )
+  {
+    pcWriteIf->writeUvlc( m_uiNotPresentOPId[i], "OPNotPresentSei: NotPresentOPId");
+  }
+  return Err::m_nOK;
+}
+ErrVal
+SEI::OPNotPresentSei::read(HeaderSymbolReadIf* pcReadIf)
+{
+  pcReadIf->getUvlc( m_uiNumNotPresentOP, "OPNotPresentSei: uiNumNotPresentOP");
+  m_uiNotPresentOPId = new UInt[m_uiNumNotPresentOP];
+  for ( UInt i = 0; i < m_uiNumNotPresentOP; i++ )
+  {
+    pcReadIf->getUvlc( m_uiNotPresentOPId[i], "OPNotPresentSei: NotPresentOPId");
+  }
+  return Err::m_nOK;
+}
+//JVT-AB025 }}
 H264AVC_NAMESPACE_END

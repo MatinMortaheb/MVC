@@ -174,9 +174,7 @@ public:
                         ); 
 //Dec. 1 fix view order for base view {{                        
   UInt*   getViewOrder  () { return m_puiViewOrder; } 
-//}}          
-  Bool	  getActiveViewFlag( UInt ViewId ); //SEI 
-  Bool	  DecideDecodeView();               //SEI 
+//}}           
   //JVT-P031
   ErrVal  initPacket( BinDataAccessor*  pcBinDataAccessor);
   Void    getDecodedResolution(UInt &uiLayerId);
@@ -359,7 +357,6 @@ protected:
   UInt							m_uiSnapShotId;
   int							m_uiPoc;
 
-  UInt							m_uiActiveViewInfoSeiFlag;
   Bool							m_bOpPresentFlag;
   UInt						    m_uiOperationPointId;
   UInt							m_uiNumActiveViews;
@@ -369,6 +366,24 @@ protected:
   UInt							m_uiNumOpMinus1;
   UInt							m_uiNumViews[MAX_OPERATION_POINTS];
   UInt*							m_OpViewId[MAX_OPERATION_POINTS];
+  //JVT-AB025 {{
+  UInt              m_uiTargetViewId;   
+  UInt              m_auiViewOrderIndex[MAX_VIEWS];
+  UInt              m_auiNumNonReqViewCop[MAX_VIEWS];
+  UInt              m_aauiIndexDelta[MAX_VIEWS][MAX_VIEWS];
+  UInt              m_aauiNonReqViewOrderIndex[MAX_VIEWS][MAX_VIEWS];
+  UInt              m_uiNumTargetViewMinus1;
+  Bool m_bAnchorUpdateFlag;
+  Bool m_bNonAnchorUpdateFlag;
+  Bool m_aabUpdateAnchorRefL0ViewIdFlag[MAX_OPERATION_POINTS][MAX_OPERATION_POINTS];
+  Bool m_aabUpdateAnchorRefL1ViewIdFlag[MAX_OPERATION_POINTS][MAX_OPERATION_POINTS];
+  Bool m_aabUpdateNonAnchorRefL0ViewIdFlag[MAX_OPERATION_POINTS][MAX_OPERATION_POINTS];
+  Bool m_aabUpdateNonAnchorRefL1ViewIdFlag[MAX_OPERATION_POINTS][MAX_OPERATION_POINTS];
+  Bool m_bRefUpdateFlag;
+  UInt              m_uiOPNotPresentSeiFlag; 
+  UInt              m_uiNumNotPresentOP;
+  UInt              m_auiNotPresentOPID[MAX_OPERATION_POINTS];
+  //JVT-AB025 }}
 //SEI }
 
   UInt							m_uiMultiviewSceneInfoSeiFlag; // SEI JVT-W060

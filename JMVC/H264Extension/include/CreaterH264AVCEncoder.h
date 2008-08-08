@@ -181,7 +181,6 @@ public:
   //}}Quality level estimation and modified truncation- JVTO044 and m12007
 
   ErrVal writeNestingSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor );// SEI LSJ
-  ErrVal writeActiveViewInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor ); // SEI LSJ
   ErrVal writeViewScalInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor ); // SEI LSJ
   ErrVal writeMultiviewSceneInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor ); // SEI JVT-W060
   ErrVal writeMultiviewAcquisitionInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor ); // SEI JVT-W060

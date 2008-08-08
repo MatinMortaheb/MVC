@@ -140,7 +140,7 @@ protected:
                           UInt uiHeight, UInt uiWidth, UInt uiStride, UInt uiNumOfViews );
 
   ErrVal xInitMVC( const std::string& rcFileName, UInt *vcOrder, 
-                   UInt uiNumOfViews ,UInt *vcActive ); //SEI LSJ
+                   UInt uiNumOfViews ); // JVT-AB024
   //JVT-V054
   Bool getFileInitDone() {return m_bFileInitDone;}
 

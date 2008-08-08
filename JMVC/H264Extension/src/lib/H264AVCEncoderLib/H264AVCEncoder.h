@@ -283,7 +283,6 @@ public:
     //}}Quality level estimation and modified truncation- JVTO044 and m12007
 
   ErrVal writeNestingSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor, Double* dSeqBits );                                           //SEI LSJ
-  ErrVal writeActiveViewInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor, Double* dSeqBits );                                    //SEI LSJ
   ErrVal writeViewScalInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor, Double* dBitRate, Double* dFrameRate, Double dMaxRate ); //SEI LSJ
   ErrVal writeMultiviewSceneInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor, Double* dSeqBits );   // SEI JVT-W060
   ErrVal writeMultiviewAcquisitionInfoSEIMessage( ExtBinDataAccessor* pcExtBinDataAccessor, Double* dSeqBits );   // SEI JVT-W060
