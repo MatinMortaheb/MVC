@@ -92,7 +92,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 
 #include "LargeFile.h"
 
-class H264AVCVIDEOIOLIB_API ReadYuvFile 
+class ReadYuvFile 
 {
 
 public:
