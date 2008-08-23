@@ -1396,7 +1396,7 @@ class H264AVCCOMMONLIB_API MultiviewAcquisitionInfoSei : public SEIMessage // SE
    ErrVal destroy();
    ErrVal write( HeaderSymbolWriteIf * pcWriteIf);
    ErrVal read( HeaderSymbolReadIf* pcReadIf);
-   ErrVal init( UInt m_uiNumNotPresentOP );
+   ErrVal init( UInt uiNum );
    Void   setNumNotPresentOP( UInt uiNumNotPresentOP ) { m_uiNumNotPresentOP = uiNumNotPresentOP;}
    UInt   getNumNotPresentOP() { return m_uiNumNotPresentOP;}
    Void   setNotPresentOPId( UInt* OperationPointId)
@@ -1429,22 +1429,6 @@ class H264AVCCOMMONLIB_API MultiviewAcquisitionInfoSei : public SEIMessage // SE
   static ErrVal write ( HeaderSymbolWriteIf*  pcWriteIf,
                         HeaderSymbolWriteIf*  pcWriteTestIf,
                         MessageList*          rpcSEIMessageList );
-  //JVT-AB025 {{
-  static ErrVal read  (  HeaderSymbolReadIf* pcReadIf
-    , MessageList& rcSEIMessageList
-    , UInt uiNumOfViews
-    , UInt* puinum_refs_list0_anc
-    , UInt* puinum_refs_list1_anc
-    , UInt* puinum_refs_list0_nonanc
-    , UInt* puinum_refs_list1_nonanc);
-  static ErrVal xRead (  HeaderSymbolReadIf*   pcReadIf
-    , SEIMessage*&          rpcSEIMessage
-    , UInt uiNumOfViews
-    , UInt* puinum_refs_list0_anc
-    , UInt* puinum_refs_list1_anc
-    , UInt* puinum_refs_list0_nonanc
-    , UInt* puinum_refs_list1_nonanc);
-  //JVT-AB025 }}
 
 protected:
   //static ErrVal xRead               ( HeaderSymbolReadIf*   pcReadIf,

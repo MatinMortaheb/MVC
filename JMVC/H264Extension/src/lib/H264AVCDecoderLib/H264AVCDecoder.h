@@ -373,13 +373,6 @@ protected:
   UInt              m_aauiIndexDelta[MAX_VIEWS][MAX_VIEWS];
   UInt              m_aauiNonReqViewOrderIndex[MAX_VIEWS][MAX_VIEWS];
   UInt              m_uiNumTargetViewMinus1;
-  Bool m_bAnchorUpdateFlag;
-  Bool m_bNonAnchorUpdateFlag;
-  Bool m_aabUpdateAnchorRefL0ViewIdFlag[MAX_OPERATION_POINTS][MAX_OPERATION_POINTS];
-  Bool m_aabUpdateAnchorRefL1ViewIdFlag[MAX_OPERATION_POINTS][MAX_OPERATION_POINTS];
-  Bool m_aabUpdateNonAnchorRefL0ViewIdFlag[MAX_OPERATION_POINTS][MAX_OPERATION_POINTS];
-  Bool m_aabUpdateNonAnchorRefL1ViewIdFlag[MAX_OPERATION_POINTS][MAX_OPERATION_POINTS];
-  Bool m_bRefUpdateFlag;
   UInt              m_uiOPNotPresentSeiFlag; 
   UInt              m_uiNumNotPresentOP;
   UInt              m_auiNotPresentOPID[MAX_OPERATION_POINTS];

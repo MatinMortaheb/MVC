@@ -110,6 +110,12 @@ SEI::read( HeaderSymbolReadIf* pcReadIf,
 
 
     rcSEIMessageList.push_back( pcActualSEIMessage );
+	//JVT-AB025{{ omit parsing
+	if( pcActualSEIMessage->getMessageType()  == VIEW_DEPENDENCY_STRUCTURE_SEI )
+	{
+		return Err::m_nOK;
+	}
+	//JVT-AB025 }}
 //JVT-W080, stop parsing any more
 		if( pcActualSEIMessage->getMessageType() == PARALLEL_DEC_SEI )
 			return Err::m_nOK;
@@ -147,71 +153,6 @@ SEI::write( HeaderSymbolWriteIf*  pcWriteIf,
   return Err::m_nOK;
 }
 
-//JVT-AB025 {{
-ErrVal
-SEI::read( HeaderSymbolReadIf* pcReadIf
-          ,MessageList&        rcSEIMessageList
-          ,UInt uiNumOfViews
-          ,UInt* puinum_refs_list0_anc
-          ,UInt* puinum_refs_list1_anc
-          ,UInt* puinum_refs_list0_nonanc
-          ,UInt* puinum_refs_list1_nonanc)  
-{
-  ROT( NULL == pcReadIf);
-
-  while( pcReadIf->moreRBSPData() )
-  {
-    SEIMessage* pcActualSEIMessage = NULL;
-
-    //    RNOK( xRead( pcReadIf, pcActualSEIMessage ));
-    RNOK( xRead( pcReadIf, pcActualSEIMessage, uiNumOfViews, puinum_refs_list0_anc,puinum_refs_list1_anc, puinum_refs_list0_nonanc, puinum_refs_list1_nonanc)); 
-
-
-    rcSEIMessageList.push_back( pcActualSEIMessage );
-    //JVT-W080, stop parsing any more
-    if( pcActualSEIMessage->getMessageType() == PARALLEL_DEC_SEI )
-      return Err::m_nOK;
-    //~JVT-W080
-  }
-  return Err::m_nOK;
-}
-
-ErrVal
-SEI::xRead( HeaderSymbolReadIf* pcReadIf
-           ,SEIMessage*&        rpcSEIMessage 
-           ,UInt uiNumOfViews
-           ,UInt* puinum_refs_list0_anc
-           ,UInt* puinum_refs_list1_anc
-           ,UInt* puinum_refs_list0_nonanc
-           ,UInt* puinum_refs_list1_nonanc) 
-{
-  MessageType eMessageType = RESERVED_SEI;
-  UInt        uiSize       = 0;
-
-  RNOK( xReadPayloadHeader( pcReadIf, eMessageType, uiSize) );
-
-  RNOK( xCreate( rpcSEIMessage, eMessageType, uiSize ) )
-
-    //  rpcSEIMessage->NumOfViewMinus1 = NumViewsMinus1; // SEI JVT-W060 Nov. 30
-
-    //JVT-W080, omit parsing
-    if( eMessageType == PARALLEL_DEC_SEI )
-    {
-      ParallelDecodingSEI* pcPdSEI = (ParallelDecodingSEI*)rpcSEIMessage;
-      return Err::m_nOK;   
-    }
-    //~JVT-W080
-
-    if( eMessageType == VIEW_DEPENDENCY_STRUCTURE_SEI)
-    {
-      ViewDependencyStructureSei* pcVDSSEI = (ViewDependencyStructureSei*) rpcSEIMessage;
-      pcVDSSEI->init( uiNumOfViews, puinum_refs_list0_anc, puinum_refs_list1_anc, puinum_refs_list0_nonanc, puinum_refs_list1_nonanc, false);
-    }
-    RNOK( rpcSEIMessage->read( pcReadIf) );
-    RNOK( pcReadIf->readByteAlign() );
-    return Err::m_nOK;
-}
-//JVT-AB025 }}
 //SEI LSJ{
 ErrVal
 SEI::writeNesting( HeaderSymbolWriteIf*  pcWriteIf,
@@ -922,7 +863,12 @@ SEI::xRead( HeaderSymbolReadIf* pcReadIf,
   RNOK( xCreate( rpcSEIMessage, eMessageType, uiSize ) )
 	  
 //  rpcSEIMessage->NumOfViewMinus1 = NumViewsMinus1; // SEI JVT-W060 Nov. 30
-
+//JVT-AB025{{ omit parsing
+if( eMessageType == VIEW_DEPENDENCY_STRUCTURE_SEI )
+{
+	return Err::m_nOK;
+}
+//JVT-AB025 }}
 //JVT-W080, omit parsing
   if( eMessageType == PARALLEL_DEC_SEI )
 	{
@@ -2350,7 +2296,6 @@ SEI::NonReqViewInfoSei::NonReqViewInfoSei()
 {}
 SEI::NonReqViewInfoSei::~NonReqViewInfoSei()
 {
-  UInt NumOfTargetView = m_uiNumOfTargetViewMinus1 + 1;
   if( m_uiNumOfTargetViewMinus1 >= 0)
   {
     for (UInt i=0; i<= m_uiNumOfTargetViewMinus1; i++)
@@ -2405,9 +2350,8 @@ SEI::NonReqViewInfoSei::init( UInt uiNumOfTargetViewMinus1, UInt* puiViewOrderIn
 ErrVal
 SEI::NonReqViewInfoSei::write( HeaderSymbolWriteIf* pcWriteIf )
 {
-  UInt NumOfTargetView = m_uiNumOfTargetViewMinus1 + 1;
   pcWriteIf->writeUvlc( m_uiNumOfTargetViewMinus1, "NonReqViewInfoSei:uiNumOfTargetViewMinus1");
-  for( UInt i = 0; i< NumOfTargetView; i++)
+  for( UInt i = 0; i<= m_uiNumOfTargetViewMinus1; i++)
   {
     pcWriteIf->writeUvlc(m_puiViewOrderIndex[i],"NonReqViewInfoSei:TargetViewOrderIndex");
     pcWriteIf->writeUvlc(m_puiNumNonReqViewCopMinus1[i],"NonReqViewInfoSei:NumNonReqViewComponentMinus1");
@@ -2706,9 +2650,9 @@ SEI::OPNotPresentSei::create(OPNotPresentSei*& rpcSeiMessage)
   return Err::m_nOK;
 }
 ErrVal
-SEI::OPNotPresentSei::init( UInt m_uiNumNotPresentOP)
+SEI::OPNotPresentSei::init( UInt uiNum)
 {
-  m_uiNotPresentOPId = new UInt[m_uiNumNotPresentOP];
+  m_uiNotPresentOPId = new UInt[uiNum];
   return Err::m_nOK;
 }
 ErrVal

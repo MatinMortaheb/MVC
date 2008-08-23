@@ -1,6 +1,6 @@
 JMVC_1_1 -> JMVC_1_2
 Date            : Aug. 08, 2008
-Authors         : USTC/TUT/Nokia (Software coordinators)
+Authors         : USTC/TUT/Nokia
 Contribution    : JVT-AB025, JVT-AB026 and JVT-AB027, SEI messages
 Changes         :
 - Added decoder supports for the SEI messages (view dependency change, non-required view component, op not present)

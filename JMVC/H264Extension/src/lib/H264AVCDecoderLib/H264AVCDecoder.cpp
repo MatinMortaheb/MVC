@@ -187,9 +187,6 @@ H264AVCDecoder::H264AVCDecoder()
 //JVT-T054}
 //JVT-AB025 {{
 , m_uiTargetViewId        ( 0 )    
-, m_bAnchorUpdateFlag     ( false)
-, m_bNonAnchorUpdateFlag  ( false)
-, m_bRefUpdateFlag            ( false) 
 , m_uiOPNotPresentSeiFlag (0)
 //JVT-AB025 }}
 , m_puiViewOrder                  ( NULL ) //Dec. 1
@@ -1575,42 +1572,7 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
       //===== just for trace file =====
       SEI::MessageList  cMessageList;
 	  UInt	i;
-    UInt uiNumOfViews;
-	  //RNOK( SEI::read( m_pcHeaderSymbolReadIf, cMessageList ) );
-    //JVT-AB025 {{
-    SequenceParameterSet* pcSPS = NULL;
-    //m_pcParameterSetMng->get( pcSPS, 1 );
-    if(!m_pcParameterSetMng->isValidSPS(1))
-     {
        RNOK( SEI::read( m_pcHeaderSymbolReadIf, cMessageList  ) );
-     }   
-    else
-    {
-      m_pcParameterSetMng->get( pcSPS, 1 );
-      uiNumOfViews = pcSPS->SpsMVC->getNumViewMinus1() + 1;
-      UInt* puinum_refs_list0_anc = new UInt [uiNumOfViews];
-      UInt* puinum_refs_list1_anc = new UInt [uiNumOfViews];
-      UInt* puinum_refs_list0_nonanc = new UInt [uiNumOfViews];
-      UInt* puinum_refs_list1_nonanc = new UInt [uiNumOfViews];
-
-      for( UInt i0 = 0; i0 < uiNumOfViews; i0++ )
-      {
-        puinum_refs_list0_anc[i0]    = pcSPS->SpsMVC->getNumAnchorRefsForListX( i0, 0 );
-        puinum_refs_list1_anc[i0]    = pcSPS->SpsMVC->getNumAnchorRefsForListX( i0, 1 );
-        puinum_refs_list0_nonanc[i0] = pcSPS->SpsMVC->getNumNonAnchorRefsForListX( i0, 0 );
-        puinum_refs_list1_nonanc[i0] = pcSPS->SpsMVC->getNumNonAnchorRefsForListX( i0, 1 );		  
-      }
-      RNOK( SEI::read( m_pcHeaderSymbolReadIf, cMessageList, uiNumOfViews, puinum_refs_list0_anc, puinum_refs_list1_anc, puinum_refs_list0_nonanc, puinum_refs_list1_nonanc) );
-      delete[] puinum_refs_list0_anc;
-      delete[] puinum_refs_list1_anc;
-      delete[] puinum_refs_list0_nonanc;
-      delete[] puinum_refs_list1_nonanc;
-      puinum_refs_list0_anc = NULL;
-      puinum_refs_list1_anc = NULL;
-      puinum_refs_list0_nonanc = NULL;
-      puinum_refs_list1_nonanc = NULL;
-    }
-    //JVT-AB025 }}
 	  
       while( ! cMessageList.empty() )
       {
@@ -1807,7 +1769,7 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
         else if (pcSEIMessage->getMessageType() == SEI::NON_REQ_VIEW_INFO_SEI)
         {
           m_uiNumTargetViewMinus1 = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getNumTargetViewMinus1();
-          for (UInt i =0; i<= m_uiNumTargetViewMinus1; i++)
+          for ( i =0; i<= m_uiNumTargetViewMinus1; i++)
           {
             m_auiViewOrderIndex[i] = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getTargetViewOrderIndex()[i];
             m_auiNumNonReqViewCop[i] = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getNumNonReqViewCopMinus1()[i] + 1;
@@ -1818,70 +1780,15 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
             }
           }
         }
-        else if (pcSEIMessage->getMessageType() == SEI::VIEW_DEPENDENCY_STRUCTURE_SEI)
-        {
-          m_bRefUpdateFlag = true;
-          m_bAnchorUpdateFlag = ((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getAnchorUpdateFlag();
-          m_bNonAnchorUpdateFlag = ((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getNonAnchorUpdateFlag();
-
-          for( UInt uiView = 0; uiView < uiNumOfViews; uiView++ )
-          {
-            UInt uiL0;
-            UInt uiL1;
-            if( m_bAnchorUpdateFlag)
-            {
-              // for anchor pictures
-              UInt uiNumRefL0 = pcSPS->SpsMVC->getNumAnchorRefsForListX( uiView, LIST_0 );
-              UInt uiNumRefL1 = pcSPS->SpsMVC->getNumAnchorRefsForListX( uiView, LIST_1 );
-              for( uiL0 = 0; uiL0 < uiNumRefL0; uiL0++ )
-              {
-                UInt uiIdL0 = pcSPS->SpsMVC->getAnchorRefForListX( uiView, uiL0, LIST_0 );
-                if (!((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getAnchorRefL0Flag()[uiView][uiL0])
-                  m_aabUpdateAnchorRefL0ViewIdFlag[uiView][uiIdL0] = true;
-                else
-                  m_aabUpdateAnchorRefL0ViewIdFlag[uiView][uiIdL0] = false;
-              }
-
-              for( uiL1 = 0; uiL1 < uiNumRefL1; uiL1++ )
-              {
-                UInt uiIdL1 = pcSPS->SpsMVC->getAnchorRefForListX( uiView, uiL1, LIST_1 );
-                if (!((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getAnchorRefL1Flag()[uiView][uiL1])
-                  m_aabUpdateAnchorRefL1ViewIdFlag[uiView][uiIdL1] = true;
-                else
-                  m_aabUpdateAnchorRefL1ViewIdFlag[uiView][uiIdL1] = false;
-              }
-            }
-            if (m_bNonAnchorUpdateFlag)
-            {
-              //for non anchor picture
-              UInt uiNumRefL0 = pcSPS->SpsMVC->getNumNonAnchorRefsForListX( uiView, LIST_0 );
-              UInt uiNumRefL1 = pcSPS->SpsMVC->getNumNonAnchorRefsForListX( uiView, LIST_1 );
-
-              for( uiL0 = 0; uiL0 < uiNumRefL0; uiL0++ )
-              {
-                UInt uiIdL0 = pcSPS->SpsMVC->getNonAnchorRefForListX( uiView, uiL0, LIST_0 );
-                if (!((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getNonAnchorRefL0Flag()[uiView][uiL0])
-                  m_aabUpdateNonAnchorRefL0ViewIdFlag[uiView][uiIdL0] = true;
-                else
-                  m_aabUpdateNonAnchorRefL0ViewIdFlag[uiView][uiIdL0] = false;
-              }
-
-              for( uiL1 = 0; uiL1 < uiNumRefL1; uiL1++ )
-              {
-                UInt uiIdL1 = pcSPS->SpsMVC->getNonAnchorRefForListX( uiView, uiL1, LIST_1 );
-                if (!((SEI::ViewDependencyStructureSei*)pcSEIMessage)->getNonAnchorRefL1Flag()[uiView][uiL1])
-                  m_aabUpdateNonAnchorRefL1ViewIdFlag[uiView][uiIdL1] = true;
-                else
-                  m_aabUpdateNonAnchorRefL1ViewIdFlag[uiView][uiIdL1] = false;
-              }
-            }
-          }
-        }
+		else if( pcSEIMessage->getMessageType() == SEI::VIEW_DEPENDENCY_STRUCTURE_SEI )
+		{
+			printf("\n View dependency structure SEI message received. \n");
+		}
         else if (pcSEIMessage->getMessageType() == SEI::OP_NOT_PRESENT_SEI)
         {
           m_uiOPNotPresentSeiFlag = 1;
           m_uiNumNotPresentOP = ((SEI::OPNotPresentSei*)pcSEIMessage)->getNumNotPresentOP();
-          for (UInt i = 0; i< m_uiNumNotPresentOP; i++)
+          for ( i = 0; i< m_uiNumNotPresentOP; i++)
           {
             m_auiNotPresentOPID[i] = ((SEI::OPNotPresentSei*)pcSEIMessage)->getNotPresentOPId()[i];
           }
