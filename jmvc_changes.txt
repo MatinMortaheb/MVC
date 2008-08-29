@@ -1,3 +1,9 @@
+JMVC_1_2 -> JMVC_2_0
+Date            : May 31, 2008
+Authors         : TUT/Thomson/MERL (Software coordinators)
+Contribution    : fix for warnings
+
+
 JMVC_1_1 -> JMVC_1_2
 Date            : Aug. 08, 2008
 Authors         : USTC/TUT/Nokia
