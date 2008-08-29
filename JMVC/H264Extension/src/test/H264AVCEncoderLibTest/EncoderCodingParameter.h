@@ -1013,7 +1013,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 ErrVal EncoderCodingParameter::GetExponentMantissa_MVAcquisitionInfo(double arg, UInt mant_prec, UInt *E, UInt *M)// JVT-Z038
 {
 	double log_val;
-	int expo,v,i;
+	int expo,v=0,i;
 	double mant;
 
 	/* Find expo & mant when arg=(-1)^sign*2^expo*(0.mant),*/
