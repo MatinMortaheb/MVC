@@ -945,6 +945,12 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
   //JVT-V054
   CodingParameter::SpsMVC.setViewCodingOrder(m_cViewOrder);
 
+  UInt *order = CodingParameter::SpsMVC.getViewCodingOrder();
+
+  if(order[0] == m_CurrentViewId)
+        m_bAVCFlag      = true;
+  else   
+        m_bAVCFlag      = false;
 
   /////////////////////////
     if ( view_cnt != CodingParameter::SpsMVC.getNumViewMinus1() )
