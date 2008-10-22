@@ -235,6 +235,15 @@ NalUnitParser::xTrace( Bool bDDIPresent )
   DTRACE_BITS ( m_svc_mvc_flag, 1 );
   DTRACE_COUNT( 1 );
   DTRACE_N;
+  
+  DTRACE_TH   ( "NALU HEADER: idr_flag" );
+  DTRACE_TY   ( " u(1)" );
+  DTRACE_POS;
+  DTRACE_CODE (m_bIDRFlag );
+  DTRACE_BITS (m_bIDRFlag, 1 );
+  DTRACE_COUNT( 1 );
+  DTRACE_N;
+  
 // JVT-W035 start{{
   DTRACE_TH   ( "NALU HEADER: priority_id" );
   DTRACE_TY   ( " u(6)" );
@@ -242,6 +251,14 @@ NalUnitParser::xTrace( Bool bDDIPresent )
   DTRACE_CODE (m_uiSimplePriorityId);
   DTRACE_BITS (m_uiSimplePriorityId, 6 );
   DTRACE_COUNT( 6 );
+  DTRACE_N;
+  
+  DTRACE_TH   ( "NALU HEADER: view_id" );
+  DTRACE_TY   ( " u(10)" );
+  DTRACE_POS;
+  DTRACE_CODE (m_view_id );
+  DTRACE_BITS (m_view_id, 10 );
+  DTRACE_COUNT( 10 );
   DTRACE_N;
 
   DTRACE_TH   ( "NALU HEADER: temporal_level" );
@@ -251,7 +268,7 @@ NalUnitParser::xTrace( Bool bDDIPresent )
   DTRACE_BITS ( m_uiTemporalLevel, 3 );
   DTRACE_COUNT( 3 );
   DTRACE_N;
-// JVT-W035 start}}  
+// JVT-W035 end}}  
   DTRACE_TH   ( "NALU HEADER: anchor_pic_flag" );
   DTRACE_TY   ( " u(1)" );
   DTRACE_POS;
@@ -259,23 +276,6 @@ NalUnitParser::xTrace( Bool bDDIPresent )
   DTRACE_BITS (m_anchor_pic_flag, 1 );
   DTRACE_COUNT( 1 );
   DTRACE_N;
-
-  DTRACE_TH   ( "NALU HEADER: view_id" );
-  DTRACE_TY   ( " u(10)" );
-  DTRACE_POS;
-  DTRACE_CODE (m_view_id );
-  DTRACE_BITS (m_view_id, 10 );
-  DTRACE_COUNT( 10 );
-  DTRACE_N;
-// JVT-W035
-  DTRACE_TH   ( "NALU HEADER: idr_flag" );
-  DTRACE_TY   ( " u(1)" );
-  DTRACE_POS;
-  DTRACE_CODE (m_bIDRFlag );
-  DTRACE_BITS (m_bIDRFlag, 1 );
-  DTRACE_COUNT( 1 );
-  DTRACE_N;
-
 // JVT-XXX
   DTRACE_TH   ( "NALU HEADER: inter_view_flag" );
   DTRACE_TY   ( " u(1)" );
@@ -437,25 +437,23 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 			} 
       else
 			{
+//ying Oct. 22, 2008
 			                                                     // 1 bit
-        // priority_id
-        m_uiSimplePriorityId = ( ucByte >> 1 ) & 0x3f ;    // 6
-        // temporal_level
-        m_uiTemporalLevel    = ( ucByte ) &0x01       ;     // 1 bit first
-        m_uiTemporalLevel  <<= 2;
-        ucByte               = pcBinDataAccessor->data()[2];
-        m_uiTemporalLevel   += ( ucByte >> 6 ) & 0x03;     // 2 bits more
-        // anchor_pic_flag
-				m_anchor_pic_flag    = ( ucByte >>5  ) & 0x01;     // 1 bit
+        m_bIDRFlag           = ( ucByte >> 6)  & 0x01;     // 1 bit
+        m_uiSimplePriorityId = ( ucByte     ) & 0x3f ;    // 6
         // view_id
-        m_view_id            = ( ucByte      ) & 0x1f ;    // 5 bit first
-        m_view_id          <<=5;
+        ucByte               = pcBinDataAccessor->data()[2];
+        m_view_id            = ( ucByte     ) & 0xff ;    // 8 bit first
+        m_view_id          <<=2;
         ucByte               = pcBinDataAccessor->data()[3];
-        m_view_id           += (ucByte >>3   ) & 0x1f;     // 5 bit more
-        //idr_flag
-        m_bIDRFlag           = (ucByte >>2  )  & 0x01;
-				m_inter_view_flag	 = (ucByte >>1	)	 & 0x01;     // 1 bit  JVT-W056  Samsung
-				m_reserved_zero_bits = (ucByte) & 0x01; // 1 bit
+        m_view_id           += ( ucByte >>6  ) & 0x03;     // 2 bit more
+
+        m_uiTemporalLevel    = ( ucByte >>3 )  & 0x07;     // 3 bit 
+				m_anchor_pic_flag    = ( ucByte >>2 )  & 0x01;     // 1 bit
+				m_inter_view_flag	   = ( ucByte >>1	)	 & 0x01;     // 1 bit  
+
+				m_reserved_zero_bits = ( ucByte     )  & 0x01;           // 1 bit
+				
         //For trace
         m_AvcViewId = (m_eNalUnitType == NAL_UNIT_CODED_SLICE_PREFIX) ? m_view_id : m_AvcViewId;
 

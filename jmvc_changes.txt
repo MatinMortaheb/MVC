@@ -1,3 +1,10 @@
+JMVC_2_1 -> JMVC_2_2
+Date            : October 22, 2008
+Authors         : TUT (Software coordinators)
+Contribution    : NALU header fix
+Changes:
+- Make the NAL unit header consistent to the current WD
+
 JMVC_2_0 -> JMVC_2_1
 Date            : October 22, 2008
 Authors         : Harmonic (Software coordinators)

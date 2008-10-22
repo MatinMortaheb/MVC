@@ -379,14 +379,13 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
     }
 
 	} else {
-	  RNOK (  pcWriteIf->writeCode( m_uiSimplePriorityId,               6,                              "NALU HEADER: simple_priority_id"));
-		RNOK (  pcWriteIf->writeCode( m_uiTemporalLevel,                  3,                              "NALU HEADER: temporal_level"));
-		// JVT-W035
+	  RNOK  ( pcWriteIf->writeCode( this->getIDRFlag(),                 1,                              "NALU HEADER: idr_flag" ) );
+	  RNOK (  pcWriteIf->writeCode( m_uiSimplePriorityId,               6,                              "NALU HEADER: priority_id"));
+	  RNOK  ( pcWriteIf->writeCode( this->getViewId(),                  10,                             "NALU HEADER: view_id" ) );
+		RNOK (  pcWriteIf->writeCode( m_uiTemporalLevel,                  3,                              "NALU HEADER: temporal_id"));
 		RNOK  ( pcWriteIf->writeCode( this->getAnchorPicFlag(),           1,                              "NALU HEADER: anchor_pic_flag" ) );
-		RNOK  ( pcWriteIf->writeCode( this->getViewId(),                  10,                             "NALU HEADER: view_id" ) );
-    RNOK  ( pcWriteIf->writeCode( this->getIDRFlag(),                 1,                              "NALU HEADER: IDR_flag" ) );
-		RNOK  ( pcWriteIf->writeCode( this->getInterViewFlag(),		    		1,														  "NALU HEADER: inter_view_flag") ); // JVT-W056 Samsung
-    RNOK  ( pcWriteIf->writeCode( this->getReservedZeroBits(),        1,                              "NALU HEADER: reserved_zero_two_bits" ) );
+		RNOK  ( pcWriteIf->writeCode( this->getInterViewFlag(),		    		1,														  "NALU HEADER: inter_view_flag") ); 
+    RNOK  ( pcWriteIf->writeCode( this->getReservedZeroBits(),        1,                              "NALU HEADER: reserved_zero_one_bit" ) );
 	
 		return Err::m_nOK;
 
@@ -677,14 +676,14 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
 	
 	if ( !this->getAVCFlag() ) //JVT-W035
 	{
-		RNOK  ( pcWriteIf->writeCode( this->getSvcMvcFlag(),          1,                                "NALU HEADER: svc_mvc_flag" ) );
-    RNOK (  pcWriteIf->writeCode( m_uiSimplePriorityId,           6,                                "NALU HEADER: simple_priority_id")); // JVT-W035
-		RNOK (  pcWriteIf->writeCode( m_uiTemporalLevel,              3,                                "NALU HEADER: temporal_level"));
-		RNOK  ( pcWriteIf->writeCode( this->getAnchorPicFlag(),       1,                                "NALU HEADER: anchor_pic_flag" ) );
-		RNOK  ( pcWriteIf->writeCode( this->getViewId(),              10,                               "NALU HEADER: view_id" ) );
-    RNOK  ( pcWriteIf->writeCode( this->getIDRFlag(),             1,                                "NALU HEADER: idr_flag" ) );
-		RNOK  ( pcWriteIf->writeCode( this->getInterViewFlag(),				1,															  "NALU HEADER: inter_view_flag") ); // JVT-W056 Samsung
-		RNOK  ( pcWriteIf->writeCode( this->getReservedZeroBits(),    1,                                "NALU HEADER: reserved_zero_one_bits" ) );
+	  RNOK  ( pcWriteIf->writeCode( this->getSvcMvcFlag(),          1,                                "NALU HEADER: svc_mvc_flag" ) );
+		RNOK  ( pcWriteIf->writeCode( this->getIDRFlag(),                 1,                              "NALU HEADER: idr_flag" ) );
+	  RNOK (  pcWriteIf->writeCode( m_uiSimplePriorityId,               6,                              "NALU HEADER: priority_id"));
+	  RNOK  ( pcWriteIf->writeCode( this->getViewId(),                  10,                             "NALU HEADER: view_id" ) );
+		RNOK (  pcWriteIf->writeCode( m_uiTemporalLevel,                  3,                              "NALU HEADER: temporal_id"));
+		RNOK  ( pcWriteIf->writeCode( this->getAnchorPicFlag(),           1,                              "NALU HEADER: anchor_pic_flag" ) );
+		RNOK  ( pcWriteIf->writeCode( this->getInterViewFlag(),		    		1,														  "NALU HEADER: inter_view_flag") ); 
+    RNOK  ( pcWriteIf->writeCode( this->getReservedZeroBits(),        1,                              "NALU HEADER: reserved_zero_one_bit" ) );
 		
 	}
 	
