@@ -559,6 +559,15 @@ PicEncoder::xGetNextFrameSpec()
     m_uiProcessingPocInGOP=0;
     return xGetNextFrameSpec();
   }
+
+  if( m_uiGOPSize == 1)
+  {
+      // others
+      xUpdateFrameSepNextGOP();
+      m_uiProcessingPocInGOP=0;
+      return xGetNextFrameSpec();
+  }  
+
 //at the end of a complete special GOP
   if(m_bSpecialGOP && m_acFrameSpecification [m_uiProcessingPocInGOP].getTemporalLayer()==m_uiMaxTL && m_uiProcessingPocInGOP + 2 >=m_uiGOPSizeReal ) 
   {
