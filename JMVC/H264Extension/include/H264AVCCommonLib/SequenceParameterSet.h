@@ -118,6 +118,14 @@ public:
 , m_non_anchor_ref_list1      ( NULL )
 , m_uiViewCodingOrder         ( NULL ) // name ?
 , m_bInitDone                 ( false)
+, m_num_level_values_signalled (0)
+, m_ui_level_idc (NULL)
+, m_ui_num_applicable_ops_minus1 (NULL)
+, m_ui_applicable_op_temporal_id (NULL)
+, m_ui_applicable_op_num_target_views_minus1 (NULL)
+, m_ui_applicable_op_num_views_minus1 (NULL)
+, m_ui_applicable_op_target_view_id (NULL)
+
   {
   }
   
@@ -132,6 +140,9 @@ public:
 
   int getNumViewMinus1() const { return (int)m_num_views_minus_1;}
   Void setNumViewsMinus1(UInt num_views) {m_num_views_minus_1=(int)num_views;}
+
+  int getNumLevelValuesSignalled() const { return (int)m_num_level_values_signalled;}
+  Void setNumLevelValuesSignalled(UInt num_level_values) {m_num_level_values_signalled=(int)num_level_values;}
 
   Void initViewSPSMemory_num_refs_for_lists(UInt num_views_minus1)
   { 
@@ -163,6 +174,84 @@ public:
     //JVT-V054
     delete [] m_uiViewCodingOrder;
   }
+
+
+ 
+
+  Void initViewSPSMemory_num_level_related_memory(UInt num_level_values_signalled)
+  { 
+	m_ui_level_idc = new UInt[num_level_values_signalled];
+	m_ui_num_applicable_ops_minus1 = new UInt[num_level_values_signalled];
+	m_ui_applicable_op_temporal_id = new UInt*[num_level_values_signalled];
+	m_ui_applicable_op_num_target_views_minus1 = new UInt*[num_level_values_signalled];
+	m_ui_applicable_op_num_views_minus1 = new UInt*[num_level_values_signalled];
+	m_ui_applicable_op_target_view_id = new UInt**[num_level_values_signalled];
+
+    for (int i=0;i<num_level_values_signalled;i++)
+    {
+      m_ui_level_idc[i]=0;
+      m_ui_num_applicable_ops_minus1[i]=0;      
+    }
+  }
+
+  Void releaseViewSPSMemory_num_level_related_memory()
+  {
+	  
+    delete [] m_ui_level_idc;
+    delete [] m_ui_num_applicable_ops_minus1;
+	delete [] m_ui_applicable_op_temporal_id;
+	delete [] m_ui_applicable_op_num_target_views_minus1;
+	delete [] m_ui_applicable_op_num_views_minus1; 
+	delete [] m_ui_applicable_op_target_view_id; 
+    
+  }
+
+  Void initViewSPSMemory_num_level_related_memory_2D(UInt num_applicable_ops_minus1,int i)
+  {
+
+	  m_ui_applicable_op_temporal_id[i] = new UInt[num_applicable_ops_minus1+1];
+	  m_ui_applicable_op_num_target_views_minus1[i] = new UInt[num_applicable_ops_minus1+1];
+	  m_ui_applicable_op_num_views_minus1[i] = new UInt[num_applicable_ops_minus1+1];
+
+  }
+
+  Void releaseViewSPSMemory_num_level_related_memory_2D()
+  {
+	  for (int i=0; i<this->getNumLevelValuesSignalled(); i++)
+	  {
+		delete [] m_ui_applicable_op_temporal_id[i];
+		delete [] m_ui_applicable_op_num_target_views_minus1[i];
+		delete [] m_ui_applicable_op_num_views_minus1[i];
+
+	  }
+  }
+
+  Void initViewSPSMemory_num_level_related_memory_3D(UInt num_applicable_ops_minus1, UInt applicable_op_num_target_views_minus1,int i, int j)
+  {
+
+	  
+	  m_ui_applicable_op_target_view_id[i] = new UInt*[num_applicable_ops_minus1+1];
+	  m_ui_applicable_op_target_view_id[i][j] = new UInt[applicable_op_num_target_views_minus1+1];	
+	 
+
+  }
+
+  Void releaseViewSPSMemory_num_level_related_memory_3D()
+  {
+	  int num_i=this->getNumLevelValuesSignalled();
+
+	  for (int i=0;i<num_i; i++) 
+	  {
+		for (int j=0; j< this->m_ui_num_applicable_ops_minus1[i]; j++)
+	  		delete [] m_ui_applicable_op_target_view_id[i][j];
+
+		delete [] m_ui_applicable_op_target_view_id[i];	
+	  }	  
+
+	  
+  }
+
+
 
   Void initViewSPSMemory_ref_for_lists(UInt num_views_minus1,int i, int j, int k)
   // i : view-idx, j: list0/1 , k:anchor/non-anchor
@@ -360,6 +449,15 @@ public:
   //JVT-V054
   UInt                  *m_uiViewCodingOrder;
   Bool                   m_bInitDone;
+  int			m_num_level_values_signalled; // ue(v)
+  UInt			*m_ui_level_idc; // u(8)
+  UInt			*m_ui_num_applicable_ops_minus1; // ue(v)
+  UInt			**m_ui_applicable_op_temporal_id; // u(3)
+  UInt			**m_ui_applicable_op_num_target_views_minus1; // ue(v)
+  UInt			***m_ui_applicable_op_target_view_id; // ue(v)
+  UInt			**m_ui_applicable_op_num_views_minus1; // ue(v)
+
+
 };
 
 
@@ -402,6 +500,7 @@ public:
   Bool                  getConstrainedSet1Flag                ()          const { return m_bConstrainedSet1Flag; }
   Bool                  getConstrainedSet2Flag                ()          const { return m_bConstrainedSet2Flag; }
   Bool                  getConstrainedSet3Flag                ()          const { return m_bConstrainedSet3Flag; }
+  Bool                  getConstrainedSet4Flag                ()          const { return m_bConstrainedSet4Flag; }
   UInt                  getLevelIdc                           ()          const { return m_uiLevelIdc;}
   UInt                  getSeqParameterSetId                  ()          const { return m_uiSeqParameterSetId;}
   Bool                  getSeqScalingMatrixPresentFlag        ()          const { return m_bSeqScalingMatrixPresentFlag; }
@@ -433,6 +532,7 @@ public:
   Void  setConstrainedSet1Flag                ( Bool        b  )          { m_bConstrainedSet1Flag                  = b;  }
   Void  setConstrainedSet2Flag                ( Bool        b  )          { m_bConstrainedSet2Flag                  = b;  }
   Void  setConstrainedSet3Flag                ( Bool        b  )          { m_bConstrainedSet3Flag                  = b;  }
+  Void  setConstrainedSet4Flag                ( Bool        b  )          { m_bConstrainedSet4Flag                  = b;  }
   Void  setLevelIdc                           ( UInt        ui )          { m_uiLevelIdc                            = ui; }
   Void  setSeqParameterSetId                  ( UInt        ui )          { m_uiSeqParameterSetId                   = ui; }
   Void  setSeqScalingMatrixPresentFlag        ( Bool        b  )          { m_bSeqScalingMatrixPresentFlag          = b;  }
@@ -487,10 +587,11 @@ protected:
   Bool          m_bConstrainedSet0Flag;
   Bool          m_bConstrainedSet1Flag;
   Bool          m_bConstrainedSet2Flag;
-	Bool          m_bConstrainedSet3Flag;
+  Bool          m_bConstrainedSet3Flag;
+  Bool          m_bConstrainedSet4Flag;
   UInt          m_uiLevelIdc;
   UInt          m_uiSeqParameterSetId;
-	Bool          m_bSeqScalingMatrixPresentFlag;
+  Bool          m_bSeqScalingMatrixPresentFlag;
   ScalingMatrix m_cSeqScalingMatrix;
   UInt          m_uiLog2MaxFrameNum;
 	UInt          m_uiPicOrderCntType;

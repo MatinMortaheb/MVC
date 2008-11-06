@@ -38,6 +38,7 @@ enum NalUnitType
   NAL_UNIT_END_OF_SEQUENCE          = 10,
   NAL_UNIT_END_OF_STREAM            = 11,
   NAL_UNIT_FILLER_DATA              = 12,
+  NAL_UNIT_SUBSET_SPS               = 15,
 
   NAL_UNIT_CODED_SLICE_PREFIX       = 14, //
   NAL_UNIT_CODED_SLICE_SCALABLE     = 20,

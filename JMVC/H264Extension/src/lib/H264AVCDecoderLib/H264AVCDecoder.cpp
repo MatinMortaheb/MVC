@@ -1293,6 +1293,7 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 	}
 	break;
   case NAL_UNIT_SPS:
+  case NAL_UNIT_SUBSET_SPS:
     {
       SequenceParameterSet* pcSPS = NULL;
       RNOK( SequenceParameterSet::create  ( pcSPS   ) );
@@ -1308,46 +1309,46 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
       else if( m_pcVeryFirstSPS->getProfileIdc() != MULTI_VIEW_PROFILE )
       {
         m_pcVeryFirstSPS->SpsMVC = new SpsMvcExtension;	 // Nov. 30
-        m_pcVeryFirstSPS->SpsMVC->setNumViewsMinus1 ( pcSPS->getSpsMVC()->getNumViewMinus1() );
-      
+        m_pcVeryFirstSPS->SpsMVC->setNumViewsMinus1 ( pcSPS->getSpsMVC()->getNumViewMinus1() );      
         m_puiViewOrder = pcSPS->getSpsMVC()->getViewCodingOrder(); // Dec. 1
       }
-//TMM_EC {{
-			for ( UInt i=0; i<m_uiNumLayers; i++)
+
+		for ( UInt i=0; i<m_uiNumLayers; i++)
+		{
+			UInt	uiDecompositionStagesSub	=	m_uiMaxDecompositionStages - m_uiDecompositionStages[i];
+			UInt	uiGopSize	=	m_uiGopSize[i];
+			m_pauiPocInGOP[i]				=	new	UInt[uiGopSize];
+			m_pauiFrameNumInGOP[i]		=	new	UInt[uiGopSize];
+			m_pauiTempLevelInGOP[i]	=	new	UInt[uiGopSize];
+			UInt	uiFrameIdx	=	0;
+			UInt	uiFrameNum	=	1;
+			for( UInt uiTemporalLevel = 0; uiTemporalLevel <= m_uiDecompositionStages[i]; uiTemporalLevel++ )
 			{
-				UInt	uiDecompositionStagesSub	=	m_uiMaxDecompositionStages - m_uiDecompositionStages[i];
-				UInt	uiGopSize	=	m_uiGopSize[i];
-				m_pauiPocInGOP[i]				=	new	UInt[uiGopSize];
-				m_pauiFrameNumInGOP[i]		=	new	UInt[uiGopSize];
-				m_pauiTempLevelInGOP[i]	=	new	UInt[uiGopSize];
-				UInt	uiFrameIdx	=	0;
-				UInt	uiFrameNum	=	1;
-				for( UInt uiTemporalLevel = 0; uiTemporalLevel <= m_uiDecompositionStages[i]; uiTemporalLevel++ )
+				UInt      uiStep    = ( 1 << ( m_uiDecompositionStages[i] - uiTemporalLevel ) );
+				for( UInt uiFrameId = uiStep; uiFrameId <= uiGopSize; uiFrameId += ( uiStep << 1 ) )
 				{
-					UInt      uiStep    = ( 1 << ( m_uiDecompositionStages[i] - uiTemporalLevel ) );
-					for( UInt uiFrameId = uiStep; uiFrameId <= uiGopSize; uiFrameId += ( uiStep << 1 ) )
-					{
-						m_pauiPocInGOP[i][uiFrameIdx]	=	uiFrameId << uiDecompositionStagesSub;
-						m_pauiFrameNumInGOP[i][uiFrameIdx]	=	uiFrameNum;
-						m_pauiTempLevelInGOP[i][uiFrameIdx]	=	uiTemporalLevel;
-						uiFrameIdx++;
-						if ( uiFrameId % 2 == 0)
-							uiFrameNum++;
-					}
+					m_pauiPocInGOP[i][uiFrameIdx]	=	uiFrameId << uiDecompositionStagesSub;
+					m_pauiFrameNumInGOP[i][uiFrameIdx]	=	uiFrameNum;
+					m_pauiTempLevelInGOP[i][uiFrameIdx]	=	uiTemporalLevel;
+					uiFrameIdx++;
+					if ( uiFrameId % 2 == 0)
+						uiFrameNum++;
 				}
 			}
-//TMM_EC }}
-			if ( pcSPS->getProfileIdc()==SCALABLE_PROFILE )
+		}
+
+	  if ( pcSPS->getProfileIdc()==SCALABLE_PROFILE )
       {
-//TMM_EC {{
-				if ( pcSPS->getSeqParameterSetId() == 0)
-				{
-					m_bNotSupport	=	true;
-				}
-//TMM_EC }}
-				m_bEnhancementLayer = true;
+
+			if ( pcSPS->getSeqParameterSetId() == 0)
+			{
+				m_bNotSupport	=	true;
+			}
+
+			m_bEnhancementLayer = true;
       }
-			m_bNewSPS = true;
+	
+	  m_bNewSPS = true;
       RNOK( m_pcParameterSetMng ->store   ( pcSPS   ) );
 
       // Copy simple priority ID mapping from SPS to NAL unit parser
@@ -2281,53 +2282,42 @@ H264AVCDecoder::process( PicBuffer*       pcPicBuffer,
       ROF( m_pcSliceHeader );
       ROF( m_pcSliceHeader->getLayerId() == 0 );
       m_uiLastLayerId    = m_pcSliceHeader->getLayerId();
-//JVT-T054{
       Bool bHighestLayer;
       m_bLastNalInAU = (m_uiNumOfNALInAU == 0);
       if(m_bFGSRefInAU)
         bHighestLayer = ( m_uiLastLayerId == m_uiRecLayerId );
       else
         bHighestLayer = ( m_uiLastLayerId == m_uiRecLayerId && m_bLastNalInAU);
-//JVT-T054}
-// JVT-Q054 Red. Picture {
       if ( NULL != m_pcSliceHeader_backup )
-      {
         RNOK( m_pcSliceHeader->sliceHeaderBackup( m_pcSliceHeader_backup ) );
-      }
-// JVT-Q054 Red. Picture }
 
-//	TMM EC {{
-			//m_apcMCTFDecoder[m_uiLastLayerId+1]->m_bBaseLayerLost	=	!m_pcSliceHeader->getTrueSlice();
 
-//			if(eNalUnitType==NAL_UNIT_VIRTUAL_BASELAYER)
-			if ( !m_pcSliceHeader->getTrueSlice())
-			{
-				RNOK( xProcessSliceVirtual( *m_pcSliceHeader, m_pcPrevSliceHeader, pcPicBuffer ) );				
-			}
-			else
-			{
-      RNOK( xProcessSlice( *m_pcSliceHeader, 
-                          m_pcPrevSliceHeader, 
-                          pcPicBuffer, 
-                          rcPicBufferOutputList,
-                          rcPicBufferUnusedList,
-                          bHighestLayer ) ); //JVT-T054
-      m_bOnlyAVCAtLayer = true; //JVT-T054
-			}
-//TMM_EC }}
+		if ( !m_pcSliceHeader->getTrueSlice())
+		{
+			RNOK( xProcessSliceVirtual( *m_pcSliceHeader, m_pcPrevSliceHeader, pcPicBuffer ) );				
+		}
+		else
+		{
+			RNOK( xProcessSlice( *m_pcSliceHeader, 
+								m_pcPrevSliceHeader, 
+								pcPicBuffer, 
+								rcPicBufferOutputList,
+								rcPicBufferUnusedList,
+								bHighestLayer ) ); 
+			m_bOnlyAVCAtLayer = true; 
+		}
+
 
       PicBufferList   cDummyList;
       PicBufferList&  rcOutputList  = ( (m_uiRecLayerId == 0) ? rcPicBufferOutputList : cDummyList ); //JVT-T054
 
       RNOK( m_pcFrameMng->setPicBufferLists( rcOutputList, rcPicBufferReleaseList ) );
-//JVT-T054{
-      //m_apcMCTFDecoder[m_uiLastLayerId]->setAVCBased(true);
       m_bAVCBased = true;
-//JVT-T054}
     }
     break;
   
   case NAL_UNIT_SPS:
+  case NAL_UNIT_SUBSET_SPS:
     {
       break;
     }

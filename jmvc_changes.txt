@@ -1,3 +1,11 @@
+JMVC_2_3 -> JMVC_2_4
+Date            : November 6, 2008
+Authors         : MERL (Software coordinators)
+Contribution    : SPS new syntax support
+Changes:
+- Added Nal_unit_type 15 (subset SPS) and its associated SE implementations according to FDAM (H.7.3.2.1.3 & H.7.3.2.1.4).
+
+
 JMVC_2_2 -> JMVC_2_3
 Date            : October 28, 2008
 Authors         : Harmonic (Software coordinators)

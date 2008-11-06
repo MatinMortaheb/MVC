@@ -378,56 +378,51 @@ Assembler::xAnalyse()
     //----------------------------assembling ----------------------------------------------
     UChar       ucByte        = (pcBinData->data())[0];
     NalUnitType eNalUnitType  = NalUnitType ( ucByte  & 0x1F );
-    if(NAL_UNIT_SPS == eNalUnitType || NAL_UNIT_PPS == eNalUnitType )
+    if(NAL_UNIT_SPS == eNalUnitType || NAL_UNIT_SUBSET_SPS == eNalUnitType || NAL_UNIT_PPS == eNalUnitType )
     {
       Bool isMVCProfile = false;
       uiNumVCLUnits--;
       if(bNewAUStart){ bKeep = true; uiNumOtherNalU++;}
-      // else discard the SPS and PPS
-//SEI {
-// fix Nov. 30{
     
-    if (NAL_UNIT_SPS == eNalUnitType ) 
-    {
-      RNOK( m_pcH264AVCPacketAnalyzer ->isMVCProfile ( pcBinData, isMVCProfile) );
-    }
+    
+	  if (NAL_UNIT_SPS == eNalUnitType || NAL_UNIT_SUBSET_SPS == eNalUnitType ) 
+		RNOK( m_pcH264AVCPacketAnalyzer ->isMVCProfile ( pcBinData, isMVCProfile) );
+		
 	  if(isMVCProfile && bFinalViewScalSei && pcFinalViewScalSei )
-// fix Nov. 30}	  
 	  {
-      RNOK( m_pcH264AVCPacketAnalyzer ->processSEIAndMVC( pcBinData, pcFinalViewScalSei ) );
-      BinData* pcBinData1 = 0;
-      pcBinData1 = new BinData;
-      xWriteViewScalSEIToBuffer( pcFinalViewScalSei, pcBinData1 );
-      //Nov. 31{
-      UChar ucTemp[100];
-      UInt  uiRet;
-      i64Start = m_pcWriteBitstream->getFile().tell();
-      m_pcWriteBitstream->getFile().close();
-      m_pcWriteBitstream->getFile().open(m_pcAssemblerParameter->getOutFile(),LargeFile::OM_READONLY);
-      m_pcWriteBitstream->getFile().read(ucTemp,(UInt) i64Start,uiRet);
-      m_pcWriteBitstream->getFile().close();
-      m_pcWriteBitstream->getFile().open(m_pcAssemblerParameter->getOutFile(),LargeFile::OM_WRITEONLY);
-      //Nov. 31}
-      RNOK( m_pcWriteBitstream->writePacket( &m_cBinDataStartCode ) );
-      RNOK( m_pcWriteBitstream->writePacket( pcBinData1 ) );
-      //Nov. 31{
-      m_pcWriteBitstream->getFile().write(ucTemp,(UInt) i64Start);
-      //Nov. 31}
-      pcFinalViewScalSei->destroy();
-      pcFinalViewScalSei = NULL;
-      pcBinData1->deleteData();
-      delete pcBinData1;
+		RNOK( m_pcH264AVCPacketAnalyzer ->processSEIAndMVC( pcBinData, pcFinalViewScalSei ) );
+		BinData* pcBinData1 = 0;
+		pcBinData1 = new BinData;
+		xWriteViewScalSEIToBuffer( pcFinalViewScalSei, pcBinData1 );
+	      
+		UChar ucTemp[100];
+		UInt  uiRet;
+		i64Start = m_pcWriteBitstream->getFile().tell();
+		m_pcWriteBitstream->getFile().close();
+		m_pcWriteBitstream->getFile().open(m_pcAssemblerParameter->getOutFile(),LargeFile::OM_READONLY);
+		m_pcWriteBitstream->getFile().read(ucTemp,(UInt) i64Start,uiRet);
+		m_pcWriteBitstream->getFile().close();
+		m_pcWriteBitstream->getFile().open(m_pcAssemblerParameter->getOutFile(),LargeFile::OM_WRITEONLY);
+	      
+		RNOK( m_pcWriteBitstream->writePacket( &m_cBinDataStartCode ) );
+		RNOK( m_pcWriteBitstream->writePacket( pcBinData1 ) );
+	      
+		m_pcWriteBitstream->getFile().write(ucTemp,(UInt) i64Start);
+	     
+		pcFinalViewScalSei->destroy();
+		pcFinalViewScalSei = NULL;
+		pcBinData1->deleteData();
+		delete pcBinData1;
 	  }
 
-//SEI }
     }
 //JVT-W080
-		else if ( NAL_UNIT_SEI == eNalUnitType )
-		{
-		  uiNumVCLUnits--;
+	else if ( NAL_UNIT_SEI == eNalUnitType )
+	{
+	  uiNumVCLUnits--;
       bKeep = true; 
-			uiNumOtherNalU++;
-		}
+	  uiNumOtherNalU++;
+    }
 //~JVT-W080
     else if ( NAL_UNIT_CODED_SLICE_PREFIX == eNalUnitType )
     {

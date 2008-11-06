@@ -770,6 +770,8 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
 
   int cur_view_id, view_id, view_cnt=-1;
+  int cur_level_id,level_id,level_cnt=-1;
+  int num_of_ops,num_target_views_minus1,num_views_minus1,temporal_id,view_idx;
   int ref_idx,num_of_refs,temp;
   int vcOrder;
   CodingParameter::SpsMVC.setNumViewsMinus1(0);
@@ -931,6 +933,61 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
     }
 
+	if (acTags[0] == "NumLevelValuesSignalled") 
+    {
+      AOF(( temp=atoi(acTags[1].c_str()))>=0);
+      AOF(temp<=63); //hard-coded 
+      CodingParameter::SpsMVC.setNumLevelValuesSignalled(temp);
+      CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory(CodingParameter::SpsMVC.getNumLevelValuesSignalled());
+    }
+
+	if (acTags[0] == "Level_IDC") 
+    {
+      AOF((cur_level_id=atoi(acTags[1].c_str()))>=0);      
+      //AOF(cur_view_id <= MAX_NUM_VIEWS_MINUS_1);
+      AOF(++level_cnt<=CodingParameter::SpsMVC.getNumLevelValuesSignalled());		
+	  CodingParameter::SpsMVC.m_ui_level_idc[level_cnt]=cur_level_id;
+
+    }
+
+	if (acTags[0] == "NumApplicableOpsMinus1")
+    {
+      AOF((num_of_ops=atoi(acTags[1].c_str()))>=0); 
+      AOF(num_of_ops<=1023); // hard-coded
+      CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]=num_of_ops;
+	  CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_2D(num_of_ops,level_cnt);      
+	}
+
+	if (acTags[0] == "ApplicableOpTemporalId")
+    {
+      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);
+      temporal_id=atoi(acTags[2].c_str());
+      CodingParameter::SpsMVC.m_ui_applicable_op_temporal_id[level_cnt][ref_idx]=temporal_id;
+    }
+
+	if (acTags[0] == "ApplicableOpNumTargetViewsMinus1")
+    {
+      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);
+      num_target_views_minus1=atoi(acTags[2].c_str());
+      CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_minus1[level_cnt][ref_idx]=num_target_views_minus1;
+	  CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_3D(num_of_ops,num_target_views_minus1,level_cnt,ref_idx);   
+    }
+
+	if (acTags[0] == "ApplicableOpNumViewsMinus1")
+    {
+      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);
+      num_views_minus1=atoi(acTags[2].c_str());
+      CodingParameter::SpsMVC.m_ui_applicable_op_num_views_minus1[level_cnt][ref_idx]=num_views_minus1;
+    }
+
+	if (acTags[0] == "ApplicableOpTargetViewId")
+    {
+      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);      
+      AOF((view_idx=atoi(acTags[2].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_minus1[level_cnt][ref_idx]);            
+      CodingParameter::SpsMVC.m_ui_applicable_op_target_view_id[level_cnt][ref_idx][view_idx]=atoi(acTags[3].c_str());
+	     
+	}
+
 	
   }
 
@@ -1007,8 +1064,6 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
         getLayerParameters(0).setFrameWidth     ( m_uiFrameWidth );
         getLayerParameters(0).setFrameHeight    ( m_uiFrameHeight );
         xAppendStringWithNO ( rcBitstreamFile, rcBitstreamFile, m_CurrentViewId, ".264");
-
-
 
       }
 

@@ -615,7 +615,7 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
                                 eNalUnitType == NAL_UNIT_CODED_SLICE_SCALABLE       );
   UInt        uiSPSid       = 0;
   UInt        uiPPSid       = 0;
-  Bool        bParameterSet = ( eNalUnitType == NAL_UNIT_SPS                      ||
+  Bool        bParameterSet = ( eNalUnitType == NAL_UNIT_SPS                      || eNalUnitType == NAL_UNIT_SUBSET_SPS ||
                                 eNalUnitType == NAL_UNIT_PPS                        );
 
 
@@ -881,14 +881,14 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
     m_pcNalUnitParser->setCheckAllNALUs(false);//JVT-P031
   
     // get the SPSid
-    if(eNalUnitType == NAL_UNIT_SPS )
+    if(eNalUnitType == NAL_UNIT_SPS || eNalUnitType == NAL_UNIT_SUBSET_SPS)
     {
       SequenceParameterSet* pcSPS = NULL;
       RNOK( SequenceParameterSet::create  ( pcSPS   ) );
 	  
       RNOK( pcSPS->read( m_pcUvlcReader, eNalUnitType ) );
       // Copy simple priority ID mapping from SPS
-       uiSPSid = pcSPS->getSeqParameterSetId();
+      uiSPSid = pcSPS->getSeqParameterSetId();
 	  
       pcSPS->destroy();
     }
@@ -1015,8 +1015,9 @@ H264AVCPacketAnalyzer::isMVCProfile ( BinData*				pcBinData, Bool& b )// fix Nov
 {
   UChar       ucByte        = (pcBinData->data())[0];
   NalUnitType eNalUnitType  = NalUnitType ( ucByte  & 0x1F );
-  if ( eNalUnitType != NAL_UNIT_SPS )
-  return Err::m_nERR; 
+  
+  if ( eNalUnitType != NAL_UNIT_SPS && eNalUnitType != NAL_UNIT_SUBSET_SPS )
+	return Err::m_nERR; 
 
   ULong*  pulData = (ULong*)( pcBinData->data() + 1 );
   UInt    uiSize  =     8 * ( pcBinData->size() - 1 ) - 1;
@@ -1028,7 +1029,7 @@ H264AVCPacketAnalyzer::isMVCProfile ( BinData*				pcBinData, Bool& b )// fix Nov
   BinDataAccessor cBinDataAccessor;
   cBinData.setMemAccessor( cBinDataAccessor );
   m_pcNalUnitParser->setCheckAllNALUs(true); //JVT-P031
-	UInt uiNumBytesRemoved; //FIX_FRAG_CAVLC
+  UInt uiNumBytesRemoved; //FIX_FRAG_CAVLC
 
   RNOK( m_pcNalUnitParser->initNalUnit( &cBinDataAccessor, NULL, uiNumBytesRemoved ) ); //FIX_FRAG_CAVLC
 
@@ -1037,7 +1038,7 @@ H264AVCPacketAnalyzer::isMVCProfile ( BinData*				pcBinData, Bool& b )// fix Nov
   SequenceParameterSet* pcSPS = NULL;
   RNOK( SequenceParameterSet::create  ( pcSPS   ) );
 
-	RNOK( pcSPS->read( m_pcUvlcReader, eNalUnitType ) );
+  RNOK( pcSPS->read( m_pcUvlcReader, eNalUnitType ) );
 
   b= (MULTI_VIEW_PROFILE == pcSPS->getProfileIdc());
   
@@ -1093,7 +1094,8 @@ H264AVCPacketAnalyzer::processSEIAndMVC( BinData*				pcBinData,
     }
     m_pcNalUnitParser->closeNalUnit();
   }
-  else if( eNalUnitType == NAL_UNIT_SPS && pcSEIMessage )
+  //else if( eNalUnitType == NAL_UNIT_SPS && pcSEIMessage )
+  else if( eNalUnitType == NAL_UNIT_SUBSET_SPS && pcSEIMessage )
   {
     ULong*  pulData = (ULong*)( pcBinData->data() + 1 );
     UInt    uiSize  =     8 * ( pcBinData->size() - 1 ) - 1;

@@ -177,6 +177,10 @@ NalUnitParser::xTrace( Bool bDDIPresent )
     DTRACE_HEADER( "SEQUENCE PARAMETER SET" );
     break;
 
+  case NAL_UNIT_SUBSET_SPS:
+	DTRACE_HEADER( "SUBSET SEQUENCE PARAMETER SET" );
+	break;
+
   case NAL_UNIT_PPS:
     DTRACE_HEADER( "PICTURE PARAMETER SET" );
     break;

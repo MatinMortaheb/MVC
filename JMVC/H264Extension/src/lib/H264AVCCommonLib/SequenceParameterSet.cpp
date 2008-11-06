@@ -160,6 +160,7 @@ SequenceParameterSet::SequenceParameterSet  ()
 , m_bConstrainedSet1Flag                    ( false )
 , m_bConstrainedSet2Flag                    ( false )
 , m_bConstrainedSet3Flag                    ( false )
+, m_bConstrainedSet4Flag                    ( false )
 , m_uiLevelIdc                              ( 0 )
 , m_uiSeqParameterSetId                     ( MSYS_UINT_MAX )
 //, m_bNalUnitExtFlag                         ( true  )  //JVT-S036 lsj
@@ -209,15 +210,16 @@ ErrVal
 SequenceParameterSet::destroy()
 {
 // previous implementation has memory leak! // ying
-if ( m_eProfileIdc == MVC_PROFILE ) // 
-{
-	SpsMVC->releaseViewSPSMemory_num_refs_for_lists();
-	SpsMVC->releaseViewSPSMemory_ref_for_lists();
-}
-
-
-  if (SpsMVC!=NULL)
-    delete SpsMVC; 
+	if ( m_eProfileIdc == MVC_PROFILE ) // 
+	{
+		SpsMVC->releaseViewSPSMemory_num_refs_for_lists();
+		SpsMVC->releaseViewSPSMemory_ref_for_lists();
+		SpsMVC->releaseViewSPSMemory_num_level_related_memory_2D();
+		SpsMVC->releaseViewSPSMemory_num_level_related_memory_3D();
+		SpsMVC->releaseViewSPSMemory_num_level_related_memory();
+		if (SpsMVC!=NULL)
+			delete SpsMVC; 
+	}
 
   delete this;
   return Err::m_nOK;
@@ -292,109 +294,13 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
   RNOK  ( pcWriteIf->writeFlag( m_bConstrainedSet1Flag,                   "SPS: constrained_set1_flag" ) );
   RNOK  ( pcWriteIf->writeFlag( m_bConstrainedSet2Flag,                   "SPS: constrained_set2_flag" ) );
   RNOK  ( pcWriteIf->writeFlag( m_bConstrainedSet3Flag,                   "SPS: constrained_set3_flag" ) );
-  RNOK  ( pcWriteIf->writeCode( 0,                                4,      "SPS: reserved_zero_4bits" ) );
+  RNOK  ( pcWriteIf->writeFlag( m_bConstrainedSet4Flag,                   "SPS: constrained_set4_flag" ) );
+  RNOK  ( pcWriteIf->writeCode( 0,                                3,      "SPS: reserved_zero_3bits" ) );
   RNOK  ( pcWriteIf->writeCode( getLevelIdc(),                    8,      "SPS: level_idc" ) );
   RNOK  ( pcWriteIf->writeUvlc( getSeqParameterSetId(),                   "SPS: seq_parameter_set_id" ) );
   
-  if( m_eProfileIdc == SCALABLE_PROFILE ) // bug-fix (HS)
-  {
-    /*RNOK( pcWriteIf->writeFlag( m_bNalUnitExtFlag,                        "SPS: nal_unit_extension_flag" ) );
-    if ( m_bNalUnitExtFlag == 0 )
-    {
-        RNOK ( pcWriteIf->writeUvlc( m_uiNumSimplePriIdVals - 1,          "SPS: number_of_simple_priority_id_values_minus1" ) );
-        for ( UInt uiPriCount = 0; uiPriCount < m_uiNumSimplePriIdVals; uiPriCount++ )
-        {
-            RNOK ( pcWriteIf->writeCode( uiPriCount,              PRI_ID_BITS, "SPS: priority_id" ) );
-            RNOK ( pcWriteIf->writeCode( m_uiTemporalLevelList[uiPriCount], 3, "SPS: temporal_level_list[priority_id]" ) );
-            RNOK ( pcWriteIf->writeCode( m_uiDependencyIdList [uiPriCount], 3, "SPS: dependency_id_list[priority_id]" ) );
-            RNOK ( pcWriteIf->writeCode( m_uiQualityLevelList [uiPriCount], 2, "SPS: quality_level_list[priority_id]" ) );
-        }
-    }
- JVT-S036  */
 
-    RNOK( pcWriteIf->writeCode( getExtendedSpatialScalability(), 2,       "SPS: ExtendedSpatialScalability" ) );
-//    if ( 1 /* chroma_format_idc */ > 0 )
-    {
-      RNOK( pcWriteIf->writeCode( m_uiChromaPhaseXPlus1, 2,             "SPS: ChromaPhaseXPlus1" ) );
-      RNOK( pcWriteIf->writeCode( m_uiChromaPhaseYPlus1, 2,             "SPS: ChromaPhaseYPlus1" ) );
-    }
-    if (getExtendedSpatialScalability() == ESS_SEQ)
-    {
-      RNOK( pcWriteIf->writeSvlc( m_iScaledBaseLeftOffset,              "SPS: ScaledBaseLeftOffset" ) );
-      RNOK( pcWriteIf->writeSvlc( m_iScaledBaseTopOffset,               "SPS: ScaledBaseTopOffset" ) );
-      RNOK( pcWriteIf->writeSvlc( m_iScaledBaseRightOffset,             "SPS: ScaledBaseRightOffset" ) );
-      RNOK( pcWriteIf->writeSvlc( m_iScaledBaseBottomOffset,            "SPS: ScaledBaseBottomOffset" ) );
-    }
-
-    RNOK  ( pcWriteIf->writeFlag( m_bFGSCodingMode,                       "SPS: FGSCodingMode") );
-    if(m_bFGSCodingMode == false)
-    {
-      RNOK  ( pcWriteIf->writeUvlc(m_uiGroupingSize-1,                    "SPS: GroupingSizeMinus1") );
-    }
-    else
-    {
-      UInt uiNumPosVector = 0;
-      UInt uiIndex = 0;
-      while(uiNumPosVector != 15)
-      {
-        if(uiIndex == 0)
-        {
-          RNOK( pcWriteIf->writeUvlc(m_uiPosVect[uiIndex],               "SPS: PosVect[0]") );
-        }
-        else
-        {
-          RNOK( pcWriteIf->writeUvlc(m_uiPosVect[uiIndex]-m_uiPosVect[uiIndex-1]-1, "SPS: PosVect") );
-        }
-        uiNumPosVector = m_uiPosVect[uiIndex];
-        uiIndex++;
-      }
-    }
-  }
-
-  if( m_eProfileIdc == MULTI_VIEW_PROFILE ) 
-  {
-
-    // seq_parameter_set_mvc_extension()
-
-    RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_num_views_minus_1,                   "SPS: num_views_minus_1" ) ); // ue(v)
-	
-	int i,j, vcOrder;
-    //JVT-V054
-    printf("ViewCodingOrder: ");
-    for (i=0;i<= SpsMVC->m_num_views_minus_1; i++)
-    {
-      printf("%d ", SpsMVC->m_uiViewCodingOrder[i]);
-      RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_uiViewCodingOrder[i], "SPS: view_id[i]")); //ue(v)
-    }	  
-    printf ("\n");
-
-    for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
-    {
-      vcOrder = SpsMVC->m_uiViewCodingOrder[i];
-
-      RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_anchor_refs_list0[vcOrder],                   "SPS: num_anchor_refs_l0[i]" ) ); // ue(v)
-      for (j=0; j<SpsMVC->m_num_anchor_refs_list0[vcOrder]; j++)
-        RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_anchor_ref_list0[vcOrder][j],      "SPS: anchor_ref_l0[i][j]" ) ); // ue(v)
-			
-      RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_anchor_refs_list1[vcOrder],                   "SPS: num_anchor_refs_l1[i]" ) ); // ue(v)
-      for (j=0; j<SpsMVC->m_num_anchor_refs_list1[vcOrder]; j++)
-        RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_anchor_ref_list1[vcOrder][j],      "SPS: anchor_ref_l1[i][j]" ) ); // ue(v)
-    }
-
-    for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
-    {
-      vcOrder = SpsMVC->m_uiViewCodingOrder[i];
-      RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_non_anchor_refs_list0[vcOrder],                   "SPS: num_non_anchor_refs_l0[i]" ) ); // ue(v)
-      for (j=0; j<SpsMVC->m_num_non_anchor_refs_list0[vcOrder]; j++)
-		  RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_non_anchor_ref_list0[vcOrder][j],      "SPS: non_anchor_ref_l0[i][j]" ) ); // ue(v)
-
-      RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_non_anchor_refs_list1[vcOrder],                   "SPS: num_non_anchor_refs_l1[i]" ) ); // ue(v)
-      for (j=0; j<SpsMVC->m_num_non_anchor_refs_list1[vcOrder]; j++)
-		  RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_non_anchor_ref_list1[vcOrder][j],      "SPS: non_anchor_ref_l1[i][j]" ) ); // ue(v)
-
-    }	
-  }
-
+  
 
   //--- fidelity range extension syntax ---
   RNOK  ( xWriteFrext( pcWriteIf ) );
@@ -428,6 +334,79 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
 
   RNOK  ( pcWriteIf->writeFlag( false,                                  "SPS: vui_parameters_present_flag" ) );
 
+  if (m_eNalUnitType == NAL_UNIT_SUBSET_SPS )
+  {
+	if( m_eProfileIdc == MULTI_VIEW_PROFILE ) 
+	{
+
+		RNOK  ( pcWriteIf->writeFlag(true,                      "SUBSET SPS: bit_equal_to_one" ) );
+
+		// seq_parameter_set_mvc_extension()
+
+		RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_num_views_minus_1,                   "SPS: num_views_minus_1" ) ); // ue(v)
+		
+		int i,j,k, vcOrder;
+		//JVT-V054
+		printf("ViewCodingOrder: ");
+		for (i=0;i<= SpsMVC->m_num_views_minus_1; i++)
+		{
+			printf("%d ", SpsMVC->m_uiViewCodingOrder[i]);
+			RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_uiViewCodingOrder[i], "SPS: view_id[i]")); //ue(v)
+		}	  
+		printf ("\n");
+
+		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
+		{
+			vcOrder = SpsMVC->m_uiViewCodingOrder[i];
+
+			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_anchor_refs_list0[vcOrder],                   "SPS: num_anchor_refs_l0[i]" ) ); // ue(v)
+			for (j=0; j<SpsMVC->m_num_anchor_refs_list0[vcOrder]; j++)
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_anchor_ref_list0[vcOrder][j],      "SPS: anchor_ref_l0[i][j]" ) ); // ue(v)
+					
+			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_anchor_refs_list1[vcOrder],                   "SPS: num_anchor_refs_l1[i]" ) ); // ue(v)
+			for (j=0; j<SpsMVC->m_num_anchor_refs_list1[vcOrder]; j++)
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_anchor_ref_list1[vcOrder][j],      "SPS: anchor_ref_l1[i][j]" ) ); // ue(v)
+		}
+
+		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
+		{
+			vcOrder = SpsMVC->m_uiViewCodingOrder[i];
+			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_non_anchor_refs_list0[vcOrder],                   "SPS: num_non_anchor_refs_l0[i]" ) ); // ue(v)
+			for (j=0; j<SpsMVC->m_num_non_anchor_refs_list0[vcOrder]; j++)
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_non_anchor_ref_list0[vcOrder][j],      "SPS: non_anchor_ref_l0[i][j]" ) ); // ue(v)
+
+			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_non_anchor_refs_list1[vcOrder],                   "SPS: num_non_anchor_refs_l1[i]" ) ); // ue(v)
+			for (j=0; j<SpsMVC->m_num_non_anchor_refs_list1[vcOrder]; j++)
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_non_anchor_ref_list1[vcOrder][j],      "SPS: non_anchor_ref_l1[i][j]" ) ); // ue(v)
+
+		}	
+
+		RNOK  ( pcWriteIf->writeUvlc( (UInt &)SpsMVC->m_num_level_values_signalled,                   "SPS: num_level_values_signalled" ) ); // ue(v)
+
+		//SpsMVC->initViewSPSMemory_num_level_related_memory(SpsMVC->getNumLevelValuesSignalled());
+		for (i=0;i< SpsMVC->m_num_level_values_signalled; i++)  
+		{
+			RNOK  ( pcWriteIf->writeCode( SpsMVC->m_ui_level_idc[i] ,                               8,      "SPS: level_idc[i]" ) );
+			RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_num_applicable_ops_minus1[i],                   "SPS: num_applicable_ops_minus1[i]" ) ); // ue(v)
+			//SpsMVC->initViewSPSMemory_num_level_related_memory_2D(SpsMVC->m_ui_num_applicable_ops_minus1[i],i);
+			for (j=0; j<=SpsMVC->m_ui_num_applicable_ops_minus1[i];j++)
+			{
+				RNOK  ( pcWriteIf->writeCode( SpsMVC->m_ui_applicable_op_temporal_id[i][j] ,                               3,      "SPS: applicable_op_temporal_id[i][j]" ) );
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j],                   "SPS: applicable_op_num_target_views_minus1[i][j]" ) ); // ue(v)
+				//SpsMVC->initViewSPSMemory_num_level_related_memory_3D(SpsMVC->m_ui_num_applicable_ops_minus1[i],SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j], i,j);
+				for (k=0; k<= SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j];k++)
+					RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_target_view_id[i][j][k],                    "SPS: applicable_op_num_target_view_id[i][j][k]" ) ); // ue(v)
+				
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_num_views_minus1[i][j],                   "SPS: num_applicable_op_num_views_minus1[i][j]" ) ); // ue(v)			
+			}		
+		}
+
+	}
+	RNOK  ( pcWriteIf->writeFlag(false,                      "SUBSET SPS: mvc_vui_parameters_present_flag" ) );	
+	RNOK  ( pcWriteIf->writeFlag( false,                      "SUBSET SPS: Additional_extension2_flag" ) );
+	
+  }
+
   return Err::m_nOK;
 }
 
@@ -453,127 +432,22 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
           m_eProfileIdc != HIGH_PROFILE  &&
           m_eProfileIdc != MULTI_VIEW_PROFILE &&
           m_eProfileIdc != SCALABLE_PROFILE );
+
   RNOK  ( pcReadIf->getFlag( m_bConstrainedSet0Flag,                      "SPS: constrained_set0_flag" ) );
   RNOK  ( pcReadIf->getFlag( m_bConstrainedSet1Flag,                      "SPS: constrained_set1_flag" ) );
   RNOK  ( pcReadIf->getFlag( m_bConstrainedSet2Flag,                      "SPS: constrained_set2_flag" ) );
   RNOK  ( pcReadIf->getFlag( m_bConstrainedSet3Flag,                      "SPS: constrained_set3_flag" ) );
-  RNOK  ( pcReadIf->getCode( uiTmp,                               4,      "SPS: reserved_zero_4bits" ) );
+  RNOK  ( pcReadIf->getFlag( m_bConstrainedSet4Flag,                      "SPS: constrained_set4_flag" ) );
+  RNOK  ( pcReadIf->getCode( uiTmp,                               3,      "SPS: reserved_zero_3bits" ) );
   ROT   ( uiTmp );
   RNOK  ( pcReadIf->getCode( m_uiLevelIdc,                        8,      "SPS: level_idc" ) );
   RNOK  ( pcReadIf->getUvlc( m_uiSeqParameterSetId,                       "SPS: seq_parameter_set_id" ) );
 
-  if( m_eProfileIdc == SCALABLE_PROFILE ) // bug-fix (HS)
-  {
 
-   /* RNOK( pcReadIf->getFlag( m_bNalUnitExtFlag,                           "SPS: nal_unit_extension_flag" ) );
-    if ( m_bNalUnitExtFlag == 0 )
-    {
-        RNOK ( pcReadIf->getUvlc( m_uiNumSimplePriIdVals,                 "SPS: number_of_simple_priority_id_values_minus1" ) );
-        m_uiNumSimplePriIdVals++;
-        for ( UInt uiPriCount = 0; uiPriCount < m_uiNumSimplePriIdVals; uiPriCount++ )
-        {
-            RNOK ( pcReadIf->getCode( uiTmp,              PRI_ID_BITS,    "SPS: priority_id" ) );
-            RNOK ( pcReadIf->getCode( m_uiTemporalLevelList[uiTmp], 3,    "SPS: temporal_level_list[priority_id]" ) );
-            RNOK ( pcReadIf->getCode( m_uiDependencyIdList [uiTmp], 3,    "SPS: dependency_id_list[priority_id]" ) );
-            RNOK ( pcReadIf->getCode( m_uiQualityLevelList [uiTmp], 2,    "SPS: quality_level_list[priority_id]" ) );
-        }
-    }
- JVT-S036  */
-
-    RNOK( pcReadIf->getCode( m_uiExtendedSpatialScalability, 2,           "SPS: ExtendedSpatialScalability" ) );
-//    if ( 1 /* chroma_format_idc */ > 0 )
-    {
-      RNOK( pcReadIf->getCode( m_uiChromaPhaseXPlus1, 2,                  "SPS: ChromaPhaseXPlus1" ) );
-      RNOK( pcReadIf->getCode( m_uiChromaPhaseYPlus1, 2,                  "SPS: ChromaPhaseYPlus1" ) );
-    }
-    if (m_uiExtendedSpatialScalability == ESS_SEQ)
-    {
-      RNOK( pcReadIf->getSvlc( m_iScaledBaseLeftOffset,                   "SPS: ScaledBaseLeftOffset" ) );
-      RNOK( pcReadIf->getSvlc( m_iScaledBaseTopOffset,                    "SPS: ScaledBaseTopOffset" ) );
-      RNOK( pcReadIf->getSvlc( m_iScaledBaseRightOffset,                  "SPS: ScaledBaseRightOffset" ) );
-      RNOK( pcReadIf->getSvlc( m_iScaledBaseBottomOffset,                 "SPS: ScaledBaseBottomOffset" ) );
-    }
-    RNOK  ( pcReadIf->getFlag( m_bFGSCodingMode,                            "SPS: FGSCodingMode") );
-    if(m_bFGSCodingMode == false)
-    {
-      RNOK  ( pcReadIf->getUvlc(m_uiGroupingSize,                           "SPS: GroupingSizeMinus1") );
-      m_uiGroupingSize++;
-    }
-    else
-    {
-      UInt uiNumPosVector = 0;
-      UInt uiIndex = 0;
-      while(uiNumPosVector != 15)
-      {
-        if(uiIndex == 0)
-        {
-          RNOK( pcReadIf->getUvlc(m_uiPosVect[uiIndex],                     "SPS: PosVect[0]") );
-        }
-        else
-        {
-          RNOK( pcReadIf->getUvlc(m_uiPosVect[uiIndex], "SPS: PosVect") );
-          m_uiPosVect[uiIndex] = m_uiPosVect[uiIndex] + m_uiPosVect[uiIndex-1] + 1;
-        }
-        uiNumPosVector = m_uiPosVect[uiIndex];
-        uiIndex++;
-      }
-    }
-  }
+  
 
 
-  SpsMVC = NULL; // Nov. 30
-  if( m_eProfileIdc == MULTI_VIEW_PROFILE ) 
-  {
-    SpsMVC = new SpsMvcExtension;	// Nov. 30
-    int i,j, vcOrder;
-	
-    // seq_parameter_set_mvc_extension()
-    RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_views_minus_1,                   "SPS: num_views_minus_1" ) ); // ue(v)
-    SpsMVC->initViewSPSMemory_num_refs_for_lists(SpsMVC->getNumViewMinus1());
-
-    //JVT-V054
-    SpsMVC->setInitDone(false);
-    printf("ViewCodingOrder: ");
-    for (i=0;i<= SpsMVC->m_num_views_minus_1; i++)
-    {
-      RNOK  ( pcReadIf->getUvlc( SpsMVC->m_uiViewCodingOrder[i], "SPS: view_id[i]")); //ue(v)
-      printf("%d ", SpsMVC->m_uiViewCodingOrder[i]);
-    }	  
-    printf ("\n");
-
-    for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
-    {
-      vcOrder = SpsMVC->m_uiViewCodingOrder[i];
-
-      RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_anchor_refs_list0[vcOrder],                   "SPS: num_anchor_refs_l0[i]" ) ); // ue(v)
-      SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,0,0);
-      for (j=0; j<SpsMVC->m_num_anchor_refs_list0[vcOrder]; j++)
-        RNOK  ( pcReadIf->getUvlc( SpsMVC->m_anchor_ref_list0[vcOrder][j],      "SPS: anchor_ref_l0[i][j]" ) ); // ue(v)
-			
-      RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_anchor_refs_list1[vcOrder],                   "SPS: num_anchor_refs_l1[i]" ) ); // ue(v)
-      SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,1,0);
-      for (j=0; j<SpsMVC->m_num_anchor_refs_list1[vcOrder]; j++)
-        RNOK  ( pcReadIf->getUvlc( SpsMVC->m_anchor_ref_list1[vcOrder][j],      "SPS: anchor_ref_l1[vcOrder][j]" ) ); // ue(v)
-    }
-
-    for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
-    {
-      vcOrder = SpsMVC->m_uiViewCodingOrder[i];
-      RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_non_anchor_refs_list0[vcOrder],                   "SPS: num_non_anchor_refs_l0[i]" ) ); // ue(v)
-      SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,0,1);
-      for (j=0; j<SpsMVC->m_num_non_anchor_refs_list0[vcOrder]; j++)
-		  RNOK  ( pcReadIf->getUvlc( SpsMVC->m_non_anchor_ref_list0[vcOrder][j],      "SPS: non_anchor_ref_l0[i][j]" ) ); // ue(v)
-
-      RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_non_anchor_refs_list1[vcOrder],                   "SPS: num_non_anchor_refs_l1[i]" ) ); // ue(v)
-      SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,1,1);
-      for (j=0; j<SpsMVC->m_num_non_anchor_refs_list1[vcOrder]; j++)
-		  RNOK  ( pcReadIf->getUvlc( SpsMVC->m_non_anchor_ref_list1[vcOrder][j],      "SPS: non_anchor_ref_l1[i][j]" ) ); // ue(v)
-
-    }
-  }
-
-
-  //--- fidelity range extension syntax ---
+  //--- fidelity range extension syntax ---  
   RNOK  ( xReadFrext( pcReadIf ) );
 
   RNOK  ( pcReadIf->getUvlc( uiTmp,                                       "SPS: log2_max_frame_num_minus_4" ) );
@@ -603,14 +477,99 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
   RNOK( pcReadIf->getUvlc( uiTmp,                                         "SPS: pic_height_in_map_units_minus_1" ) );
   setFrameHeightInMbs( 1 + uiTmp );
   RNOK( pcReadIf->getFlag( bTmp,                                          "SPS: frame_mbs_only_flag" ) );
-  ROF ( bTmp );
+  ROF ( bTmp ); // always set to 1 in jmvc
   RNOK( pcReadIf->getFlag( m_bDirect8x8InferenceFlag,                     "SPS: direct_8x8_inference_flag" ) );
   RNOK( pcReadIf->getFlag( bTmp,                                          "SPS: frame_cropping_flag" ) );
-  ROT ( bTmp );
+  ROT ( bTmp ); // always set to 0 in jmvc
   
   RNOK( pcReadIf->getFlag( bTmp,                                          "SPS: vui_parameters_present_flag" ) );
-  ROT ( bTmp );
+  ROT ( bTmp ); // always set to 0 in jmvc
 
+  if (eNalUnitType == NAL_UNIT_SUBSET_SPS )
+  {
+	SpsMVC = NULL; 
+	if( m_eProfileIdc == MULTI_VIEW_PROFILE ) 
+	{
+		RNOK  ( pcReadIf->getFlag( bTmp,                      "SUBSET SPS: bit_equal_to_one" ) );
+		ROF ( bTmp ); // always shoule be set to 1 
+
+		SpsMVC = new SpsMvcExtension;	
+		int i,j,k, vcOrder;
+		
+		// seq_parameter_set_mvc_extension()
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_views_minus_1,                   "SPS: num_views_minus_1" ) ); // ue(v)
+		SpsMVC->initViewSPSMemory_num_refs_for_lists(SpsMVC->getNumViewMinus1());
+
+		//JVT-V054
+		SpsMVC->setInitDone(false);
+		printf("ViewCodingOrder: ");
+		for (i=0;i<= SpsMVC->m_num_views_minus_1; i++)
+		{
+		RNOK  ( pcReadIf->getUvlc( SpsMVC->m_uiViewCodingOrder[i], "SPS: view_id[i]")); //ue(v)
+		printf("%d ", SpsMVC->m_uiViewCodingOrder[i]);
+		}	  
+		printf ("\n");
+
+		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
+		{
+		vcOrder = SpsMVC->m_uiViewCodingOrder[i];
+
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_anchor_refs_list0[vcOrder],                   "SPS: num_anchor_refs_l0[i]" ) ); // ue(v)
+		SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,0,0);
+		for (j=0; j<SpsMVC->m_num_anchor_refs_list0[vcOrder]; j++)
+			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_anchor_ref_list0[vcOrder][j],      "SPS: anchor_ref_l0[i][j]" ) ); // ue(v)
+				
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_anchor_refs_list1[vcOrder],                   "SPS: num_anchor_refs_l1[i]" ) ); // ue(v)
+		SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,1,0);
+		for (j=0; j<SpsMVC->m_num_anchor_refs_list1[vcOrder]; j++)
+			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_anchor_ref_list1[vcOrder][j],      "SPS: anchor_ref_l1[vcOrder][j]" ) ); // ue(v)
+		}
+
+		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
+		{
+		vcOrder = SpsMVC->m_uiViewCodingOrder[i];
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_non_anchor_refs_list0[vcOrder],                   "SPS: num_non_anchor_refs_l0[i]" ) ); // ue(v)
+		SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,0,1);
+		for (j=0; j<SpsMVC->m_num_non_anchor_refs_list0[vcOrder]; j++)
+			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_non_anchor_ref_list0[vcOrder][j],      "SPS: non_anchor_ref_l0[i][j]" ) ); // ue(v)
+
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_non_anchor_refs_list1[vcOrder],                   "SPS: num_non_anchor_refs_l1[i]" ) ); // ue(v)
+		SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,1,1);
+		for (j=0; j<SpsMVC->m_num_non_anchor_refs_list1[vcOrder]; j++)
+			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_non_anchor_ref_list1[vcOrder][j],      "SPS: non_anchor_ref_l1[i][j]" ) ); // ue(v)
+
+		}
+
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_level_values_signalled,                   "SPS: num_level_values_signalled" ) ); // ue(v)
+		SpsMVC->initViewSPSMemory_num_level_related_memory(SpsMVC->getNumLevelValuesSignalled());
+		for (i=0;i< SpsMVC->m_num_level_values_signalled; i++)  
+		{
+			RNOK  ( pcReadIf->getCode( SpsMVC->m_ui_level_idc[i] ,                               8,      "SPS: level_idc[i]" ) );
+			RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_num_applicable_ops_minus1[i],                   "SPS: num_applicable_ops_minus1[i]" ) ); // ue(v)
+			SpsMVC->initViewSPSMemory_num_level_related_memory_2D(SpsMVC->m_ui_num_applicable_ops_minus1[i],i);
+			for (j=0; j<=SpsMVC->m_ui_num_applicable_ops_minus1[i];j++)
+			{
+				RNOK  ( pcReadIf->getCode( SpsMVC->m_ui_applicable_op_temporal_id[i][j] ,                               3,      "SPS: applicable_op_temporal_id[i][j]" ) );
+				RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j],                   "SPS: applicable_op_num_target_views_minus1[i][j]" ) ); // ue(v)
+				SpsMVC->initViewSPSMemory_num_level_related_memory_3D(SpsMVC->m_ui_num_applicable_ops_minus1[i],SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j], i,j);
+				for (k=0; k<= SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j];k++)
+					RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_target_view_id[i][j][k],                    "SPS: applicable_op_num_target_view_id[i][j][k]" ) ); // ue(v)
+				
+				RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_num_views_minus1[i][j],                   "SPS: num_applicable_op_num_views_minus1[i][j]" ) ); // ue(v)
+			
+			
+			}
+		
+		}
+
+	}
+	
+	RNOK  ( pcReadIf->getFlag( bTmp,                      "SUBSET SPS: mvc_vui_parameters_present_flag" ) );
+	ROT ( bTmp ); // always shoule be set to 0 
+
+	RNOK  ( pcReadIf->getFlag( bTmp,                      "SUBSET SPS: Additional_extension2_flag" ) );
+	ROT ( bTmp ); // always shoule be set to 0 
+  }
   return Err::m_nOK;
 }
 
@@ -726,3 +685,4 @@ Void SequenceParameterSet::getResizeParameters ( ResizeParameters * params ) con
 
 
 H264AVC_NAMESPACE_END
+                                             

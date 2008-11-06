@@ -1448,7 +1448,7 @@ H264AVCEncoder::xWriteScalableSEICGSSNR( ExtBinDataAccessor* pcExtBinDataAccesso
             else if ( rcLayer.getLayerCGSSNR() ) // D != 0,T = 0, Q = 0
 					  {
 						UInt uiBaseLayerId = rcLayer.getBaseLayerId();
-            UInt uiBaseLayerCGSSNR = rcLayer.getBaseLayerCGSSNR();
+						UInt uiBaseLayerCGSSNR = rcLayer.getBaseLayerCGSSNR();
 						LayerParameters& rcBaseLayer = m_pcCodingParameter->getLayerParameters ( uiBaseLayerId );
 						//UInt uiBaseFGSLayers = (UInt)( rcBaseLayer.getNumFGSLayers() );
 						UInt uiBaseQualityLevel = rcLayer.getBaseQualityLevelCGSSNR();
@@ -2299,9 +2299,7 @@ H264AVCEncoder::xInitParameterSets()
 	  pcPPSLP->setNumSliceGroupMapUnitsMinus1			  (rcLayerParameters.getNumSliceGroupMapUnitsMinus1());
 	  pcPPSLP->setArraySliceGroupId						  (rcLayerParameters.getArraySliceGroupId());
 	  //--ICU/ETRI FMO Implementation : FMO stuff end
-
-    //===== initialization using parameter sets =====
-//    RNOK( m_pcControlMng->initParameterSetsForFGS( *pcSPS, *pcPPSLP, *pcPPSHP ) );
+   
   }
 
   //===== set unwritten parameter lists =====

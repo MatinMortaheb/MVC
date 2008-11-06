@@ -298,8 +298,7 @@ PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
 {
   if( ! m_pcSPSBase)
   {
-    //===== create base SPS =====
-    
+    //===== create base SPS =====    
     RNOK( xInitSPS(true) );
 
     //===== write SPS =====
@@ -308,8 +307,9 @@ PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
     RNOK( m_pcNalUnitEncoder->write       ( *m_pcSPSBase ) );
     RNOK( m_pcNalUnitEncoder->closeNalUnit( uiSPSBits ) );
     m_uiWrittenBytes += ( ( uiSPSBits >> 3 ) + 4 );
+	
+	m_adMVCSeqBits[0] += uiSPSBits; //SEI 
 
-	  m_adMVCSeqBits[0] += uiSPSBits; //SEI 
   }
   else if ( ! m_pcSPS )
   {
@@ -321,9 +321,10 @@ PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
     RNOK( m_pcNalUnitEncoder->initNalUnit ( pcExtBinDataAccessor ) );
     RNOK( m_pcNalUnitEncoder->write       ( *m_pcSPS ) );
     RNOK( m_pcNalUnitEncoder->closeNalUnit( uiSPSBits ) );
-    m_uiWrittenBytes += ( ( uiSPSBits >> 3 ) + 4 );
-	  
-    m_adMVCSeqBits[0] += uiSPSBits; //SEI 
+    m_uiWrittenBytes += ( ( uiSPSBits >> 3 ) + 4 );	  
+    
+	m_adMVCSeqBits[0] += uiSPSBits; //SEI 
+
   }
   else if ( !m_pcPPSBase)
   {
@@ -337,9 +338,7 @@ PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
     m_uiWrittenBytes += ( ( uiPPSBits >> 3 ) + 4 );
 
 	m_adMVCSeqBits[0] += uiPPSBits; //SEI 
-
-    //===== init pic encoder with parameter sets =====
-    //RNOK( xInitParameterSets() );
+    
   }
   else if( ! m_pcPPS )
   {
@@ -875,7 +874,6 @@ ErrVal
 PicEncoder::xInitSPS( Bool bAVCSPS )
 {
   ROF( m_bInit );
-//  ROT( m_pcSPS );
 
   SequenceParameterSet*&  rpcSPS = bAVCSPS ?  m_pcSPSBase: m_pcSPS; 
   ROT( rpcSPS );
@@ -891,22 +889,22 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   UInt              uiDPBSize           = ( 1 << m_pcCodingParameter->getDecompositionStages());
   if (!bAVCSPS) uiDPBSize+= 4;
   m_pcCodingParameter->setDPBSize      ( uiDPBSize );
-// 
+
   UInt  uiLevelIdc  = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, uiDPBSize );
 
   //===== create parameter sets =====
   RNOK( SequenceParameterSet::create( rpcSPS ) );
 
   //===== set SPS parameters =====
-  rpcSPS->setNalUnitType                           ( NAL_UNIT_SPS );
+  //rpcSPS->setNalUnitType                           ( NAL_UNIT_SPS );
+  rpcSPS->setNalUnitType                           ( bAVCSPS ?  NAL_UNIT_SPS : NAL_UNIT_SUBSET_SPS );
   rpcSPS->setLayerId                               ( 0 );
-
   rpcSPS->setProfileIdc                            ( bAVCSPS ? ( m_pcCodingParameter->get8x8Mode() >0  ? HIGH_PROFILE : MAIN_PROFILE  ) : MVC_PROFILE );
-
   rpcSPS->setConstrainedSet0Flag                   ( false );
   rpcSPS->setConstrainedSet1Flag                   ( false );
   rpcSPS->setConstrainedSet2Flag                   ( false );
   rpcSPS->setConstrainedSet3Flag                   ( false );
+  rpcSPS->setConstrainedSet4Flag                   ( false );
   rpcSPS->setLevelIdc                              ( uiLevelIdc );
   rpcSPS->setSeqParameterSetId                     ( uiSPSId );
   rpcSPS->setSeqScalingMatrixPresentFlag           ( m_pcCodingParameter->get8x8Mode() > 1 );
@@ -927,9 +925,8 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
 //    //m_pcSPS->SpsMVC = &(m_pcCodingParameter->SpsMVC); // need to destroy SpsMVC when m_pcSPS is released 
   }
   else 
-  {
-    m_pcSPSBase->SpsMVC = NULL;
-  }
+     m_pcSPSBase->SpsMVC = NULL;
+  
 
   return Err::m_nOK;
 }
