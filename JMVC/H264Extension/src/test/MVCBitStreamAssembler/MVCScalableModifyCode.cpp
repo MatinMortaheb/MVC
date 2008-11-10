@@ -379,22 +379,24 @@ MVCScalableModifyCode::SEICode( h264::SEI::ViewScalabilityInfoSei* pcViewScalInf
 		pcScalableModifyCode->WriteCode( pcViewScalInfoSei->getPriorityId( uiOpId ), 5 );
 		pcScalableModifyCode->WriteCode( pcViewScalInfoSei->getTemporalId( uiOpId ), 3 );
 
-		UInt uiNumActiveViewsMinus1 = pcViewScalInfoSei->getNumActiveViewsMinus1( uiOpId );
-		pcScalableModifyCode->WriteUVLC( uiNumActiveViewsMinus1 );
+		UInt uiNumTargetOutputViewsMinus1 = pcViewScalInfoSei->getNumTargetOutputViewsMinus1( uiOpId );//SEI JJ 
+		pcScalableModifyCode->WriteUVLC( uiNumTargetOutputViewsMinus1 );//SEI JJ 
 
-		for( j = 0; j <= uiNumActiveViewsMinus1; j++ )
+		for( j = 0; j <= uiNumTargetOutputViewsMinus1; j++ )//SEI JJ 
 			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getViewId( uiOpId, j ) );
 
 		pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getProfileLevelInfoPresentFlag( uiOpId ) );
 		pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getBitRateInfoPresentFlag( uiOpId ) );
 		pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getFrmRateInfoPresentFlag( uiOpId ) );
-		pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getOpDependencyInfoPresentFlag( uiOpId ) );
-		pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getInitParameterSetsInfoPresentFlag( uiOpId ) );
+		if(!pcViewScalInfoSei->getNumTargetOutputViewsMinus1( uiOpId ))//SEI JJ
+			pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getViewDependencyInfoPresentFlag( uiOpId ) );//SEI JJ 
+		pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getParameterSetsInfoPresentFlag( uiOpId ) );//SEI JJ
+		pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getBitstreamRestrictionInfoPresentFlag( uiOpId ) );//SEI JJ
 
 
 		if( pcViewScalInfoSei->getProfileLevelInfoPresentFlag( uiOpId ) )
 		{
-			pcScalableModifyCode->WriteCode( pcViewScalInfoSei->getOpProfileIdc( uiOpId ), 8 );
+			pcScalableModifyCode->WriteCode( pcViewScalInfoSei->getOpProfileLevelIdc( uiOpId ), 8 );//SEI JJ
 			pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet0Flag( uiOpId ) );
 			pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet1Flag( uiOpId ) );
 			pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet2Flag( uiOpId ) );
@@ -419,33 +421,45 @@ MVCScalableModifyCode::SEICode( h264::SEI::ViewScalabilityInfoSei* pcViewScalInf
 			pcScalableModifyCode->WriteCode( pcViewScalInfoSei->getConstantFrmRateIdc( uiOpId ), 2 );
 			pcScalableModifyCode->WriteCode( pcViewScalInfoSei->getAvgFrmRate( uiOpId ), 16 );
 		}
-		else
-		{
-			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getFrmRateInfoSrcOpIdDela( uiOpId ) );
-		}
 
-		if( pcViewScalInfoSei->getOpDependencyInfoPresentFlag( uiOpId ) )
+		if( pcViewScalInfoSei->getViewDependencyInfoPresentFlag( uiOpId ) )//SEI JJ
 		{
-			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getNumDirectlyDependentOps( uiOpId ) );
-			for( j = 0; j < pcViewScalInfoSei->getNumDirectlyDependentOps( uiOpId ); j++ )
-				pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getDirectlyDependentOpIdDeltaMinus1( uiOpId, j ) );
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getNumDirectlyDependentViews( uiOpId ) );//SEI JJ
+			for( j = 0; j < pcViewScalInfoSei->getNumDirectlyDependentViews( uiOpId ); j++ )//SEI JJ
+				pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getDirectlyDependentViewId( uiOpId, j ) );//SEI JJ 
 		}
 		else
-			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getOpDependencyInfoSrcOpIdDelta( uiOpId ) );
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getViewDependencyInfoSrcOpId( uiOpId ) );//SEI JJ 
 
-		if( pcViewScalInfoSei->getInitParameterSetsInfoPresentFlag( uiOpId ) )
+		if( pcViewScalInfoSei->getParameterSetsInfoPresentFlag( uiOpId ) )//SEI JJ 
 		{
-			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getNumInitSeqParameterSetMinus1( uiOpId ) );
-			for( j = 0; j <= pcViewScalInfoSei->getNumInitSeqParameterSetMinus1( uiOpId ); j++ )
-				pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getInitSeqParameterSetIdDelta( uiOpId, j ) );
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getNumSeqParameterSetMinus1( uiOpId ) );//SEI JJ
+			for( j = 0; j <= pcViewScalInfoSei->getNumSeqParameterSetMinus1( uiOpId ); j++ )//SEI JJ 
+				pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getSeqParameterSetIdDelta( uiOpId, j ) );//SEI JJ
 
-			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getNumInitPicParameterSetMinus1( uiOpId ) );
-			for( j = 0; j <= pcViewScalInfoSei->getNumInitPicParameterSetMinus1( uiOpId ); j++ )
-				pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getInitPicParameterSetIdDelta( uiOpId, j ) );
+			//{{SEI JJ
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getNumSubsetSeqParameterSetMinus1( uiOpId ) );//SEI JJ
+			for ( j=0;j<=pcViewScalInfoSei->getNumSubsetSeqParameterSetMinus1( uiOpId ); j++)//SEI JJ
+				pcScalableModifyCode->WriteUVLC(pcViewScalInfoSei->getSubsetSeqParameterSetIdDelta(uiOpId,j));//SEI JJ
+            //}}SEI JJ
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getNumPicParameterSetMinus1( uiOpId ) );//SEI JJ 
+			for( j = 0; j <= pcViewScalInfoSei->getNumPicParameterSetMinus1( uiOpId ); j++ )//SEI JJ 
+				pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getPicParameterSetIdDelta( uiOpId, j ) );//SEI JJ 
 		}
 		else
-			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getInitParameterSetsInfoSrcOpIdDelta( uiOpId ) );
-
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getParameterSetsInfoSrcOpId( uiOpId ) );//SEI JJ 
+		//{{SEI JJ
+		if (pcViewScalInfoSei->getBitstreamRestrictionInfoPresentFlag(uiOpId))
+		{
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getMotionVectorsOverPicBoundariesFlag(uiOpId));
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getMaxBytesPerPicDenom(uiOpId));
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getMaxBitsPerMbDenom(uiOpId));
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getLog2MaxMvLengthHorizontal(uiOpId));
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getLog2MaxMvLengthVertical(uiOpId));
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getNumReorderFrames(uiOpId));
+			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getMaxDecFrameBuffering(uiOpId));
+		}
+		//}}SEI JJ
 	}// for
 
 	return Err::m_nOK;

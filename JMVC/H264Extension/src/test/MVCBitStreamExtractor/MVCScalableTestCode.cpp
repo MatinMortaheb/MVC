@@ -197,22 +197,22 @@ MVCScalableTestCode::SEICode( h264::SEI::ViewScalabilityInfoSei* pcViewScalInfoS
 		pcScalableTestCode->WriteCode( pcViewScalInfoSei->getPriorityId( uiOpId ), 5 );
 		pcScalableTestCode->WriteCode( pcViewScalInfoSei->getTemporalId( uiOpId ), 3 );
 
-		UInt uiNumActiveViewsMinus1 = pcViewScalInfoSei->getNumActiveViewsMinus1( uiOpId );
-		pcScalableTestCode->WriteUVLC( uiNumActiveViewsMinus1 );
+		UInt uiNumTargetOutputViewsMinus1 = pcViewScalInfoSei->getNumTargetOutputViewsMinus1( uiOpId );//SEI JJ
+		pcScalableTestCode->WriteUVLC( uiNumTargetOutputViewsMinus1 );//SEI JJ
 
-		for( UInt j = 0; j <= uiNumActiveViewsMinus1; j++ )
+		for( UInt j = 0; j <= uiNumTargetOutputViewsMinus1; j++ )//SEI JJ
 			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getViewId( uiOpId, j ) );
 
 		pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getProfileLevelInfoPresentFlag( uiOpId ) );
 		pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getBitRateInfoPresentFlag( uiOpId ) );
 		pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getFrmRateInfoPresentFlag( uiOpId ) );
-		pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getOpDependencyInfoPresentFlag( uiOpId ) );
-		pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getInitParameterSetsInfoPresentFlag( uiOpId ) );
+		pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getViewDependencyInfoPresentFlag( uiOpId ) );//SEI JJ
+		pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getParameterSetsInfoPresentFlag( uiOpId ) );//SEI JJ
 
 
 		if( pcViewScalInfoSei->getProfileLevelInfoPresentFlag( uiOpId ) )
 		{
-			pcScalableTestCode->WriteCode( pcViewScalInfoSei->getOpProfileIdc( uiOpId ), 8 );
+			pcScalableTestCode->WriteCode( pcViewScalInfoSei->getOpProfileLevelIdc( uiOpId ), 8 );//SEI JJ
 			pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet0Flag( uiOpId ) );
 			pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet1Flag( uiOpId ) );
 			pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet2Flag( uiOpId ) );
@@ -242,27 +242,27 @@ MVCScalableTestCode::SEICode( h264::SEI::ViewScalabilityInfoSei* pcViewScalInfoS
 			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getFrmRateInfoSrcOpIdDela( uiOpId ) );
 		}
 
-		if( pcViewScalInfoSei->getOpDependencyInfoPresentFlag( uiOpId ) )
+		if( pcViewScalInfoSei->getViewDependencyInfoPresentFlag( uiOpId ) )//SEI JJ 
 		{
-			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getNumDirectlyDependentOps( uiOpId ) );
-			for( UInt j = 0; j < pcViewScalInfoSei->getNumDirectlyDependentOps( uiOpId ); j++ )
-				pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getDirectlyDependentOpIdDeltaMinus1( uiOpId, j ) );
+			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getNumDirectlyDependentViews( uiOpId ) );//SEI JJ 
+			for( UInt j = 0; j < pcViewScalInfoSei->getNumDirectlyDependentViews( uiOpId ); j++ )//SEI JJ 
+				pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getDirectlyDependentViewId( uiOpId, j ) );//SEI JJ 
 		}
 		else
-			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getOpDependencyInfoSrcOpIdDelta( uiOpId ) );
+			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getViewDependencyInfoSrcOpId( uiOpId ) );//SEI JJ 
 
-		if( pcViewScalInfoSei->getInitParameterSetsInfoPresentFlag( uiOpId ) )
+		if( pcViewScalInfoSei->getParameterSetsInfoPresentFlag( uiOpId ) )//SEI JJ 
 		{
-			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getNumInitSeqParameterSetMinus1( uiOpId ) );
-			for( UInt j = 0; j <= pcViewScalInfoSei->getNumInitSeqParameterSetMinus1( uiOpId ); j++ )
-				pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getInitSeqParameterSetIdDelta( uiOpId, j ) );
+			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getNumSeqParameterSetMinus1( uiOpId ) );//SEI JJ 
+			for( UInt j = 0; j <= pcViewScalInfoSei->getNumSeqParameterSetMinus1( uiOpId ); j++ )//SEI JJ 
+				pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getSeqParameterSetIdDelta( uiOpId, j ) );//SEI JJ 
 
-			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getNumInitPicParameterSetMinus1( uiOpId ) );
-			for( UInt j = 0; j <= pcViewScalInfoSei->getNumInitPicParameterSetMinus1( uiOpId ); j++ )
-				pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getInitPicParameterSetIdDelta( uiOpId, j ) );
+			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getNumPicParameterSetMinus1( uiOpId ) );//SEI JJ
+			for( UInt j = 0; j <= pcViewScalInfoSei->getNumPicParameterSetMinus1( uiOpId ); j++ )//SEI JJ 
+				pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getPicParameterSetIdDelta( uiOpId, j ) );//SEI JJ 
 		}
 		else
-			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getInitParameterSetsInfoSrcOpIdDelta( uiOpId ) );
+			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getParameterSetsInfoSrcOpId( uiOpId ) );//SEI JJ 
 
 	}// for
 

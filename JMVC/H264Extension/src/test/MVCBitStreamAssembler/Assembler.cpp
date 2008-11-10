@@ -287,19 +287,21 @@ Assembler::xAnalyse()
 		 pcFinalViewScalSei->setPriorityId( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getPriorityId(i) );
 		 pcFinalViewScalSei->setTemporalId( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getTemporalId(i) );
 
-		 pcFinalViewScalSei->setNumActiveViewsMinus1( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getNumActiveViewsMinus1(i) );
-		 for(  j = 0; j <= pcTmpViewScalInfoSei[uiProcessingView]->getNumActiveViewsMinus1(i); j++ )
+		 pcFinalViewScalSei->setNumTargetOutputViewsMinus1( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getNumTargetOutputViewsMinus1(i) );//SEI JJ
+		 for(  j = 0; j <= pcTmpViewScalInfoSei[uiProcessingView]->getNumTargetOutputViewsMinus1(i); j++ )//SEI JJ
 		   pcFinalViewScalSei->setViewId( OpId, j, pcTmpViewScalInfoSei[uiProcessingView]->getViewId(i,j) );
 
 		 pcFinalViewScalSei->setProfileLevelInfoPresentFlag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getProfileLevelInfoPresentFlag(i) );
 		 pcFinalViewScalSei->setBitRateInfoPresentFlag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getBitRateInfoPresentFlag(i) );
 		 pcFinalViewScalSei->setFrmRateInfoPresentFlag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getFrmRateInfoPresentFlag(i) );
-		 pcFinalViewScalSei->setOpDependencyInfoPresentFlag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpDependencyInfoPresentFlag(i) );
-		 pcFinalViewScalSei->setInitParameterSetsInfoPresentFlag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getInitParameterSetsInfoPresentFlag(i) );
+		 if(!(pcFinalViewScalSei->getNumTargetOutputViewsMinus1(OpId)))//SEI JJ
+			pcFinalViewScalSei->setViewDependencyInfoPresentFlag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getViewDependencyInfoPresentFlag(i) );//SEI JJ 
+		 pcFinalViewScalSei->setParameterSetsInfoPresentFlag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getParameterSetsInfoPresentFlag(i) );//SEI JJ 
+		 pcFinalViewScalSei->setBitstreamRestrictionInfoPresentFlag(OpId, pcTmpViewScalInfoSei[uiProcessingView]->getBitstreamRestrictionInfoPresentFlag(i));//SEI JJ
 
 		 if( pcFinalViewScalSei->getProfileLevelInfoPresentFlag(OpId) )
 		 {
-		   pcFinalViewScalSei->setOpProfileIdc( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpProfileIdc(i) );
+		   pcFinalViewScalSei->setOpProfileLevelIdc( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpProfileLevelIdc(i) );//SEI JJ
 		   pcFinalViewScalSei->setOpConstraintSet0Flag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpConstraintSet0Flag(i) );
 		   pcFinalViewScalSei->setOpConstraintSet1Flag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpConstraintSet1Flag(i) );
 		   pcFinalViewScalSei->setOpConstraintSet2Flag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpConstraintSet2Flag(i) );
@@ -321,34 +323,46 @@ Assembler::xAnalyse()
 		   pcFinalViewScalSei->setConstantFrmRateIdc( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getConstantFrmRateIdc(i) );
 		   pcFinalViewScalSei->setAvgFrmRate( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getAvgFrmRate(i) );
    		 }
-		 else
-		   pcFinalViewScalSei->setFrmRateInfoSrcOpIdDela( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getFrmRateInfoSrcOpIdDela(i) );
 
- 		 pcFinalViewScalSei->setNumDirectlyDependentOps(OpId, MAX_OPERATION_POINTS ); //bug-fix
-
-		 
-		 if( pcFinalViewScalSei->getOpDependencyInfoPresentFlag(OpId) )
+		 if( pcFinalViewScalSei->getViewDependencyInfoPresentFlag(OpId) )//SEI JJ
 		 {
-		   pcFinalViewScalSei->setNumDirectlyDependentOps( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getNumDirectlyDependentOps(i) );
-		   for( j = 0; j < pcFinalViewScalSei->getNumDirectlyDependentOps( OpId ); j++ )
-		   	 pcFinalViewScalSei->setDirectlyDependentOpIdDeltaMinus1( OpId, j, pcTmpViewScalInfoSei[uiProcessingView]->getDirectlyDependentOpIdDeltaMinus1(i,j) );
+			 pcFinalViewScalSei->setNumDirectlyDependentViews( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getNumDirectlyDependentViews(i) );//SEI JJ 
+			 for( j = 0; j < pcFinalViewScalSei->getNumDirectlyDependentViews( OpId ); j++ )//SEI JJ 
+				 pcFinalViewScalSei->setDirectlyDependentViewId( OpId, j, pcTmpViewScalInfoSei[uiProcessingView]->getDirectlyDependentViewId(i,j) );//SEI JJ 
 		 }
 		 else
-		   pcFinalViewScalSei->setOpDependencyInfoSrcOpIdDelta( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpDependencyInfoSrcOpIdDelta(i) );
+			 pcFinalViewScalSei->setViewDependencyInfoSrcOpId( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getViewDependencyInfoSrcOpId(i) );//SEI JJ 
 
-		
-		 if( pcFinalViewScalSei->getInitParameterSetsInfoPresentFlag(OpId) )
+
+		 if( pcFinalViewScalSei->getParameterSetsInfoPresentFlag(OpId) )//SEI JJ 
 		 {
-		   pcFinalViewScalSei->setNumInitSeqParameterSetMinus1( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getNumInitSeqParameterSetMinus1(i) );
-		   for( j = 0; j < pcFinalViewScalSei->getNumInitSeqParameterSetMinus1( OpId ); j++ )
-			 pcFinalViewScalSei->setInitSeqParameterSetIdDelta( OpId, j, pcTmpViewScalInfoSei[uiProcessingView]->getInitSeqParameterSetIdDelta(i,j) );
+			 pcFinalViewScalSei->setNumSeqParameterSetMinus1( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getNumSeqParameterSetMinus1(i) );//SEI JJ
+			 for( j = 0; j < pcFinalViewScalSei->getNumSeqParameterSetMinus1( OpId ); j++ )//SEI JJ
+				 pcFinalViewScalSei->setSeqParameterSetIdDelta( OpId, j, pcTmpViewScalInfoSei[uiProcessingView]->getSeqParameterSetIdDelta(i,j) );//SEI JJ
+		     
+			 pcFinalViewScalSei->setNumSubsetSeqParameterSetMinus1(OpId,pcTmpViewScalInfoSei[uiProcessingView]->getNumSubsetSeqParameterSetMinus1(i));//SEI JJ
+			 for( j=0; j<pcFinalViewScalSei->getNumSubsetSeqParameterSetMinus1(OpId);j++)//SEI JJ
+				 pcFinalViewScalSei->setSubsetSeqParameterSetIdDelta(OpId,j,pcTmpViewScalInfoSei[uiProcessingView]->getSubsetSeqParameterSetIdDelta(i,j));//SEI JJ
 
-		   pcFinalViewScalSei->setNumInitPicParameterSetMinus1( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getNumInitPicParameterSetMinus1(i) );
-		   for( j = 0; j < pcFinalViewScalSei->getNumInitPicParameterSetMinus1( OpId ); j++ )
-			 pcFinalViewScalSei->setInitPicParameterSetIdDelta( OpId, j, pcTmpViewScalInfoSei[uiProcessingView]->getInitPicParameterSetIdDelta(i,j) );
+			 pcFinalViewScalSei->setNumPicParameterSetMinus1( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getNumPicParameterSetMinus1(i) );//SEI JJ
+			 for( j = 0; j < pcFinalViewScalSei->getNumPicParameterSetMinus1( OpId ); j++ )//SEI JJ
+				 pcFinalViewScalSei->setPicParameterSetIdDelta( OpId, j, pcTmpViewScalInfoSei[uiProcessingView]->getPicParameterSetIdDelta(i,j) );//SEI JJ
 		 }
 		 else
-		   pcFinalViewScalSei->setInitParameterSetsInfoSrcOpIdDelta( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getInitParameterSetsInfoSrcOpIdDelta(i) );
+			 pcFinalViewScalSei->setParameterSetsInfoSrcOpId( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getParameterSetsInfoSrcOpId(i) );//SEI JJ 
+		 //{{SEI JJ
+		 if( pcFinalViewScalSei->getBitstreamRestrictionInfoPresentFlag(OpId) )
+		 {
+			 pcFinalViewScalSei->setMotionVectorsOverPicBoundariesFlag(OpId,pcTmpViewScalInfoSei[uiProcessingView]->getMotionVectorsOverPicBoundariesFlag(i));
+			 pcFinalViewScalSei->setMaxBytesPerPicDenom(OpId,pcTmpViewScalInfoSei[uiProcessingView]->getMaxBytesPerPicDenom(i));
+			 pcFinalViewScalSei->setMaxBitsPerMbDenom(OpId,pcTmpViewScalInfoSei[uiProcessingView]->getMaxBitsPerMbDenom(i));
+			 pcFinalViewScalSei->setLog2MaxMvLengthHorizontal(OpId,pcTmpViewScalInfoSei[uiProcessingView]->getLog2MaxMvLengthHorizontal(i));
+			 pcFinalViewScalSei->setLog2MaxMvLengthVertical(OpId,pcTmpViewScalInfoSei[uiProcessingView]->getLog2MaxMvLengthVertical(i));
+			 pcFinalViewScalSei->setNumReorderFrames(OpId,pcTmpViewScalInfoSei[uiProcessingView]->getNumReorderFrames(i));
+			 pcFinalViewScalSei->setMaxDecFrameBuffering(OpId,pcTmpViewScalInfoSei[uiProcessingView]->getMaxDecFrameBuffering(i));
+
+		 }//}}SEI JJ
+
 	   
 	     OpId++;
 	   }

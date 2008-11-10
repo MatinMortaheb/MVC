@@ -117,37 +117,39 @@ class H264AVCCOMMONLIB_API SEI
 public:
   enum MessageType
   {
-    SUB_SEQ_INFO                          = 10,
-	MOTION_SEI                            = 18,
-    SCALABLE_SEI                          = 22,
-		SUB_PIC_SEI														= 23,
-    //{{Quality level estimation and modified truncation- JVTO044 and m12007
-    //France Telecom R&D-(nathalie.cammas@francetelecom.com)
-    QUALITYLEVEL_SEI                      = 25,
-	//}}Quality level estimation and modified truncation- JVTO044 and m12007
-	// JVT-S080 LMI {
-	SCALABLE_SEI_LAYERS_NOT_PRESENT       = 26,
-    SCALABLE_SEI_DEPENDENCY_CHANGE        = 27,
-//SEI LSJ{
-	SCALABLE_NESTING_SEI                  = 28,
-	FULLFRAME_SNAPSHOT_SEI                = 9,
-	ACTIVE_VIEWINFO_SEI                   = 20, 
-	VIEW_SCALABILITY_INFO_SEI             = 21, 
-//SEI }
-	MULTIVIEW_SCENE_INFO_SEI				  = 30, // SEI JVT-W060
-	MULTIVIEW_ACQUISITION_INFO_SEI			  = 31, // SEI JVT-W060
-	RESERVED_SEI                          = 36, //JVT-AB025
-//JVT-W080
-	 PARALLEL_DEC_SEI                      =29,
-  /* RESERVED_SEI                          = 30, */ // SEI JVT-W060
-  /*RESERVED_SEI                          = 28,*/
-//~JVT-W080   
-   TARGET_VIEW_INFO_SEI             = 32,  //JVT-AB025
-   NON_REQ_VIEW_INFO_SEI                 = 33,  //JVT-AB025
-   VIEW_DEPENDENCY_STRUCTURE_SEI         = 34,  //JVT-AB025
-   OP_NOT_PRESENT_SEI                    = 35,  //JVT-AB025
-	// JVT-S080 LMI }
-  	NON_REQUIRED_SEI					            = 24
+	  SUB_SEQ_INFO                          = 10,
+	  MOTION_SEI                            = 18,
+	  //{{SEI JJ
+	  SCALABLE_SEI                          = 24,  
+	  SUB_PIC_SEI							= 25,
+	  //{{Quality level estimation and modified truncation- JVTO044 and m12007
+	  //France Telecom R&D-(nathalie.cammas@francetelecom.com)
+	  QUALITYLEVEL_SEI                      = 45,   
+	  //}}Quality level estimation and modified truncation- JVTO044 and m12007
+	  // JVT-S080 LMI {
+	  SCALABLE_SEI_LAYERS_NOT_PRESENT       = 28,
+	  SCALABLE_SEI_DEPENDENCY_CHANGE        = 29,
+	  //SEI LSJ{
+	  SCALABLE_NESTING_SEI                  = 30, 
+	  FULLFRAME_SNAPSHOT_SEI                = 15,
+	  //ACTIVE_VIEWINFO_SEI                   = 20, 
+	  VIEW_SCALABILITY_INFO_SEI             = 38, 
+	  //SEI }
+	  MULTIVIEW_SCENE_INFO_SEI			    = 39, // SEI JVT-W060 
+	  MULTIVIEW_ACQUISITION_INFO_SEI		= 40, // SEI JVT-W060 
+	  RESERVED_SEI                          = 46, //JVT-AB025
+	  //JVT-W080
+	  PARALLEL_DEC_SEI                      =36,    
+	  /* RESERVED_SEI                          = 30, */ // SEI JVT-W060
+	  /*RESERVED_SEI                          = 28,*/
+	  //~JVT-W080   
+
+	  NON_REQ_VIEW_INFO_SEI                 = 41,  //JVT-AB025 
+	  VIEW_DEPENDENCY_STRUCTURE_SEI         = 42,  //JVT-AB025 
+	  OP_NOT_PRESENT_SEI                    = 43,  //JVT-AB025 
+	  // JVT-S080 LMI }
+	  NON_REQUIRED_SEI					    = 26
+	  //}}SEI JJ
   };
 
 
@@ -808,14 +810,14 @@ public:
 	UInt getOperationPointId( UInt index )			  { return m_uiOperationPointId[index]; }
 	UInt getPriorityId( UInt index )				  { return m_uiPriorityId[index]; }
 	UInt getTemporalId( UInt index )				  { return m_uiTemporalId[index]; }
-	UInt getNumActiveViewsMinus1( UInt index )		  { return m_uiNumActiveViewsMinus1[index]; }
+	UInt getNumTargetOutputViewsMinus1( UInt index )		  { return m_uiNumTargetOutputViewsMinus1[index]; }//SEI JJ
 	UInt getViewId( UInt i, UInt j )				  { return m_uiViewId[i][j]; }
 	Bool getProfileLevelInfoPresentFlag( UInt index ) { return m_bProfileLevelInfoPresentFlag[index]; }
 	Bool getBitRateInfoPresentFlag( UInt index )	  { return m_bBitRateInfoPresentFlag[index]; }
 	Bool getFrmRateInfoPresentFlag( UInt index )      { return m_bFrmRateInfoPresentFlag[index]; }
-	Bool getOpDependencyInfoPresentFlag( UInt index ) { return m_bOpDependencyInfoPresentFlag[index]; }
-	Bool getInitParameterSetsInfoPresentFlag(UInt i)  { return m_bInitParameterSetsInfoPresentFlag[i]; }
-	UInt getOpProfileIdc( UInt index )				  { return m_uiOpProfileIdc[index]; }
+	Bool getViewDependencyInfoPresentFlag( UInt index ) { return m_bViewDependencyInfoPresentFlag[index]; }//SEI JJ
+	Bool getParameterSetsInfoPresentFlag(UInt i)  { return m_bParameterSetsInfoPresentFlag[i]; }//SEI JJ
+	UInt getOpProfileLevelIdc( UInt index )				  { return m_uiOpProfileLevelIdc[index]; }//SEI JJ
 	Bool getOpConstraintSet0Flag( UInt index )		  { return m_bOpConstraintSet0Flag[index]; }
 	Bool getOpConstraintSet1Flag( UInt index )		  { return m_bOpConstraintSet1Flag[index]; }
 	Bool getOpConstraintSet2Flag( UInt index )		  { return m_bOpConstraintSet2Flag[index]; }
@@ -828,28 +830,39 @@ public:
 	UInt getConstantFrmRateIdc( UInt index )		  { return m_uiConstantFrmRateIdc[index]; }
 	UInt getAvgFrmRate( UInt index )				  { return m_uiAvgFrmRate[index]; }
 	UInt getFrmRateInfoSrcOpIdDela( UInt index )      { return m_uiFrmRateInfoSrcOpIdDela[index]; }
-	UInt getNumDirectlyDependentOps( UInt index )	  { return m_uiNumDirectlyDependentOps[index]; }
-	UInt getDirectlyDependentOpIdDeltaMinus1( UInt i, UInt j ) { return m_uiDirectlyDependentOpIdDeltaMinus1[i][j]; }
-	UInt getOpDependencyInfoSrcOpIdDelta( UInt index ) { return m_uiOpDependencyInfoSrcOpIdDelta[index]; }
-	UInt getNumInitSeqParameterSetMinus1( UInt index ) { return m_uiNumInitSeqParameterSetMinus1[index]; }
-	UInt getInitSeqParameterSetIdDelta( UInt i, UInt j ) { return m_uiInitSeqParameterSetIdDelta[i][j]; } 
-	UInt getNumInitPicParameterSetMinus1( UInt index ) { return m_uiNumInitPicParameterSetMinus1[index]; }
-	UInt getInitPicParameterSetIdDelta( UInt i, UInt j){ return m_uiInitPicParameterSetIdDelta[i][j]; }
-	UInt getInitParameterSetsInfoSrcOpIdDelta( UInt index) { return m_uiInitParameterSetsInfoSrcOpIdDelta[index]; }
-
+	UInt getNumDirectlyDependentViews( UInt index )	  { return m_uiNumDirectlyDependentViews[index]; }//SEI JJ 
+	UInt getDirectlyDependentViewId( UInt i, UInt j ) { return m_uiDirectlyDependentViewId[i][j]; }//SEI JJ
+	UInt getViewDependencyInfoSrcOpId( UInt index ) { return m_uiViewDependencyInfoSrcOpId[index]; }//SEI JJ
+	UInt getNumSeqParameterSetMinus1( UInt index ) { return m_uiNumSeqParameterSetMinus1[index]; }//SEI JJ
+	UInt getSeqParameterSetIdDelta( UInt i, UInt j ) { return m_uiSeqParameterSetIdDelta[i][j]; } //SEI JJ
+	UInt getNumPicParameterSetMinus1( UInt index ) { return m_uiNumPicParameterSetMinus1[index]; }//SEI JJ
+	UInt getPicParameterSetIdDelta( UInt i, UInt j){ return m_uiPicParameterSetIdDelta[i][j]; }//SEI JJ 
+	UInt getParameterSetsInfoSrcOpId( UInt index) { return m_uiParameterSetsInfoSrcOpId[index]; }//SEI JJ
+    //{{SEI JJ
+	UInt getNumSubsetSeqParameterSetMinus1(UInt index )	{ return m_uiNumSubsetSeqParameterSetMinus1[index];}
+	UInt getSubsetSeqParameterSetIdDelta( UInt i,UInt j )  { return m_uiSubsetSeqParameterSetIdDelta[i][j];}
+	Bool getBitstreamRestrictionInfoPresentFlag(UInt index ) {  return m_bBitstreamRestrictionInfoPresentFlag[index];}
+	Bool getMotionVectorsOverPicBoundariesFlag(UInt index )  { return m_bMotionVectorsOverPicBoundariesFlag[index];}
+	UInt getMaxBytesPerPicDenom(UInt index ) { return m_uiMaxBytesPerPicDenom[index];}
+	UInt getMaxBitsPerMbDenom(UInt index ) { return m_uiMaxBitsPerMbDenom[index];}
+	UInt getLog2MaxMvLengthHorizontal(UInt index ) { return m_uiLog2MaxMvLengthHorizontal[index];}
+	UInt getLog2MaxMvLengthVertical(UInt index ) { return m_uiLog2MaxMvLengthVertical[index];}
+	UInt getNumReorderFrames(UInt index ) { return m_uiNumReorderFrames[index];}
+	UInt getMaxDecFrameBuffering(UInt index ) { return m_uiMaxDecFrameBuffering[index];}
+	//}}SEI JJ
 
 	Void setNumOperationPointsMinus1( UInt ui )		  { m_uiNumOperationPointsMinus1 = ui; }
 	Void setOperationPointId( UInt index, UInt ui )	  { m_uiOperationPointId[index] = ui; }
 	Void setPriorityId( UInt index, UInt ui )		  { m_uiPriorityId[index] = ui; }
 	Void setTemporalId( UInt index, UInt ui )		  { m_uiTemporalId[index] = ui; }
-//	Void setNumActiveViewsMinus1( UInt index, UInt ui )  { m_uiNumActiveViewsMinus1[index] = ui; }
+//	Void setNumTargetOutputViewsMinus1( UInt index, UInt ui )  { m_uiNumTargetOutputViewsMinus1[index] = ui; }//SEI JJ 
 	Void setViewId( UInt i, UInt j, UInt uiId )		  { m_uiViewId[i][j] = uiId; }
 	Void setProfileLevelInfoPresentFlag( UInt index, Bool b ) { m_bProfileLevelInfoPresentFlag[index] = b; }
 	Void setBitRateInfoPresentFlag( UInt index, Bool b )	  { m_bBitRateInfoPresentFlag[index] = b; }
 	Void setFrmRateInfoPresentFlag( UInt index, Bool b )      { m_bFrmRateInfoPresentFlag[index] = b; }
-	Void setOpDependencyInfoPresentFlag( UInt index, Bool b ) { m_bOpDependencyInfoPresentFlag[index] = b; }
-	Void setInitParameterSetsInfoPresentFlag(UInt i, Bool b ) { m_bInitParameterSetsInfoPresentFlag[i] = b; }
-	Void setOpProfileIdc( UInt index, UInt ui )				  { m_uiOpProfileIdc[index] = ui; }
+	Void setViewDependencyInfoPresentFlag( UInt index, Bool b ) { m_bViewDependencyInfoPresentFlag[index] = b; }//SEI JJ 
+	Void setParameterSetsInfoPresentFlag(UInt i, Bool b ) { m_bParameterSetsInfoPresentFlag[i] = b; }//SEI JJ 
+	Void setOpProfileLevelIdc( UInt index, UInt ui )				  { m_uiOpProfileLevelIdc[index] = ui; }//SEI JJ
 	Void setOpConstraintSet0Flag( UInt index, Bool b )		  { m_bOpConstraintSet0Flag[index] = b; }
 	Void setOpConstraintSet1Flag( UInt index, Bool b )		  { m_bOpConstraintSet1Flag[index] = b; }
 	Void setOpConstraintSet2Flag( UInt index, Bool b )		  { m_bOpConstraintSet2Flag[index] = b; }
@@ -862,60 +875,72 @@ public:
 	Void setConstantFrmRateIdc( UInt index, UInt ui )		  { m_uiConstantFrmRateIdc[index] = ui; }
 	Void setAvgFrmRate( UInt index, UInt ui )				  { m_uiAvgFrmRate[index] = ui; }
 	Void setFrmRateInfoSrcOpIdDela( UInt index, UInt ui )     { m_uiFrmRateInfoSrcOpIdDela[index] = ui; }
-//	Void setNumDirectlyDependentOps( UInt index, UInt ui )	  { m_uiNumDirectlyDependentOps[index] = ui; }
-	Void setDirectlyDependentOpIdDeltaMinus1( UInt i, UInt j, UInt ui ) { m_uiDirectlyDependentOpIdDeltaMinus1[i][j] = ui; }
-	Void setOpDependencyInfoSrcOpIdDelta( UInt index, UInt ui )     { m_uiOpDependencyInfoSrcOpIdDelta[index] = ui; }
-//	Void setNumInitSeqParameterSetMinus1( UInt index, UInt ui )     { m_uiNumInitSeqParameterSetMinus1[index] = ui; }
-	Void setInitSeqParameterSetIdDelta( UInt i, UInt j, UInt ui )   { m_uiInitSeqParameterSetIdDelta[i][j] = ui; } 
-//	Void setNumInitPicParameterSetMinus1( UInt index, UInt ui )     { m_uiNumInitPicParameterSetMinus1[index] = ui; }
-	Void setInitPicParameterSetIdDelta( UInt i, UInt j, UInt ui)    { m_uiInitPicParameterSetIdDelta[i][j] = ui; }
-	Void setInitParameterSetsInfoSrcOpIdDelta( UInt index, UInt ui) { m_uiInitParameterSetsInfoSrcOpIdDelta[index] = ui; }
+//	Void setNumDirectlyDependentViews( UInt index, UInt ui )	  { m_uiNumDirectlyDependentViews[index] = ui; }//SEI JJ 
+	Void setDirectlyDependentViewId( UInt i, UInt j, UInt ui ) { m_uiDirectlyDependentViewId[i][j] = ui; }//SEI JJ 
+	Void setViewDependencyInfoSrcOpId( UInt index, UInt ui )     { m_uiViewDependencyInfoSrcOpId[index] = ui; }//SEI JJ
+//	Void setNumSeqParameterSetMinus1( UInt index, UInt ui )     { m_uiNumSeqParameterSetMinus1[index] = ui; }//SEI JJ 
+	Void setSeqParameterSetIdDelta( UInt i, UInt j, UInt ui )   { m_uiSeqParameterSetIdDelta[i][j] = ui; } //SEI JJ 
+//	Void setNumPicParameterSetMinus1( UInt index, UInt ui )     { m_uiNumPicParameterSetMinus1[index] = ui; }//SEI JJ 
+	Void setPicParameterSetIdDelta( UInt i, UInt j, UInt ui)    { m_uiPicParameterSetIdDelta[i][j] = ui; }//SEI JJ 
+	Void setParameterSetsInfoSrcOpId( UInt index, UInt ui)		{ m_uiParameterSetsInfoSrcOpId[index] = ui; }//SEI JJ 
+    //{{SEI JJ
+	Void setNumSubsetSeqParameterSetMinus1(UInt index, UInt ui)	{ m_uiNumSubsetSeqParameterSetMinus1[index]=ui;}
+	Void setSubsetSeqParameterSetIdDelta( UInt i,UInt j, UInt ui )  { m_uiSubsetSeqParameterSetIdDelta[i][j]=ui;}
+	Void setBitstreamRestrictionInfoPresentFlag(UInt index,Bool b) {  m_bBitstreamRestrictionInfoPresentFlag[index]=b;}
+	Void setMotionVectorsOverPicBoundariesFlag(UInt index,Bool b)  { m_bMotionVectorsOverPicBoundariesFlag[index]=b;}
+	Void setMaxBytesPerPicDenom(UInt index,UInt ui) { m_uiMaxBytesPerPicDenom[index]=ui;}
+	Void setMaxBitsPerMbDenom(UInt index,UInt ui) {m_uiMaxBitsPerMbDenom[index]=ui;}
+	Void setLog2MaxMvLengthHorizontal(UInt index,UInt ui) { m_uiLog2MaxMvLengthHorizontal[index]=ui;}
+	Void setLog2MaxMvLengthVertical(UInt index,UInt ui) { m_uiLog2MaxMvLengthVertical[index]=ui;}
+	Void setNumReorderFrames(UInt index,UInt ui) { m_uiNumReorderFrames[index]=ui;}
+	Void setMaxDecFrameBuffering(UInt index,UInt ui) {m_uiMaxDecFrameBuffering[index]=ui;}
+	//}}SEI JJ
 
-	Void setNumActiveViewsMinus1( UInt index, UInt ui )  
+	Void setNumTargetOutputViewsMinus1( UInt index, UInt ui )  //SEI JJ
 	{ 
 
-  	  m_uiNumActiveViewsMinus1[index] = ui; 
+  	  m_uiNumTargetOutputViewsMinus1[index] = ui; //SEI JJ
 	  if( m_uiViewId[index] == NULL )
 		m_uiViewId[index] = (UInt*)malloc((ui+1)*sizeof(UInt));
 	}
-
-	Void setNumDirectlyDependentOps( UInt index, UInt ui )	  
+	//{{SEI JJ
+	Void setNumDirectlyDependentViews( UInt index, UInt ui )	 
 	{ 
-	  m_uiNumDirectlyDependentOps[index] = ui; 
-	  if( m_uiDirectlyDependentOpIdDeltaMinus1[index] == NULL )
-		  m_uiDirectlyDependentOpIdDeltaMinus1[index] = (UInt*)malloc(ui*sizeof(UInt));
+	  m_uiNumDirectlyDependentViews[index] = ui;
+	  if( m_uiDirectlyDependentViewId[index] == NULL )
+		  m_uiDirectlyDependentViewId[index] = (UInt*)malloc(ui*sizeof(UInt)); 
 	}
 
-	Void setNumInitSeqParameterSetMinus1( UInt index, UInt ui )     
+	Void setNumSeqParameterSetMinus1( UInt index, UInt ui )   
 	{ 
-	  m_uiNumInitSeqParameterSetMinus1[index] = ui; 
-	  if( m_uiInitSeqParameterSetIdDelta[index] == NULL )
-	    m_uiInitSeqParameterSetIdDelta[index] = (UInt*)malloc((ui+1)*sizeof(UInt));
+	  m_uiNumSeqParameterSetMinus1[index] = ui; 
+	  if( m_uiSeqParameterSetIdDelta[index] == NULL )
+	    m_uiSeqParameterSetIdDelta[index] = (UInt*)malloc((ui+1)*sizeof(UInt));
 	}
 	
-	Void setNumInitPicParameterSetMinus1( UInt index, UInt ui ) 
+	Void setNumPicParameterSetMinus1( UInt index, UInt ui ) 
 	{ 
-	  m_uiNumInitPicParameterSetMinus1[index] = ui; 
-	  if( m_uiInitPicParameterSetIdDelta[index] == NULL )
-	    m_uiInitPicParameterSetIdDelta[index] = (UInt*)malloc((ui+1)*sizeof(UInt));
+	  m_uiNumPicParameterSetMinus1[index] = ui; 
+	  if( m_uiPicParameterSetIdDelta[index] == NULL )
+	    m_uiPicParameterSetIdDelta[index] = (UInt*)malloc((ui+1)*sizeof(UInt));
 	}
-
+	//}}SEI JJ
   private:
 	UInt			m_uiNumOperationPointsMinus1;
 
 	UInt			m_uiOperationPointId[MAX_OPERATION_POINTS];
 	UInt			m_uiPriorityId[MAX_OPERATION_POINTS];
 	UInt			m_uiTemporalId[MAX_OPERATION_POINTS];
-	UInt			m_uiNumActiveViewsMinus1[MAX_OPERATION_POINTS];
+	UInt			m_uiNumTargetOutputViewsMinus1[MAX_OPERATION_POINTS];//SEI JJ
 
 	UInt*			m_uiViewId[MAX_OPERATION_POINTS];
 	Bool			m_bProfileLevelInfoPresentFlag[MAX_OPERATION_POINTS];
 	Bool			m_bBitRateInfoPresentFlag[MAX_OPERATION_POINTS];
 	Bool			m_bFrmRateInfoPresentFlag[MAX_OPERATION_POINTS];
-	Bool			m_bOpDependencyInfoPresentFlag[MAX_OPERATION_POINTS];
-	Bool			m_bInitParameterSetsInfoPresentFlag[MAX_OPERATION_POINTS];
+	Bool			m_bViewDependencyInfoPresentFlag[MAX_OPERATION_POINTS];//SEI JJ 
+	Bool			m_bParameterSetsInfoPresentFlag[MAX_OPERATION_POINTS];//SEI JJ 
 
-	UInt			m_uiOpProfileIdc[MAX_OPERATION_POINTS];
+	UInt			m_uiOpProfileLevelIdc[MAX_OPERATION_POINTS];//SEI JJ
 	Bool			m_bOpConstraintSet0Flag[MAX_OPERATION_POINTS];
 	Bool			m_bOpConstraintSet1Flag[MAX_OPERATION_POINTS];
 	Bool			m_bOpConstraintSet2Flag[MAX_OPERATION_POINTS];
@@ -932,18 +957,30 @@ public:
 	UInt			m_uiAvgFrmRate[MAX_OPERATION_POINTS];
 
 	UInt			m_uiFrmRateInfoSrcOpIdDela[MAX_OPERATION_POINTS];
+    //{{SEI JJ
+	UInt			m_uiNumDirectlyDependentViews[MAX_OPERATION_POINTS]; 
+	UInt*			m_uiDirectlyDependentViewId[MAX_OPERATION_POINTS]; 
 
-	UInt			m_uiNumDirectlyDependentOps[MAX_OPERATION_POINTS];
-	UInt*			m_uiDirectlyDependentOpIdDeltaMinus1[MAX_OPERATION_POINTS];
+	UInt			m_uiViewDependencyInfoSrcOpId[MAX_OPERATION_POINTS]; 
 
-	UInt			m_uiOpDependencyInfoSrcOpIdDelta[MAX_OPERATION_POINTS];
+	UInt			m_uiNumSeqParameterSetMinus1[MAX_OPERATION_POINTS];
+	UInt*			m_uiSeqParameterSetIdDelta[MAX_OPERATION_POINTS]; 
+	UInt			m_uiNumPicParameterSetMinus1[MAX_OPERATION_POINTS]; 
+	UInt*			m_uiPicParameterSetIdDelta[MAX_OPERATION_POINTS]; 
 
-	UInt			m_uiNumInitSeqParameterSetMinus1[MAX_OPERATION_POINTS];
-	UInt*			m_uiInitSeqParameterSetIdDelta[MAX_OPERATION_POINTS];
-	UInt			m_uiNumInitPicParameterSetMinus1[MAX_OPERATION_POINTS];
-	UInt*			m_uiInitPicParameterSetIdDelta[MAX_OPERATION_POINTS];
+	UInt			m_uiParameterSetsInfoSrcOpId[MAX_OPERATION_POINTS]; 
 
-	UInt			m_uiInitParameterSetsInfoSrcOpIdDelta[MAX_OPERATION_POINTS];
+	UInt			m_uiNumSubsetSeqParameterSetMinus1[MAX_OPERATION_POINTS];
+	UInt*           m_uiSubsetSeqParameterSetIdDelta[MAX_OPERATION_POINTS];
+	Bool m_bBitstreamRestrictionInfoPresentFlag[MAX_SCALABLE_LAYERS]; 
+	Bool m_bMotionVectorsOverPicBoundariesFlag[MAX_SCALABLE_LAYERS];
+	UInt m_uiMaxBytesPerPicDenom[MAX_SCALABLE_LAYERS];
+	UInt m_uiMaxBitsPerMbDenom[MAX_SCALABLE_LAYERS];
+	UInt m_uiLog2MaxMvLengthHorizontal[MAX_SCALABLE_LAYERS];
+	UInt m_uiLog2MaxMvLengthVertical[MAX_SCALABLE_LAYERS];
+	UInt m_uiNumReorderFrames[MAX_SCALABLE_LAYERS];
+	UInt m_uiMaxDecFrameBuffering[MAX_SCALABLE_LAYERS];
+	//}}SEI JJ
   };
 
 #define MAX_PICTURES_IN_ACCESS_UNIT 50
@@ -1310,21 +1347,7 @@ class H264AVCCOMMONLIB_API MultiviewAcquisitionInfoSei : public SEIMessage // SE
    
  };
 
- class H264AVCCOMMONLIB_API TargetViewInfoSei:public SEIMessage
- {
- protected:
-   TargetViewInfoSei() :SEIMessage(TARGET_VIEW_INFO_SEI)
-   {}
- public:
-   static ErrVal create(TargetViewInfoSei*& rpcTargetViewInfoSei);
-   ErrVal destory();
-   ErrVal write(HeaderSymbolWriteIf* pcWriteIf);
-   ErrVal read(HeaderSymbolReadIf* pcReadIf);
-   UInt getTargetViewId()           const{ return m_uiTargetViewId; }
-   Void setTargetViewId(UInt uiTargetViewId)            { m_uiTargetViewId = uiTargetViewId; }
- private:
-   UInt m_uiTargetViewId;
- };
+
  //JVT-AB025 {{
  class H264AVCCOMMONLIB_API NonReqViewInfoSei:public SEIMessage
  {
@@ -1365,8 +1388,10 @@ class H264AVCCOMMONLIB_API MultiviewAcquisitionInfoSei : public SEIMessage // SE
      ,UInt* puinum_refs_list1_nonanc
      ,Bool bEnc_Dec_Flag); // True:encder False:decoder
 
+   UInt  getSeqParameterSetId() { return m_uiSeqParameterSetId;}//SEI JJ
    Bool  getAnchorUpdateFlag()  const { return m_bAnchorUpdateFlag;}
    Bool  getNonAnchorUpdateFlag()  const { return m_bNonAnchorUpdateFlag;}
+   Void  setSeqParameterSetId( UInt i ) { m_uiSeqParameterSetId=i; }  //SEI JJ
    Void  setAnchorUpdateFlag( Bool flag ){ m_bAnchorUpdateFlag = flag;}
    Void  setNonAnchorUpdateFlag( Bool flag){ m_bNonAnchorUpdateFlag = flag;}
    Bool** getAnchorRefL0Flag()  const { return m_ppbAnchorRefL0Flag;}
@@ -1381,6 +1406,7 @@ class H264AVCCOMMONLIB_API MultiviewAcquisitionInfoSei : public SEIMessage // SE
    UInt *m_puiNumNonAnchorL1Refs;
    Bool m_bAnchorUpdateFlag;
    Bool m_bNonAnchorUpdateFlag;
+   UInt m_uiSeqParameterSetId;//SEI JJ
    Bool **m_ppbAnchorRefL0Flag;
    Bool **m_ppbAnchorRefL1Flag;
    Bool **m_ppbNonAnchorRefL0Flag;

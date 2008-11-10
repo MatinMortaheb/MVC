@@ -254,12 +254,12 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 	Bool bMoreOps = true;
 	while( bMoreOps )
 	{
-	  if( pcOldViewScalSei->getOpDependencyInfoPresentFlag( m_uiOpId ) )
+	  if( pcOldViewScalSei->getViewDependencyInfoPresentFlag( m_uiOpId ) )//SEI JJ
 	  {
-		  UInt uiNumOpDep = pcOldViewScalSei->getNumDirectlyDependentOps( m_uiOpId );
+		  UInt uiNumOpDep = pcOldViewScalSei->getNumDirectlyDependentViews( m_uiOpId );//SEI JJ
 	      for( UInt i = 0; i < uiNumOpDep; i++ )
 		  {
-		    UInt OpId = m_uiOpId - 1 - pcOldViewScalSei->getDirectlyDependentOpIdDeltaMinus1( m_uiOpId, i );
+		    UInt OpId = m_uiOpId - 1 - pcOldViewScalSei->getDirectlyDependentViewId( m_uiOpId, i );//SEI JJ
 		    if( OpId >= 0 && OpId <= pcOldViewScalSei->getNumOperationPointsMinus1() )
 		    {
 		      uiOperationPointId[uiNumOps] = OpId;
@@ -277,7 +277,7 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 	for( UInt i = 0; i < uiNumOps; i++ )
 	{
 	  m_uiOpId = uiOperationPointId[i];
-	  UInt NumView = pcOldViewScalSei->getNumActiveViewsMinus1( m_uiOpId ) + 1;
+	  UInt NumView = pcOldViewScalSei->getNumTargetOutputViewsMinus1( m_uiOpId ) + 1;//SEI JJ
 	  for( UInt j = 0; j < NumView; j++ )
 	  {
 		UInt uiId = pcOldViewScalSei->getViewId( m_uiOpId, j );
@@ -312,19 +312,19 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 	  pcNewViewScalSei->setOperationPointId( uiNumNewOps, uiNumNewOps );
 	  pcNewViewScalSei->setPriorityId( uiNumNewOps, pcOldViewScalSei->getPriorityId( i ) );
 	  pcNewViewScalSei->setTemporalId( uiNumNewOps, pcOldViewScalSei->getTemporalId( i ) );
-	  pcNewViewScalSei->setNumActiveViewsMinus1( uiNumNewOps, pcOldViewScalSei->getNumActiveViewsMinus1( i ) );
-	  for( UInt view = 0; view <= pcOldViewScalSei->getNumActiveViewsMinus1(i); view++ )
+	  pcNewViewScalSei->setNumTargetOutputViewsMinus1( uiNumNewOps, pcOldViewScalSei->getNumTargetOutputViewsMinus1( i ) );//SEI JJ
+	  for( UInt view = 0; view <= pcOldViewScalSei->getNumTargetOutputViewsMinus1(i); view++ )//SEI JJ
 		  pcNewViewScalSei->setViewId( uiNumNewOps, view, pcOldViewScalSei->getViewId( i, view ) );
 
 	  pcNewViewScalSei->setProfileLevelInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getProfileLevelInfoPresentFlag( i ) );
 	  pcNewViewScalSei->setBitRateInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getBitRateInfoPresentFlag( i ) );
 	  pcNewViewScalSei->setFrmRateInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getFrmRateInfoPresentFlag( i ) );
-	  pcNewViewScalSei->setOpDependencyInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getOpDependencyInfoPresentFlag( i ) );
-	  pcNewViewScalSei->setInitParameterSetsInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getInitParameterSetsInfoPresentFlag( i ) );
+	  pcNewViewScalSei->setViewDependencyInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getViewDependencyInfoPresentFlag( i ) );//SEI JJ
+	  pcNewViewScalSei->setParameterSetsInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getParameterSetsInfoPresentFlag( i ) );//SEI JJ
 
 	  if( pcOldViewScalSei->getProfileLevelInfoPresentFlag( i ) )
 	  {
-		pcNewViewScalSei->setOpProfileIdc( uiNumNewOps, pcOldViewScalSei->getOpProfileIdc( i ) );
+		pcNewViewScalSei->setOpProfileLevelIdc( uiNumNewOps, pcOldViewScalSei->getOpProfileLevelIdc( i ) );//SEI JJ
 		pcNewViewScalSei->setOpConstraintSet0Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet0Flag( i ) );
 		pcNewViewScalSei->setOpConstraintSet1Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet1Flag( i ) );
 		pcNewViewScalSei->setOpConstraintSet2Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet2Flag( i ) );
@@ -341,7 +341,7 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 		if( j == uiNumOps )
 		{
 		  pcNewViewScalSei->setProfileLevelInfoPresentFlag( uiNumNewOps, true );
-		  pcNewViewScalSei->setOpProfileIdc( uiNumNewOps, pcOldViewScalSei->getOpProfileIdc( OldOpId ) );
+		  pcNewViewScalSei->setOpProfileLevelIdc( uiNumNewOps, pcOldViewScalSei->getOpProfileLevelIdc( OldOpId ) );//SEI JJ
 		  pcNewViewScalSei->setOpConstraintSet0Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet0Flag( OldOpId ) );
 		  pcNewViewScalSei->setOpConstraintSet1Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet1Flag( OldOpId ) );
 		  pcNewViewScalSei->setOpConstraintSet2Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet2Flag( OldOpId ) );
@@ -385,76 +385,76 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 	  else
 		pcNewViewScalSei->setFrmRateInfoSrcOpIdDela( uiNumNewOps, 0 );
 
-	  if( pcOldViewScalSei->getOpDependencyInfoPresentFlag( i ) )
+	  if( pcOldViewScalSei->getViewDependencyInfoPresentFlag( i ) )//SEI JJ
 	  {
-		pcNewViewScalSei->setNumDirectlyDependentOps( uiNumNewOps, pcOldViewScalSei->getNumDirectlyDependentOps( i ) );
-		for( UInt ui = 0; ui < pcOldViewScalSei->getNumDirectlyDependentOps( i ); ui++ )
-		{
-		  UInt OldOpId = pcOldViewScalSei->getOperationPointId( i ) - pcOldViewScalSei->getDirectlyDependentOpIdDeltaMinus1( i, ui ) - 1;
-	      for( j = 0; j< uiNumOps; j++ )
-		    if( OldOpId == uiOperationPointId[j] )
-		      break;
-		  pcNewViewScalSei->setDirectlyDependentOpIdDeltaMinus1( uiNumNewOps, ui, uiNumNewOps - uiOldOpToNewOp[OldOpId] - 1 );
-		}
-	  }
-	  else if( pcOldViewScalSei->getOpDependencyInfoSrcOpIdDelta( i ) )
-	  {
-		UInt OldOpId = pcOldViewScalSei->getOperationPointId( i ) - pcOldViewScalSei->getOpDependencyInfoSrcOpIdDelta( i );
-	    for( j = 0; j< uiNumOps; j++ )
-		  if( OldOpId == uiOperationPointId[j] )
-		    break;
-
-		if( j == uiNumOps )
-		{
-		  pcNewViewScalSei->setNumDirectlyDependentOps( uiNumNewOps, pcOldViewScalSei->getNumDirectlyDependentOps( OldOpId ) );
-		  for( UInt ui = 0; ui < pcOldViewScalSei->getNumDirectlyDependentOps( i ); ui++ )
+		  pcNewViewScalSei->setNumDirectlyDependentViews( uiNumNewOps, pcOldViewScalSei->getNumDirectlyDependentViews( i ) );//SEI JJ 
+		  for( UInt ui = 0; ui < pcOldViewScalSei->getNumDirectlyDependentViews( i ); ui++ )//SEI JJ
 		  {
-		    UInt OldOpId1 = pcOldViewScalSei->getOperationPointId( i ) - pcOldViewScalSei->getDirectlyDependentOpIdDeltaMinus1( OldOpId, ui ) - 1;
-	        for( j = 0; j< uiNumOps; j++ )
-		      if( OldOpId1 == uiOperationPointId[j] )
-		        break;
-		    pcNewViewScalSei->setDirectlyDependentOpIdDeltaMinus1( uiNumNewOps, ui, uiNumNewOps - uiOldOpToNewOp[OldOpId1] - 1 );
+			  UInt OldOpId = pcOldViewScalSei->getOperationPointId( i ) - pcOldViewScalSei->getDirectlyDependentViewId( i, ui ) - 1;//SEI JJ
+			  for( j = 0; j< uiNumOps; j++ )
+				  if( OldOpId == uiOperationPointId[j] )
+					  break;
+			  pcNewViewScalSei->setDirectlyDependentViewId( uiNumNewOps, ui, uiNumNewOps - uiOldOpToNewOp[OldOpId] - 1 );//SEI JJ 
 		  }
-		}
-		else
-		  pcNewViewScalSei->setOpDependencyInfoSrcOpIdDelta( uiNumNewOps, uiNumNewOps - uiOldOpToNewOp[OldOpId] ); 
+	  }
+	  else if( pcOldViewScalSei->getViewDependencyInfoSrcOpId( i ) )//SEI JJ 
+	  {
+		  UInt OldOpId = pcOldViewScalSei->getOperationPointId( i ) - pcOldViewScalSei->getViewDependencyInfoSrcOpId( i );//SEI JJ 
+		  for( j = 0; j< uiNumOps; j++ )
+			  if( OldOpId == uiOperationPointId[j] )
+				  break;
+
+		  if( j == uiNumOps )
+		  {
+			  pcNewViewScalSei->setNumDirectlyDependentViews( uiNumNewOps, pcOldViewScalSei->getNumDirectlyDependentViews( OldOpId ) );//SEI JJ 
+			  for( UInt ui = 0; ui < pcOldViewScalSei->getNumDirectlyDependentViews( i ); ui++ )//SEI JJ 
+			  {
+				  UInt OldOpId1 = pcOldViewScalSei->getOperationPointId( i ) - pcOldViewScalSei->getDirectlyDependentViewId( OldOpId, ui ) - 1;//SEI JJ 
+				  for( j = 0; j< uiNumOps; j++ )
+					  if( OldOpId1 == uiOperationPointId[j] )
+						  break;
+				  pcNewViewScalSei->setDirectlyDependentViewId( uiNumNewOps, ui, uiNumNewOps - uiOldOpToNewOp[OldOpId1] - 1 );//SEI JJ 
+			  }
+		  }
+		  else
+			  pcNewViewScalSei->setViewDependencyInfoSrcOpId( uiNumNewOps, uiNumNewOps - uiOldOpToNewOp[OldOpId] ); //SEI JJ
 	  }
 	  else
-		pcNewViewScalSei->setOpDependencyInfoSrcOpIdDelta( uiNumNewOps, 0 );
+		  pcNewViewScalSei->setViewDependencyInfoSrcOpId( uiNumNewOps, 0 );//SEI JJ 
 
-	  if( pcOldViewScalSei->getInitParameterSetsInfoPresentFlag( i ) )
+	  if( pcOldViewScalSei->getParameterSetsInfoPresentFlag( i ) )//SEI JJ
 	  {
-		pcNewViewScalSei->setNumInitSeqParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumInitSeqParameterSetMinus1( i ) );
-		for( j = 0; j <= pcOldViewScalSei->getNumInitSeqParameterSetMinus1(i); j++)
-		  pcNewViewScalSei->setInitSeqParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getInitSeqParameterSetIdDelta( i, j ) );
+		  pcNewViewScalSei->setNumSeqParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumSeqParameterSetMinus1( i ) );//SEI JJ 
+		  for( j = 0; j <= pcOldViewScalSei->getNumSeqParameterSetMinus1(i); j++)//SEI JJ 
+			  pcNewViewScalSei->setSeqParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getSeqParameterSetIdDelta( i, j ) );//SEI JJ 
 
-		pcNewViewScalSei->setNumInitPicParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumInitPicParameterSetMinus1( i ) );
-		for( j = 0; j <= pcOldViewScalSei->getNumInitPicParameterSetMinus1(i); j++)
-		  pcNewViewScalSei->setInitPicParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getInitPicParameterSetIdDelta( i, j ) );
+		  pcNewViewScalSei->setNumPicParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumPicParameterSetMinus1( i ) );//SEI JJ 
+		  for( j = 0; j <= pcOldViewScalSei->getNumPicParameterSetMinus1(i); j++)//SEI JJ
+			  pcNewViewScalSei->setPicParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getPicParameterSetIdDelta( i, j ) );//SEI JJ 
 	  }
-	  else if( pcOldViewScalSei->getInitParameterSetsInfoSrcOpIdDelta( i ) )
+	  else if( pcOldViewScalSei->getParameterSetsInfoSrcOpId( i ) )//SEI JJ
 	  {
-		UInt OldOpId = pcOldViewScalSei->getOperationPointId( i ) - pcOldViewScalSei->getInitParameterSetsInfoSrcOpIdDelta( i );
-	    for( j = 0; j< uiNumOps; j++ )
-		  if( OldOpId == uiOperationPointId[j] )
-		    break;
+		  UInt OldOpId = pcOldViewScalSei->getOperationPointId( i ) - pcOldViewScalSei->getParameterSetsInfoSrcOpId( i );//SEI JJ 
+		  for( j = 0; j< uiNumOps; j++ )
+			  if( OldOpId == uiOperationPointId[j] )
+				  break;
 
-		if( j == uiNumOps )
-		{
-		  pcNewViewScalSei->setNumInitSeqParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumInitSeqParameterSetMinus1( OldOpId ) );
-		  for( j = 0; j <= pcOldViewScalSei->getNumInitSeqParameterSetMinus1(OldOpId); j++)
-		    pcNewViewScalSei->setInitSeqParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getInitSeqParameterSetIdDelta( OldOpId, j ) );
+		  if( j == uiNumOps )
+		  {
+			  pcNewViewScalSei->setNumSeqParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumSeqParameterSetMinus1( OldOpId ) );//SEI JJ 
+			  for( j = 0; j <= pcOldViewScalSei->getNumSeqParameterSetMinus1(OldOpId); j++)//SEI JJ
+				  pcNewViewScalSei->setSeqParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getSeqParameterSetIdDelta( OldOpId, j ) );//SEI JJ 
 
-		  pcNewViewScalSei->setNumInitPicParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumInitPicParameterSetMinus1( OldOpId ) );
-		  for( j = 0; j <= pcOldViewScalSei->getNumInitPicParameterSetMinus1(OldOpId); j++)
-		    pcNewViewScalSei->setInitPicParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getInitPicParameterSetIdDelta( OldOpId, j ) );
-		}
-		else
-		  pcNewViewScalSei->setInitParameterSetsInfoSrcOpIdDelta( uiNumNewOps, uiNumNewOps - uiOldOpToNewOp[OldOpId] ); 
+			  pcNewViewScalSei->setNumPicParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumPicParameterSetMinus1( OldOpId ) );//SEI JJ 
+			  for( j = 0; j <= pcOldViewScalSei->getNumPicParameterSetMinus1(OldOpId); j++)//SEI JJ 
+				  pcNewViewScalSei->setPicParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getPicParameterSetIdDelta( OldOpId, j ) );//SEI JJ 
+		  }
+		  else
+			  pcNewViewScalSei->setParameterSetsInfoSrcOpId( uiNumNewOps, uiNumNewOps - uiOldOpToNewOp[OldOpId] );//SEI JJ
 
 	  }
 	  else
-	    pcNewViewScalSei->setInitParameterSetsInfoSrcOpIdDelta( uiNumNewOps, 0 );
+		  pcNewViewScalSei->setParameterSetsInfoSrcOpId( uiNumNewOps, 0 );//SEI JJ 
 
 	  uiNumNewOps++;
 	}
@@ -589,9 +589,9 @@ Extractor::xDisplayOperationPoints()
 	  UInt uiTemporalId = pcViewScalInfoSei->getTemporalId(i);
 	  printf("Temporal Id: %d\n", uiTemporalId);
 
-	  UInt uiNumActiveViewsMinus1 = pcViewScalInfoSei->getNumActiveViewsMinus1(i);
-	  printf("Number of active views: %d\n", uiNumActiveViewsMinus1+1);
-	  for( UInt j = 0; j <= uiNumActiveViewsMinus1; j++ )
+	  UInt uiNumTargetOutputViewsMinus1 = pcViewScalInfoSei->getNumTargetOutputViewsMinus1(i);//SEI JJ
+	  printf("Number of active views: %d\n", uiNumTargetOutputViewsMinus1+1);//SEI JJ
+	  for( UInt j = 0; j <= uiNumTargetOutputViewsMinus1; j++ )//SEI JJ
 	  {
 	    UInt viewid = pcViewScalInfoSei->getViewId( i, j );
 		printf("View_Id[%d]: %d\n", j, viewid);
@@ -599,7 +599,7 @@ Extractor::xDisplayOperationPoints()
 	  
 	  if( pcViewScalInfoSei->getProfileLevelInfoPresentFlag(i) )
 	  {
-		printf( "Op Profile Idc: %d\n", pcViewScalInfoSei->getOpProfileIdc(i) );
+		printf( "Op Profile Idc: %d\n", pcViewScalInfoSei->getOpProfileLevelIdc(i) );//SEI JJ
 		printf( "Op Constraint Set0 Flag(0:false; 1:true): %d\n", (UInt)pcViewScalInfoSei->getOpConstraintSet0Flag(i) );
 		printf( "Op Constraint Set1 Flag(0:false; 1:true): %d\n", (UInt)pcViewScalInfoSei->getOpConstraintSet1Flag(i) );
 		printf( "Op Constraint Set2 Flag(0:false; 1:true): %d\n", (UInt)pcViewScalInfoSei->getOpConstraintSet2Flag(i) );
@@ -636,41 +636,42 @@ Extractor::xDisplayOperationPoints()
 	  else
 	    printf("No frame rate information.\n");
 
-	  if( pcViewScalInfoSei->getOpDependencyInfoPresentFlag(i) )
+	  if( pcViewScalInfoSei->getViewDependencyInfoPresentFlag(i) )//SEI JJ
 	  {
-	    UInt uiNumDirectlyDependentOps = pcViewScalInfoSei->getNumDirectlyDependentOps(i);
-		printf("Number of Directly Dependent Operation points: %d\n", uiNumDirectlyDependentOps);
-		for( UInt j = 0; j < uiNumDirectlyDependentOps; j++ )
-		{
-		  UInt uiOpId = uiOperationPointId - pcViewScalInfoSei->getDirectlyDependentOpIdDeltaMinus1(i, j) - 1;
-		  printf("NO%d of the dependent operation points(operation point id): %d\n", j+1, uiOpId);
-		}
+		  UInt uiNumDirectlyDependentViews = pcViewScalInfoSei->getNumDirectlyDependentViews(i);//SEI JJ
+		  printf("Number of Directly Dependent Operation points: %d\n", uiNumDirectlyDependentViews);//SEI JJ
+		  for( UInt j = 0; j < uiNumDirectlyDependentViews; j++ )//SEI JJ
+		  {
+			  UInt uiOpId = uiOperationPointId - pcViewScalInfoSei->getDirectlyDependentViewId(i, j) - 1;//SEI JJ
+			  printf("NO%d of the dependent operation points(operation point id): %d\n", j+1, uiOpId);
+		  }
 	  }
-	  else if( pcViewScalInfoSei->getOpDependencyInfoSrcOpIdDelta(i) )
+	  else if( pcViewScalInfoSei->getViewDependencyInfoSrcOpId(i) )//SEI JJ 
 	  {
-	    UInt uiRefOpId = uiOperationPointId - pcViewScalInfoSei->getOpDependencyInfoSrcOpIdDelta(i);
-		printf( "The OpDependency information is the same as that of the operation point id %d\n", uiRefOpId );
+		  UInt uiRefOpId = uiOperationPointId - pcViewScalInfoSei->getViewDependencyInfoSrcOpId(i);//SEI JJ 
+		  printf( "The OpDependency information is the same as that of the operation point id %d\n", uiRefOpId );
 	  }
 	  else
-	    printf("No OpDependency information.\n");
+		  printf("No OpDependency information.\n");
 
-	  if( pcViewScalInfoSei->getInitParameterSetsInfoPresentFlag(i) )
+	  if( pcViewScalInfoSei->getParameterSetsInfoPresentFlag(i) )//SEI JJ 
 	  {
-	    UInt uiNumInitSeqParameterSetMinus1 = pcViewScalInfoSei->getNumInitSeqParameterSetMinus1(i);
-		printf("Number of SPS required: %d\n", uiNumInitSeqParameterSetMinus1+1 );
-		for( UInt j = 0; j <= uiNumInitSeqParameterSetMinus1; j++ )
-			printf("NO%d of the SPS required: %d\n", j, pcViewScalInfoSei->getInitSeqParameterSetIdDelta(i,j));
+		  UInt uiNumSeqParameterSetMinus1 = pcViewScalInfoSei->getNumSeqParameterSetMinus1(i);//SEI JJ 
+		  printf("Number of SPS required: %d\n", uiNumSeqParameterSetMinus1+1 );//SEI JJ
+		  for( UInt j = 0; j <= uiNumSeqParameterSetMinus1; j++ )//SEI JJ
+			  printf("NO%d of the SPS required: %d\n", j, pcViewScalInfoSei->getSeqParameterSetIdDelta(i,j));//SEI JJ
 
-		UInt uiNumInitPicParameterSetMinus1 = pcViewScalInfoSei->getNumInitPicParameterSetMinus1(i);
-		printf("Number of PPS required: %d\n", uiNumInitPicParameterSetMinus1+1 );
-		for( UInt j = 0; j <= uiNumInitPicParameterSetMinus1; j++ )
-			printf("NO%d of the PPS required: %d\n", j, pcViewScalInfoSei->getInitPicParameterSetIdDelta(i,j));
+		  UInt uiNumPicParameterSetMinus1 = pcViewScalInfoSei->getNumPicParameterSetMinus1(i);//SEI JJ 
+		  printf("Number of PPS required: %d\n", uiNumPicParameterSetMinus1+1 );//SEI JJ
+		  for( UInt j = 0; j <= uiNumPicParameterSetMinus1; j++ )//SEI JJ
+			  printf("NO%d of the PPS required: %d\n", j, pcViewScalInfoSei->getPicParameterSetIdDelta(i,j));//SEI JJ 
 	  }
-	  else if( pcViewScalInfoSei->getInitParameterSetsInfoSrcOpIdDelta(i) )
+	  else if( pcViewScalInfoSei->getParameterSetsInfoSrcOpId(i) )//SEI JJ 
 	  {
-	    UInt uiRefOpId = uiOperationPointId - pcViewScalInfoSei->getInitParameterSetsInfoSrcOpIdDelta(i);
-		printf( "The SPS/PPS required information is the same as that of the operation point id %d\n", uiRefOpId );
+		  UInt uiRefOpId = uiOperationPointId - pcViewScalInfoSei->getParameterSetsInfoSrcOpId(i);//SEI JJ
+		  printf( "The SPS/PPS required information is the same as that of the operation point id %d\n", uiRefOpId );
 	  }
+
 	  else
 	    printf("No SPS/PPS required information.\n\n");
     

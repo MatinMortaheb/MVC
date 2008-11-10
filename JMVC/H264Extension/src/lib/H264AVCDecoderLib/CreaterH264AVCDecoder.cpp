@@ -1126,50 +1126,50 @@ H264AVCPacketAnalyzer::processSEIAndMVC( BinData*				pcBinData,
 	UInt i;
 	for( i = 0; i <= uiNumOp; i++ )
 	{
-	  UInt uiNumViews = pcSEIMessage->getNumActiveViewsMinus1( i );
-	  for( UInt j = 0; j <= uiNumViews; j++ )
-	  {
-		UInt uiViewId = pcSEIMessage->getViewId(i, j); 
-		ViewOp[uiViewId] = i;
-	  }
+		UInt uiNumViews = pcSEIMessage->getNumTargetOutputViewsMinus1( i );//SEI JJ
+		for( UInt j = 0; j <= uiNumViews; j++ )
+		{
+			UInt uiViewId = pcSEIMessage->getViewId(i, j); 
+			ViewOp[uiViewId] = i;
+		}
 	}
 
 	for( i = 0; i <= uiNumOp; i++ )
 	{
-	  UInt uiNumViews = pcSEIMessage->getNumActiveViewsMinus1( i );
-	  for( UInt j = 0; j <= uiNumViews; j++ )
-	  {
-		UInt uiViewId = pcSEIMessage->getViewId(i, j); 
-
-		UInt uiNumRef = pcSPS->SpsMVC->getNumRefsForListX( uiViewId, LIST_0, true ) 
-						+ pcSPS->SpsMVC->getNumRefsForListX( uiViewId, LIST_1, true );
-		UInt uiNumRef1 = pcSPS->SpsMVC->getNumRefsForListX( uiViewId, LIST_0, false ) 
-						+ pcSPS->SpsMVC->getNumRefsForListX( uiViewId, LIST_1, false );
-		if( uiNumRef1 > uiNumRef )
-		  uiNumRef = uiNumRef1;
-
-		if( uiNumRef == 0 )
-			continue;
-
-		if( !pcSEIMessage->getOpDependencyInfoPresentFlag(i) && !pcSEIMessage->getOpDependencyInfoSrcOpIdDelta(i))
+		UInt uiNumViews = pcSEIMessage->getNumTargetOutputViewsMinus1( i );//SEI JJ
+		for( UInt j = 0; j <= uiNumViews; j++ )
 		{
-		  pcSEIMessage->setNumDirectlyDependentOps(i, uiNumRef );
-		  pcSEIMessage->setOpDependencyInfoPresentFlag(i, true);
-		}
-	    else if( pcSEIMessage->getNumDirectlyDependentOps(i) < uiNumRef )
-			pcSEIMessage->setNumDirectlyDependentOps(i, uiNumRef );
+			UInt uiViewId = pcSEIMessage->getViewId(i, j); 
 
-		for( UInt ui = 0; ui < uiNumRef; ui++ )
-		{
-		  UInt uiRef;
-		  if( ui< pcSPS->SpsMVC->getNumRefsForListX( uiViewId, LIST_0, true ) )
-		    uiRef = pcSPS->SpsMVC->getAnchorRefForListX( uiViewId, ui, LIST_0 ); 
-		  else
-		    uiRef = pcSPS->SpsMVC->getAnchorRefForListX( uiViewId, ui-pcSPS->SpsMVC->getNumRefsForListX(uiViewId,LIST_0,true), LIST_1 );
-		  if( i > ViewOp[uiRef] )
-		    pcSEIMessage->setDirectlyDependentOpIdDeltaMinus1( i, ui, i - ViewOp[uiRef] - 1 );
+			UInt uiNumRef = pcSPS->SpsMVC->getNumRefsForListX( uiViewId, LIST_0, true ) 
+				+ pcSPS->SpsMVC->getNumRefsForListX( uiViewId, LIST_1, true );
+			UInt uiNumRef1 = pcSPS->SpsMVC->getNumRefsForListX( uiViewId, LIST_0, false ) 
+				+ pcSPS->SpsMVC->getNumRefsForListX( uiViewId, LIST_1, false );
+			if( uiNumRef1 > uiNumRef )
+				uiNumRef = uiNumRef1;
+
+			if( uiNumRef == 0 )
+				continue;
+
+			if( !pcSEIMessage->getViewDependencyInfoPresentFlag(i) && !pcSEIMessage->getViewDependencyInfoSrcOpId(i))//SEI 
+			{
+				pcSEIMessage->setNumDirectlyDependentViews(i, uiNumRef );//SEI JJ
+				pcSEIMessage->setViewDependencyInfoPresentFlag(i, true);//SEI JJ 
+			}
+			else if( pcSEIMessage->getNumDirectlyDependentViews(i) < uiNumRef )//SEI JJ
+				pcSEIMessage->setNumDirectlyDependentViews(i, uiNumRef );//SEI JJ 
+
+			for( UInt ui = 0; ui < uiNumRef; ui++ )
+			{
+				UInt uiRef;
+				if( ui< pcSPS->SpsMVC->getNumRefsForListX( uiViewId, LIST_0, true ) )
+					uiRef = pcSPS->SpsMVC->getAnchorRefForListX( uiViewId, ui, LIST_0 ); 
+				else
+					uiRef = pcSPS->SpsMVC->getAnchorRefForListX( uiViewId, ui-pcSPS->SpsMVC->getNumRefsForListX(uiViewId,LIST_0,true), LIST_1 );
+				if( i > ViewOp[uiRef] )
+					pcSEIMessage->setDirectlyDependentViewId( i, ui, i - ViewOp[uiRef] - 1 );//SEI JJ
+			}
 		}
-	  }
 	}
 
 	ViewOp = NULL;

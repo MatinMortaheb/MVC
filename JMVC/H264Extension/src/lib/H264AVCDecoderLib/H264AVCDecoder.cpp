@@ -1634,7 +1634,7 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 					m_uiNumOpMinus1 = ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getNumOperationPointsMinus1();
 					for( UInt uiOp = 0; uiOp <= m_uiNumOpMinus1; uiOp++ )
 					{
-					  m_uiNumViews[uiOp] = ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getNumActiveViewsMinus1(uiOp)+1;
+					  m_uiNumViews[uiOp] = ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getNumTargetOutputViewsMinus1(uiOp)+1;//SEI JJ
 					  m_OpViewId[uiOp] = (UInt*)malloc(m_uiNumViews[uiOp]*sizeof(UInt));
 					  for(UInt uiView = 0; uiView < m_uiNumViews[uiOp]; uiView++ )
 						  m_OpViewId[uiOp][uiView] = ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getViewId(uiOp, uiView);
@@ -1763,10 +1763,7 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 					}
 				}
         //JVT-AB025 {{
-        else if ( pcSEIMessage->getMessageType() == SEI::TARGET_VIEW_INFO_SEI)
-        {
-          m_uiTargetViewId = ((SEI::TargetViewInfoSei*)pcSEIMessage)->getTargetViewId();
-        }
+
         else if (pcSEIMessage->getMessageType() == SEI::NON_REQ_VIEW_INFO_SEI)
         {
           m_uiNumTargetViewMinus1 = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getNumTargetViewMinus1();

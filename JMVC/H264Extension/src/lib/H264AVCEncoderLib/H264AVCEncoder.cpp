@@ -515,19 +515,19 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
   pcViewScalInfoSei->setNumOperationPointsMinus1( uiNumOperationPointsMinus1 );
   for( i = 0; i <= uiNumOperationPointsMinus1; i++ )
   {
-    UInt uiOperationPointId, uiPriorityId, uiTemporalId, uiNumActiveViewsMinus1;
+    UInt uiOperationPointId, uiPriorityId, uiTemporalId, uiNumTargetOutputViewsMinus1;//SEI JJ
 
 	uiOperationPointId = i;
 	uiTemporalId = m_pcCodingParameter->getDecompositionStages();
 	uiPriorityId = uiCurrViewId == 0 ? uiTemporalId : ( uiTemporalId+uiCurrViewId%2+1 );
-	uiNumActiveViewsMinus1 = 0;
+	uiNumTargetOutputViewsMinus1 = 0;//SEI JJ
 
 	pcViewScalInfoSei->setOperationPointId( i, uiOperationPointId );
 	pcViewScalInfoSei->setPriorityId( i, uiPriorityId );
 	pcViewScalInfoSei->setTemporalId( i, uiTemporalId );
-	pcViewScalInfoSei->setNumActiveViewsMinus1( i, uiNumActiveViewsMinus1 );
+	pcViewScalInfoSei->setNumTargetOutputViewsMinus1( i, uiNumTargetOutputViewsMinus1 );//SEI JJ 
     
-	for( j = 0; j <= uiNumActiveViewsMinus1; j++)
+	for( j = 0; j <= uiNumTargetOutputViewsMinus1; j++)//SEI JJ
 	{
 	  UInt uiViewId = uiCurrViewId;
 	  pcViewScalInfoSei->setViewId( i, j, uiViewId );
@@ -544,8 +544,9 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
 	pcViewScalInfoSei->setProfileLevelInfoPresentFlag( i, bProfileLevelInfoPresentFlag );
 	pcViewScalInfoSei->setBitRateInfoPresentFlag( i, bBitRateInfoPresentFlag );
 	pcViewScalInfoSei->setFrmRateInfoPresentFlag( i, bFrmRateInfoPresentFlag );
-	pcViewScalInfoSei->setOpDependencyInfoPresentFlag( i, bOpDependencyInfoPresentFlag );
-	pcViewScalInfoSei->setInitParameterSetsInfoPresentFlag( i, bInitParameterSetsInfoPresentFlag );
+	
+	pcViewScalInfoSei->setViewDependencyInfoPresentFlag( i, bOpDependencyInfoPresentFlag );//SEI JJ
+	pcViewScalInfoSei->setParameterSetsInfoPresentFlag( i, bInitParameterSetsInfoPresentFlag );//SEI JJ
 
 	if( bProfileLevelInfoPresentFlag )
 	{
@@ -560,7 +561,7 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
 	  uiOpConstraintSet2Flag = false;		// may be changed
 	  uiOpConstraintSet3Flag = false;		// may be changed
 
-	  pcViewScalInfoSei->setOpProfileIdc( i, uiOpProfileIdc );
+	  pcViewScalInfoSei->setOpProfileLevelIdc( i, uiOpProfileIdc );//SEI JJ
 	  pcViewScalInfoSei->setOpConstraintSet0Flag( i, uiOpConstraintSet0Flag );
 	  pcViewScalInfoSei->setOpConstraintSet1Flag( i, uiOpConstraintSet1Flag );
 	  pcViewScalInfoSei->setOpConstraintSet2Flag( i, uiOpConstraintSet2Flag );
@@ -607,56 +608,57 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
 
 	if( bOpDependencyInfoPresentFlag )
 	{
-	  UInt uiNumDirectlyDependentOps =0 ;
+		
+	  UInt uiNumDirectlyDependentViews =0 ;//SEI JJ
 
-	  pcViewScalInfoSei->setNumDirectlyDependentOps( i, uiNumDirectlyDependentOps );
+	  pcViewScalInfoSei->setNumDirectlyDependentViews( i, uiNumDirectlyDependentViews );//SEI JJ 
 
-	  for( j = 0; j <= uiNumDirectlyDependentOps; j++ )
+	  for( j = 0; j <= uiNumDirectlyDependentViews; j++ )//SEI JJ
 	  {
-	    UInt uiDirectlyDependentOpIdDeltaMinus1 = 0;
+	    UInt uiDirectlyDependentViewId = 0;//SEI JJ
 
-		pcViewScalInfoSei->setDirectlyDependentOpIdDeltaMinus1( i, j, uiDirectlyDependentOpIdDeltaMinus1 );
+		pcViewScalInfoSei->setDirectlyDependentViewId( i, j, uiDirectlyDependentViewId );//SEI JJ
 	  }
 	}
 	else
 	{
-	  UInt uiOpDependencyInfoSrcOpIdDelta = 0; //should be changed
+	  UInt uiViewDependencyInfoSrcOpId = 0; //should be changed SEI JJ
 
-	  pcViewScalInfoSei->setOpDependencyInfoSrcOpIdDelta( i, uiOpDependencyInfoSrcOpIdDelta );
+	  pcViewScalInfoSei->setViewDependencyInfoSrcOpId( i, uiViewDependencyInfoSrcOpId );//SEI JJ 
 	}
 
 	if( bInitParameterSetsInfoPresentFlag )
 	{
 	  //the parameters may should be changed
-	  UInt uiNumInitSeqParameterSetMinus1, uiNumInitPicParameterSetMinus1;
+	  UInt uiNumSeqParameterSetMinus1, uiNumPicParameterSetMinus1;//SEI JJ
 
-	  uiNumInitSeqParameterSetMinus1 = 0;
-	  uiNumInitPicParameterSetMinus1 = 0;
+	  uiNumSeqParameterSetMinus1 = 0;//SEI JJ
+	  uiNumPicParameterSetMinus1 = 0;//SEI JJ
 
-	  pcViewScalInfoSei->setNumInitSeqParameterSetMinus1( i, uiNumInitSeqParameterSetMinus1 );
+	  pcViewScalInfoSei->setNumSeqParameterSetMinus1( i, uiNumSeqParameterSetMinus1 );//SEI JJ 
 
-	  for( j = 0; j <= uiNumInitSeqParameterSetMinus1; j++ )
+	  for( j = 0; j <= uiNumSeqParameterSetMinus1; j++ )//SEI JJ
 	  {
-	    UInt uiInitSeqParameterSetIdDelta = 0;
+	    UInt uiSeqParameterSetIdDelta = 0;//SEI JJ
 
-		pcViewScalInfoSei->setInitSeqParameterSetIdDelta( i, j, uiInitSeqParameterSetIdDelta );
+		pcViewScalInfoSei->setSeqParameterSetIdDelta( i, j, uiSeqParameterSetIdDelta );//SEI JJ 
 	  }
 
-	  pcViewScalInfoSei->setNumInitPicParameterSetMinus1( i, uiNumInitPicParameterSetMinus1 );
+	  pcViewScalInfoSei->setNumPicParameterSetMinus1( i, uiNumPicParameterSetMinus1 );//SEI JJ 
 
-	  for( j = 0; j <= uiNumInitPicParameterSetMinus1; j++ )
+	  for( j = 0; j <= uiNumPicParameterSetMinus1; j++ )//SEI JJ
 	  {
-	    UInt uiInitPicParameterSetIdDelta = 0;
+	    UInt uiPicParameterSetIdDelta = 0;//SEI JJ
 
-		pcViewScalInfoSei->setInitPicParameterSetIdDelta( i, j, uiInitPicParameterSetIdDelta );
+		pcViewScalInfoSei->setPicParameterSetIdDelta( i, j, uiPicParameterSetIdDelta );//SEI JJ 
 	  }
 
 	}
 	else
 	{
-	  UInt uiInitParameterSetsInfoSrcOpIdDelta = 0; //may should be changed
+	  UInt uiParameterSetsInfoSrcOpId = 0; //may should be changed SEI JJ
 
-	  pcViewScalInfoSei->setInitParameterSetsInfoSrcOpIdDelta( i, uiInitParameterSetsInfoSrcOpIdDelta );
+	  pcViewScalInfoSei->setParameterSetsInfoSrcOpId( i, uiParameterSetsInfoSrcOpId );//SEI JJ 
 	}
   }
 

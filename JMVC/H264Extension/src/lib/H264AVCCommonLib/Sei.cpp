@@ -255,14 +255,14 @@ SEI::ViewScalabilityInfoSei::ViewScalabilityInfoSei()
 	::memset( m_uiOperationPointId, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
 	::memset( m_uiPriorityId, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
 	::memset( m_uiTemporalId, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
-	::memset( m_uiNumActiveViewsMinus1, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
+	::memset( m_uiNumTargetOutputViewsMinus1, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );//SEI JJ
 	::memset( m_uiViewId, 0x00, MAX_OPERATION_POINTS*sizeof(UInt*) );
 	::memset( m_bProfileLevelInfoPresentFlag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
 	::memset( m_bBitRateInfoPresentFlag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
 	::memset( m_bFrmRateInfoPresentFlag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
-	::memset( m_bOpDependencyInfoPresentFlag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
-	::memset( m_bInitParameterSetsInfoPresentFlag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
-	::memset( m_uiOpProfileIdc, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
+	::memset( m_bViewDependencyInfoPresentFlag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );//SEI JJ 
+	::memset( m_bParameterSetsInfoPresentFlag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );//SEI JJ 
+	::memset( m_uiOpProfileLevelIdc, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );//SEI JJ
 	::memset( m_bOpConstraintSet0Flag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
 	::memset( m_bOpConstraintSet1Flag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
 	::memset( m_bOpConstraintSet2Flag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
@@ -277,14 +277,14 @@ SEI::ViewScalabilityInfoSei::ViewScalabilityInfoSei()
 	::memset( m_uiConstantFrmRateIdc, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
 	::memset( m_uiAvgFrmRate, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
 	::memset( m_uiFrmRateInfoSrcOpIdDela, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
-	::memset( m_uiNumDirectlyDependentOps, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
-	::memset( m_uiDirectlyDependentOpIdDeltaMinus1, 0x00, MAX_OPERATION_POINTS*sizeof(UInt*) );
-	::memset( m_uiOpDependencyInfoSrcOpIdDelta, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
-	::memset( m_uiNumInitSeqParameterSetMinus1, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
-	::memset( m_uiInitSeqParameterSetIdDelta, 0x00, MAX_OPERATION_POINTS*sizeof(UInt*) );
-	::memset( m_uiNumInitPicParameterSetMinus1, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
-	::memset( m_uiInitPicParameterSetIdDelta, 0x00, MAX_OPERATION_POINTS*sizeof(UInt*) );
-	::memset( m_uiInitParameterSetsInfoSrcOpIdDelta, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
+	::memset( m_uiNumDirectlyDependentViews, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );//SEI JJ 
+	::memset( m_uiDirectlyDependentViewId, 0x00, MAX_OPERATION_POINTS*sizeof(UInt*) );//SEI JJ 
+	::memset( m_uiViewDependencyInfoSrcOpId, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );//SEI JJ 
+	::memset( m_uiNumSeqParameterSetMinus1, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );//SEI JJ 
+	::memset( m_uiSeqParameterSetIdDelta, 0x00, MAX_OPERATION_POINTS*sizeof(UInt*) );//SEI JJ 
+	::memset( m_uiNumPicParameterSetMinus1, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );//SEI JJ 
+	::memset( m_uiPicParameterSetIdDelta, 0x00, MAX_OPERATION_POINTS*sizeof(UInt*) );//SEI JJ 
+	::memset( m_uiParameterSetsInfoSrcOpId, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );//SEI JJ 
 }
 
 SEI::ViewScalabilityInfoSei::~ViewScalabilityInfoSei()
@@ -297,24 +297,25 @@ SEI::ViewScalabilityInfoSei::~ViewScalabilityInfoSei()
 	    free( m_uiViewId[i] );
 		m_uiViewId[i] = NULL;
 	  }
-
-	  if( m_uiDirectlyDependentOpIdDeltaMinus1[i] != NULL )
+	  //{{SEI JJ
+	  if( m_uiDirectlyDependentViewId[i] != NULL )
 	  {
-	    free( m_uiDirectlyDependentOpIdDeltaMinus1[i] );
-		m_uiDirectlyDependentOpIdDeltaMinus1[i] = NULL;
+	    free( m_uiDirectlyDependentViewId[i] );
+		m_uiDirectlyDependentViewId[i] = NULL;
 	  }
 
-	  if( m_uiInitSeqParameterSetIdDelta[i] != NULL )
+	  if( m_uiSeqParameterSetIdDelta[i] != NULL )
 	  {
-	    free( m_uiInitSeqParameterSetIdDelta[i] );
-		m_uiInitSeqParameterSetIdDelta[i] = NULL;
+	    free( m_uiSeqParameterSetIdDelta[i] );
+		m_uiSeqParameterSetIdDelta[i] = NULL;
 	  }
 
-	  if( m_uiInitPicParameterSetIdDelta[i] != NULL )
+	  if( m_uiPicParameterSetIdDelta[i] != NULL )
 	  {
-	    free( m_uiInitPicParameterSetIdDelta[i] );
-		m_uiInitPicParameterSetIdDelta[i] = NULL;
+	    free( m_uiPicParameterSetIdDelta[i] );
+		m_uiPicParameterSetIdDelta[i] = NULL;
 	  }
+	  //}}SEI JJ
 	}
 }
 
@@ -345,9 +346,9 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 	RNOK( pcWriteIf->writeUvlc( m_uiOperationPointId[i], "ViewScalabilityInfoSei: operation_point_id" ) );
 	RNOK( pcWriteIf->writeCode( m_uiPriorityId[i], 5, "ViewScalabilityInfoSei: priority_id" ) );
 	RNOK( pcWriteIf->writeCode( m_uiTemporalId[i], 3, "ViewScalabilityInfoSei: temporal_id" ) );
-	RNOK( pcWriteIf->writeUvlc( m_uiNumActiveViewsMinus1[i], "ViewScalabilityInfoSei: num_active_views_minus1" ) );
+	RNOK( pcWriteIf->writeUvlc( m_uiNumTargetOutputViewsMinus1[i], "ViewScalabilityInfoSei: num_target_output_views_minus1" ) );//SEI JJ 
 
-	for( j = 0; j <= m_uiNumActiveViewsMinus1[i]; j++ )
+	for( j = 0; j <= m_uiNumTargetOutputViewsMinus1[i]; j++ )//SEI JJ 
 	{
 	  RNOK( pcWriteIf->writeUvlc( m_uiViewId[i][j], "ViewScalabilityInfoSei: view_id" ) );
 	}
@@ -355,12 +356,17 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 	RNOK( pcWriteIf->writeFlag( m_bProfileLevelInfoPresentFlag[i], "ViewScalabilityInfoSei: profile_level_info_present_flag" ) );
 	RNOK( pcWriteIf->writeFlag( m_bBitRateInfoPresentFlag[i], "ViewScalabilityInfoSei: bitrate_info_present_flag" ) );
 	RNOK( pcWriteIf->writeFlag( m_bFrmRateInfoPresentFlag[i], "ViewScalabilityInfoSei: frm_rate_info_present_flag" ) );
-	RNOK( pcWriteIf->writeFlag( m_bOpDependencyInfoPresentFlag[i], "ViewScalabilityInfoSei: op_dependency_info_present_flag" ) );
-	RNOK( pcWriteIf->writeFlag( m_bInitParameterSetsInfoPresentFlag[i], "ViewScalabilityInfoSei: init_parameter_sets_info_present_flag" ) );
-
+	//SEI JJ{{
+	if ( !m_uiNumTargetOutputViewsMinus1[i] )
+	{
+		RNOK( pcWriteIf->writeFlag( m_bViewDependencyInfoPresentFlag[i], "ViewScalabilityInfoSei: view_dependency_info_present_flag" ) );
+	}//SEI JJ}}
+	RNOK( pcWriteIf->writeFlag( m_bParameterSetsInfoPresentFlag[i], "ViewScalabilityInfoSei: parameter_sets_info_present_flag" ) );//SEI JJ
+	RNOK( pcWriteIf->writeFlag( m_bBitstreamRestrictionInfoPresentFlag[i], "ViewScalabilityInfoSei: bitstream_restriction_info_present_flag" ) );//SEI JJ
+ 
 	if( m_bProfileLevelInfoPresentFlag[i] )
 	{
-	  RNOK( pcWriteIf->writeCode( m_uiOpProfileIdc[i], 8, "ViewScalabilityInfoSei: op_profile_idc" ) );
+	  RNOK( pcWriteIf->writeCode( m_uiOpProfileLevelIdc[i], 8, "ViewScalabilityInfoSei: op_profile_level_idc" ) );//SEI JJ
 	  RNOK( pcWriteIf->writeFlag( m_bOpConstraintSet0Flag[i], "ViewScalabilityInfoSei: op_constraint_set0_flag" ) );
 	  RNOK( pcWriteIf->writeFlag( m_bOpConstraintSet1Flag[i], "ViewScalabilityInfoSei: op_constraint_set1_flag" ) );
 	  RNOK( pcWriteIf->writeFlag( m_bOpConstraintSet2Flag[i], "ViewScalabilityInfoSei: op_constraint_set2_flag" ) );
@@ -369,7 +375,7 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 	  RNOK( pcWriteIf->writeCode( m_uiOpLevelIdc[i], 8, "ViewScalabilityInfoSei: op_level_idc" ) );
 	}
 	else
-	  RNOK( pcWriteIf->writeUvlc( m_uiProfileLevelInfoSrcOpIdDelta[i], "ViewScalabilityInfoSei: profile_level_info_src_op_id_delta" ) );
+		RNOK( pcWriteIf->writeUvlc( m_uiProfileLevelInfoSrcOpIdDelta[i], "ViewScalabilityInfoSei: profile_level_info_src_op_id_delta" ) );
 	
 	if( m_bBitRateInfoPresentFlag[i] )
 	{
@@ -383,30 +389,46 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 	  RNOK( pcWriteIf->writeCode( m_uiConstantFrmRateIdc[i], 2, "ViewScalabilityInfoSei: constant_frm_rate_idc" ) );
 	  RNOK( pcWriteIf->writeCode( m_uiAvgFrmRate[i], 16, "ViewScalabilityInfoSei: avg_frm_rate" ) );
 	}
-	else
-	  RNOK( pcWriteIf->writeUvlc( m_uiFrmRateInfoSrcOpIdDela[i], "ViewScalabilityInfoSei: frm_rate_info_src_op_id_delta" ) );
-
-	if( m_bOpDependencyInfoPresentFlag[i] )
+	//{{SEI JJ
+	if( m_bViewDependencyInfoPresentFlag[i] )
 	{
-	  RNOK( pcWriteIf->writeUvlc( m_uiNumDirectlyDependentOps[i], "ViewScalabilityInfoSei: num_directly_dependent_ops" ) );
-	  for( j = 0; j < m_uiNumDirectlyDependentOps[i]; j++ )
-	    RNOK( pcWriteIf->writeUvlc( m_uiDirectlyDependentOpIdDeltaMinus1[i][j], "ViewScalabilityInfoSei: directly_dependent_op_id_delta_minus1" ) );
+	  RNOK( pcWriteIf->writeUvlc( m_uiNumDirectlyDependentViews[i], "ViewScalabilityInfoSei: num_directly_dependent_ops" ) );
+	  for( j = 0; j < m_uiNumDirectlyDependentViews[i]; j++ )
+	    RNOK( pcWriteIf->writeUvlc( m_uiDirectlyDependentViewId[i][j], "ViewScalabilityInfoSei: directly_dependent_view_id" ) );
 	}
 	else
-	  RNOK( pcWriteIf->writeUvlc( m_uiOpDependencyInfoSrcOpIdDelta[i], "ViewScalabilityInfoSei: op_dependency_info_src_op_id_delta" ) );
+	  RNOK( pcWriteIf->writeUvlc( m_uiViewDependencyInfoSrcOpId[i], "ViewScalabilityInfoSei: view_dependency_info_src_op_id" ) ); 
 
-	if( m_bInitParameterSetsInfoPresentFlag[i] )
+	if( m_bParameterSetsInfoPresentFlag[i] )
 	{
-	  RNOK( pcWriteIf->writeUvlc( m_uiNumInitSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_init_seq_parameter_set_minus1" ) );
-	  for( j = 0; j <= m_uiNumInitSeqParameterSetMinus1[i]; j++ )
-	    RNOK( pcWriteIf->writeUvlc( m_uiInitSeqParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: init_seq_parameter_set_id_delta" ) );
-
-	  RNOK( pcWriteIf->writeUvlc( m_uiNumInitPicParameterSetMinus1[i], "ViewScalabilityInfoSei: num_init_pic_parameter_set_minus1" ) );
-	  for( j = 0; j <= m_uiNumInitPicParameterSetMinus1[i]; j++ )
-	    RNOK( pcWriteIf->writeUvlc( m_uiInitPicParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: init_pic_parameter_set_id_delta" ) );
+	  RNOK( pcWriteIf->writeUvlc( m_uiNumSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_seq_parameter_set_minus1" ) );
+	  for( j = 0; j <= m_uiNumSeqParameterSetMinus1[i]; j++ )
+	    RNOK( pcWriteIf->writeUvlc( m_uiSeqParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: seq_parameter_set_id_delta" ) );
+       
+	  RNOK( pcWriteIf->writeUvlc( m_uiNumSubsetSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_subset_seq_parameter_set_minus1" ) );
+	  for ( j = 0; j <= m_uiNumSubsetSeqParameterSetMinus1[ i ]; j++)
+	  {
+		  RNOK( pcWriteIf->writeUvlc( m_uiSubsetSeqParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: subset_seq_parameter_set_id_delta" ) );
+	  }
+	  
+	  RNOK( pcWriteIf->writeUvlc( m_uiNumPicParameterSetMinus1[i], "ViewScalabilityInfoSei: num_pic_parameter_set_minus1" ) ); 
+	  for( j = 0; j <= m_uiNumPicParameterSetMinus1[i]; j++ )
+	    RNOK( pcWriteIf->writeUvlc( m_uiPicParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: pic_parameter_set_id_delta" ) );
 	}
 	else
-	  RNOK( pcWriteIf->writeUvlc( m_uiInitParameterSetsInfoSrcOpIdDelta[i], "ViewScalabilityInfoSei: init_parameter_sets_info_src_op_id_delta" ) );
+	  RNOK( pcWriteIf->writeUvlc( m_uiParameterSetsInfoSrcOpId[i], "ViewScalabilityInfoSei: parameter_sets_info_src_op_id" ) );
+	
+	if( m_bBitstreamRestrictionInfoPresentFlag[ i ] ) 
+	{
+		RNOK	( pcWriteIf->writeFlag( m_bMotionVectorsOverPicBoundariesFlag[i],"ScalableSEI:motion_vectors_over_pic_boundaries_flag"	) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiMaxBytesPerPicDenom[i],		"ScalableSEI:max_bytes_per_pic_denom" ) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiMaxBitsPerMbDenom[i],		"ScalableSEI:max_bits_per_mb_denom" ) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiLog2MaxMvLengthHorizontal[i],		"ScalableSEI:log2_max_mv_length_horizontal" ) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiLog2MaxMvLengthVertical[i],		"ScalableSEI:og2_max_mv_length_vertical" ) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiNumReorderFrames[i],		"ScalableSEI:num_reorder_frames" ) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiMaxDecFrameBuffering[i],		"ScalableSEI:max_dec_frame_buffering" ) );
+	}
+	//}}SEI JJ, Ying
   }
   return Err::m_nOK;
 
@@ -425,13 +447,13 @@ SEI::ViewScalabilityInfoSei::read( HeaderSymbolReadIf *pcReadIf )
 	RNOK( pcReadIf->getUvlc( m_uiOperationPointId[i], "ViewScalabilityInfoSei: operation_point_id" ) );
 	RNOK( pcReadIf->getCode( m_uiPriorityId[i], 5, "ViewScalabilityInfoSei: priority_id" ) );
 	RNOK( pcReadIf->getCode( m_uiTemporalId[i], 3, "ViewScalabilityInfoSei: temporal_id" ) );
-	RNOK( pcReadIf->getUvlc( m_uiNumActiveViewsMinus1[i], "ViewScalabilityInfoSei: num_active_views_minus1" ) );
+	RNOK( pcReadIf->getUvlc( m_uiNumTargetOutputViewsMinus1[i], "ViewScalabilityInfoSei: num_target_output_views_minus1" ) );//SEI JJ 
 
 	if( m_uiViewId[i] != NULL )
 	  free( m_uiViewId[i] );
-	m_uiViewId[i] = (UInt*)malloc( ( m_uiNumActiveViewsMinus1[i]+1 )*sizeof(UInt) );
+	m_uiViewId[i] = (UInt*)malloc( ( m_uiNumTargetOutputViewsMinus1[i]+1 )*sizeof(UInt) );//SEI JJ 
 
-	for( j = 0; j <= m_uiNumActiveViewsMinus1[i]; j++ )
+	for( j = 0; j <= m_uiNumTargetOutputViewsMinus1[i]; j++ )//SEI JJ 
 	{
 	  RNOK( pcReadIf->getUvlc( m_uiViewId[i][j], "ViewScalabilityInfoSei: view_id" ) );
 	}
@@ -439,12 +461,17 @@ SEI::ViewScalabilityInfoSei::read( HeaderSymbolReadIf *pcReadIf )
 	RNOK( pcReadIf->getFlag( m_bProfileLevelInfoPresentFlag[i], "ViewScalabilityInfoSei: profile_level_info_present_flag" ) );
 	RNOK( pcReadIf->getFlag( m_bBitRateInfoPresentFlag[i], "ViewScalabilityInfoSei: bitrate_info_present_flag" ) );
 	RNOK( pcReadIf->getFlag( m_bFrmRateInfoPresentFlag[i], "ViewScalabilityInfoSei: frm_rate_info_present_flag" ) );
-	RNOK( pcReadIf->getFlag( m_bOpDependencyInfoPresentFlag[i], "ViewScalabilityInfoSei: op_dependency_info_present_flag" ) );
-	RNOK( pcReadIf->getFlag( m_bInitParameterSetsInfoPresentFlag[i], "ViewScalabilityInfoSei: init_parameter_sets_info_present_flag" ) );
-
+	//{{SEI JJ 
+	if ( !m_uiNumTargetOutputViewsMinus1[i] )
+	{
+		RNOK( pcReadIf->getFlag( m_bViewDependencyInfoPresentFlag[i], "ViewScalabilityInfoSei: view_dependency_info_present_flag" ) );
+	}
+	RNOK( pcReadIf->getFlag( m_bParameterSetsInfoPresentFlag[i], "ViewScalabilityInfoSei: parameter_sets_info_present_flag" ) ); 
+	RNOK( pcReadIf->getFlag( m_bBitstreamRestrictionInfoPresentFlag[i], "ViewScalabilityInfoSei: bitstream_restriction_info_present_flag" ) );
+    //}}SEI JJ
 	if( m_bProfileLevelInfoPresentFlag[i] )
 	{
-	  RNOK( pcReadIf->getCode( m_uiOpProfileIdc[i], 8, "ViewScalabilityInfoSei: op_profile_idc" ) );
+	  RNOK( pcReadIf->getCode( m_uiOpProfileLevelIdc[i], 8, "ViewScalabilityInfoSei: op_profile_level_idc" ) );//SEI JJ
 	  RNOK( pcReadIf->getFlag( m_bOpConstraintSet0Flag[i], "ViewScalabilityInfoSei: op_constraint_set0_flag" ) );
 	  RNOK( pcReadIf->getFlag( m_bOpConstraintSet1Flag[i], "ViewScalabilityInfoSei: op_constraint_set1_flag" ) );
 	  RNOK( pcReadIf->getFlag( m_bOpConstraintSet2Flag[i], "ViewScalabilityInfoSei: op_constraint_set2_flag" ) );
@@ -453,7 +480,7 @@ SEI::ViewScalabilityInfoSei::read( HeaderSymbolReadIf *pcReadIf )
 	  RNOK( pcReadIf->getCode( m_uiOpLevelIdc[i], 8, "ViewScalabilityInfoSei: op_level_idc" ) );
 	}
 	else
-	  RNOK( pcReadIf->getUvlc( m_uiProfileLevelInfoSrcOpIdDelta[i], "ViewScalabilityInfoSei: profile_level_info_src_op_id_delta" ) );
+		RNOK( pcReadIf->getUvlc( m_uiProfileLevelInfoSrcOpIdDelta[i], "ViewScalabilityInfoSei: profile_level_info_src_op_id_delta" ) );
 	
 	if( m_bBitRateInfoPresentFlag[i] )
 	{
@@ -467,45 +494,61 @@ SEI::ViewScalabilityInfoSei::read( HeaderSymbolReadIf *pcReadIf )
 	  RNOK( pcReadIf->getCode( m_uiConstantFrmRateIdc[i], 2, "ViewScalabilityInfoSei: constant_frm_rate_idc" ) );
 	  RNOK( pcReadIf->getCode( m_uiAvgFrmRate[i], 16, "ViewScalabilityInfoSei: avg_frm_rate" ) );
 	}
-	else
-	  RNOK( pcReadIf->getUvlc( m_uiFrmRateInfoSrcOpIdDela[i], "ViewScalabilityInfoSei: frm_rate_info_src_op_id_delta" ) );
-
-	if( m_bOpDependencyInfoPresentFlag[i] )
+    //{{SEI JJ
+	if( m_bViewDependencyInfoPresentFlag[i] )
 	{
-	  RNOK( pcReadIf->getUvlc( m_uiNumDirectlyDependentOps[i], "ViewScalabilityInfoSei: num_directly_dependent_ops" ) );
+	  RNOK( pcReadIf->getUvlc( m_uiNumDirectlyDependentViews[i], "ViewScalabilityInfoSei: num_directly_dependent_views" ) );
 
-	  if( m_uiDirectlyDependentOpIdDeltaMinus1[i] != NULL )
-	    free( m_uiDirectlyDependentOpIdDeltaMinus1[i] );
-	  m_uiDirectlyDependentOpIdDeltaMinus1[i] = (UInt*)malloc( ( m_uiNumDirectlyDependentOps[i]+1 ) * sizeof(UInt) );
+	  if( m_uiDirectlyDependentViewId[i] != NULL )
+	    free( m_uiDirectlyDependentViewId[i] );
+	  m_uiDirectlyDependentViewId[i] = (UInt*)malloc( ( m_uiNumDirectlyDependentViews[i]+1 ) * sizeof(UInt) );
 
-	  for( j = 0; j < m_uiNumDirectlyDependentOps[i]; j++ )
-	    RNOK( pcReadIf->getUvlc( m_uiDirectlyDependentOpIdDeltaMinus1[i][j], "ViewScalabilityInfoSei: directly_dependent_op_id_delta_minus1" ) );
+	  for( j = 0; j < m_uiNumDirectlyDependentViews[i]; j++ )
+	    RNOK( pcReadIf->getUvlc( m_uiDirectlyDependentViewId[i][j], "ViewScalabilityInfoSei: directly_dependent_view_id" ) );
 	}
 	else
-	  RNOK( pcReadIf->getUvlc( m_uiOpDependencyInfoSrcOpIdDelta[i], "ViewScalabilityInfoSei: op_dependency_info_src_op_id_delta" ) );
+	  RNOK( pcReadIf->getUvlc( m_uiViewDependencyInfoSrcOpId[i], "ViewScalabilityInfoSei: view_dependency_info_src_op_id" ) );
 
-	if( m_bInitParameterSetsInfoPresentFlag[i] )
+	if( m_bParameterSetsInfoPresentFlag[i] )
 	{
-	  RNOK( pcReadIf->getUvlc( m_uiNumInitSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_init_seq_parameter_set_minus1" ) );
+	  RNOK( pcReadIf->getUvlc( m_uiNumSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_seq_parameter_set_minus1" ) );
 
-	  if( m_uiInitSeqParameterSetIdDelta[i] != NULL )
-	    free( m_uiInitSeqParameterSetIdDelta[i] );
-	  m_uiInitSeqParameterSetIdDelta[i] = (UInt*)malloc( ( m_uiNumInitSeqParameterSetMinus1[i]+1 ) * sizeof(UInt) );
+	  if( m_uiSeqParameterSetIdDelta[i] != NULL )
+	    free( m_uiSeqParameterSetIdDelta[i] );
+	  m_uiSeqParameterSetIdDelta[i] = (UInt*)malloc( ( m_uiNumSeqParameterSetMinus1[i]+1 ) * sizeof(UInt) );
 
-	  for( j = 0; j <= m_uiNumInitSeqParameterSetMinus1[i]; j++ )
-	    RNOK( pcReadIf->getUvlc( m_uiInitSeqParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: init_seq_parameter_set_id_delta" ) );
+	  for( j = 0; j <= m_uiNumSeqParameterSetMinus1[i]; j++ )
+	    RNOK( pcReadIf->getUvlc( m_uiSeqParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: init_seq_parameter_set_id_delta" ) );
+      
+	  RNOK( pcReadIf->getUvlc( m_uiNumSubsetSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_subset_seq_parameter_set_minus1" ) );
+	  for ( j = 0; j <= m_uiNumSubsetSeqParameterSetMinus1[ i ]; j++)
+	  {
+		  RNOK( pcReadIf->getUvlc( m_uiSubsetSeqParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: subset_seq_parameter_set_id_delta" ) );
+	  }
+	  
+	  RNOK( pcReadIf->getUvlc( m_uiNumPicParameterSetMinus1[i], "ViewScalabilityInfoSei: num_pic_parameter_set_minus1" ) );
 
-	  RNOK( pcReadIf->getUvlc( m_uiNumInitPicParameterSetMinus1[i], "ViewScalabilityInfoSei: num_init_pic_parameter_set_minus1" ) );
+	  if( m_uiPicParameterSetIdDelta[i] != NULL )
+	    free( m_uiPicParameterSetIdDelta[i] );
+	  m_uiPicParameterSetIdDelta[i] = (UInt*)malloc( ( m_uiNumPicParameterSetMinus1[i]+1 ) * sizeof(UInt) );
 
-	  if( m_uiInitPicParameterSetIdDelta[i] != NULL )
-	    free( m_uiInitPicParameterSetIdDelta[i] );
-	  m_uiInitPicParameterSetIdDelta[i] = (UInt*)malloc( ( m_uiNumInitPicParameterSetMinus1[i]+1 ) * sizeof(UInt) );
-
-	  for( j = 0; j <= m_uiNumInitPicParameterSetMinus1[i]; j++ )
-	    RNOK( pcReadIf->getUvlc( m_uiInitPicParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: init_pic_parameter_set_id_delta" ) );
+	  for( j = 0; j <= m_uiNumPicParameterSetMinus1[i]; j++ ) 
+	    RNOK( pcReadIf->getUvlc( m_uiPicParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: init_pic_parameter_set_id_delta" ) );
 	}
 	else
-	  RNOK( pcReadIf->getUvlc( m_uiInitParameterSetsInfoSrcOpIdDelta[i], "ViewScalabilityInfoSei: init_parameter_sets_info_src_op_id_delta" ) );
+	  RNOK( pcReadIf->getUvlc( m_uiParameterSetsInfoSrcOpId[i], "ViewScalabilityInfoSei: parameter_sets_info_src_op_id" ) );
+	
+	if( m_bBitstreamRestrictionInfoPresentFlag[ i ] ) 
+	{
+		RNOK	( pcReadIf->getFlag( m_bMotionVectorsOverPicBoundariesFlag[i],"ScalableSEI:motion_vectors_over_pic_boundaries_flag"	) );
+		RNOK	( pcReadIf->getUvlc( m_uiMaxBytesPerPicDenom[i],		"ScalableSEI:max_bytes_per_pic_denom" ) );
+		RNOK	( pcReadIf->getUvlc( m_uiMaxBitsPerMbDenom[i],		"ScalableSEI:max_bits_per_mb_denom" ) );
+		RNOK	( pcReadIf->getUvlc( m_uiLog2MaxMvLengthHorizontal[i],		"ScalableSEI:log2_max_mv_length_horizontal" ) );
+		RNOK	( pcReadIf->getUvlc( m_uiLog2MaxMvLengthVertical[i],		"ScalableSEI:log2_max_mv_length_vertical" ) );
+		RNOK	( pcReadIf->getUvlc( m_uiNumReorderFrames[i],		"ScalableSEI:num_reorder_frames" ) );
+		RNOK	( pcReadIf->getUvlc( m_uiMaxDecFrameBuffering[i],		"ScalableSEI:max_dec_frame_buffering" ) );
+	}
+	//}}SEI JJ
   }
   return Err::m_nOK;
 
@@ -969,7 +1012,6 @@ SEI::xCreate( SEIMessage*&  rpcSEIMessage,
 //JVT-W080
 		case PARALLEL_DEC_SEI: return ParallelDecodingSEI::create(( ParallelDecodingSEI*&) rpcSEIMessage );
 //~JVT-W080
-    case TARGET_VIEW_INFO_SEI: return TargetViewInfoSei::create((TargetViewInfoSei*&) rpcSEIMessage);   //JVT-AB025
     case NON_REQ_VIEW_INFO_SEI: return NonReqViewInfoSei::create((NonReqViewInfoSei*&)rpcSEIMessage);   //JVT-AB025
     case VIEW_DEPENDENCY_STRUCTURE_SEI: return ViewDependencyStructureSei::create((ViewDependencyStructureSei*&)rpcSEIMessage); //JVT-AB025
     case OP_NOT_PRESENT_SEI: return OPNotPresentSei:: create((OPNotPresentSei*&) rpcSEIMessage);//JVT-AB025
@@ -2212,7 +2254,7 @@ SEI::ParallelDecodingSEI::write( HeaderSymbolWriteIf *pcWriteIf )
 	pcWriteIf->writeUvlc( m_uiSPSId, "SEI:PDSEI: PdsSeqParameterSetId");
 	for( UInt uiNumView = 0; uiNumView <= uiNumViewMinus1; uiNumView++ )
 	{
-		for( j = 0; j < m_puiNumRefAnchorFramesL0[uiNumView]; j++ )
+		for( j = 1; j < m_puiNumRefAnchorFramesL0[uiNumView]; j++ )//SEI JJ
 	  {
 			pcWriteIf->writeUvlc( m_ppuiPDIInitDelayMinus2L0Anc[uiNumView][j], "SEI:PDSEI: PdsInitialDelayMinus2L0Anc");
 		}
@@ -2240,45 +2282,7 @@ SEI::ParallelDecodingSEI::read ( HeaderSymbolReadIf *pcReadIf )
 	return Err::m_nOK;
 }
 //~JVT-W080
-//////////////////////////////////////////////////////////////////////////
-//
-//			Target View Id Info //JVT-AB025  
-//
-//////////////////////////////////////////////////////////////////////////
-ErrVal
-SEI::TargetViewInfoSei::create(TargetViewInfoSei*& rpcSeiMessage)
-{
-  rpcSeiMessage =new TargetViewInfoSei();
-  ROT(NULL == rpcSeiMessage);
-  return Err::m_nOK;
-}
-ErrVal
-SEI::TargetViewInfoSei::destory()
-{
-  delete this;
-  return Err::m_nOK;
-}
-ErrVal
-SEI::TargetViewInfoSei::write(HeaderSymbolWriteIf* pcWriteIf)
-{
-  UInt uiStartBits  = pcWriteIf->getNumberOfWrittenBits();
-  UInt uiPayloadSize = 0;
 
-  RNOK( pcWriteIf->writeUvlc( m_uiTargetViewId, "TargetViewInfoSei::TargetViewId" ) );
-
-  UInt uiBits = pcWriteIf->getNumberOfWrittenBits()-uiStartBits;
-
-  uiPayloadSize = (uiBits+7)/8;
-
-  return Err::m_nOK;
-}
-ErrVal
-SEI::TargetViewInfoSei::read(HeaderSymbolReadIf* pcReadIf)
-{
-  RNOK( pcReadIf->getUvlc( m_uiTargetViewId, "TargetViewInfoSei::TargetViewId" ) );
-
-  return Err::m_nOK;
-}
 
 //JVT-AB025 {{
 ////////////////////////////////////////////////////////////////////////////////
@@ -2399,6 +2403,7 @@ SEI::ViewDependencyStructureSei::ViewDependencyStructureSei()
 ,m_puiNumNonAnchorL1Refs(NULL)
 ,m_bAnchorUpdateFlag(false)
 ,m_bNonAnchorUpdateFlag(false)
+,m_uiSeqParameterSetId(0)  //SEI JJ
 ,m_ppbAnchorRefL0Flag(NULL)
 ,m_ppbAnchorRefL1Flag(NULL)
 ,m_ppbNonAnchorRefL0Flag(NULL)
@@ -2547,12 +2552,13 @@ SEI::ViewDependencyStructureSei::init( UInt uiNumOfViews
 }
 ErrVal
 SEI::ViewDependencyStructureSei::write(HeaderSymbolWriteIf* pcWriteIf )
-{
+{ 	
+  RNOK(pcWriteIf->writeUvlc(m_uiSeqParameterSetId,"ViewDependencyStructureSei:seq_parameter_set_id" ) );  //SEI JJ	
   RNOK(pcWriteIf->writeFlag(m_bAnchorUpdateFlag,"ViewDependencyStructureSei: anchor_update_flag"));
   RNOK(pcWriteIf->writeFlag(m_bNonAnchorUpdateFlag, "ViewDependencyStructureSei: non_anchor_update_flag"));
   if (m_bAnchorUpdateFlag)
   {
-    for ( UInt i = 0; i< m_uiNumOfViews; i++)
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) // ying
     {
       for ( UInt j = 0; j< m_puiNumAnchorL0Refs[i]; j++)
       {
@@ -2566,7 +2572,7 @@ SEI::ViewDependencyStructureSei::write(HeaderSymbolWriteIf* pcWriteIf )
   }
   if (m_bNonAnchorUpdateFlag)
   {
-    for ( UInt i = 0; i< m_uiNumOfViews; i++)
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) // ying
     {
       for ( UInt j = 0; j< m_puiNumNonAnchorL0Refs[i]; j++)
       {
@@ -2583,11 +2589,12 @@ SEI::ViewDependencyStructureSei::write(HeaderSymbolWriteIf* pcWriteIf )
 ErrVal
 SEI::ViewDependencyStructureSei::read(HeaderSymbolReadIf* pcReadIf)
 {
+  RNOK(pcReadIf->getUvlc(m_uiSeqParameterSetId, "ViewDependencyStructureSei:seq_parameter_set_id" ) );  //SEI JJ	
   RNOK(pcReadIf->getFlag(m_bAnchorUpdateFlag,"ViewDependencyStructureSei: anchor_update_flag"));
   RNOK(pcReadIf->getFlag(m_bNonAnchorUpdateFlag, "ViewDependencyStructureSei: non_anchor_update_flag"));
   if (m_bAnchorUpdateFlag)
   {
-    for ( UInt i = 0; i< m_uiNumOfViews; i++)
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) //ying
     {
       m_ppbAnchorRefL0Flag[i] = new Bool[m_puiNumAnchorL0Refs[i]];
       m_ppbAnchorRefL1Flag[i] = new Bool[m_puiNumAnchorL1Refs[i]];
@@ -2603,7 +2610,7 @@ SEI::ViewDependencyStructureSei::read(HeaderSymbolReadIf* pcReadIf)
   }
   if (m_bNonAnchorUpdateFlag)
   {
-    for ( UInt i = 0; i< m_uiNumOfViews; i++)
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) //ying
     {
       //m_puiNumNonAnchorL0Refs[i] = num_refs_list0_nonanc[i];
       //m_puiNumNonAnchorL1Refs[i] = num_refs_list1_nonanc[i];

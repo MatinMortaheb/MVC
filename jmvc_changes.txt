@@ -1,3 +1,12 @@
+JMVC_2_4 -> JMVC_2_5
+Date            : November 10, 2008
+Authors         : TUT (Software coordinators) & USTC
+Contribution    : SEI message syntax modification according to JVT-AB204
+Changes:
+- Confirm the payload type of each MVC SEI message, make the value in the software the same as that defined in JVT-AB204.
+- Updates for parallel decoding SEI, View Scalability info. SEI and View dependency change SEI.
+
+
 JMVC_2_3 -> JMVC_2_4
 Date            : November 6, 2008
 Authors         : MERL (Software coordinators)
