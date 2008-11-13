@@ -742,6 +742,8 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
   m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("SymbolMode",              &m_uiSymbolMode,                                       1 );
   m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("FRExt",                   &m_ui8x8Mode,                                          1 );
   m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineDbl ("BasisQP",                 &m_dBasisQp,                                          26 );
+  m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("PicOrderCntType",         &m_uiPicOrderCntType,                                  0 );//poc type 
+
   //SEI LSJ{
   m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("NestingSEI",              &m_uiNestingSEIEnable,                                 0 );
   m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("SnapShot",                &m_uiSnapShotEnable,                                  0 );

@@ -909,6 +909,8 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   rpcSPS->setSeqParameterSetId                     ( uiSPSId );
   rpcSPS->setSeqScalingMatrixPresentFlag           ( m_pcCodingParameter->get8x8Mode() > 1 );
   rpcSPS->setLog2MaxFrameNum                       ( m_pcCodingParameter->getLog2MaxFrameNum() );
+  ROT(m_pcCodingParameter->getPicOrderCntType()==2 && m_pcCodingParameter->getGOPSize()>1);//Poc type 2 supported when GOPSize =1
+  rpcSPS->setPicOrderCntType                       ( m_pcCodingParameter->getPicOrderCntType() );
   rpcSPS->setLog2MaxPicOrderCntLsb                 ( m_pcCodingParameter->getLog2MaxPocLsb() );
   rpcSPS->setNumRefFrames                          ( m_pcCodingParameter->getDPBSize ());
   rpcSPS->setRequiredFrameNumUpdateBehaviourFlag   ( true );

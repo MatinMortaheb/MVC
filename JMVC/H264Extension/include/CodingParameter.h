@@ -664,6 +664,7 @@ public:
     , m_uiDPBSize                         ( 0 )
     , m_uiNumDPBRefFrames                 ( 0 )
     , m_uiLog2MaxFrameNum                 ( 0 )
+	, m_uiPicOrderCntType                 ( 0 )//Poc Type
     , m_uiLog2MaxPocLsb                   ( 0 )
     , m_cSequenceFormatString             ()
     , m_uiMaxRefIdxActiveBL0              ( 0 )
@@ -793,6 +794,7 @@ public:
   UInt                            getDPBSize              ()              const   { return m_uiDPBSize; }
   UInt                            getNumDPBRefFrames      ()              const   { return m_uiNumDPBRefFrames; }
   UInt                            getLog2MaxFrameNum      ()              const   { return m_uiLog2MaxFrameNum; }
+  UInt                            getPicOrderCntType      ()              const   { return m_uiPicOrderCntType; } //Poc Type
   UInt                            getLog2MaxPocLsb        ()              const   { return m_uiLog2MaxPocLsb; }
   std::string                     getSequenceFormatString ()              const   { return m_cSequenceFormatString; }
   Double                          getDeltaQpLayer         ( UInt ui )     const   { return m_adDeltaQpLayer[ui]; }
@@ -855,6 +857,7 @@ public:
   Void                            setDPBSize              ( UInt    p )   { m_uiDPBSize             = p; }
   Void                            setNumDPBRefFrames      ( UInt    p )   { m_uiNumDPBRefFrames     = p; }
   Void                            setLog2MaxFrameNum      ( UInt    p )   { m_uiLog2MaxFrameNum     = p; }
+  Void                            setPicOrderCntType      ( UInt    p )   { m_uiPicOrderCntType     = p; } //Poc Type
   Void                            setLog2MaxPocLsb        ( UInt    p )   { m_uiLog2MaxPocLsb       = p; }
   Void                            setSequenceFormatString ( Char*   p )   { m_cSequenceFormatString = p; }
   Void                            setDeltaQpLayer         ( UInt    n,
@@ -1157,6 +1160,7 @@ protected:
   UInt                      m_uiDPBSize;
   UInt                      m_uiNumDPBRefFrames;
   UInt                      m_uiLog2MaxFrameNum;
+  UInt                      m_uiPicOrderCntType; //Poc Type
   UInt                      m_uiLog2MaxPocLsb;
   std::string               m_cSequenceFormatString;
   Double                    m_adDeltaQpLayer[6];

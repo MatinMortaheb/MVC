@@ -89,7 +89,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 int
 main( int argc, char** argv)   
 {
-  printf("JMVM %s Encoder\n\n",_JMVM_VERSION_);
+  printf("JMVC %s Encoder\n\n",_JMVC_VERSION_);
 
   H264AVCEncoderTest*               pcH264AVCEncoderTest = NULL;
   RNOK( H264AVCEncoderTest::create( pcH264AVCEncoderTest ) );

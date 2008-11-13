@@ -1,3 +1,10 @@
+JMVC_2_5 -> JMVC_2_6
+Date            : November 10, 2008
+Authors         : TUT (Software coordinators) & USTC
+Contribution    : POC Type 2 implementation
+Changes:
+-A new configuration item is added to support this when GOPSize is equal to 1
+
 JMVC_2_4 -> JMVC_2_5
 Date            : November 10, 2008
 Authors         : TUT (Software coordinators) & USTC
