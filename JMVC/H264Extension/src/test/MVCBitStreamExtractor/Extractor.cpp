@@ -319,8 +319,10 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 	  pcNewViewScalSei->setProfileLevelInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getProfileLevelInfoPresentFlag( i ) );
 	  pcNewViewScalSei->setBitRateInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getBitRateInfoPresentFlag( i ) );
 	  pcNewViewScalSei->setFrmRateInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getFrmRateInfoPresentFlag( i ) );
-	  pcNewViewScalSei->setViewDependencyInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getViewDependencyInfoPresentFlag( i ) );//SEI JJ
+	  if(!(pcOldViewScalSei->getNumTargetOutputViewsMinus1( i ))) //SEI JJ Nov 15
+		pcNewViewScalSei->setViewDependencyInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getViewDependencyInfoPresentFlag( i ) );//SEI JJ
 	  pcNewViewScalSei->setParameterSetsInfoPresentFlag( uiNumNewOps, pcOldViewScalSei->getParameterSetsInfoPresentFlag( i ) );//SEI JJ
+	  pcNewViewScalSei->setBitstreamRestrictionInfoPresentFlag(uiNumNewOps, pcOldViewScalSei->getBitstreamRestrictionInfoPresentFlag(i));//SEI JJ
 
 	  if( pcOldViewScalSei->getProfileLevelInfoPresentFlag( i ) )
 	  {
@@ -379,11 +381,7 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 		  pcNewViewScalSei->setConstantFrmRateIdc( uiNumNewOps, pcOldViewScalSei->getConstantFrmRateIdc( OldOpId ) );
 		  pcNewViewScalSei->setAvgFrmRate( uiNumNewOps, pcOldViewScalSei->getAvgFrmRate( OldOpId ) );
 		}
-		else
-		  pcNewViewScalSei->setFrmRateInfoSrcOpIdDela( uiNumNewOps, uiNumNewOps - uiOldOpToNewOp[OldOpId] );
 	  }
-	  else
-		pcNewViewScalSei->setFrmRateInfoSrcOpIdDela( uiNumNewOps, 0 );
 
 	  if( pcOldViewScalSei->getViewDependencyInfoPresentFlag( i ) )//SEI JJ
 	  {
@@ -427,7 +425,9 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 		  pcNewViewScalSei->setNumSeqParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumSeqParameterSetMinus1( i ) );//SEI JJ 
 		  for( j = 0; j <= pcOldViewScalSei->getNumSeqParameterSetMinus1(i); j++)//SEI JJ 
 			  pcNewViewScalSei->setSeqParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getSeqParameterSetIdDelta( i, j ) );//SEI JJ 
-
+		  pcNewViewScalSei->setNumSubsetSeqParameterSetMinus1(uiNumNewOps,pcOldViewScalSei->getNumSubsetSeqParameterSetMinus1(i));
+		  for( j=0; j<pcOldViewScalSei->getNumSubsetSeqParameterSetMinus1( i );j++)
+			  pcNewViewScalSei->setSubsetSeqParameterSetIdDelta(uiNumNewOps,j,pcOldViewScalSei->getSubsetSeqParameterSetIdDelta(i,j));
 		  pcNewViewScalSei->setNumPicParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumPicParameterSetMinus1( i ) );//SEI JJ 
 		  for( j = 0; j <= pcOldViewScalSei->getNumPicParameterSetMinus1(i); j++)//SEI JJ
 			  pcNewViewScalSei->setPicParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getPicParameterSetIdDelta( i, j ) );//SEI JJ 
@@ -445,6 +445,9 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 			  for( j = 0; j <= pcOldViewScalSei->getNumSeqParameterSetMinus1(OldOpId); j++)//SEI JJ
 				  pcNewViewScalSei->setSeqParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getSeqParameterSetIdDelta( OldOpId, j ) );//SEI JJ 
 
+			  pcNewViewScalSei->setNumSubsetSeqParameterSetMinus1(uiNumNewOps,pcOldViewScalSei->getNumSubsetSeqParameterSetMinus1(OldOpId));
+			  for( j=0; j<pcOldViewScalSei->getNumSubsetSeqParameterSetMinus1( OldOpId );j++)
+				  pcNewViewScalSei->setSubsetSeqParameterSetIdDelta(uiNumNewOps,j,pcOldViewScalSei->getSubsetSeqParameterSetIdDelta(OldOpId,j));
 			  pcNewViewScalSei->setNumPicParameterSetMinus1( uiNumNewOps, pcOldViewScalSei->getNumPicParameterSetMinus1( OldOpId ) );//SEI JJ 
 			  for( j = 0; j <= pcOldViewScalSei->getNumPicParameterSetMinus1(OldOpId); j++)//SEI JJ 
 				  pcNewViewScalSei->setPicParameterSetIdDelta( uiNumNewOps, j, pcOldViewScalSei->getPicParameterSetIdDelta( OldOpId, j ) );//SEI JJ 
@@ -455,6 +458,17 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 	  }
 	  else
 		  pcNewViewScalSei->setParameterSetsInfoSrcOpId( uiNumNewOps, 0 );//SEI JJ 
+	  if( pcOldViewScalSei->getBitstreamRestrictionInfoPresentFlag(i) )
+	  {
+		  pcNewViewScalSei->setMotionVectorsOverPicBoundariesFlag(uiNumNewOps,pcOldViewScalSei->getMotionVectorsOverPicBoundariesFlag(i));
+		  pcNewViewScalSei->setMaxBytesPerPicDenom(uiNumNewOps,pcOldViewScalSei->getMaxBytesPerPicDenom(i));
+		  pcNewViewScalSei->setMaxBitsPerMbDenom(uiNumNewOps,pcOldViewScalSei->getMaxBitsPerMbDenom(i));
+		  pcNewViewScalSei->setLog2MaxMvLengthHorizontal(uiNumNewOps,pcOldViewScalSei->getLog2MaxMvLengthHorizontal(i));
+		  pcNewViewScalSei->setLog2MaxMvLengthVertical(uiNumNewOps,pcOldViewScalSei->getLog2MaxMvLengthVertical(i));
+		  pcNewViewScalSei->setNumReorderFrames(uiNumNewOps,pcOldViewScalSei->getNumReorderFrames(i));
+		  pcNewViewScalSei->setMaxDecFrameBuffering(uiNumNewOps,pcOldViewScalSei->getMaxDecFrameBuffering(i));
+
+	  }
 
 	  uiNumNewOps++;
 	}

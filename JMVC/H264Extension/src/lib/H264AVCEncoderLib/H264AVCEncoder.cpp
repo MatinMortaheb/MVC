@@ -534,19 +534,21 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
 	}
 
 	Bool bProfileLevelInfoPresentFlag, bBitRateInfoPresentFlag, bFrmRateInfoPresentFlag;
-	Bool bOpDependencyInfoPresentFlag, bInitParameterSetsInfoPresentFlag;
+	Bool bOpDependencyInfoPresentFlag, bInitParameterSetsInfoPresentFlag,bBitstreamRestrictionInfoPresentFlag;
 
 	bProfileLevelInfoPresentFlag = false;
 	bBitRateInfoPresentFlag = true;
 	bFrmRateInfoPresentFlag = true;//may be changed
 	bOpDependencyInfoPresentFlag = false;
 	bInitParameterSetsInfoPresentFlag = false;
+	bBitstreamRestrictionInfoPresentFlag=false;
 	pcViewScalInfoSei->setProfileLevelInfoPresentFlag( i, bProfileLevelInfoPresentFlag );
 	pcViewScalInfoSei->setBitRateInfoPresentFlag( i, bBitRateInfoPresentFlag );
 	pcViewScalInfoSei->setFrmRateInfoPresentFlag( i, bFrmRateInfoPresentFlag );
 	
 	pcViewScalInfoSei->setViewDependencyInfoPresentFlag( i, bOpDependencyInfoPresentFlag );//SEI JJ
-	pcViewScalInfoSei->setParameterSetsInfoPresentFlag( i, bInitParameterSetsInfoPresentFlag );//SEI JJ
+	pcViewScalInfoSei->setParameterSetsInfoPresentFlag( i, bInitParameterSetsInfoPresentFlag );//SEI JJ 
+	pcViewScalInfoSei->setBitstreamRestrictionInfoPresentFlag(i, bBitstreamRestrictionInfoPresentFlag);//SEI JJ
 
 	if( bProfileLevelInfoPresentFlag )
 	{
@@ -599,12 +601,6 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
 	  pcViewScalInfoSei->setConstantFrmRateIdc( i, uiConstantFrmRateIdc );
 	  pcViewScalInfoSei->setAvgFrmRate( i, uiAvgFrmRate );
 	}
-	else
-	{
-	  UInt uiFrmRateInfoSrcOpIdDelta = 0;		//may be changed
-
-	  pcViewScalInfoSei->setFrmRateInfoSrcOpIdDela( i, uiFrmRateInfoSrcOpIdDelta );
-	}
 
 	if( bOpDependencyInfoPresentFlag )
 	{
@@ -630,10 +626,11 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
 	if( bInitParameterSetsInfoPresentFlag )
 	{
 	  //the parameters may should be changed
-	  UInt uiNumSeqParameterSetMinus1, uiNumPicParameterSetMinus1;//SEI JJ
+	  UInt uiNumSeqParameterSetMinus1, uiNumPicParameterSetMinus1,uiNumSubsetSeqParameterSetMinus1;//SEI JJ
 
 	  uiNumSeqParameterSetMinus1 = 0;//SEI JJ
 	  uiNumPicParameterSetMinus1 = 0;//SEI JJ
+	  uiNumSubsetSeqParameterSetMinus1=0;//
 
 	  pcViewScalInfoSei->setNumSeqParameterSetMinus1( i, uiNumSeqParameterSetMinus1 );//SEI JJ 
 
@@ -643,7 +640,15 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
 
 		pcViewScalInfoSei->setSeqParameterSetIdDelta( i, j, uiSeqParameterSetIdDelta );//SEI JJ 
 	  }
+	  
+	  pcViewScalInfoSei->setNumSubsetSeqParameterSetMinus1( i, uiNumSubsetSeqParameterSetMinus1 );
+	  for( j = 0; j <= uiNumSubsetSeqParameterSetMinus1; j++ )
+	  {
+		  UInt uiSubsetSeqParameterSetIdDelta = 0;//SEI JJ
 
+		  pcViewScalInfoSei->setSubsetSeqParameterSetIdDelta( i, j, uiSubsetSeqParameterSetIdDelta );//SEI JJ 
+	  }
+      
 	  pcViewScalInfoSei->setNumPicParameterSetMinus1( i, uiNumPicParameterSetMinus1 );//SEI JJ 
 
 	  for( j = 0; j <= uiNumPicParameterSetMinus1; j++ )//SEI JJ
@@ -659,6 +664,16 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
 	  UInt uiParameterSetsInfoSrcOpId = 0; //may should be changed SEI JJ
 
 	  pcViewScalInfoSei->setParameterSetsInfoSrcOpId( i, uiParameterSetsInfoSrcOpId );//SEI JJ 
+	}
+	if( bBitstreamRestrictionInfoPresentFlag )
+	{
+	  pcViewScalInfoSei->setMotionVectorsOverPicBoundariesFlag(i,true);
+	  pcViewScalInfoSei->setMaxBytesPerPicDenom(i,0);
+      pcViewScalInfoSei->setMaxBitsPerMbDenom(i,0);
+	  pcViewScalInfoSei->setLog2MaxMvLengthHorizontal(i,0);
+	  pcViewScalInfoSei->setLog2MaxMvLengthVertical(i,0);
+	  pcViewScalInfoSei->setNumReorderFrames(i,0);
+	  pcViewScalInfoSei->setMaxDecFrameBuffering(i,0);
 	}
   }
 
