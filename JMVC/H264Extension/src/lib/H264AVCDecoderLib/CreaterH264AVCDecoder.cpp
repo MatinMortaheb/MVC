@@ -622,62 +622,48 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
   if( eNalUnitType == NAL_UNIT_CODED_SLICE_SCALABLE     ||
       eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE   )
   {
-    //{{Variable Lengh NAL unit header data with priority and dead substream flag
-    //France Telecom R&D- (nathalie.cammas@francetelecom.com)
     ucByte             = (pcBinData->data())[1];
 	  uiSimplePriorityId = ( ucByte >> 2);
 	  bDiscardableFlag	 = ( ucByte >> 1) & 1;
- //JVT-S036  start
-//SEI {
-	bSvcMvcFlag = ( ( ucByte >> 7 ) !=0);
-	if( bSvcMvcFlag )
-	{
-	  uiSimplePriorityId = ( ucByte >> 1 ) & 63;
-	  uiLevel = ( ucByte ) & 1;
-
-	  ucByte  = pcBinData->data()[2];
-	  uiLevel = uiLevel*4 + (ucByte >> 6);
-	  bAnchorPicFlag = ( ucByte >> 5 ) & 1;
-	  uiViewId = ( ucByte ) & 31;
-
-	  ucByte  = pcBinData->data()[3];
-	  uiViewId = uiViewId * (2^5) + ( ucByte >> 3 );
-	}
-	else
-	{
-	  uiSimplePriorityId = ( ucByte >> 1) & 63;
-	  bDiscardableFlag	 = ( ucByte ) & 1;
-	  ucByte      = pcBinData->data()[2];
-	  bReservedZeroBit   = ( ucByte     ) & 1; 
-  	  uiLevel     = ( ucByte >> 4 ) & 7;
-	  uiLayer     = ( ucByte >> 1 ) & 7;
-	  uiFGSLayer  = ( ucByte      ) & 1;
-	  ucByte      = pcBinData->data()[3];
-	  uiFGSLayer  = uiFGSLayer*2 + ( ucByte >> 7);
-	}
-/*	  bReservedZeroBit   = ( ucByte     ) & 1; 
-	 
-		    ucByte      = pcBinData->data()[2];
-		    uiLevel     = ( ucByte >> 5 );
-		    uiLayer     = ( ucByte >> 2 ) & 7;
-		    uiFGSLayer  = ( ucByte      ) & 3;*/
-//SEI }
-	 /* }
-	  else
+  	bSvcMvcFlag = ( ( ucByte >> 7 ) !=0);
+	  if( bSvcMvcFlag )
 	  {
-        // Look up simple priority ID in mapping table (J. Ridge, Y-K. Wang @ Nokia)
-        uiLevel    = m_uiTemporalLevelList[uiSimplePriorityId];
-        uiLayer    = m_uiDependencyIdList [uiSimplePriorityId];
-        uiFGSLayer = m_uiQualityLevelList [uiSimplePriorityId];
-	  }*/
-//JVT-S036  end
-    //}}Variable Lengh NAL unit header data with priority and dead substream flag
+    //ying 
+			                                                    // 1 bit
+      Bool bNonIDRFlag     = ( ucByte >> 6)  & 0x01;     // 1 bit
+      uiSimplePriorityId   = ( ucByte     ) & 0x3f ;    // 6
+      // view_id
+      ucByte               = pcBinData->data()[2];
+      uiViewId             = ( ucByte     ) & 0xff ;    // 8 bit first
+      uiViewId           <<=2;
+      ucByte               = pcBinData->data()[3];
+      uiViewId            += ( ucByte >>6  ) & 0x03;     // 2 bit more
+
+      UInt  uiTemporalId   = ( ucByte >>3 )  & 0x07;     // 3 bit 
+		  bAnchorPicFlag       = ( ucByte >>2 )  & 0x01;     // 1 bit
+		  Bool  bInterViewFlag = ( ucByte >>1	)	 & 0x01;     // 1 bit  
+
+		  Bool  b_Res1Zero     = ( ucByte     )  & 0x01;           // 1 bit
+		}
+    else
+    {
+// SVC ... ignore	    
+      uiSimplePriorityId = ( ucByte >> 1) & 63;
+      bDiscardableFlag	 = ( ucByte ) & 1;
+      ucByte      = pcBinData->data()[2];
+      bReservedZeroBit   = ( ucByte     ) & 1; 
+      uiLevel     = ( ucByte >> 4 ) & 7;
+      uiLayer     = ( ucByte >> 1 ) & 7;
+      uiFGSLayer  = ( ucByte      ) & 1;
+      ucByte      = pcBinData->data()[3];
+      uiFGSLayer  = uiFGSLayer*2 + ( ucByte >> 7);
+    }
   }
   else if( eNalUnitType == NAL_UNIT_CODED_SLICE     ||
            eNalUnitType == NAL_UNIT_CODED_SLICE_IDR   )
   {
     uiLevel     = ( eNalRefIdc > 0 ? 0 : 1+m_uiStdAVCOffset);
-	m_bAVCCompatible=true;//BUG FIX Kai Zhang
+	  m_bAVCCompatible=true;//BUG FIX Kai Zhang
   }
   else if( eNalUnitType == NAL_UNIT_SEI )
   {
@@ -697,7 +683,7 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
     //RNOK( SEI::read( m_pcUvlcReader, cMessageList ) );
 
 	/* SEI JVT-W060 */
-	RNOK( SEI::read( m_pcUvlcReader, cMessageList /*, Save_NumViewsMinus1*/ ) ); // Nov. 30
+  	RNOK( SEI::read( m_pcUvlcReader, cMessageList /*, Save_NumViewsMinus1*/ ) ); // Nov. 30
 	/* ~SEI JVT-W060 */
    
     SEI::MessageList::iterator iter = cMessageList.begin();
@@ -707,15 +693,13 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
 
       switch( pcSEIMessage->getMessageType() )
       {
-	  case SEI::VIEW_SCALABILITY_INFO_SEI:
-		{
-		 
-		  pcScalableSEIMessage = pcSEIMessage;
-
+        case SEI::VIEW_SCALABILITY_INFO_SEI:
+        {
+          pcScalableSEIMessage = pcSEIMessage;
           bApplyToNext = true;
           break;
         }
-      case SEI::SUB_SEQ_INFO:
+        case SEI::SUB_SEQ_INFO:
         {
           SEI::SubSeqInfo* pcSubSeqInfo = (SEI::SubSeqInfo*) pcSEIMessage;
           uiLevel       = pcSubSeqInfo->getSubSeqLayerNum();
@@ -724,135 +708,114 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
           delete pcSEIMessage;
           break;
         }
-      case SEI::SCALABLE_SEI:
-			{
-				uiLevel = 0;
-				uiLayer = 0;
-				pcScalableSEIMessage = pcSEIMessage;
-				{
-					//====set parameters used for further parsing =====
-					SEI::ScalableSei* pcSEI		= (SEI::ScalableSei*)pcSEIMessage;
-					UInt uiNumScalableLayers  = pcSEI->getNumLayersMinus1() + 1;
-					for(UInt uiIndex = 0; uiIndex < uiNumScalableLayers; uiIndex++ )
-					{
-						if( pcSEI->getDependencyId( uiIndex ) == 0 )
-						{
-// BUG_FIX liuhui{
-							m_uiStdAVCOffset = pcSEI->getTemporalLevel( uiIndex );
-							pcSEI->setStdAVCOffset( m_uiStdAVCOffset );
-							break;
-// BUG_FIX liuhui}
-						}
-						else
-							break;
-					}
-				}
-
-			    SEI::ScalableSei* pcSEI		= (SEI::ScalableSei*)pcSEIMessage;
-			    m_uiNum_layers = pcSEI->getNumLayersMinus1() + 1;   		
-			    for(int i=0; i< m_uiNum_layers; i++)
-				{				  
-				  m_ID_ROI[i] = pcSEI->getRoiId(i);
-				  m_ID_Dependency[i] = pcSEI->getDependencyId(i);
-				}
-				break;
-			}
-
-		case SEI::MOTION_SEI:
-		  {
-			  SEI::MotionSEI* pcSEI           = (SEI::MotionSEI*)pcSEIMessage;
-
-			  m_silceIDOfSubPicLayer[m_layer_id] = pcSEI->m_slice_group_id[0];
-			  break;
-		  }
-
-// JVT-S080 LMI {
-	  case SEI::SCALABLE_SEI_LAYERS_NOT_PRESENT:
-      case SEI::SCALABLE_SEI_DEPENDENCY_CHANGE:
-		  {
-			  pcScalableSEIMessage = pcSEIMessage;
-			  break;
-		  }
-// JVT-S080 LMI }
-      case SEI::SUB_PIC_SEI:
-		  {
-			  SEI::SubPicSei* pcSEI    = (SEI::SubPicSei*)pcSEIMessage;
-			  m_layer_id					= pcSEI->getLayerId();
-			  bApplyToNext  = true;
-              break;
-		  }
-      //{{Quality level estimation and modified truncation- JVTO044 and m12007
-      //France Telecom R&D-(nathalie.cammas@francetelecom.com)
-      case SEI::QUALITYLEVEL_SEI:
-		  {
-			UInt uiNum = 0;
-			UInt uiDeltaBytesRateOfLevel = 0;
-			UInt uiQualityLevel = 0;
-			SEI::QualityLevelSEI* pcSEI           = (SEI::QualityLevelSEI*)pcSEIMessage;
-			uiNum = pcSEI->getNumLevel();
-			rcPacketDescription.uiNumLevelsQL = uiNum;
-			for(UInt ui = 0; ui < uiNum; ui++)
-			{
-				uiQualityLevel = pcSEI->getQualityLevel(ui);
-				uiDeltaBytesRateOfLevel = pcSEI->getDeltaBytesRateOfLevel(ui);
-				rcPacketDescription.auiQualityLevelQL[ui] = uiQualityLevel;
-				rcPacketDescription.auiDeltaBytesRateOfLevelQL[ui] = uiDeltaBytesRateOfLevel;
-			}
-      uiLayer = pcSEI->getDependencyId();
-			bApplyToNext = true;
-			break;
-		  }
-      //}}Quality level estimation and modified truncation- JVTO044 and m12007
-  	  case SEI::NON_REQUIRED_SEI: 
-		  {
-			  m_pcNonRequiredSEI = (SEI::NonRequiredSei*) pcSEIMessage;
-			  m_uiNonRequiredSeiFlag = 1;  
-			  break;
-		  }
-//SEI {
-      case SEI::SCALABLE_NESTING_SEI:
-      {
-        Bool bAllPicturesInAuFlag;
-        UInt uiNumPicturesMinus1;
-        UInt *puiPicId, uiTemporalId;
-        SEI::ScalableNestingSei* pcSEI = (SEI::ScalableNestingSei*)pcSEIMessage;
-        bAllPicturesInAuFlag = pcSEI->getAllPicturesInAuFlag();
-        if( bAllPicturesInAuFlag == 0 )
+        case SEI::SCALABLE_SEI:
         {
-          uiNumPicturesMinus1 = pcSEI->getNumPicturesMinus1();
-          puiPicId = new UInt[uiNumPicturesMinus1+1];
-          for( UInt uiIndex = 0; uiIndex <= uiNumPicturesMinus1; uiIndex++ )
-          {
-            puiPicId[uiIndex] = pcSEI->getPicId(uiIndex);
-          }
+	        uiLevel = 0;
+	        uiLayer = 0;
+	        pcScalableSEIMessage = pcSEIMessage;
+	        {
+		        //====set parameters used for further parsing =====
+		        SEI::ScalableSei* pcSEI		= (SEI::ScalableSei*)pcSEIMessage;
+		        UInt uiNumScalableLayers  = pcSEI->getNumLayersMinus1() + 1;
+		        for(UInt uiIndex = 0; uiIndex < uiNumScalableLayers; uiIndex++ )
+		        {
+			        if( pcSEI->getDependencyId( uiIndex ) == 0 )
+			        {
+        // BUG_FIX liuhui{
+				        m_uiStdAVCOffset = pcSEI->getTemporalLevel( uiIndex );
+				        pcSEI->setStdAVCOffset( m_uiStdAVCOffset );
+				        break;
+        // BUG_FIX liuhui}
+			        }
+			        else
+				        break;
+		        }
+	        }
 
-		  uiTemporalId = pcSEI->getTemporalId();
-
-          delete puiPicId;
+		        SEI::ScalableSei* pcSEI		= (SEI::ScalableSei*)pcSEIMessage;
+		        m_uiNum_layers = pcSEI->getNumLayersMinus1() + 1;   		
+		        for(int i=0; i< m_uiNum_layers; i++)
+	        {				  
+		        m_ID_ROI[i] = pcSEI->getRoiId(i);
+		        m_ID_Dependency[i] = pcSEI->getDependencyId(i);
+	        }
+	        break;
         }
-              bApplyToNext = true;
-        break;
-      }
 
-//SEI }
-	  case SEI::MULTIVIEW_SCENE_INFO_SEI: // SEI JVT-W060
-      {
-        UInt uiMaxDisparity;
-		
-		    SEI::MultiviewSceneInfoSei* pcSEI = (SEI::MultiviewSceneInfoSei*)pcSEIMessage;
-		    uiMaxDisparity = pcSEI->getMaxDisparity();
-        bApplyToNext = true;
-        break;
-      }
-	  case SEI::MULTIVIEW_ACQUISITION_INFO_SEI: // SEI JVT-W060
-      {
-        // I comment the following line to remove the warning
-        //SEI::MultiviewAcquisitionInfoSei* pcSEI = (SEI::MultiviewAcquisitionInfoSei*)pcSEIMessage; 
-        // This is introduced by MERL, it should be checked
-        // ying
-        bApplyToNext = true;
-        break;
-      }
+        case SEI::MOTION_SEI:
+        {
+	        SEI::MotionSEI* pcSEI           = (SEI::MotionSEI*)pcSEIMessage;
+
+	        m_silceIDOfSubPicLayer[m_layer_id] = pcSEI->m_slice_group_id[0];
+	        break;
+        }
+
+      // JVT-S080 LMI {
+        case SEI::SCALABLE_SEI_LAYERS_NOT_PRESENT:
+        case SEI::SCALABLE_SEI_DEPENDENCY_CHANGE:
+        {
+	        pcScalableSEIMessage = pcSEIMessage;
+	        break;
+        }
+        // JVT-S080 LMI }
+        case SEI::SUB_PIC_SEI:
+        {
+	        SEI::SubPicSei* pcSEI    = (SEI::SubPicSei*)pcSEIMessage;
+	        m_layer_id					= pcSEI->getLayerId();
+	        bApplyToNext  = true;
+                break;
+        }
+      
+        case SEI::NON_REQUIRED_SEI: 
+        {
+	        m_pcNonRequiredSEI = (SEI::NonRequiredSei*) pcSEIMessage;
+	        m_uiNonRequiredSeiFlag = 1;  
+	        break;
+        }
+      //SEI {
+        case SEI::SCALABLE_NESTING_SEI:
+        {
+          Bool bAllPicturesInAuFlag;
+          UInt uiNumPicturesMinus1;
+          UInt *puiPicId, uiTemporalId;
+          SEI::ScalableNestingSei* pcSEI = (SEI::ScalableNestingSei*)pcSEIMessage;
+          bAllPicturesInAuFlag = pcSEI->getAllPicturesInAuFlag();
+          if( bAllPicturesInAuFlag == 0 )
+          {
+            uiNumPicturesMinus1 = pcSEI->getNumPicturesMinus1();
+            puiPicId = new UInt[uiNumPicturesMinus1+1];
+            for( UInt uiIndex = 0; uiIndex <= uiNumPicturesMinus1; uiIndex++ )
+            {
+              puiPicId[uiIndex] = pcSEI->getPicId(uiIndex);
+            }
+
+            uiTemporalId = pcSEI->getTemporalId();
+
+            delete puiPicId;
+          }
+                bApplyToNext = true;
+          break;
+        }
+
+      //SEI }
+        case SEI::MULTIVIEW_SCENE_INFO_SEI: // SEI JVT-W060
+        {
+          UInt uiMaxDisparity;
+
+	        SEI::MultiviewSceneInfoSei* pcSEI = (SEI::MultiviewSceneInfoSei*)pcSEIMessage;
+	        uiMaxDisparity = pcSEI->getMaxDisparity();
+          bApplyToNext = true;
+          break;
+        }
+        case SEI::MULTIVIEW_ACQUISITION_INFO_SEI: // SEI JVT-W060
+        {
+          // I comment the following line to remove the warning
+          //SEI::MultiviewAcquisitionInfoSei* pcSEI = (SEI::MultiviewAcquisitionInfoSei*)pcSEIMessage; 
+          // This is introduced by MERL, it should be checked
+          // ying
+          bApplyToNext = true;
+          break;
+        }
       default:
         {
           delete pcSEIMessage;
@@ -920,59 +883,35 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
               eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE   )
     {
 //BUG FIX Kai Zhang{
-	if(!(uiLayer == 0 && uiFGSLayer == 0 && m_bAVCCompatible&&
-			(eNalUnitType == NAL_UNIT_CODED_SLICE_SCALABLE||eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE))){
-      UInt uiTemp;
-	    Bool bTemp;
-      //JVT-P031
-
-    RNOK( m_pcUvlcReader->getUvlc( uiTemp,  "SH: first_mb_in_slice" ) );
-
-	// FMO ROI ICU/ETRI
-	rcPacketDescription.uiFirstMb = uiTemp;
-
-
-    RNOK( m_pcUvlcReader->getUvlc( uiTemp,  "SH: slice_type" ) );
-//JVT-T054{
-		rcPacketDescription.bEnableQLTruncation = false;
-//JVT-T054}
-    if(uiTemp == F_SLICE)
-    {
-//JVT-T054{
-      rcPacketDescription.bEnableQLTruncation = true;
-//JVT-T054}
-       RNOK( m_pcUvlcReader->getFlag( bFragmentedFlag,  "SH: fragmented_flag" ) );
-       if(bFragmentedFlag)
-       {
-            RNOK( m_pcUvlcReader->getUvlc(uiFragmentOrder,  "SH: fragment_order" ) );
-            if(uiFragmentOrder!=0)
-            {
-                RNOK( m_pcUvlcReader->getFlag( bLastFragmentFlag,  "SH: last_fragment_flag" ) );
-            }
-       }
-		  if(uiFragmentOrder == 0 )
-		  {
-			  RNOK( m_pcUvlcReader    ->getUvlc( uiTemp,  "SH: num_mbs_in_slice" ) );
-			  RNOK( m_pcUvlcReader    ->getFlag( bTemp,  "SH: fgs_comp_sep" ) );
-		  }
-    }
-  
-    if(uiFragmentOrder == 0)
-    {
-        RNOK( m_pcUvlcReader->getUvlc( uiPPSid, "SH: pic_parameter_set_id" ) );
-        uiSPSid = rcPacketDescription.SPSidRefByPPS[uiPPSid];
-    }     
-		
-    //~JVT-P031
-		m_uiCurrPicLayer = (uiLayer << 4) + uiFGSLayer;
-	  if(m_uiCurrPicLayer <= m_uiPrevPicLayer && m_uiNonRequiredSeiFlag != 1)
-	  {
-		  m_pcNonRequiredSEI->destroy();
-		  m_pcNonRequiredSEI = NULL;
-	  }          
-	  m_uiNonRequiredSeiFlag = 0;
-	  m_uiPrevPicLayer = m_uiCurrPicLayer;
-		}
+	    if(!(uiLayer == 0 && uiFGSLayer == 0 && m_bAVCCompatible&&
+			    (eNalUnitType == NAL_UNIT_CODED_SLICE_SCALABLE||eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE)))
+	    {
+          UInt uiTemp;
+          //JVT-P031
+        RNOK( m_pcUvlcReader->getUvlc( uiTemp,  "SH: first_mb_in_slice" ) );
+	    // FMO ROI ICU/ETRI
+  	    rcPacketDescription.uiFirstMb = uiTemp;
+        RNOK( m_pcUvlcReader->getUvlc( uiTemp,  "SH: slice_type" ) );
+    //JVT-T054{
+		    rcPacketDescription.bEnableQLTruncation = false;
+    //JVT-T054}
+      
+        if(uiFragmentOrder == 0)
+        {
+            RNOK( m_pcUvlcReader->getUvlc( uiPPSid, "SH: pic_parameter_set_id" ) );
+            uiSPSid = rcPacketDescription.SPSidRefByPPS[uiPPSid];
+        }     
+    		
+        //~JVT-P031
+		    m_uiCurrPicLayer = (uiLayer << 4) + uiFGSLayer;
+	      if(m_uiCurrPicLayer <= m_uiPrevPicLayer && m_uiNonRequiredSeiFlag != 1)
+	      {
+		      m_pcNonRequiredSEI->destroy();
+		      m_pcNonRequiredSEI = NULL;
+	      }          
+	      m_uiNonRequiredSeiFlag = 0;
+	      m_uiPrevPicLayer = m_uiCurrPicLayer;
+	    }
 //BUG_FIX Kai Zhang}
     }
     m_pcNalUnitParser->closeNalUnit();
