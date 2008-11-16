@@ -1,3 +1,8 @@
+JMVC_2_6 -> JMVC_3_0
+Date            : Nov 16, 2008
+Authors         : TUT (Software coordinators) & USTC
+Contribution    : fix bugs for View Scal. Info. SEI
+
 JMVC_2_5 -> JMVC_2_6
 Date            : November 10, 2008
 Authors         : TUT (Software coordinators) & USTC
