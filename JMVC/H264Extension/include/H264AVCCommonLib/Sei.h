@@ -1042,7 +1042,7 @@ public:
     UInt m_uiSnapShotId;
   };
 
-#define MAX_VIEWS 100
+
  class H264AVCCOMMONLIB_API MultiviewSceneInfoSei : public SEIMessage // SEI JVT-W060
  {
  protected:

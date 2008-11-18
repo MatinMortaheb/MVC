@@ -772,7 +772,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
 
   int cur_view_id, view_id, view_cnt=-1;
-  int cur_level_id,level_id,level_cnt=-1;
+  int cur_level_id,level_cnt=-1;
   int num_of_ops,num_target_views_minus1,num_views_minus1,temporal_id,view_idx;
   int ref_idx,num_of_refs,temp;
   int vcOrder;
@@ -809,7 +809,6 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
     if (acTags[0] == "View_ID") 
     {
       AOF((cur_view_id=atoi(acTags[1].c_str()))>=0);      
-      AOF(cur_view_id <= MAX_NUM_VIEWS_MINUS_1);
       AOF(++view_cnt<=CodingParameter::SpsMVC.getNumViewMinus1());		
     }
 
@@ -849,8 +848,8 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 	   
     if (acTags[0] == "Fwd_AnchorRefs")
     {
-      AOF((ref_idx=atoi(acTags[1].c_str()))< (int)CodingParameter::SpsMVC.getNumAnchorRefsForListX(cur_view_id,0));
-      AOF((view_id=atoi(acTags[2].c_str())) <= MAX_NUM_VIEWS_MINUS_1);
+      AOF((ref_idx=atoi(acTags[1].c_str()))< (int)CodingParameter::SpsMVC.getNumAnchorRefsForListX(cur_view_id,0));      
+	  AOF((view_id=atoi(acTags[2].c_str())) >= 0);      
       CodingParameter::SpsMVC.setAnchorRefForListX(cur_view_id,ref_idx,0,view_id);
      
       if(m_CurrentViewId==cur_view_id) 
@@ -871,8 +870,8 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
     if (acTags[0] == "Bwd_AnchorRefs")
     {
-      AOF((ref_idx=atoi(acTags[1].c_str()))< (int)CodingParameter::SpsMVC.getNumAnchorRefsForListX(cur_view_id,1));
-      AOF((view_id=atoi(acTags[2].c_str()))< MAX_NUM_VIEWS_MINUS_1);
+      AOF((ref_idx=atoi(acTags[1].c_str()))< (int)CodingParameter::SpsMVC.getNumAnchorRefsForListX(cur_view_id,1));      
+	  AOF((view_id=atoi(acTags[2].c_str())) >= 0);    
       CodingParameter::SpsMVC.setAnchorRefForListX(cur_view_id,ref_idx,1,view_id);
      
       if(m_CurrentViewId==cur_view_id)
@@ -893,8 +892,8 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 	
     if (acTags[0] == "Fwd_NonAnchorRefs")
     {
-      AOF((ref_idx=atoi(acTags[1].c_str()))< (int)CodingParameter::SpsMVC.getNumNonAnchorRefsForListX(cur_view_id,0));
-      AOF((view_id=atoi(acTags[2].c_str()))< MAX_NUM_VIEWS_MINUS_1);
+      AOF((ref_idx=atoi(acTags[1].c_str()))< (int)CodingParameter::SpsMVC.getNumNonAnchorRefsForListX(cur_view_id,0));      
+	  AOF((view_id=atoi(acTags[2].c_str())) >= 0);    
       CodingParameter::SpsMVC.setNonAnchorRefForListX(cur_view_id,ref_idx,0,view_id);
 	  
 	  if(m_CurrentViewId==cur_view_id)
@@ -915,8 +914,8 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
     if (acTags[0] == "Bwd_NonAnchorRefs")
     {
-      AOF((ref_idx=atoi(acTags[1].c_str()))< (int)CodingParameter::SpsMVC.getNumNonAnchorRefsForListX(cur_view_id,1));
-      AOF((view_id=atoi(acTags[2].c_str()))< MAX_NUM_VIEWS_MINUS_1);
+      AOF((ref_idx=atoi(acTags[1].c_str()))< (int)CodingParameter::SpsMVC.getNumNonAnchorRefsForListX(cur_view_id,1));      
+	  AOF((view_id=atoi(acTags[2].c_str())) >= 0);    
       CodingParameter::SpsMVC.setNonAnchorRefForListX(cur_view_id,ref_idx,1,view_id);
 	  if(m_CurrentViewId==cur_view_id)
       {
@@ -935,19 +934,18 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
     }
 
-	if (acTags[0] == "NumLevelValuesSignalled") 
+	if (acTags[0] == "NumLevelValuesSignalledMinus1") 
     {
       AOF(( temp=atoi(acTags[1].c_str()))>=0);
       AOF(temp<=63); //hard-coded 
-      CodingParameter::SpsMVC.setNumLevelValuesSignalled(temp);
-      CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory(CodingParameter::SpsMVC.getNumLevelValuesSignalled());
+      CodingParameter::SpsMVC.setNumLevelValuesSignalledMinus1(temp);
+      CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory(CodingParameter::SpsMVC.getNumLevelValuesSignalledMinus1());
     }
 
 	if (acTags[0] == "Level_IDC") 
     {
-      AOF((cur_level_id=atoi(acTags[1].c_str()))>=0);      
-      //AOF(cur_view_id <= MAX_NUM_VIEWS_MINUS_1);
-      AOF(++level_cnt<=CodingParameter::SpsMVC.getNumLevelValuesSignalled());		
+      AOF((cur_level_id=atoi(acTags[1].c_str()))>=0);       
+      AOF(++level_cnt<=CodingParameter::SpsMVC.getNumLevelValuesSignalledMinus1());		
 	  CodingParameter::SpsMVC.m_ui_level_idc[level_cnt]=cur_level_id;
 
     }

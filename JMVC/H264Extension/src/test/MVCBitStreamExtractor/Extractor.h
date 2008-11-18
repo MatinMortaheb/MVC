@@ -143,7 +143,7 @@ protected:
 
 
   // ROI ICU/ETRI
-  ErrVal		xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage* pcSEIMessage, UInt uiOpId, UInt *uiViewId, UInt* uiNewNumViews );
+  ErrVal		xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage* pcSEIMessage, UInt uiOpId, UInt*& uiViewId, UInt* uiNewNumViews );
 
 
 protected:

@@ -95,6 +95,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 #define ENCODER_TRACE     0
 #define DECODER_TRACE     0
 
+
 #define MAX_LINE_LENGTH 255
 
 
@@ -107,6 +108,7 @@ public:
 	TraceFile         ();
 	virtual ~TraceFile();
 
+  static Bool IsInitialized() {return Initialized;}
   static ErrVal initTrace   (Bool b,  UInt uiNumOfViews);
   static ErrVal openTrace   ( Char* pucBaseFilename, UInt uiViewId );
   static ErrVal closeTrace  ();
@@ -142,15 +144,17 @@ protected:
   static UInt  sm_uiViewId;
   static Bool  sm_bEncoder;
   static UInt  sm_uiNumOfViews;
-  static FILE* sm_fTrace      [MAX_VIEWS];
-  static UInt  sm_uiFrameNum  [MAX_VIEWS];
-  static UInt  sm_uiSliceNum  [MAX_VIEWS];
-  static UInt  sm_uiPosCounter[MAX_VIEWS];
+  static FILE **sm_fTrace;
+  static UInt  *sm_uiFrameNum;
+  static UInt  *sm_uiSliceNum;
+  static UInt  *sm_uiPosCounter;
   static Char  sm_acLine      [MAX_LINE_LENGTH];
   static Char  sm_acType      [9];
   static Char  sm_acPos       [9];
   static Char  sm_acCode      [6];
   static Char  sm_acBits      [35];
+  static Bool Initialized;	
+
 };
 
 
@@ -217,7 +221,7 @@ H264AVC_NAMESPACE_END
 #endif
 
 #if DECODER_TRACE
-#define INIT_DTRACE(x, y)   TraceFile::initTrace   (x, y)
+  #define INIT_DTRACE(x, y)   TraceFile::initTrace   (x, y)
   #define OPEN_DTRACE      TraceFile::openTrace   ("TraceDecoder", 0)
   #define CLOSE_DTRACE     TraceFile::closeTrace  ()
   
@@ -244,7 +248,7 @@ H264AVC_NAMESPACE_END
   #define DTRACE_DO(x)     x
 #else
   #define OPEN_DTRACE
-#define INIT_DTRACE(x,y)
+  #define INIT_DTRACE(x,y)
   #define CLOSE_DTRACE
 
   #define DTRACE_LAYER(x)

@@ -120,7 +120,6 @@ protected:
   ReadBitstreamIf*            m_pcReadBitstream;
   WriteYuvIf*                 m_pcWriteYuv;
   WriteYuvIf*				  m_pcWriteSnapShot;   //SEI LSJ
-  UInt					      vcActive[MAX_VIEWS]; //SEI LSJ
   DecoderParameter*           m_pcParameter;
 	
   PicBufferList               m_cActivePicBufferList;

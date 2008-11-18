@@ -360,18 +360,18 @@ protected:
   Bool							m_bOpPresentFlag;
   UInt						    m_uiOperationPointId;
   UInt							m_uiNumActiveViews;
-  UInt							m_uiViewId[MAX_VIEWS];
+  //UInt							m_uiViewId[MAX_VIEWS]; // YSH
   UInt							m_uiNumDecodeViews;
-  UInt							m_uiDecodeView[MAX_VIEWS];
+  //UInt							m_uiDecodeView[MAX_VIEWS]; // YSH
   UInt							m_uiNumOpMinus1;
   UInt							m_uiNumViews[MAX_OPERATION_POINTS];
   UInt*							m_OpViewId[MAX_OPERATION_POINTS];
   //JVT-AB025 {{
   UInt              m_uiTargetViewId;   
-  UInt              m_auiViewOrderIndex[MAX_VIEWS];
-  UInt              m_auiNumNonReqViewCop[MAX_VIEWS];
-  UInt              m_aauiIndexDelta[MAX_VIEWS][MAX_VIEWS];
-  UInt              m_aauiNonReqViewOrderIndex[MAX_VIEWS][MAX_VIEWS];
+  UInt              *m_auiViewOrderIndex;
+  UInt              *m_auiNumNonReqViewCop;
+  UInt              **m_aauiIndexDelta;
+  UInt              **m_aauiNonReqViewOrderIndex;
   UInt              m_uiNumTargetViewMinus1;
   UInt              m_uiOPNotPresentSeiFlag; 
   UInt              m_uiNumNotPresentOP;

@@ -304,8 +304,13 @@ void MultiviewReferencePictureManager::AddMultiviewReferencesPicturesToBuffer
     
     if (_verbose) ShowFrameInfo(cout,"Added frame", newRecPicBufUnit);
     
+	delete [] newPic->getBuffer();
+	delete newPic;
   }
-}
+
+  
+
+ }
 
 int MultiviewReferencePictureManager::CountNumMultiviewReferenceStreams()const
 {

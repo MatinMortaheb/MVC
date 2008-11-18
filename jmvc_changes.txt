@@ -1,3 +1,14 @@
+JMVC_3_0 -> JMVC_3_0_1
+Date            : Nov 18, 2008
+Authors         : MERL (Software coordinators) 
+Contribution    : SW improvement
+Changes:
+- um_level_values_signalled --> num_level_values_signalled_minus1 according to SPS extension corrigenda   
+- Removal of MAX_VIEWS constraint
+- Resolved an assembler crash problem caused by Decoder Trace function
+- Fixed a memory-leak problem in encoder (contribution by Kwangwoon Univ.)
+- Removal of some warning messages 
+
 JMVC_2_6 -> JMVC_3_0
 Date            : Nov 16, 2008
 Authors         : TUT (Software coordinators) & USTC

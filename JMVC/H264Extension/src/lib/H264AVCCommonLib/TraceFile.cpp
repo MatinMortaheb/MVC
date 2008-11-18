@@ -108,10 +108,10 @@ TraceFile::~TraceFile()
 
 UInt  TraceFile::sm_uiLayer;
 UInt  TraceFile::sm_uiViewId;
-FILE* TraceFile::sm_fTrace      [MAX_VIEWS];
-UInt  TraceFile::sm_uiFrameNum  [MAX_VIEWS];
-UInt  TraceFile::sm_uiSliceNum  [MAX_VIEWS];
-UInt  TraceFile::sm_uiPosCounter[MAX_VIEWS];
+FILE **TraceFile::sm_fTrace;
+UInt  *TraceFile::sm_uiFrameNum;
+UInt  *TraceFile::sm_uiSliceNum;
+UInt  *TraceFile::sm_uiPosCounter;
 Char  TraceFile::sm_acLine      [MAX_LINE_LENGTH] ;
 Char  TraceFile::sm_acType      [9];
 Char  TraceFile::sm_acPos       [9];
@@ -119,6 +119,7 @@ Char  TraceFile::sm_acCode      [6];
 Char  TraceFile::sm_acBits      [35];
 Bool  TraceFile::sm_bEncoder;
 UInt  TraceFile::sm_uiNumOfViews;
+Bool TraceFile::Initialized;
 
 ErrVal
 TraceFile::initTrace(Bool b, UInt uiNumOfViews)
@@ -133,14 +134,20 @@ TraceFile::initTrace(Bool b, UInt uiNumOfViews)
   sm_bEncoder   = b;
   sm_uiNumOfViews = uiNumOfViews;
 
+  sm_fTrace = new FILE*[uiNumOfViews];
+  sm_uiFrameNum  = new UInt[uiNumOfViews];
+  sm_uiSliceNum  = new UInt[uiNumOfViews];
+  sm_uiPosCounter= new UInt[uiNumOfViews];
+
   for( UInt ui = 0; ui < uiNumOfViews; ui++ )
   {
-    sm_fTrace      [ui] = 0;
+    sm_fTrace      [ui] = NULL;
     sm_uiFrameNum  [ui] = 0;
     sm_uiSliceNum  [ui] = 0;
     sm_uiPosCounter[ui] = 0;
   }
 
+  Initialized = true;
   return Err::m_nOK;
 }
 
@@ -170,13 +177,17 @@ TraceFile::openTrace( Char* pucBaseFilename, UInt uiViewId )
 ErrVal
 TraceFile::closeTrace ()
 {
-  for( UInt ui = 0; ui < MAX_VIEWS; ui++ )
+  for( UInt ui = 0; ui < sm_uiNumOfViews; ui++ )
   {
     if( sm_fTrace[ui] )
     {
       ::fclose( sm_fTrace[ui] );
     }
   }
+  delete [] sm_fTrace;
+  delete [] sm_uiFrameNum;
+  delete [] sm_uiSliceNum;
+  delete [] sm_uiPosCounter;
 
   return Err::m_nOK;
 }
@@ -185,14 +196,16 @@ TraceFile::closeTrace ()
 ErrVal
 TraceFile::setLayer( UInt uiLayerId )
 {
-  sm_uiLayer = uiLayerId;
+  if (IsInitialized())
+	sm_uiLayer = uiLayerId;
   return Err::m_nOK;
 }
 
 ErrVal
 TraceFile::setViewId( UInt uiViewId )
 {
-  sm_uiViewId = uiViewId;
+  if (IsInitialized())
+	sm_uiViewId = uiViewId;
   return Err::m_nOK;
 }
 
@@ -200,7 +213,8 @@ TraceFile::setViewId( UInt uiViewId )
 ErrVal
 TraceFile::startNalUnit()
 {
-  RNOK( printHeading("Nal Unit") );
+  if (IsInitialized())
+	RNOK( printHeading("Nal Unit") );
   return Err::m_nOK;
 }
 
@@ -208,9 +222,11 @@ TraceFile::startNalUnit()
 ErrVal
 TraceFile::startFrame()
 {
-  sm_uiFrameNum[sm_uiViewId]++;
-  sm_uiSliceNum[sm_uiViewId]=0;
-
+  if (IsInitialized())
+  {
+	sm_uiFrameNum[sm_uiViewId]++;
+	sm_uiSliceNum[sm_uiViewId]=0;
+  }
   return Err::m_nOK;
 }
 
@@ -218,12 +234,14 @@ TraceFile::startFrame()
 ErrVal
 TraceFile::startSlice()
 {
-  Char acSliceHead[100];
-  ::snprintf( acSliceHead, 100, "Slice # %d Frame # %d", sm_uiSliceNum[sm_uiViewId], sm_uiFrameNum[sm_uiViewId] );
-  
-  RNOK( printHeading( acSliceHead ) );
-  sm_uiSliceNum[sm_uiViewId]++;
-  
+  if (IsInitialized())
+  {
+	Char acSliceHead[100];
+	::snprintf( acSliceHead, 100, "Slice # %d Frame # %d", sm_uiSliceNum[sm_uiViewId], sm_uiFrameNum[sm_uiViewId] );
+	  
+	RNOK( printHeading( acSliceHead ) );
+	sm_uiSliceNum[sm_uiViewId]++;
+  }
   return Err::m_nOK;
 }
 
@@ -231,10 +249,12 @@ TraceFile::startSlice()
 ErrVal
 TraceFile::startMb( Int iMbAddress )
 {
-  Char acMbHead[100];
-  ::snprintf( acMbHead, 100, "MB # %d", iMbAddress );
-  RNOK( printHeading( acMbHead ) );
-  
+  if (IsInitialized())
+  {
+	Char acMbHead[100];
+	::snprintf( acMbHead, 100, "MB # %d", iMbAddress );
+	RNOK( printHeading( acMbHead ) );
+  }
   return Err::m_nOK;
 }
 
@@ -242,17 +262,19 @@ TraceFile::startMb( Int iMbAddress )
 ErrVal
 TraceFile::printHeading( Char* pcString )
 {
-  if( ! sm_fTrace[sm_uiViewId] )
+  if (IsInitialized())
   {
-    sm_acLine[0] = '\0';
-    return Err::m_nOK;
-  }
+	if( ! sm_fTrace[sm_uiViewId] )
+	{
+		sm_acLine[0] = '\0';
+		return Err::m_nOK;
+	}
 
-  ::snprintf( sm_acLine, MAX_LINE_LENGTH, "-------------------- %s --------------------\n", pcString );
-  ::fprintf ( sm_fTrace[sm_uiViewId], sm_acLine );
-  ::fflush  ( sm_fTrace[sm_uiViewId] );
-  sm_acLine[0] = '\0';
-  
+	::snprintf( sm_acLine, MAX_LINE_LENGTH, "-------------------- %s --------------------\n", pcString );
+	::fprintf ( sm_fTrace[sm_uiViewId], sm_acLine );
+	::fflush  ( sm_fTrace[sm_uiViewId] );
+	sm_acLine[0] = '\0';
+  }
   return Err::m_nOK;
 }
 
@@ -260,7 +282,8 @@ TraceFile::printHeading( Char* pcString )
 ErrVal
 TraceFile::countBits( UInt uiBitCount )
 {
-  sm_uiPosCounter[sm_uiViewId] += uiBitCount;
+  if (IsInitialized())
+	sm_uiPosCounter[sm_uiViewId] += uiBitCount;
   return Err::m_nOK;
 }
 
@@ -269,7 +292,8 @@ TraceFile::countBits( UInt uiBitCount )
 ErrVal
 TraceFile::printPos()
 {
-  ::snprintf( sm_acPos, 8, "@%d", sm_uiPosCounter[sm_uiViewId] );
+  if (IsInitialized())		
+	::snprintf( sm_acPos, 8, "@%d", sm_uiPosCounter[sm_uiViewId] );
   return Err::m_nOK;
 }
 
@@ -277,6 +301,7 @@ TraceFile::printPos()
 ErrVal
 TraceFile::printString( const Char* pcString )
 {
+  if (IsInitialized())		
   ::strncat( sm_acLine, pcString, MAX_LINE_LENGTH );
   return Err::m_nOK;
 }
@@ -285,7 +310,8 @@ TraceFile::printString( const Char* pcString )
 ErrVal
 TraceFile::printType( Char* pcString )
 {
-  ::snprintf( sm_acType, 8, "%s", pcString);
+  if (IsInitialized())
+   ::snprintf( sm_acType, 8, "%s", pcString);
   return Err::m_nOK;
 }
 
@@ -294,8 +320,10 @@ ErrVal
 TraceFile::printVal( UInt uiVal )
 {
   Char tmp[8];
-  ::snprintf( tmp, 8, "%3u", uiVal);
-  ::strncat( sm_acLine, tmp, MAX_LINE_LENGTH);
+  if (IsInitialized()) {
+	::snprintf( tmp, 8, "%3u", uiVal);
+	::strncat( sm_acLine, tmp, MAX_LINE_LENGTH);
+  }
   return Err::m_nOK;
 }
 
@@ -304,8 +332,11 @@ ErrVal
 TraceFile::printVal( Int iVal )
 {
   Char tmp[8];
-  ::snprintf( tmp, 8, "%3i", iVal );
-  ::strncat( sm_acLine, tmp, MAX_LINE_LENGTH );
+  if (IsInitialized())
+  {
+	::snprintf( tmp, 8, "%3i", iVal );
+	::strncat( sm_acLine, tmp, MAX_LINE_LENGTH );
+  }
   return Err::m_nOK;
 }
 
@@ -314,8 +345,11 @@ ErrVal
 TraceFile::printXVal( UInt uiVal )
 {
   Char tmp[8];
-  ::snprintf( tmp, 8, "0x%04x", uiVal );
-  ::strncat( sm_acLine, tmp, MAX_LINE_LENGTH);
+  if (IsInitialized())
+  {
+	::snprintf( tmp, 8, "0x%04x", uiVal );
+	::strncat( sm_acLine, tmp, MAX_LINE_LENGTH);
+  }
   return Err::m_nOK;
 }
 
@@ -324,28 +358,31 @@ ErrVal
 TraceFile::addBits( UInt uiVal,
                     UInt uiLength )
 {
-  ROT( uiLength > 32 );
+  if (IsInitialized())
+  {
+	ROT( uiLength > 32 );
 
-  Char acBuffer[33];
-  UInt i;
-  for ( i = 0; i < uiLength; i++ )
-  {
-    acBuffer[i] = '0' + ( ( uiVal & ( 1 << (uiLength - i - 1) ) ) >> (uiLength - i - 1 ) );
-  }
-  acBuffer[uiLength] = '\0';
+	Char acBuffer[33];
+	UInt i;
+	for ( i = 0; i < uiLength; i++ )
+	{
+		acBuffer[i] = '0' + ( ( uiVal & ( 1 << (uiLength - i - 1) ) ) >> (uiLength - i - 1 ) );
+	}
+	acBuffer[uiLength] = '\0';
 
-  i = strlen( sm_acBits );
-  if( i < 2 )
-  {
-    sm_acBits[0] = '[';
-    sm_acBits[1] = '\0';
+	i = strlen( sm_acBits );
+	if( i < 2 )
+	{
+		sm_acBits[0] = '[';
+		sm_acBits[1] = '\0';
+	}
+	else
+	{
+		sm_acBits[i-1] = '\0';
+	}
+	strncat( sm_acBits, acBuffer, 34 );
+	strncat( sm_acBits, "]",      34 );
   }
-  else
-  {
-    sm_acBits[i-1] = '\0';
-  }
-  strncat( sm_acBits, acBuffer, 34 );
-  strncat( sm_acBits, "]",      34 );
   return Err::m_nOK;
 }
 
@@ -354,10 +391,13 @@ ErrVal
 TraceFile::printBits( UInt uiVal,
                       UInt uiLength )
 {
-  sm_acBits[0] = '[';
-  sm_acBits[1] = ']';
-  sm_acBits[2] = '\0';
-  RNOK( addBits( uiVal, uiLength ) );
+  if (IsInitialized()) 
+  {
+	sm_acBits[0] = '[';
+	sm_acBits[1] = ']';
+	sm_acBits[2] = '\0';
+	RNOK( addBits( uiVal, uiLength ) );
+  }
   return Err::m_nOK;
 }
 
@@ -365,7 +405,8 @@ TraceFile::printBits( UInt uiVal,
 ErrVal
 TraceFile::printCode( UInt uiVal )
 {
-  ::snprintf( sm_acCode, MAX_LINE_LENGTH, "%u", uiVal );
+  if (IsInitialized())
+	::snprintf( sm_acCode, MAX_LINE_LENGTH, "%u", uiVal );
   return Err::m_nOK;
 }
 
@@ -373,7 +414,8 @@ TraceFile::printCode( UInt uiVal )
 ErrVal
 TraceFile::printCode(Int iVal)
 {
-  ::snprintf( sm_acCode, MAX_LINE_LENGTH, "%i", iVal );
+  if (IsInitialized())	
+	::snprintf( sm_acCode, MAX_LINE_LENGTH, "%i", iVal );
   return Err::m_nOK;
 }
 
@@ -381,30 +423,32 @@ TraceFile::printCode(Int iVal)
 ErrVal
 TraceFile::newLine()
 {
-  if( ! sm_fTrace[sm_uiViewId] )
+  if (IsInitialized())
   {
-    sm_acLine[0] = '\0';
-    sm_acType[0] ='\0';
-    sm_acCode[0] ='\0';
-    sm_acBits[0] ='\0';
-    sm_acPos [0] ='\0';
-    return Err::m_nOK;
+	if( ! sm_fTrace[sm_uiViewId] )
+	{
+		sm_acLine[0] = '\0';
+		sm_acType[0] ='\0';
+		sm_acCode[0] ='\0';
+		sm_acBits[0] ='\0';
+		sm_acPos [0] ='\0';
+		return Err::m_nOK;
+	}
+
+	::fprintf( sm_fTrace[sm_uiViewId], "%-6s",   sm_acPos  );
+	::fprintf( sm_fTrace[sm_uiViewId], " %-50s", sm_acLine );
+	::fprintf( sm_fTrace[sm_uiViewId], " %-8s",  sm_acType );
+	::fprintf( sm_fTrace[sm_uiViewId], " %5s",   sm_acCode );
+	::fprintf( sm_fTrace[sm_uiViewId], " %s",    sm_acBits );
+	::fprintf( sm_fTrace[sm_uiViewId], "\n");
+	::fflush ( sm_fTrace[sm_uiViewId] );
+
+	sm_acLine[0] ='\0';
+	sm_acType[0] ='\0';
+	sm_acCode[0] ='\0';
+	sm_acBits[0] ='\0';
+	sm_acPos [0] ='\0';
   }
-
-  ::fprintf( sm_fTrace[sm_uiViewId], "%-6s",   sm_acPos  );
-  ::fprintf( sm_fTrace[sm_uiViewId], " %-50s", sm_acLine );
-  ::fprintf( sm_fTrace[sm_uiViewId], " %-8s",  sm_acType );
-  ::fprintf( sm_fTrace[sm_uiViewId], " %5s",   sm_acCode );
-  ::fprintf( sm_fTrace[sm_uiViewId], " %s",    sm_acBits );
-  ::fprintf( sm_fTrace[sm_uiViewId], "\n");
-  ::fflush ( sm_fTrace[sm_uiViewId] );
-
-  sm_acLine[0] ='\0';
-  sm_acType[0] ='\0';
-  sm_acCode[0] ='\0';
-  sm_acBits[0] ='\0';
-  sm_acPos [0] ='\0';
-
   return Err::m_nOK;
 }
 

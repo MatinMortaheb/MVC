@@ -381,20 +381,17 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
 
 		}	
 
-		RNOK  ( pcWriteIf->writeUvlc( (UInt &)SpsMVC->m_num_level_values_signalled,                   "SPS: num_level_values_signalled" ) ); // ue(v)
+		RNOK  ( pcWriteIf->writeUvlc( (UInt &)SpsMVC->m_num_level_values_signalled_minus1,                   "SPS: num_level_values_signalled_minus1" ) ); // ue(v)
 
-		//SpsMVC->initViewSPSMemory_num_level_related_memory(SpsMVC->getNumLevelValuesSignalled());
-		for (i=0;i< SpsMVC->m_num_level_values_signalled; i++)  
+		for (i=0;i<= SpsMVC->m_num_level_values_signalled_minus1; i++)  
 		{
 			RNOK  ( pcWriteIf->writeCode( SpsMVC->m_ui_level_idc[i] ,                               8,      "SPS: level_idc[i]" ) );
 			RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_num_applicable_ops_minus1[i],                   "SPS: num_applicable_ops_minus1[i]" ) ); // ue(v)
-			//SpsMVC->initViewSPSMemory_num_level_related_memory_2D(SpsMVC->m_ui_num_applicable_ops_minus1[i],i);
-			for (j=0; j<=SpsMVC->m_ui_num_applicable_ops_minus1[i];j++)
+			for (j=0; j<=(int)SpsMVC->m_ui_num_applicable_ops_minus1[i];j++)
 			{
 				RNOK  ( pcWriteIf->writeCode( SpsMVC->m_ui_applicable_op_temporal_id[i][j] ,                               3,      "SPS: applicable_op_temporal_id[i][j]" ) );
 				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j],                   "SPS: applicable_op_num_target_views_minus1[i][j]" ) ); // ue(v)
-				//SpsMVC->initViewSPSMemory_num_level_related_memory_3D(SpsMVC->m_ui_num_applicable_ops_minus1[i],SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j], i,j);
-				for (k=0; k<= SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j];k++)
+				for (k=0; k<= (int)SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j];k++)
 					RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_target_view_id[i][j][k],                    "SPS: applicable_op_num_target_view_id[i][j][k]" ) ); // ue(v)
 				
 				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_num_views_minus1[i][j],                   "SPS: num_applicable_op_num_views_minus1[i][j]" ) ); // ue(v)			
@@ -540,19 +537,19 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 
 		}
 
-		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_level_values_signalled,                   "SPS: num_level_values_signalled" ) ); // ue(v)
-		SpsMVC->initViewSPSMemory_num_level_related_memory(SpsMVC->getNumLevelValuesSignalled());
-		for (i=0;i< SpsMVC->m_num_level_values_signalled; i++)  
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_level_values_signalled_minus1,                   "SPS: num_level_values_signalled_minus1" ) ); // ue(v)
+		SpsMVC->initViewSPSMemory_num_level_related_memory(SpsMVC->getNumLevelValuesSignalledMinus1());
+		for (i=0;i<= SpsMVC->m_num_level_values_signalled_minus1; i++)  
 		{
 			RNOK  ( pcReadIf->getCode( SpsMVC->m_ui_level_idc[i] ,                               8,      "SPS: level_idc[i]" ) );
 			RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_num_applicable_ops_minus1[i],                   "SPS: num_applicable_ops_minus1[i]" ) ); // ue(v)
 			SpsMVC->initViewSPSMemory_num_level_related_memory_2D(SpsMVC->m_ui_num_applicable_ops_minus1[i],i);
-			for (j=0; j<=SpsMVC->m_ui_num_applicable_ops_minus1[i];j++)
+			for (j=0; j<=(int)SpsMVC->m_ui_num_applicable_ops_minus1[i];j++)
 			{
 				RNOK  ( pcReadIf->getCode( SpsMVC->m_ui_applicable_op_temporal_id[i][j] ,                               3,      "SPS: applicable_op_temporal_id[i][j]" ) );
 				RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j],                   "SPS: applicable_op_num_target_views_minus1[i][j]" ) ); // ue(v)
 				SpsMVC->initViewSPSMemory_num_level_related_memory_3D(SpsMVC->m_ui_num_applicable_ops_minus1[i],SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j], i,j);
-				for (k=0; k<= SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j];k++)
+				for (k=0; k<= (int)SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j];k++)
 					RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_target_view_id[i][j][k],                    "SPS: applicable_op_num_target_view_id[i][j][k]" ) ); // ue(v)
 				
 				RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_num_views_minus1[i][j],                   "SPS: num_applicable_op_num_views_minus1[i][j]" ) ); // ue(v)

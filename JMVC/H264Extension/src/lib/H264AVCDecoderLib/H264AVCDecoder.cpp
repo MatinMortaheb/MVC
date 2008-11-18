@@ -207,12 +207,7 @@ H264AVCDecoder::H264AVCDecoder()
   {
       m_uiPicId[uiNumPic] = 0;
   }
-  UInt uiNumViews;
-  for(uiNumViews = 0; uiNumViews < MAX_VIEWS; uiNumViews++)
-  {
-      m_uiViewId[uiNumViews] = 0;
-	  m_uiDecodeView[uiNumViews] = 0;
-  }
+
   UInt uiOp;
   for(uiOp = 0; uiOp < MAX_OPERATION_POINTS; uiOp++)
   {
@@ -1767,8 +1762,16 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
         else if (pcSEIMessage->getMessageType() == SEI::NON_REQ_VIEW_INFO_SEI)
         {
           m_uiNumTargetViewMinus1 = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getNumTargetViewMinus1();
+		  m_auiViewOrderIndex = new UInt[m_uiNumTargetViewMinus1];
+		  m_auiNumNonReqViewCop = new UInt[m_uiNumTargetViewMinus1];
+		  m_aauiIndexDelta = new UInt*[m_uiNumTargetViewMinus1];
+		  m_aauiNonReqViewOrderIndex = new UInt*[m_uiNumTargetViewMinus1];
+
           for ( i =0; i<= m_uiNumTargetViewMinus1; i++)
           {
+			m_aauiIndexDelta[i] = new UInt[m_uiNumTargetViewMinus1];
+ 		    m_aauiNonReqViewOrderIndex[i] = new UInt[m_uiNumTargetViewMinus1];
+
             m_auiViewOrderIndex[i] = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getTargetViewOrderIndex()[i];
             m_auiNumNonReqViewCop[i] = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getNumNonReqViewCopMinus1()[i] + 1;
             for (UInt j = 0; j < m_auiNumNonReqViewCop[i]; j++)
@@ -1776,7 +1779,12 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
               m_aauiIndexDelta[i][j] = ((SEI::NonReqViewInfoSei*)pcSEIMessage)->getindexDeltaMinus1()[i][j];
               m_aauiNonReqViewOrderIndex[i][j] = m_auiViewOrderIndex[i] - m_aauiIndexDelta[i][j] - 1;
             }
+			
+			delete [] m_aauiIndexDelta[i];
+ 		    delete [] m_aauiNonReqViewOrderIndex[i];
           }
+		  delete [] m_aauiIndexDelta;
+ 		  delete [] m_aauiNonReqViewOrderIndex;	
         }
 		else if( pcSEIMessage->getMessageType() == SEI::VIEW_DEPENDENCY_STRUCTURE_SEI )
 		{

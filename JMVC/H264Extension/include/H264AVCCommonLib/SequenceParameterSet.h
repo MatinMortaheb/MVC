@@ -99,8 +99,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 
 H264AVC_NAMESPACE_BEGIN
 
-//JVT-V054 define some maximum view id that is currently possible in the test sequences
-#define MAX_VIEWS 100
+
 
 class H264AVCCOMMONLIB_API SpsMvcExtension
 {
@@ -118,7 +117,7 @@ public:
 , m_non_anchor_ref_list1      ( NULL )
 , m_uiViewCodingOrder         ( NULL ) // name ?
 , m_bInitDone                 ( false)
-, m_num_level_values_signalled (0)
+, m_num_level_values_signalled_minus1 (0)
 , m_ui_level_idc (NULL)
 , m_ui_num_applicable_ops_minus1 (NULL)
 , m_ui_applicable_op_temporal_id (NULL)
@@ -141,20 +140,20 @@ public:
   int getNumViewMinus1() const { return (int)m_num_views_minus_1;}
   Void setNumViewsMinus1(UInt num_views) {m_num_views_minus_1=(int)num_views;}
 
-  int getNumLevelValuesSignalled() const { return (int)m_num_level_values_signalled;}
-  Void setNumLevelValuesSignalled(UInt num_level_values) {m_num_level_values_signalled=(int)num_level_values;}
+  int getNumLevelValuesSignalledMinus1() const { return (int)m_num_level_values_signalled_minus1;}
+  Void setNumLevelValuesSignalledMinus1(UInt num_level_values_minus1) {m_num_level_values_signalled_minus1=(int)num_level_values_minus1;}
 
   Void initViewSPSMemory_num_refs_for_lists(UInt num_views_minus1)
   { 
-    m_num_anchor_refs_list0 = new int[MAX_VIEWS]; // ue(v)
-    m_num_anchor_refs_list1 = new int[MAX_VIEWS]; // ue(v) 
-    m_num_non_anchor_refs_list0 = new int[MAX_VIEWS]; // ue(v)
-    m_num_non_anchor_refs_list1 = new int[MAX_VIEWS]; // ue(v)
+    m_num_anchor_refs_list0 = new int[num_views_minus1+1]; // ue(v)
+    m_num_anchor_refs_list1 = new int[num_views_minus1+1]; // ue(v) 
+    m_num_non_anchor_refs_list0 = new int[num_views_minus1+1]; // ue(v)
+    m_num_non_anchor_refs_list1 = new int[num_views_minus1+1]; // ue(v)
           
     //JVT-V054
-    m_uiViewCodingOrder = new UInt[MAX_VIEWS];
+    m_uiViewCodingOrder = new UInt[num_views_minus1+1];
 
-    for (int i=0;i<MAX_VIEWS;i++)
+    for (int i=0;i<(int)num_views_minus1+1;i++)
     {
       m_num_anchor_refs_list0[i]=0;
       m_num_anchor_refs_list1[i]=0;
@@ -178,16 +177,16 @@ public:
 
  
 
-  Void initViewSPSMemory_num_level_related_memory(UInt num_level_values_signalled)
+  Void initViewSPSMemory_num_level_related_memory(UInt num_level_values_signalled_minus1)
   { 
-	m_ui_level_idc = new UInt[num_level_values_signalled];
-	m_ui_num_applicable_ops_minus1 = new UInt[num_level_values_signalled];
-	m_ui_applicable_op_temporal_id = new UInt*[num_level_values_signalled];
-	m_ui_applicable_op_num_target_views_minus1 = new UInt*[num_level_values_signalled];
-	m_ui_applicable_op_num_views_minus1 = new UInt*[num_level_values_signalled];
-	m_ui_applicable_op_target_view_id = new UInt**[num_level_values_signalled];
+	m_ui_level_idc = new UInt[num_level_values_signalled_minus1+1];
+	m_ui_num_applicable_ops_minus1 = new UInt[num_level_values_signalled_minus1+1];
+	m_ui_applicable_op_temporal_id = new UInt*[num_level_values_signalled_minus1+1];
+	m_ui_applicable_op_num_target_views_minus1 = new UInt*[num_level_values_signalled_minus1+1];
+	m_ui_applicable_op_num_views_minus1 = new UInt*[num_level_values_signalled_minus1+1];
+	m_ui_applicable_op_target_view_id = new UInt**[num_level_values_signalled_minus1+1];
 
-    for (int i=0;i<num_level_values_signalled;i++)
+    for (int i=0;i<=(int)num_level_values_signalled_minus1;i++)
     {
       m_ui_level_idc[i]=0;
       m_ui_num_applicable_ops_minus1[i]=0;      
@@ -217,7 +216,7 @@ public:
 
   Void releaseViewSPSMemory_num_level_related_memory_2D()
   {
-	  for (int i=0; i<this->getNumLevelValuesSignalled(); i++)
+	  for (int i=0; i<=this->getNumLevelValuesSignalledMinus1(); i++)
 	  {
 		delete [] m_ui_applicable_op_temporal_id[i];
 		delete [] m_ui_applicable_op_num_target_views_minus1[i];
@@ -238,11 +237,11 @@ public:
 
   Void releaseViewSPSMemory_num_level_related_memory_3D()
   {
-	  int num_i=this->getNumLevelValuesSignalled();
+	  int num_i=this->getNumLevelValuesSignalledMinus1();
 
-	  for (int i=0;i<num_i; i++) 
+	  for (int i=0;i<=num_i; i++) 
 	  {
-		for (int j=0; j< this->m_ui_num_applicable_ops_minus1[i]; j++)
+		for (int j=0; j<= (int)this->m_ui_num_applicable_ops_minus1[i]; j++)
 	  		delete [] m_ui_applicable_op_target_view_id[i][j];
 
 		delete [] m_ui_applicable_op_target_view_id[i];	
@@ -258,12 +257,12 @@ public:
   {
     if(!m_bInitDone)
     {
-      m_anchor_ref_list0 = new UInt*[MAX_VIEWS];
-      m_non_anchor_ref_list0 = new UInt*[MAX_VIEWS];
-      m_anchor_ref_list1 = new UInt*[MAX_VIEWS];
-      m_non_anchor_ref_list1 = new UInt*[MAX_VIEWS];
+      m_anchor_ref_list0 = new UInt*[num_views_minus1+1];
+      m_non_anchor_ref_list0 = new UInt*[num_views_minus1+1];
+      m_anchor_ref_list1 = new UInt*[num_views_minus1+1];
+      m_non_anchor_ref_list1 = new UInt*[num_views_minus1+1];
       
-      for (UInt n = 0; n < MAX_VIEWS; n++)
+      for (UInt n = 0; n <= num_views_minus1; n++)
       {
         m_anchor_ref_list0[n] = NULL;
         m_non_anchor_ref_list0[n] = NULL;
@@ -291,7 +290,7 @@ public:
   
   Void releaseViewSPSMemory_ref_for_lists()
   {
-    for (int i=0; i< MAX_VIEWS; i++)
+	  for (int i=0; i<= this->getNumViewMinus1(); i++)
     {
       if(m_anchor_ref_list0[i])
         delete [] m_anchor_ref_list0[i];
@@ -312,7 +311,7 @@ public:
   }
   Void setNumAnchorRefsForListX(int i, int list_no, UInt value) 
   { 
-    AOF(i< MAX_VIEWS && i >=0)
+	  AOF(i<= this->m_num_views_minus_1 && i >=0)
       if (list_no==0)
         m_num_anchor_refs_list0[i]=value;
       else if (list_no==1)
@@ -320,7 +319,7 @@ public:
   }
   UInt getNumAnchorRefsForListX(int i,int list_no) const
   {
-    AOF(i< MAX_VIEWS && i >=0)
+    AOF(i<= this->m_num_views_minus_1 && i >=0)
       if (list_no==0)
         return (UInt)m_num_anchor_refs_list0[i];
     AOF( list_no==1 )
@@ -328,7 +327,7 @@ public:
   }
   Void setNumNonAnchorRefsForListX(int i, int list_no, UInt value) 
   { 
-    AOF(i< MAX_VIEWS && i >=0)
+    AOF(i<= this->m_num_views_minus_1 && i >=0)
       if (list_no==0)
         m_num_non_anchor_refs_list0[i]=value;
       else if (list_no==1)
@@ -336,7 +335,7 @@ public:
   }
   UInt getNumNonAnchorRefsForListX(int i,int list_no) const
   {
-    AOF(i< MAX_VIEWS && i >=0)
+    AOF(i<= this->m_num_views_minus_1 && i >=0)
       if (list_no==0)
         return (UInt)m_num_non_anchor_refs_list0[i];
     AOF( list_no==1 )
@@ -345,7 +344,7 @@ public:
 
   Void setAnchorRefForListX(int i,int j, int list_no, UInt value)
   {
-    AOF(i< MAX_VIEWS && i >=0)
+    AOF(i<= this->m_num_views_minus_1 && i >=0)
 		
       if (list_no==0) {
         AOF(j<m_num_anchor_refs_list0[i] && j >=0)		
@@ -358,7 +357,7 @@ public:
   }
   UInt getAnchorRefForListX(int i,int j, int list_no) const
   {
-    AOF(i< MAX_VIEWS && i >=0)
+    AOF(i<= this->m_num_views_minus_1 && i >=0)
       if (list_no==0){
         AOF(j<m_num_anchor_refs_list0[i] && j >=0)	
           return m_anchor_ref_list0[i][j];
@@ -372,7 +371,7 @@ public:
   }
   Void setNonAnchorRefForListX(int i,int j, int list_no, UInt value)
   {
-	  AOF(i< MAX_VIEWS && i >=0)
+	  AOF(i<= this->m_num_views_minus_1 && i >=0)
 	  AOF(list_no==0 || list_no==1)
 		
       if (list_no==0) {
@@ -386,7 +385,7 @@ public:
   }
   UInt getNonAnchorRefForListX(int i,int j, int list_no) const
   {
-    AOF(i< MAX_VIEWS && i >=0)
+    AOF(i<= this->m_num_views_minus_1 && i >=0)
 	
       if (list_no==0){
         AOF(j<m_num_non_anchor_refs_list0[i] && j >=0)	
@@ -449,7 +448,7 @@ public:
   //JVT-V054
   UInt                  *m_uiViewCodingOrder;
   Bool                   m_bInitDone;
-  int			m_num_level_values_signalled; // ue(v)
+  int			m_num_level_values_signalled_minus1; // ue(v)
   UInt			*m_ui_level_idc; // u(8)
   UInt			*m_ui_num_applicable_ops_minus1; // ue(v)
   UInt			**m_ui_applicable_op_temporal_id; // u(3)

@@ -482,7 +482,8 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 
 
   //===== TRACE output =====
-  xTrace( uiHeaderLength > 1 );
+  if (TraceFile::IsInitialized()) // assembler could call this without initilization
+	xTrace( uiHeaderLength > 1 ); 
 
   //===== NAL unit payload =====
   m_pucBuffer         = pcBinDataAccessor->data() + uiHeaderLength;

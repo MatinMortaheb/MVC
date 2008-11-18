@@ -229,7 +229,7 @@ Extractor::xWriteViewScalSEIToBuffer(h264::SEI::ViewScalabilityInfoSei *pcViewSc
 
 
 ErrVal
-Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage* pcSEIMessage, UInt uiOpId, UInt *uiViewId, UInt* uiNewNumViews )
+Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage* pcSEIMessage, UInt uiOpId, UInt*& uiViewId, UInt* uiNewNumViews )
 {
 	if(pcSEIMessage->getMessageType() == h264::SEI::VIEW_SCALABILITY_INFO_SEI)
 	{
@@ -278,6 +278,9 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 	{
 	  m_uiOpId = uiOperationPointId[i];
 	  UInt NumView = pcOldViewScalSei->getNumTargetOutputViewsMinus1( m_uiOpId ) + 1;//SEI JJ
+  	  uiViewId = new UInt[NumView];
+	  ::memset( uiViewId, 0x00, NumView*sizeof(UInt) );
+
 	  for( UInt j = 0; j < NumView; j++ )
 	  {
 		UInt uiId = pcOldViewScalSei->getViewId( m_uiOpId, j );
@@ -489,8 +492,9 @@ Extractor::xExtractOperationPoints()
     Bool  bEOS          = false;
 	UInt  uiNewNumViews = 0;
 
-	UInt uiViewId[MAX_VIEWS];
-	::memset( uiViewId, 0x00, MAX_VIEWS*sizeof(UInt) );
+	UInt *uiViewId=NULL;
+
+
 
 	RNOK( m_pcH264AVCPacketAnalyzer->init() );
 
@@ -556,6 +560,9 @@ Extractor::xExtractOperationPoints()
 	}
 	
 	RNOK( m_pcH264AVCPacketAnalyzer->uninit() );
+
+	if (uiViewId!=NULL)
+		delete [] uiViewId;
 
 	return Err::m_nOK;
 }
