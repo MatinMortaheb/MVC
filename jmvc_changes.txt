@@ -1,3 +1,10 @@
+JMVC_3_0_1 -> JMVC_3_0_2
+Date            : Dec 1, 2008
+Authors         : MERL (Software coordinators) 
+Contribution    : SW improvement
+Changes:
+- Added additional parsing routine for the encoder cfg-file so that it does not crash even in the absence of specifiers related to 'num_level_values_signalled_minus1.'
+
 JMVC_3_0 -> JMVC_3_0_1
 Date            : Nov 18, 2008
 Authors         : MERL (Software coordinators) 

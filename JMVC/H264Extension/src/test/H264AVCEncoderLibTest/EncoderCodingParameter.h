@@ -942,7 +942,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
       CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory(CodingParameter::SpsMVC.getNumLevelValuesSignalledMinus1());
     }
 
-	if (acTags[0] == "Level_IDC") 
+	if (acTags[0] == "Level_IDC" && CodingParameter::SpsMVC.m_ui_level_idc!=NULL ) 
     {
       AOF((cur_level_id=atoi(acTags[1].c_str()))>=0);       
       AOF(++level_cnt<=CodingParameter::SpsMVC.getNumLevelValuesSignalledMinus1());		
@@ -950,7 +950,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
     }
 
-	if (acTags[0] == "NumApplicableOpsMinus1")
+	if (acTags[0] == "NumApplicableOpsMinus1" && CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1!=NULL)
     {
       AOF((num_of_ops=atoi(acTags[1].c_str()))>=0); 
       AOF(num_of_ops<=1023); // hard-coded
@@ -958,14 +958,14 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 	  CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_2D(num_of_ops,level_cnt);      
 	}
 
-	if (acTags[0] == "ApplicableOpTemporalId")
+	if (acTags[0] == "ApplicableOpTemporalId" && CodingParameter::SpsMVC.m_ui_applicable_op_temporal_id!=NULL)
     {
       AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);
       temporal_id=atoi(acTags[2].c_str());
       CodingParameter::SpsMVC.m_ui_applicable_op_temporal_id[level_cnt][ref_idx]=temporal_id;
     }
 
-	if (acTags[0] == "ApplicableOpNumTargetViewsMinus1")
+	if (acTags[0] == "ApplicableOpNumTargetViewsMinus1"&& CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_minus1!=NULL)
     {
       AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);
       num_target_views_minus1=atoi(acTags[2].c_str());
@@ -973,14 +973,14 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 	  CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_3D(num_of_ops,num_target_views_minus1,level_cnt,ref_idx);   
     }
 
-	if (acTags[0] == "ApplicableOpNumViewsMinus1")
+	if (acTags[0] == "ApplicableOpNumViewsMinus1" && CodingParameter::SpsMVC.m_ui_applicable_op_num_views_minus1!=NULL)
     {
       AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);
       num_views_minus1=atoi(acTags[2].c_str());
       CodingParameter::SpsMVC.m_ui_applicable_op_num_views_minus1[level_cnt][ref_idx]=num_views_minus1;
     }
 
-	if (acTags[0] == "ApplicableOpTargetViewId")
+	if (acTags[0] == "ApplicableOpTargetViewId" && CodingParameter::SpsMVC.m_ui_applicable_op_target_view_id!=NULL)
     {
       AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);      
       AOF((view_idx=atoi(acTags[2].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_minus1[level_cnt][ref_idx]);            
@@ -1016,6 +1016,25 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
       AF();
     }
     ///////////////
+
+	// Setting default values related to level
+	if (CodingParameter::SpsMVC.m_ui_level_idc==NULL)
+	{
+		UInt temp_num_views;
+
+		CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory(CodingParameter::SpsMVC.getNumLevelValuesSignalledMinus1());
+		CodingParameter::SpsMVC.m_ui_level_idc[0]=0;
+		CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[0]=0;
+	    CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_2D(0,0);      
+		CodingParameter::SpsMVC.m_ui_applicable_op_temporal_id[0][0]=0;
+		CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_minus1[0][0]=(temp_num_views=CodingParameter::SpsMVC.getNumViewMinus1());
+		CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_3D(0,temp_num_views,0,0);   
+		CodingParameter::SpsMVC.m_ui_applicable_op_num_views_minus1[0][0]=temp_num_views;
+		for (int i=0;i<=(int)temp_num_views;i++)
+			CodingParameter::SpsMVC.m_ui_applicable_op_target_view_id[0][0][i]=order[i];	
+
+	}
+	////
 
       uiParLnCount = 0;
       while (m_pEncoderLines[uiParLnCount] != NULL)
