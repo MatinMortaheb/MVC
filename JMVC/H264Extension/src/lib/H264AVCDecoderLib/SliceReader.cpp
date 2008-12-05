@@ -441,7 +441,7 @@ SliceReader::readSliceHeaderVirtual(	NalUnitType   eNalUnitType,
 ErrVal
 SliceReader::readSliceHeader( NalUnitType   eNalUnitType,
                               Bool m_svc_mvc_flag,	// this m_xxx is not good
-                              Bool bIDRFlag,        // JVT-W035
+                              Bool bNonIDRFlag,        // JVT-W035    
                               Bool          bAnchorPicFlag,
                               UInt          uiViewId,
 					   		  Bool			uiInterViewFlag,  // JVT-W056  Samsung
@@ -499,7 +499,7 @@ SliceReader::readSliceHeader( NalUnitType   eNalUnitType,
   rpcSH->setNalRefIdc     ( eNalRefIdc      );
   rpcSH->setAnchorPicFlag ( bAnchorPicFlag  );
   rpcSH->setViewId        ( uiViewId        );
-  rpcSH->setIDRFlag       ( bIDRFlag        ); //JVT-W035
+  rpcSH->setNonIDRFlag    ( bNonIDRFlag     ); //JVT-W035 
 	rpcSH->setInterViewFalg (uiInterViewFlag);   //JVT-W056  Samsung
   rpcSH->setSvcMvcFlag    ( m_svc_mvc_flag);
   rpcSH->setFirstMbInSlice( uiFirstMbInSlice);

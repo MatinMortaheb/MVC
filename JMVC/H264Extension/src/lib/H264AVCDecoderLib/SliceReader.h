@@ -119,7 +119,7 @@ public:
   ErrVal readSliceHeader  ( NalUnitType   eNalUnitType,
 
                             Bool m_svc_mvc_flag,	
-                            Bool bIDRFlag, // JVT-W035
+                            Bool bNonIDRFlag, // JVT-W035 
                             Bool bAnchorPicFlag,
                             UInt uiViewId,
 							Bool uiInterViewFlag, //JVT-W056 Samsung

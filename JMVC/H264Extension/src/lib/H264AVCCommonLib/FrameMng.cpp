@@ -1139,9 +1139,8 @@ ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
   UInt      uiCommand;
   UInt      uiIdentifier;
 // JVT-V043
-  UInt      uiPicViewIdx   = 0;
-  Bool      bFirstViewRPLR = true;
-
+  Int       iPicViewIdx   = -1; //JVT-AB204_r1, ying
+  
   while( RPLR_END != ( uiCommand = rcRplrBuffer.get( uiIndex ).getCommand( uiIdentifier ) ) )
   {
     FUIter    iter;
@@ -1215,42 +1214,39 @@ ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
     }
     else // uiCommand == 4 or 5 JVT-V043
     {
-      if( uiCommand == RPLR_VIEW_NEG && uiIdentifier == 0 && bFirstViewRPLR )
-        uiPicViewIdx = 0;
-      else 
-      {
-        UInt uiAbsDiff = uiIdentifier + 1;
+
+		Int iAbsDiff = uiIdentifier + 1; 
+				
 // JVT-W066
-        UInt uiMaxRef = rcSH.getSPS().getSpsMVC()->getNumRefsForListX (rcSH.getViewId(), 
+        Int  iMaxRef = rcSH.getSPS().getSpsMVC()->getNumRefsForListX (rcSH.getViewId(), 
                                                                        eListIdx, 
                                                                        rcSH.getAnchorPicFlag());
 
-          if( uiCommand == RPLR_VIEW_NEG )
+        if( uiCommand == RPLR_VIEW_NEG )
+        {
+          if( iPicViewIdx < iAbsDiff )
           {
-            if( uiPicViewIdx < uiAbsDiff )
-            {
-              uiPicViewIdx -= ( uiAbsDiff - uiMaxRef );
-            }
-            else
-            {
-              uiPicViewIdx -=   uiAbsDiff;
-            }
-          }
+            iPicViewIdx -= ( iAbsDiff - iMaxRef );
+           }
+           else
+           {
+              iPicViewIdx -=   iAbsDiff;
+           }
+         }
 
-          if( uiCommand == RPLR_VIEW_POS)
-          {
-            if( uiPicViewIdx + uiAbsDiff >= uiMaxRef )
-            {
-              uiPicViewIdx += ( uiAbsDiff - uiMaxRef );
-            }
-            else
-            {
-              uiPicViewIdx +=   uiAbsDiff;
-            }
-          }
+         if( uiCommand == RPLR_VIEW_POS)
+         {
+           if( iPicViewIdx + iAbsDiff >= iMaxRef )
+           {
+             iPicViewIdx += ( iAbsDiff - iMaxRef );
+           }
+           else
+           {
+             iPicViewIdx +=   iAbsDiff;
+           }
+         }
 // JVT-W066
-      }
-      uiIdentifier = uiPicViewIdx; 
+      uiIdentifier = iPicViewIdx; 
 
       iter = m_cShortTermList.findInterView(rcSH, uiIdentifier, eListIdx);
       if( iter == m_cShortTermList.end()  ) 
@@ -1263,8 +1259,7 @@ ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
         }
       }
      //---- set frame ----
-       pcFrame = &((*iter)->getFrame() );
-       bFirstViewRPLR = false;
+       pcFrame = &((*iter)->getFrame() );    
     }
     //---- find picture in reference list -----
     UInt uiRemoveIndex = MSYS_UINT_MAX;

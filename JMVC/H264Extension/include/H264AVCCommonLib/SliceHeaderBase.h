@@ -621,7 +621,7 @@ public:
 
   //===== get properties =====
    Bool                              isIdrNalUnit                  ()  const { return ( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR || 
-                                                                                       (m_eNalUnitType == NAL_UNIT_CODED_SLICE_SCALABLE && m_bIDRFlag) ); }
+                                                                                       (m_eNalUnitType == NAL_UNIT_CODED_SLICE_SCALABLE && (!m_bNonIDRFlag) ) ); }
 
   Bool                              isH264AVCCompatible           ()  const { return ( m_eNalUnitType == NAL_UNIT_CODED_SLICE  ||
                                                                                        m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR ); }
@@ -653,7 +653,7 @@ public:
   // tmeporal_level                                                           // u(3)
   Bool 		getAnchorPicFlag()        const { return m_anchor_pic_flag; }       // u(1)
   UInt		getViewId()               const { return m_view_id;         }       // u(10) 
-  Bool 		getIDRFlag()              const { return m_bIDRFlag;        }       // u(1) // JVT-W035
+  Bool 		getNonIDRFlag()           const { return m_bNonIDRFlag;        }       // u(1) // JVT-W035 
 	Bool		getInterViewFlag()					const	{	return m_inter_view_flag;}       // u(1) // JVT-W056  Samsung
   UInt		getReservedZeroBits()     const { return m_reserved_zero_bits;}     // u(1) // JVT-W035
   void                              setFrameNum      (const int num) { m_uiFrameNum=num; }
@@ -821,7 +821,7 @@ public:
   Void	setSvcMvcFlag       (Bool svc_mvc_flag)             { m_svc_mvc_flag      = svc_mvc_flag;     } 
   Void  setAVCFlag          (Bool bAVCFlag)                 { m_bAVCFlag          = bAVCFlag;         } 
   Void  setViewId           (UInt view_id)                  { m_view_id           = view_id;          }
-  Void  setIDRFlag          (Bool bIDRFlag)                 { m_bIDRFlag          = bIDRFlag;         } 
+  Void  setNonIDRFlag       (Bool bNonIDRFlag)              { m_bNonIDRFlag       = bNonIDRFlag;      } 
 	Void	setInterViewFalg				(Bool inter_view_flag)			{ m_inter_view_flag	=	inter_view_flag;	}  // JVT-W056  Samsung
   Void  setReservedZeroBits (UInt reserved_zero_bits)       { m_reserved_zero_bits=reserved_zero_bits;} 
 // JVT-W035
@@ -938,7 +938,7 @@ protected:
   Bool 		m_bAVCFlag; // no bit for this temporal flag
   Bool 		m_anchor_pic_flag; // u(1)
   UInt		m_view_id; // u(10)
-  Bool    m_bIDRFlag;
+  Bool		m_bNonIDRFlag;//u(1)
 	Bool		m_inter_view_flag; //u(1)  JVT-W056 Samsung
   UInt		m_reserved_zero_bits; // u(1)
  

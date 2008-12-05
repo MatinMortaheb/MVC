@@ -304,7 +304,7 @@ SliceHeaderBase::SliceHeaderBase( const SequenceParameterSet& rcSPS,
 , m_bAVCFlag                          (false)
 , m_anchor_pic_flag                   (false)
 , m_view_id                           (0) 
-, m_bIDRFlag                          (false)
+, m_bNonIDRFlag                       (true)
 , m_reserved_zero_bits                (0)
 , m_bInterViewRef                     (false) // maybe shall be replaced by inter_view_flag, ying
 , m_bIsEncodingFlag                   (false)
@@ -379,7 +379,7 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
     }
 
 	} else {
-	  RNOK  ( pcWriteIf->writeCode( this->getIDRFlag(),                 1,                              "NALU HEADER: idr_flag" ) );
+	  RNOK  ( pcWriteIf->writeCode( this->getNonIDRFlag(),                 1,                              "NALU HEADER: non_idr_flag" ) );
 	  RNOK (  pcWriteIf->writeCode( m_uiSimplePriorityId,               6,                              "NALU HEADER: priority_id"));
 	  RNOK  ( pcWriteIf->writeCode( this->getViewId(),                  10,                             "NALU HEADER: view_id" ) );
 		RNOK (  pcWriteIf->writeCode( m_uiTemporalLevel,                  3,                              "NALU HEADER: temporal_id"));
@@ -677,7 +677,7 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
 	if ( !this->getAVCFlag() ) //JVT-W035
 	{
 	  RNOK  ( pcWriteIf->writeCode( this->getSvcMvcFlag(),          1,                                "NALU HEADER: svc_mvc_flag" ) );
-		RNOK  ( pcWriteIf->writeCode( this->getIDRFlag(),                 1,                              "NALU HEADER: idr_flag" ) );
+		RNOK  ( pcWriteIf->writeCode( this->getNonIDRFlag(),                 1,                       "NALU HEADER: non_idr_flag" ) );
 	  RNOK (  pcWriteIf->writeCode( m_uiSimplePriorityId,               6,                              "NALU HEADER: priority_id"));
 	  RNOK  ( pcWriteIf->writeCode( this->getViewId(),                  10,                             "NALU HEADER: view_id" ) );
 		RNOK (  pcWriteIf->writeCode( m_uiTemporalLevel,                  3,                              "NALU HEADER: temporal_id"));
@@ -842,15 +842,10 @@ SliceHeaderBase::xReadScalable( HeaderSymbolReadIf* pcReadIf )
   Bool  bTmp;
   UInt  uiTmp;
 
-  /*if( m_eSliceType == F_SLICE ) // HS: coding order changed to match the text
-  {
-    RNOK(   pcReadIf->getUvlc( m_uiNumMbsInSlice,                            "SH: num_mbs_in_slice" ) );
-    RNOK(   pcReadIf->getFlag( m_bFgsComponentSep,                           "SH: fgs_comp_sep" ) );
-  }*/
+
   RNOK(     pcReadIf->getCode( m_uiFrameNum,
                                getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
-  //if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE ) JVT-W035
-  if( getIDRFlag()) //JVT-W035
+  if( !getNonIDRFlag()) //JVT-W035  
   {
     RNOK(   pcReadIf->getUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
   }
@@ -1416,8 +1411,8 @@ SliceHeaderBase::xReadMVCCompatible( HeaderSymbolReadIf* pcReadIf )
  
   RNOK(     pcReadIf->getCode( m_uiFrameNum,
                                getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
-//  if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE ) 
-  if( this->getIDRFlag()) // JVT-W035
+
+  if( !(this->getNonIDRFlag())) // JVT-W035 
   {
     RNOK(   pcReadIf->getUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
   }

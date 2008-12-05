@@ -1416,14 +1416,10 @@ PicEncoder::xInitReorderingInterView (SliceHeader*&     rpcSliceHeader)
     RplrBuffer * pcRplrBufferInterView = new RplrBuffer;
     RplrBuffer * pRplr = &rpcSliceHeader->getRplrBuffer( eListIdx );
     UInt        idx          = 0;
-    Bool  bInterViewRPLRStart   = true;
+
     for (idx=0; idx< pcSPSMVC->getNumRefsForListX (uiCurrViewId, eListIdx, bAnchor); idx++)
     {
-      if(bInterViewRPLRStart)
-        pcRplrBufferInterView->set( idx, Rplr(RPLR_VIEW_NEG, 0));
-      else 
         pcRplrBufferInterView->set( idx, Rplr(RPLR_VIEW_POS, 0));
-      bInterViewRPLRStart = false;
     }
     
     pcRplrBufferInterView->set( idx, Rplr(RPLR_END));
@@ -1531,7 +1527,7 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
     rpcSliceHeader->getDeblockingFilterParameter().setSliceBetaOffset           ( 2*m_pcCodingParameter->getLoopFilterParams().getBetaOffset  () );
   }
   //
-  rpcSliceHeader->setIDRFlag( (rcFrameSpec.getNalUnitType () == NAL_UNIT_CODED_SLICE_IDR ) ? true : false ); // JVT-W035
+  rpcSliceHeader->setNonIDRFlag( (rcFrameSpec.getNalUnitType () == NAL_UNIT_CODED_SLICE_IDR ) ? false : true ); // JVT-W035 
   rpcSliceHeader->setSimplePriorityId( rpcSliceHeader->getViewId()== 0 ? rpcSliceHeader->getTemporalLevel() : ( m_uiMaxTL+rpcSliceHeader->getViewId()%2 +1) ); // JVT-W035
   //===== set prediction and update list sizes =====
   //===== reference picture list ===== (init with default data, later updated)

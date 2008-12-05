@@ -122,7 +122,7 @@ public:
   UInt		getViewId() { return m_view_id;}
   UInt		getAvcViewId() { return m_AvcViewId;}
   Bool 		getAnchorPicFlag() { return m_anchor_pic_flag;}
-  Bool    getIDRFlag      () { return m_bIDRFlag; } //JVT-W035
+  Bool    getNonIDRFlag      () { return m_bNonIDRFlag; } //JVT-W035 
   UInt    getPriorityID   () { return m_uiSimplePriorityId; } //JVT-W035
 	Bool		getInterViewFlag() {return m_inter_view_flag;} //JVT-W056  Samsung
 
@@ -131,7 +131,7 @@ public:
   Void		setViewId(UInt ui) { m_view_id = ui;}
   Void		setAvcViewId(UInt ui) { m_AvcViewId = ui;}
   Void 		setAnchorPicFlag(Bool b) { m_anchor_pic_flag = b;}
-  Void    setIDRFlag      (Bool b) { m_bIDRFlag =b; }  //JVT-W035
+  Void    setNonIDRFlag      (Bool b) { m_bNonIDRFlag =b; }  //JVT-W035 
   Void    setPriorityID   (UInt ui){ m_uiSimplePriorityId=ui;} //JVT-W035
 	Void		setInterViewFlag(Bool nal) { m_inter_view_flag = nal;} //JVT-W056  Samsung
 
@@ -193,7 +193,6 @@ protected:
   //France Telecom R&D- (nathalie.cammas@francetelecom.com)
   UInt			m_uiSimplePriorityId;
   Bool			m_bDiscardableFlag;
-//JVT-S036 lsj start
 
   Bool			m_bReservedZeroBit;
 
@@ -202,12 +201,9 @@ protected:
     Bool 		m_anchor_pic_flag;  // u(1)
     UInt		m_view_id;          // u(10) 
     UInt		m_AvcViewId;          // u(10) 
-    Bool    m_bIDRFlag;         // u(1)         
+    Bool        m_bNonIDRFlag;         // u(1)  
 		Bool    m_inter_view_flag; // u(1) JVT-W056 Samsung
     UInt		m_reserved_zero_bits; // u(6)
-
- 
-//JVT-S036 lsj end
   //JVT-P031
   Bool          m_bFragmentedFlag;
   Bool          m_bCheckAllNALUs;

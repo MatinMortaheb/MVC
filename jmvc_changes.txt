@@ -1,3 +1,11 @@
+JMVC_3_0_2 -> JMVC_3_0_3
+Date            : Dec 4, 2008
+Authors         : TUT (Software coordinators) & USTC
+Contribution    : SW improvement
+Changes:
+- Implemented non_idr_flag
+- Minor modifications for reference picture list construction
+
 JMVC_3_0_1 -> JMVC_3_0_2
 Date            : Dec 1, 2008
 Authors         : MERL (Software coordinators) 

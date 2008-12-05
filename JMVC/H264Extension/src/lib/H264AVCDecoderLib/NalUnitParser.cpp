@@ -109,7 +109,7 @@ NalUnitParser::NalUnitParser()
 , m_anchor_pic_flag                   (false)
 , m_view_id                           (0) 
 , m_AvcViewId                           (0) 
-, m_bIDRFlag                          (false)
+, m_bNonIDRFlag                       (true)
 , m_reserved_zero_bits                (0)
 , m_inter_view_flag                 (false) //JVT-W056
 
@@ -243,8 +243,8 @@ NalUnitParser::xTrace( Bool bDDIPresent )
   DTRACE_TH   ( "NALU HEADER: idr_flag" );
   DTRACE_TY   ( " u(1)" );
   DTRACE_POS;
-  DTRACE_CODE (m_bIDRFlag );
-  DTRACE_BITS (m_bIDRFlag, 1 );
+  DTRACE_CODE (m_bNonIDRFlag );//IDR, Nov 2008
+  DTRACE_BITS (m_bNonIDRFlag, 1 );//IDR, Nov 2008
   DTRACE_COUNT( 1 );
   DTRACE_N;
   
@@ -443,7 +443,7 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 			{
 //ying Oct. 22, 2008
 			                                                     // 1 bit
-        m_bIDRFlag           = ( ucByte >> 6)  & 0x01;     // 1 bit
+        m_bNonIDRFlag           = ( ucByte >> 6)  & 0x01;     // 1 bit 
         m_uiSimplePriorityId = ( ucByte     ) & 0x3f ;    // 6
         // view_id
         ucByte               = pcBinDataAccessor->data()[2];

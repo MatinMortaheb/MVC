@@ -517,7 +517,7 @@ H264AVCDecoder::checkSliceLayerDependency( BinDataAccessor*  pcBinDataAccessor,
       //JVT-P031								  
       RNOK( m_pcSliceReader->readSliceHeader( m_pcNalUnitParser->getNalUnitType   (),
                                               m_pcNalUnitParser->getSvcMvcFlag(),
-                                              m_pcNalUnitParser->getIDRFlag(), //JVT-W035
+                                              m_pcNalUnitParser->getNonIDRFlag(), //JVT-W035 
                                               m_pcNalUnitParser->getAnchorPicFlag(),
                                               m_pcNalUnitParser->getViewId(),											
   											  m_pcNalUnitParser->getInterViewFlag(),  //JVT-W056  Samsung
@@ -854,7 +854,7 @@ H264AVCDecoder::checkSliceGap( BinDataAccessor*  pcBinDataAccessor,
 
         RNOK( m_pcSliceReader->readSliceHeader( m_pcNalUnitParser->getNalUnitType   (),
                                                 m_pcNalUnitParser->getSvcMvcFlag(),	
-                                                m_pcNalUnitParser->getIDRFlag(),   //JVT-W035
+                                                m_pcNalUnitParser->getNonIDRFlag(),   //JVT-W035  
                                                 m_pcNalUnitParser->getAnchorPicFlag(),
                                                 m_pcNalUnitParser->getViewId(),
 												m_pcNalUnitParser->getInterViewFlag(), //JVT-W056  Samsung
@@ -882,7 +882,7 @@ H264AVCDecoder::checkSliceGap( BinDataAccessor*  pcBinDataAccessor,
 			// read the slice header	
             RNOK( m_pcSliceReader->readSliceHeader( m_pcNalUnitParser->getNalUnitType   (),
                                                     m_pcNalUnitParser->getSvcMvcFlag(),	
-                                                    m_pcNalUnitParser->getIDRFlag(),   //JVT-W035
+                                                    m_pcNalUnitParser->getNonIDRFlag(),   //JVT-W035 
                                                     m_pcNalUnitParser->getAnchorPicFlag(),
                                                     m_pcNalUnitParser->getViewId(),
 												m_pcNalUnitParser->getInterViewFlag(), //JVT-W056  Samsung											
@@ -1956,7 +1956,7 @@ H264AVCDecoder::initPacketPrefix( BinDataAccessor*  pcBinDataAccessor,
 //use the suffx NAL unit to set the values in the AVC compatible NAL unit
   pcNalUnitParser->setSvcMvcFlag( m_pcNalUnitParser->getSvcMvcFlag() );
   pcNalUnitParser->setPriorityID( m_pcNalUnitParser->getPriorityID() ); //JVT-W035
-  pcNalUnitParser->setIDRFlag   ( m_pcNalUnitParser->getIDRFlag()    ); //JVT-W035
+  pcNalUnitParser->setNonIDRFlag   ( m_pcNalUnitParser->getNonIDRFlag()    ); //JVT-W035  
   pcNalUnitParser->setViewId    ( m_pcNalUnitParser->getViewId()     );
   pcNalUnitParser->setAnchorPicFlag(m_pcNalUnitParser->getAnchorPicFlag());
 	pcNalUnitParser->setInterViewFlag (m_pcNalUnitParser->getInterViewFlag()); //JVT-W056  Samsung
@@ -2400,7 +2400,7 @@ ErrVal H264AVCDecoder::xStartSlice(Bool& bPreParseHeader, Bool& bLastFragment, B
                   {
                     RNOK( m_pcSliceReader->readSliceHeader( m_pcNalUnitParser->getNalUnitType   (),
                                                             m_pcNalUnitParser->getSvcMvcFlag(),	
-                                                             m_pcNalUnitParser->getIDRFlag(),   //JVT-W035
+                                                             m_pcNalUnitParser->getNonIDRFlag(),   //JVT-W035 
                                                             m_pcNalUnitParser->getAnchorPicFlag(),
                                                             m_pcNalUnitParser->getViewId(),
 															m_pcNalUnitParser->getInterViewFlag(), //JVT-W056  Samsung
@@ -2818,7 +2818,7 @@ H264AVCDecoder::xInitSlice( SliceHeader* pcSliceHeader )
 	pcSliceHeader->setAVCFlag       (m_pcNalUnitParser->getNalUnitType()< 14); //JVT-W035
 	pcSliceHeader->setSvcMvcFlag    (m_pcNalUnitParser->getSvcMvcFlag());
 	pcSliceHeader->setAnchorPicFlag (m_pcNalUnitParser->getAnchorPicFlag());
-	pcSliceHeader->setIDRFlag       (m_pcNalUnitParser->getIDRFlag());
+	pcSliceHeader->setNonIDRFlag    (m_pcNalUnitParser->getNonIDRFlag());  
 	pcSliceHeader->setInterViewFalg (m_pcNalUnitParser->getInterViewFlag()); //JVT-W056 Samsung
 	pcSliceHeader->setReservedZeroBits(0);
   }

@@ -92,7 +92,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 
 #define _JSVM_VERSION_ "6.5" //added by jerome.vieron@thomson.net
 #define _JMVM_VERSION_ "7.0" //added by purvin.pandit@thomson.net
-#define _JMVC_VERSION_ "2.6" //added by ying.chen@tut.fi
+#define _JMVC_VERSION_ "3.0" //added by ying.chen@tut.fi
 
 #define MB_BUFFER_WIDTH 24
 #define MB_BASE_WIDTH   16

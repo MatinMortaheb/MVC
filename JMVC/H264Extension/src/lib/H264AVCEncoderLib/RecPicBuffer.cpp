@@ -1128,9 +1128,8 @@ RecPicBuffer::xRefListRemapping( RefFrameList&  rcList,
     UInt  uiIdentifier    = 0;
 // JVT-V043
     UInt  uiCurrViewId    = pcSliceHeader->getViewId();
-    Bool  bFirstViewRPLR  = true;
     Bool  bAnchor         = pcSliceHeader->getAnchorPicFlag();
-    UInt  uiPicViewIdx    = 0;
+    Int   iPicViewIdx     = -1; //JVT-AB204_r1, ying
 
     while( RPLR_END != ( uiCommand = rcRplrBuffer.get( uiIndex ).getCommand( uiIdentifier ) ) )
     {
@@ -1205,40 +1204,36 @@ RecPicBuffer::xRefListRemapping( RefFrameList&  rcList,
       } // short-term
       else // 4 or 5
       {
-        if( uiCommand == RPLR_VIEW_NEG && uiIdentifier == 0 && bFirstViewRPLR )
-          uiPicViewIdx = 0;
-        else 
-        {
-          UInt uiAbsDiff = uiIdentifier + 1;
+		  Int iAbsDiff = uiIdentifier + 1;
+
 // JVT-W066
-          UInt uiMaxRef = pcSliceHeader->getSPS().getSpsMVC()->getNumRefsForListX (uiCurrViewId, eListIdx, bAnchor); 
+		  Int iMaxRef = pcSliceHeader->getSPS().getSpsMVC()->getNumRefsForListX (uiCurrViewId, eListIdx, bAnchor);
 
           if( uiCommand == RPLR_VIEW_NEG )
           {
-            if( uiPicViewIdx < uiAbsDiff )
+            if( iPicViewIdx < iAbsDiff )
             {
-              uiPicViewIdx -= ( uiAbsDiff - uiMaxRef );
+              iPicViewIdx -= ( iAbsDiff - iMaxRef );
             }
             else
             {
-              uiPicViewIdx -=   uiAbsDiff;
+              iPicViewIdx -=   iAbsDiff;
             }
           }
 
           if( uiCommand == RPLR_VIEW_POS)
           {
-            if( uiPicViewIdx + uiAbsDiff >= uiMaxRef )
+            if( iPicViewIdx + iAbsDiff >= iMaxRef )
             {
-              uiPicViewIdx += ( uiAbsDiff - uiMaxRef );
+              iPicViewIdx += ( iAbsDiff - iMaxRef );
             }
             else
             {
-              uiPicViewIdx +=   uiAbsDiff;
+              iPicViewIdx +=   iAbsDiff;
             }
           }
 // JVT-W066
-        }
-        uiIdentifier = uiPicViewIdx; 
+        uiIdentifier = iPicViewIdx; 
         
         UInt targetViewId = pcSliceHeader->getSPS().getSpsMVC()->getViewIDByViewIndex( pcSliceHeader->getViewId(), uiIdentifier, eListIdx, bAnchor );
         
@@ -1273,7 +1268,6 @@ RecPicBuffer::xRefListRemapping( RefFrameList&  rcList,
         //----- reference list re-ordering -----
         RNOK( rcList.setElementAndRemove( uiIndex, uiRemoveIndex, pcFrame ) );
         uiIndex++;
-        bFirstViewRPLR = false;
       } // inter-view 
     } // while
   }
