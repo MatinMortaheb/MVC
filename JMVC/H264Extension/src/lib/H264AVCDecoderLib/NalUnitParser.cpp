@@ -229,7 +229,7 @@ NalUnitParser::xTrace( Bool bDDIPresent )
 
   ROFVS( bDDIPresent );
 
-  if(m_svc_mvc_flag)
+  if(!m_svc_mvc_flag)
   {
   //===== nal unit type =====
   DTRACE_TH   ( "NALU HEADER: svc_mvc_flag" );
@@ -428,7 +428,7 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 
 			ucByte              = pcBinDataAccessor->data()[1];
 			m_svc_mvc_flag = (ucByte >> 7)& 1;
-			if (!m_svc_mvc_flag)
+			if (m_svc_mvc_flag)
 			{
 				m_uiSimplePriorityId = ( ucByte >> 1) & 0x3f ;
 				m_bDiscardableFlag	 = ( ucByte ) & 1;

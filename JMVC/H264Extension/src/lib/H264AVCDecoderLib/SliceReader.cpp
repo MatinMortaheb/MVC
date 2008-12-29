@@ -753,7 +753,7 @@ SliceReader::readSliceHeaderPrefix( NalUnitType   eNalUnitType,
 
 //JVT-W035 {{ prefix 
 
-	  if (m_svc_mvc_flag==1 && eNalUnitType == NAL_UNIT_CODED_SLICE_PREFIX)
+	  if (m_svc_mvc_flag==0 && eNalUnitType == NAL_UNIT_CODED_SLICE_PREFIX)
 		  return Err::m_nOK;
 
 //JVT-W035 }} mvc prefix end

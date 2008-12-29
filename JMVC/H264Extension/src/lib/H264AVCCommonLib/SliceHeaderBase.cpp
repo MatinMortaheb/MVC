@@ -359,7 +359,7 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
   {
 
 	RNOK  ( pcWriteIf->writeCode( this->getSvcMvcFlag(),   1,                              "NALU HEADER: svc_mvc_flag" ) );		
-	if (this->getSvcMvcFlag()==0) {
+	if (this->getSvcMvcFlag()!=0) {              
 
     //{{Variable Lengh NAL unit header data with priority and dead substream flag
     //France Telecom R&D- (nathalie.cammas@francetelecom.com)
@@ -812,7 +812,7 @@ SliceHeaderBase::read( HeaderSymbolReadIf* pcReadIf )
 {
 
     if( (m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE || 
-         m_eNalUnitType == NAL_UNIT_CODED_SLICE_SCALABLE ) && m_svc_mvc_flag)
+         m_eNalUnitType == NAL_UNIT_CODED_SLICE_SCALABLE ) && !m_svc_mvc_flag)
     {
         return xReadMVCCompatible ( pcReadIf );
     }

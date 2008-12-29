@@ -1398,7 +1398,7 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 
     {
 
-      if(m_pcNalUnitParser->getSvcMvcFlag())
+      if(!m_pcNalUnitParser->getSvcMvcFlag())
       {
         //for now MVC silce data are AVC compatible only high level syntax is different
         UnitAVCFlag = true;
@@ -2103,7 +2103,7 @@ H264AVCDecoder::process( PicBuffer*       pcPicBuffer,
 
   if( m_bLastFrame )
   {
-      if( (m_uiRecLayerId > 0 || !m_bBaseLayerIsAVCCompatible) && !m_pcNalUnitParser->getSvcMvcFlag())
+      if( (m_uiRecLayerId > 0 || !m_bBaseLayerIsAVCCompatible) && m_pcNalUnitParser->getSvcMvcFlag())
     {
       PicBufferList cDummyList;
       
@@ -2193,7 +2193,7 @@ H264AVCDecoder::process( PicBuffer*       pcPicBuffer,
   case NAL_UNIT_CODED_SLICE_IDR_SCALABLE:
     {
 
-      if(m_pcNalUnitParser->getSvcMvcFlag() )
+      if(!m_pcNalUnitParser->getSvcMvcFlag() )
       {
         ROF( m_pcSliceHeader );
         ROF( m_pcSliceHeader->getLayerId() == 0 );
@@ -2396,7 +2396,7 @@ ErrVal H264AVCDecoder::xStartSlice(Bool& bPreParseHeader, Bool& bLastFragment, B
 		else
 		{
 
-                  if(m_pcNalUnitParser->getSvcMvcFlag() )
+                  if(!m_pcNalUnitParser->getSvcMvcFlag() )
                   {
                     RNOK( m_pcSliceReader->readSliceHeader( m_pcNalUnitParser->getNalUnitType   (),
                                                             m_pcNalUnitParser->getSvcMvcFlag(),	

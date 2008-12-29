@@ -477,7 +477,7 @@ ErrVal MbDataCtrl::initSlice( SliceHeader& rcSH, ProcessingState eProcessingStat
   if( rcSH.isInterB() )
   {
     if( ((rcSH.getNalUnitType() != NAL_UNIT_CODED_SLICE_IDR_SCALABLE &&
-          rcSH.getNalUnitType() != NAL_UNIT_CODED_SLICE_SCALABLE) || rcSH.getSvcMvcFlag() ) && bDecoder) 
+          rcSH.getNalUnitType() != NAL_UNIT_CODED_SLICE_SCALABLE) || (!rcSH.getSvcMvcFlag()) ) && bDecoder) 
     {
       const RefPic& rcRefPic0L1 = rcSH.getRefPic( 1, LIST_1 );
       AOF_DBG( rcRefPic0L1.isAvailable() );

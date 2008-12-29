@@ -1,3 +1,11 @@
+JMVC_3_0_3 -> JMVC_3_0_4
+Date            : Dec 29, 2008
+Authors         : TUT (Software coordinators) & USTC
+Contribution    : SW improvement
+Changes:
+- Bug fix for svc_extension_flag
+
+
 JMVC_3_0_2 -> JMVC_3_0_3
 Date            : Dec 4, 2008
 Authors         : TUT (Software coordinators) & USTC

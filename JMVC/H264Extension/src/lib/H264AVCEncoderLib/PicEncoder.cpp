@@ -471,7 +471,7 @@ PicEncoder::xInitFrameSpec()
   m_CurrentViewId       = m_pcCodingParameter->getCurentViewId();
 //   m_ViewLevel           = m_pcCodingParameter->getViewLevel(); JVT-W035
   m_bAVCFlag            = m_pcCodingParameter->getAVCFlag();
-  m_SvcMvcFlag          = (m_pcCodingParameter->getMVCmode()!=0 );
+  m_SvcMvcFlag          = (!m_pcCodingParameter->getMVCmode() );
 
   m_bInterPridPicsFirst = m_pcCodingParameter->getInterPredPicsFirst()!=0; // JVT-V043 encoder
   // with some assumption, can be modified later

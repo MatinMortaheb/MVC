@@ -626,7 +626,7 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
 	  uiSimplePriorityId = ( ucByte >> 2);
 	  bDiscardableFlag	 = ( ucByte >> 1) & 1;
   	bSvcMvcFlag = ( ( ucByte >> 7 ) !=0);
-	  if( bSvcMvcFlag )
+	  if( !bSvcMvcFlag )
 	  {
     //ying 
 			                                                    // 1 bit
