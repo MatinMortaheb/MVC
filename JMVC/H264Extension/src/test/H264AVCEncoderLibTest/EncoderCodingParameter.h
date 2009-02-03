@@ -775,11 +775,12 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
   int cur_level_id,level_cnt=-1;
   int num_of_ops,num_target_views_minus1,num_views_minus1,temporal_id,view_idx;
   int ref_idx,num_of_refs,temp;
-  int vcOrder;
+  //int vcOrder;
   CodingParameter::SpsMVC.setNumViewsMinus1(0);
 
   //JVT-V054  
   CodingParameter::SpsMVC.setInitDone(false);
+  
 
   while (!feof(f))
   {
@@ -796,6 +797,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
         break;
       }
     }
+	
     // view prediciton informaiton
 
     if (acTags[0] == "NumViewsMinusOne") 
@@ -805,6 +807,21 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
       CodingParameter::SpsMVC.setNumViewsMinus1(temp);
       CodingParameter::SpsMVC.initViewSPSMemory_num_refs_for_lists(CodingParameter::SpsMVC.getNumViewMinus1());
     }
+
+	//JVT-V054  
+	if (acTags[0] == "ViewOrder") {
+		CodingParameter::SpsMVC.setViewCodingOrder(m_cViewOrder);
+		UInt *ViewCodingOrder=CodingParameter::SpsMVC.getViewCodingOrder();
+		for (i=0; i<= CodingParameter::SpsMVC.getNumViewMinus1(); i++)
+			if (m_CurrentViewId == ViewCodingOrder[i])
+				break;		
+		if (i > CodingParameter::SpsMVC.getNumViewMinus1())	{
+			printf("Error : View dependency information on the specified view_id is not specified\n\n");
+			return -1;
+		}
+		
+
+	}
 
     if (acTags[0] == "View_ID") 
     {
@@ -1000,7 +1017,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
 
   //JVT-V054
-  CodingParameter::SpsMVC.setViewCodingOrder(m_cViewOrder);
+//  CodingParameter::SpsMVC.setViewCodingOrder(m_cViewOrder);
 
   UInt *order = CodingParameter::SpsMVC.getViewCodingOrder();
 
@@ -1049,28 +1066,28 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
       for (i=0;i<= CodingParameter::SpsMVC.m_num_views_minus_1; i++)
       {
-        vcOrder = CodingParameter::SpsMVC.m_uiViewCodingOrder[i];       
+        //vcOrder = CodingParameter::SpsMVC.m_uiViewCodingOrder[i];       
 
-        printf("SPS: num_anchor_refs_l0[%d]: %d\n", vcOrder, CodingParameter::SpsMVC.m_num_anchor_refs_list0[vcOrder]);
-        for (j=0; j<CodingParameter::SpsMVC.m_num_anchor_refs_list0[vcOrder]; j++)
-          printf("SPS: anchor_ref_l0[%d][%d]: %d\n",  vcOrder, j, CodingParameter::SpsMVC.m_anchor_ref_list0[vcOrder][j] );
+        printf("SPS: num_anchor_refs_l0[%d]: %d\n", i, CodingParameter::SpsMVC.m_num_anchor_refs_list0[i]);
+        for (j=0; j<CodingParameter::SpsMVC.m_num_anchor_refs_list0[i]; j++)
+          printf("SPS: anchor_ref_l0[%d][%d]: %d\n",  i, j, CodingParameter::SpsMVC.m_anchor_ref_list0[i][j] );
 		
-        printf("SPS: num_anchor_refs_l1[%d]: %d\n", vcOrder, CodingParameter::SpsMVC.m_num_anchor_refs_list1[vcOrder]);
-        for (j=0; j<CodingParameter::SpsMVC.m_num_anchor_refs_list1[vcOrder]; j++)
-          printf("SPS: anchor_ref_l1[%d][%d]: %d\n",  vcOrder, j, CodingParameter::SpsMVC.m_anchor_ref_list1[vcOrder][j] );
+        printf("SPS: num_anchor_refs_l1[%d]: %d\n", i, CodingParameter::SpsMVC.m_num_anchor_refs_list1[i]);
+        for (j=0; j<CodingParameter::SpsMVC.m_num_anchor_refs_list1[i]; j++)
+          printf("SPS: anchor_ref_l1[%d][%d]: %d\n",  i, j, CodingParameter::SpsMVC.m_anchor_ref_list1[i][j] );
       }
 
       for (i=0;i<= CodingParameter::SpsMVC.m_num_views_minus_1; i++)
       {
-        vcOrder = CodingParameter::SpsMVC.m_uiViewCodingOrder[i];       
+        //vcOrder = CodingParameter::SpsMVC.m_uiViewCodingOrder[i];       
 
-        printf("SPS: num_non_anchor_refs_l0[%d]: %d\n", vcOrder, CodingParameter::SpsMVC.m_num_non_anchor_refs_list0[vcOrder] ); 
-        for (j=0; j<CodingParameter::SpsMVC.m_num_non_anchor_refs_list0[vcOrder]; j++)
-    			printf("SPS: non_anchor_ref_l0[%d][%d]: %d\n",vcOrder,j, CodingParameter::SpsMVC.m_non_anchor_ref_list0[vcOrder][j]);
+        printf("SPS: num_non_anchor_refs_l0[%d]: %d\n", i, CodingParameter::SpsMVC.m_num_non_anchor_refs_list0[i] ); 
+        for (j=0; j<CodingParameter::SpsMVC.m_num_non_anchor_refs_list0[i]; j++)
+    			printf("SPS: non_anchor_ref_l0[%d][%d]: %d\n",i,j, CodingParameter::SpsMVC.m_non_anchor_ref_list0[i][j]);
     
-        printf("SPS: num_non_anchor_refs_l1[%d]: %d\n", vcOrder, CodingParameter::SpsMVC.m_num_non_anchor_refs_list1[vcOrder] ); 
-        for (j=0; j<CodingParameter::SpsMVC.m_num_non_anchor_refs_list1[vcOrder]; j++)
-		    	printf("SPS: non_anchor_ref_l1[%d][%d]: %d\n", vcOrder,j, CodingParameter::SpsMVC.m_non_anchor_ref_list1[vcOrder][j]);
+        printf("SPS: num_non_anchor_refs_l1[%d]: %d\n", i, CodingParameter::SpsMVC.m_num_non_anchor_refs_list1[i] ); 
+        for (j=0; j<CodingParameter::SpsMVC.m_num_non_anchor_refs_list1[i]; j++)
+		    	printf("SPS: non_anchor_ref_l1[%d][%d]: %d\n", i,j, CodingParameter::SpsMVC.m_non_anchor_ref_list1[i][j]);
 	  }	
       if( m_uiMVCmode )
       {

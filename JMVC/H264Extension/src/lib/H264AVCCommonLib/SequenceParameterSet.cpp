@@ -345,7 +345,7 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
 
 		RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_num_views_minus_1,                   "SPS: num_views_minus_1" ) ); // ue(v)
 		
-		int i,j,k, vcOrder;
+		int i,j,k;
 		//JVT-V054
 		printf("ViewCodingOrder: ");
 		for (i=0;i<= SpsMVC->m_num_views_minus_1; i++)
@@ -357,27 +357,27 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
 
 		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
 		{
-			vcOrder = SpsMVC->m_uiViewCodingOrder[i];
+			//vcOrder = SpsMVC->m_uiViewCodingOrder[i];
 
-			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_anchor_refs_list0[vcOrder],                   "SPS: num_anchor_refs_l0[i]" ) ); // ue(v)
-			for (j=0; j<SpsMVC->m_num_anchor_refs_list0[vcOrder]; j++)
-				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_anchor_ref_list0[vcOrder][j],      "SPS: anchor_ref_l0[i][j]" ) ); // ue(v)
+			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_anchor_refs_list0[i],                   "SPS: num_anchor_refs_l0[i]" ) ); // ue(v)
+			for (j=0; j<SpsMVC->m_num_anchor_refs_list0[i]; j++)
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_anchor_ref_list0[i][j],      "SPS: anchor_ref_l0[i][j]" ) ); // ue(v)
 					
-			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_anchor_refs_list1[vcOrder],                   "SPS: num_anchor_refs_l1[i]" ) ); // ue(v)
-			for (j=0; j<SpsMVC->m_num_anchor_refs_list1[vcOrder]; j++)
-				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_anchor_ref_list1[vcOrder][j],      "SPS: anchor_ref_l1[i][j]" ) ); // ue(v)
+			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_anchor_refs_list1[i],                   "SPS: num_anchor_refs_l1[i]" ) ); // ue(v)
+			for (j=0; j<SpsMVC->m_num_anchor_refs_list1[i]; j++)
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_anchor_ref_list1[i][j],      "SPS: anchor_ref_l1[i][j]" ) ); // ue(v)
 		}
 
 		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
 		{
-			vcOrder = SpsMVC->m_uiViewCodingOrder[i];
-			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_non_anchor_refs_list0[vcOrder],                   "SPS: num_non_anchor_refs_l0[i]" ) ); // ue(v)
-			for (j=0; j<SpsMVC->m_num_non_anchor_refs_list0[vcOrder]; j++)
-				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_non_anchor_ref_list0[vcOrder][j],      "SPS: non_anchor_ref_l0[i][j]" ) ); // ue(v)
+			//vcOrder = SpsMVC->m_uiViewCodingOrder[i];
+			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_non_anchor_refs_list0[i],                   "SPS: num_non_anchor_refs_l0[i]" ) ); // ue(v)
+			for (j=0; j<SpsMVC->m_num_non_anchor_refs_list0[i]; j++)
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_non_anchor_ref_list0[i][j],      "SPS: non_anchor_ref_l0[i][j]" ) ); // ue(v)
 
-			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_non_anchor_refs_list1[vcOrder],                   "SPS: num_non_anchor_refs_l1[i]" ) ); // ue(v)
-			for (j=0; j<SpsMVC->m_num_non_anchor_refs_list1[vcOrder]; j++)
-				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_non_anchor_ref_list1[vcOrder][j],      "SPS: non_anchor_ref_l1[i][j]" ) ); // ue(v)
+			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_non_anchor_refs_list1[i],                   "SPS: num_non_anchor_refs_l1[i]" ) ); // ue(v)
+			for (j=0; j<SpsMVC->m_num_non_anchor_refs_list1[i]; j++)
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_non_anchor_ref_list1[i][j],      "SPS: non_anchor_ref_l1[i][j]" ) ); // ue(v)
 
 		}	
 
@@ -491,7 +491,7 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 		ROF ( bTmp ); // always shoule be set to 1 
 
 		SpsMVC = new SpsMvcExtension;	
-		int i,j,k, vcOrder;
+		int i,j,k,vcOrder;
 		
 		// seq_parameter_set_mvc_extension()
 		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_views_minus_1,                   "SPS: num_views_minus_1" ) ); // ue(v)
@@ -511,29 +511,29 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 		{
 		vcOrder = SpsMVC->m_uiViewCodingOrder[i];
 
-		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_anchor_refs_list0[vcOrder],                   "SPS: num_anchor_refs_l0[i]" ) ); // ue(v)
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_anchor_refs_list0[i],                   "SPS: num_anchor_refs_l0[i]" ) ); // ue(v)
 		SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,0,0);
-		for (j=0; j<SpsMVC->m_num_anchor_refs_list0[vcOrder]; j++)
-			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_anchor_ref_list0[vcOrder][j],      "SPS: anchor_ref_l0[i][j]" ) ); // ue(v)
+		for (j=0; j<SpsMVC->m_num_anchor_refs_list0[i]; j++)
+			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_anchor_ref_list0[i][j],      "SPS: anchor_ref_l0[i][j]" ) ); // ue(v)
 				
-		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_anchor_refs_list1[vcOrder],                   "SPS: num_anchor_refs_l1[i]" ) ); // ue(v)
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_anchor_refs_list1[i],                   "SPS: num_anchor_refs_l1[i]" ) ); // ue(v)
 		SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,1,0);
-		for (j=0; j<SpsMVC->m_num_anchor_refs_list1[vcOrder]; j++)
-			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_anchor_ref_list1[vcOrder][j],      "SPS: anchor_ref_l1[vcOrder][j]" ) ); // ue(v)
+		for (j=0; j<SpsMVC->m_num_anchor_refs_list1[i]; j++)
+			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_anchor_ref_list1[i][j],      "SPS: anchor_ref_l1[i][j]" ) ); // ue(v)
 		}
 
 		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
 		{
 		vcOrder = SpsMVC->m_uiViewCodingOrder[i];
-		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_non_anchor_refs_list0[vcOrder],                   "SPS: num_non_anchor_refs_l0[i]" ) ); // ue(v)
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_non_anchor_refs_list0[i],                   "SPS: num_non_anchor_refs_l0[i]" ) ); // ue(v)
 		SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,0,1);
-		for (j=0; j<SpsMVC->m_num_non_anchor_refs_list0[vcOrder]; j++)
-			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_non_anchor_ref_list0[vcOrder][j],      "SPS: non_anchor_ref_l0[i][j]" ) ); // ue(v)
+		for (j=0; j<SpsMVC->m_num_non_anchor_refs_list0[i]; j++)
+			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_non_anchor_ref_list0[i][j],      "SPS: non_anchor_ref_l0[i][j]" ) ); // ue(v)
 
-		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_non_anchor_refs_list1[vcOrder],                   "SPS: num_non_anchor_refs_l1[i]" ) ); // ue(v)
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_non_anchor_refs_list1[i],                   "SPS: num_non_anchor_refs_l1[i]" ) ); // ue(v)
 		SpsMVC->initViewSPSMemory_ref_for_lists(SpsMVC->getNumViewMinus1(),vcOrder,1,1);
-		for (j=0; j<SpsMVC->m_num_non_anchor_refs_list1[vcOrder]; j++)
-			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_non_anchor_ref_list1[vcOrder][j],      "SPS: non_anchor_ref_l1[i][j]" ) ); // ue(v)
+		for (j=0; j<SpsMVC->m_num_non_anchor_refs_list1[i]; j++)
+			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_non_anchor_ref_list1[i][j],      "SPS: non_anchor_ref_l1[i][j]" ) ); // ue(v)
 
 		}
 

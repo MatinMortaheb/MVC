@@ -229,6 +229,8 @@ ErrVal WriteYuvToFile::xInitMVC( const std::string& rcFileName, UInt *vcOrder,
   char t[10];
   UInt view_id;
 
+  m_cFileMVC = new LargeFile[uiNumOfViews];
+
   UInt pos = cFileName.rfind(".");
   cFileName.erase(pos);
   cTemp = cFileName.append("_");
@@ -236,15 +238,13 @@ ErrVal WriteYuvToFile::xInitMVC( const std::string& rcFileName, UInt *vcOrder,
   for(UInt i = 0; i < uiNumOfViews; i++)
   {
     view_id = vcOrder ? vcOrder[i] : 0 ; // Dec. 1 fix 
-
-	//if( !vcActive[i] && vcOrder )	continue;// JVT-AB024 modified remove active view info SEI
-
+	
     sprintf(t, "%d", view_id);
     cFileName = cTemp;
     cFileName.append(t);
     cFileName.append(".yuv");
     
-    if( Err::m_nOK != m_cFileMVC[view_id].open( cFileName, LargeFile::OM_WRITEONLY ) )
+    if( Err::m_nOK != m_cFileMVC[i].open( cFileName, LargeFile::OM_WRITEONLY ) )
     { 
       std::cerr << "failed to open YUV output file " << cFileName.data() << std::endl;
       return Err::m_nERR;
@@ -267,6 +267,8 @@ ErrVal WriteYuvToFile::destroyMVC(UInt uiNumOfViews)
       RNOK( m_cFileMVC[i].close() );
     }
   }
+  delete m_cFileMVC;
+
   delete this;
   return Err::m_nOK;
 }
@@ -277,12 +279,13 @@ ErrVal WriteYuvToFile::writeFrame( const UChar *pLum,
                                    UInt uiLumHeight,
                                    UInt uiLumWidth,
                                    UInt uiLumStride,
-                                   UInt uiViewId)
+                                   UInt ViewCnt)
 {
   m_uiWidth  = uiLumWidth;
   m_uiHeight = uiLumHeight;
 
-  RNOKS( xWriteFrame( pLum, pCb, pCr, uiLumHeight, uiLumWidth, uiLumStride, uiViewId ) );
+  
+  RNOKS( xWriteFrame( pLum, pCb, pCr, uiLumHeight, uiLumWidth, uiLumStride, ViewCnt ) );
 
   return Err::m_nOK;
 }
@@ -294,7 +297,7 @@ ErrVal WriteYuvToFile::xWriteFrame( const UChar *pLum,
                                     UInt uiHeight,
                                     UInt uiWidth,
                                     UInt uiStride, 
-                                    UInt uiViewId )
+                                    UInt ViewCnt)
 {
 
   UInt    y;
@@ -303,7 +306,7 @@ ErrVal WriteYuvToFile::xWriteFrame( const UChar *pLum,
   pucSrc = pLum;
   for( y = 0; y < uiHeight; y++ )
   {
-    RNOK( m_cFileMVC[uiViewId].write( pucSrc, uiWidth ) );
+    RNOK( m_cFileMVC[ViewCnt].write( pucSrc, uiWidth ) );
     pucSrc += uiStride;
   }
 
@@ -315,7 +318,7 @@ ErrVal WriteYuvToFile::xWriteFrame( const UChar *pLum,
   pucSrc = pCb;
   for( y = 0; y < uiHeight; y++ )
   {
-    RNOK( m_cFileMVC[uiViewId].write( pucSrc, uiWidth ) );
+    RNOK( m_cFileMVC[ViewCnt].write( pucSrc, uiWidth ) );
     pucSrc += uiStride;
   }
 
@@ -323,7 +326,7 @@ ErrVal WriteYuvToFile::xWriteFrame( const UChar *pLum,
   pucSrc = pCr;
   for( y = 0; y < uiHeight; y++ )
   {
-    RNOK( m_cFileMVC[uiViewId].write( pucSrc, uiWidth ) );
+    RNOK( m_cFileMVC[ViewCnt].write( pucSrc, uiWidth ) );
     pucSrc += uiStride;
   }
   

@@ -1,3 +1,10 @@
+JMVC_3_0_4 -> JMVC_3_0_5
+Date            : Feb 3, 2009
+Authors         : MERL (Software coordinators) 
+Contribution    : SW improvement
+Changes:
+- Bug fix for view-id specification
+
 JMVC_3_0_3 -> JMVC_3_0_4
 Date            : Dec 29, 2008
 Authors         : TUT (Software coordinators) & USTC

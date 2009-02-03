@@ -115,7 +115,8 @@ public:
                              UInt uiLumHeight,
                              UInt uiLumWidth,
                              UInt uiLumStride, 
-                             UInt uiViewId )  =  0; 
+                             //UInt uiViewId,
+							 UInt ViewCnt)  =  0; 
   
   virtual ErrVal destroyMVC(UInt numOfViews) = 0;  
 

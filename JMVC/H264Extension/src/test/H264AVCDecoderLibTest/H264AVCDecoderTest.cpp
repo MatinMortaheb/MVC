@@ -448,15 +448,22 @@ ErrVal H264AVCDecoderTest::go()
           uiLastPoc += uiMaxPocDiff;
         }
 
+		  
           if(m_pcParameter->getNumOfViews() > 0)
           {
-              RNOK( m_pcWriteYuv->writeFrame( *pcPicBufferTmp + uiLumOffset, 
+			  UInt view_cnt;
+			  for (view_cnt=0; view_cnt < m_pcParameter->getNumOfViews(); view_cnt++)
+				if ((UInt)pcPicBufferTmp->getViewId() == m_pcH264AVCDecoder->getViewCodingOrder()[view_cnt])
+					break;
+
+			  RNOK( m_pcWriteYuv->writeFrame( *pcPicBufferTmp + uiLumOffset, 
                                               *pcPicBufferTmp + uiCbOffset, 
                                               *pcPicBufferTmp + uiCrOffset,
                                               uiMbY << 4,
                                               uiMbX << 4,
                                               (uiMbX << 4)+ YUV_X_MARGIN*2,
-                                              (UInt)pcPicBufferTmp->getViewId()) );
+                                              //(UInt)pcPicBufferTmp->getViewId(),
+											   view_cnt) ); 
           }
           else
         RNOK( m_pcWriteYuv->writeFrame( *pcPicBufferTmp + uiLumOffset, 

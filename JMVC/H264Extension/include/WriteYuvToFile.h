@@ -128,7 +128,8 @@ public:
                      UInt uiLumHeight,
                      UInt uiLumWidth,
                      UInt uiLumStride, 
-                     UInt uiViewId );
+                     //UInt uiViewId,
+					 UInt ViewCnt);
 
 protected:
   ErrVal xWriteFrame    ( const UChar *pLum, const UChar *pCb, const UChar *pCr,
@@ -137,7 +138,7 @@ protected:
   ErrVal xInit( const std::string& rcFileName );
 
   ErrVal xWriteFrame    ( const UChar *pLum, const UChar *pCb, const UChar *pCr,
-                          UInt uiHeight, UInt uiWidth, UInt uiStride, UInt uiNumOfViews );
+                          UInt uiHeight, UInt uiWidth, UInt uiStride, UInt ViewCnt );
 
   ErrVal xInitMVC( const std::string& rcFileName, UInt *vcOrder, 
                    UInt uiNumOfViews ); // JVT-AB024
@@ -146,7 +147,7 @@ protected:
 
 protected:
   LargeFile m_cFile;
-  LargeFile m_cFileMVC[1024];
+  LargeFile *m_cFileMVC;
 
   Bool  m_bInitDone;
   BinData m_cTempBuffer;

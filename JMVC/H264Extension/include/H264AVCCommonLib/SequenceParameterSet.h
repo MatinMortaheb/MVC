@@ -143,6 +143,17 @@ public:
   int getNumLevelValuesSignalledMinus1() const { return (int)m_num_level_values_signalled_minus1;}
   Void setNumLevelValuesSignalledMinus1(UInt num_level_values_minus1) {m_num_level_values_signalled_minus1=(int)num_level_values_minus1;}
 
+ UInt getViewCodingOrderIdxFromAViewId(UInt view_number)
+ {
+	UInt *ViewCodingOrder=this->getViewCodingOrder();
+
+	for (int i=0; i<= m_num_views_minus_1; i++)
+		if (view_number == ViewCodingOrder[i])
+			return i;
+	return 0;
+
+ }
+
   Void initViewSPSMemory_num_refs_for_lists(UInt num_views_minus1)
   { 
     m_num_anchor_refs_list0 = new int[num_views_minus1+1]; // ue(v)
@@ -255,6 +266,7 @@ public:
   Void initViewSPSMemory_ref_for_lists(UInt num_views_minus1,int i, int j, int k)
   // i : view-idx, j: list0/1 , k:anchor/non-anchor
   {
+	i = this->getViewCodingOrderIdxFromAViewId(i);
     if(!m_bInitDone)
     {
       m_anchor_ref_list0 = new UInt*[num_views_minus1+1];
@@ -311,14 +323,16 @@ public:
   }
   Void setNumAnchorRefsForListX(int i, int list_no, UInt value) 
   { 
+	  i = this->getViewCodingOrderIdxFromAViewId(i);
 	  AOF(i<= this->m_num_views_minus_1 && i >=0)
       if (list_no==0)
         m_num_anchor_refs_list0[i]=value;
       else if (list_no==1)
         m_num_anchor_refs_list1[i]=value;
   }
-  UInt getNumAnchorRefsForListX(int i,int list_no) const
+  UInt getNumAnchorRefsForListX(int view,int list_no) 
   {
+	int i = this->getViewCodingOrderIdxFromAViewId(view); 
     AOF(i<= this->m_num_views_minus_1 && i >=0)
       if (list_no==0)
         return (UInt)m_num_anchor_refs_list0[i];
@@ -327,14 +341,16 @@ public:
   }
   Void setNumNonAnchorRefsForListX(int i, int list_no, UInt value) 
   { 
+	i = this->getViewCodingOrderIdxFromAViewId(i);
     AOF(i<= this->m_num_views_minus_1 && i >=0)
       if (list_no==0)
         m_num_non_anchor_refs_list0[i]=value;
       else if (list_no==1)
         m_num_non_anchor_refs_list1[i]=value;
   }
-  UInt getNumNonAnchorRefsForListX(int i,int list_no) const
+  UInt getNumNonAnchorRefsForListX(int view,int list_no) 
   {
+	int i=this->getViewCodingOrderIdxFromAViewId(view);
     AOF(i<= this->m_num_views_minus_1 && i >=0)
       if (list_no==0)
         return (UInt)m_num_non_anchor_refs_list0[i];
@@ -344,20 +360,23 @@ public:
 
   Void setAnchorRefForListX(int i,int j, int list_no, UInt value)
   {
-    AOF(i<= this->m_num_views_minus_1 && i >=0)
+	  i = this->getViewCodingOrderIdxFromAViewId(i);
+	  AOF(i<= this->m_num_views_minus_1 && i >=0)
 		
-      if (list_no==0) {
-        AOF(j<m_num_anchor_refs_list0[i] && j >=0)		
-          m_anchor_ref_list0[i][j] = value;
-      }
-      else if (list_no==1) {
-        AOF(j<m_num_anchor_refs_list1[i] && j >=0)
-          m_anchor_ref_list1[i][j] = value;
-      }
+	  if (list_no==0) {
+		AOF(j<m_num_anchor_refs_list0[i] && j >=0)		
+		  m_anchor_ref_list0[i][j] = value;
+	  }
+	  else if (list_no==1) {
+		AOF(j<m_num_anchor_refs_list1[i] && j >=0)
+		  m_anchor_ref_list1[i][j] = value;
+	  }
   }
-  UInt getAnchorRefForListX(int i,int j, int list_no) const
+  UInt getAnchorRefForListX(int view,int j, int list_no) 
   {
-    AOF(i<= this->m_num_views_minus_1 && i >=0)
+
+	int i=this->getViewCodingOrderIdxFromAViewId(view);
+	AOF(i<= this->m_num_views_minus_1 && i >=0)
       if (list_no==0){
         AOF(j<m_num_anchor_refs_list0[i] && j >=0)	
           return m_anchor_ref_list0[i][j];
@@ -371,6 +390,7 @@ public:
   }
   Void setNonAnchorRefForListX(int i,int j, int list_no, UInt value)
   {
+	  i = this->getViewCodingOrderIdxFromAViewId(i);
 	  AOF(i<= this->m_num_views_minus_1 && i >=0)
 	  AOF(list_no==0 || list_no==1)
 		
@@ -383,8 +403,9 @@ public:
           m_non_anchor_ref_list1[i][j] = value;
       }
   }
-  UInt getNonAnchorRefForListX(int i,int j, int list_no) const
+  UInt getNonAnchorRefForListX(int view,int j, int list_no) 
   {
+	int i=this->getViewCodingOrderIdxFromAViewId((UInt)view);
     AOF(i<= this->m_num_views_minus_1 && i >=0)
 	
       if (list_no==0){
@@ -400,7 +421,7 @@ public:
   }
 
  //JVT-V043 
- UInt getNumRefsForListX(UInt uiCurrViewId,  ListIdx eListIdx, Bool bAnchor) const
+ UInt getNumRefsForListX(UInt uiCurrViewId,  ListIdx eListIdx, Bool bAnchor) 
  {
    if ( bAnchor )
      return getNumAnchorRefsForListX( uiCurrViewId, eListIdx);
@@ -415,6 +436,8 @@ public:
    else       
      return getNonAnchorRefForListX (uiCurrViewId, uiViewIdx, eListIdx);
  }
+
+ 
  //JVT-V054
  Void setViewCodingOrder(std::string cViewOrder)
  {

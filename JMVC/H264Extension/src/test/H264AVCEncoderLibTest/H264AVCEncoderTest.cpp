@@ -448,10 +448,10 @@ H264AVCEncoderTest::go()
 
 		for( UInt i = 0; i < uiNumView; i++ )
 		{
-			num_refs_list0_anc[i]    = m_pcEncoderCodingParameter->SpsMVC.getNumAnchorRefsForListX( i, 0 );
-			num_refs_list1_anc[i]    = m_pcEncoderCodingParameter->SpsMVC.getNumAnchorRefsForListX( i, 1 );
-			num_refs_list0_nonanc[i] = m_pcEncoderCodingParameter->SpsMVC.getNumNonAnchorRefsForListX( i, 0 );
-			num_refs_list1_nonanc[i] = m_pcEncoderCodingParameter->SpsMVC.getNumNonAnchorRefsForListX( i, 1 );		  
+			num_refs_list0_anc[i]    = m_pcEncoderCodingParameter->SpsMVC.getNumAnchorRefsForListX( m_pcEncoderCodingParameter->SpsMVC.getViewCodingOrder()[i], 0 );
+			num_refs_list1_anc[i]    = m_pcEncoderCodingParameter->SpsMVC.getNumAnchorRefsForListX( m_pcEncoderCodingParameter->SpsMVC.getViewCodingOrder()[i], 1 );
+			num_refs_list0_nonanc[i] = m_pcEncoderCodingParameter->SpsMVC.getNumNonAnchorRefsForListX( m_pcEncoderCodingParameter->SpsMVC.getViewCodingOrder()[i], 0 );
+			num_refs_list1_nonanc[i] = m_pcEncoderCodingParameter->SpsMVC.getNumNonAnchorRefsForListX( m_pcEncoderCodingParameter->SpsMVC.getViewCodingOrder()[i], 1 );		  
 		}
 //#define HELP_INFOR
 #ifdef  HELP_INFOR
