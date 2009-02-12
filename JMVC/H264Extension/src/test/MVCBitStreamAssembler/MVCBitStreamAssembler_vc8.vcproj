@@ -145,6 +145,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				OutputFile="..\..\..\..\..\bin\MVCBitStreamAssemblerStatic.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
