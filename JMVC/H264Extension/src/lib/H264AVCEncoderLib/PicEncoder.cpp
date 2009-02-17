@@ -742,8 +742,8 @@ PicEncoder::process( PicBuffer*               pcInputPicBuffer,
       break;
     }
 
-    if ( (NAL_UNIT_CODED_SLICE_IDR != m_cFrameSpecification.getNalUnitType())&&
-	 (m_MultiviewRefPicManager.CountNumMultiviewReferenceStreams() > 0) ) {
+    if ( ((NAL_UNIT_CODED_SLICE_IDR != m_cFrameSpecification.getNalUnitType() || !this->getAVCFlag() )&&
+	 (m_MultiviewRefPicManager.CountNumMultiviewReferenceStreams() > 0)) ) {
       Double          dLambdaForMVC   = 0;
       SliceHeader*    pcSliceHeaderForMVC   = 0;
       RNOK( xInitSliceHeader( pcSliceHeaderForMVC, m_cFrameSpecification, 
@@ -1531,7 +1531,7 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
   rpcSliceHeader->setSimplePriorityId( rpcSliceHeader->getViewId()== 0 ? rpcSliceHeader->getTemporalLevel() : ( m_uiMaxTL+rpcSliceHeader->getViewId()%2 +1) ); // JVT-W035
   //===== set prediction and update list sizes =====
   //===== reference picture list ===== (init with default data, later updated)
-  if( !rcFrameSpec.isIdrNalUnit())
+  //if( !rcFrameSpec.isIdrNalUnit())
   {
     //--- prediction ---
     UInt auiNumViewRef [2];
@@ -1556,7 +1556,7 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
       }
     }
     //===== set MMCO commands =====
-    if(rcFrameSpec.isIdrNalUnit())
+    if(rcFrameSpec.isIdrNalUnit() && rpcSliceHeader->getSliceType() == I_SLICE)
     {
       rpcSliceHeader->setAdaptiveRefPicBufferingFlag(false);
       rpcSliceHeader->getRplrBuffer( LIST_0 ).setRefPicListReorderingFlag(false);

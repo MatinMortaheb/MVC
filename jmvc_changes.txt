@@ -1,3 +1,12 @@
+JMVC_3_0_5 -> JMVC_3_1
+Date            : Feb 17, 2009
+Authors         : Harmonic Inc (Software coordinators) 
+Contribution    : SW improvement
+Changes:
+- All view components in the first AU of the MVC bitstream were coded as IDR pictures. This has been fixed and
+  now only the base-view view component is coded as IDR. The rest are coded as either P or B depending on the view
+  coding order.
+
 JMVC_3_0_4 -> JMVC_3_0_5
 Date            : Feb 3, 2009
 Authors         : MERL (Software coordinators) 

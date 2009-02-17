@@ -694,7 +694,7 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
   RNOK(     pcWriteIf->writeUvlc( m_uiPicParameterSetId,                        "SH: pic_parameter_set_id" ) );
   RNOK(     pcWriteIf->writeCode( m_uiFrameNum,
                                   getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
-  if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR )
+  if( NNalUnitType == NAL_UNIT_CODED_SLICE_IDR )
   {
     RNOK(   pcWriteIf->writeUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
   }
@@ -1412,7 +1412,7 @@ SliceHeaderBase::xReadMVCCompatible( HeaderSymbolReadIf* pcReadIf )
   RNOK(     pcReadIf->getCode( m_uiFrameNum,
                                getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
 
-  if( !(this->getNonIDRFlag())) // JVT-W035 
+  if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR ) // JVT-W035 
   {
     RNOK(   pcReadIf->getUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
   }
