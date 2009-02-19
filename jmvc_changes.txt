@@ -1,3 +1,11 @@
+JMVC_3_1 -> JMVC_3_2
+Date            : Feb 19, 2009
+Authors         : TUT (Software coordinators) & USTC
+Contribution    : SW improvement
+Changes:
+- Bug fix for the trace of non_idr_flag.
+- Bug fix for the GOPSize equal to 2.
+
 JMVC_3_0_5 -> JMVC_3_1
 Date            : Feb 17, 2009
 Authors         : Harmonic Inc (Software coordinators) 

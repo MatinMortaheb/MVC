@@ -240,7 +240,7 @@ NalUnitParser::xTrace( Bool bDDIPresent )
   DTRACE_COUNT( 1 );
   DTRACE_N;
   
-  DTRACE_TH   ( "NALU HEADER: idr_flag" );
+  DTRACE_TH   ( "NALU HEADER: non_idr_flag" );//BUG_FIX @20090218
   DTRACE_TY   ( " u(1)" );
   DTRACE_POS;
   DTRACE_CODE (m_bNonIDRFlag );//IDR, Nov 2008

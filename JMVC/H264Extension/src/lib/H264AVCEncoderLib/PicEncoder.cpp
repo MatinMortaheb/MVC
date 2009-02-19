@@ -886,7 +886,8 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
 
 //  UInt              uiDPBSize           = ( m_pcCodingParameter->getGOPSize() );
 //Increase DPB by 4 to allow for interview pictures
-  UInt              uiDPBSize           = ( 1 << m_pcCodingParameter->getDecompositionStages());
+  //UInt              uiDPBSize           = ( 1 << m_pcCodingParameter->getDecompositionStages());
+  UInt              uiDPBSize           = max(2, 1 << m_pcCodingParameter->getDecompositionStages());//BUG_FIX @20090218
   if (!bAVCSPS) uiDPBSize+= 4;
   m_pcCodingParameter->setDPBSize      ( uiDPBSize );
 
