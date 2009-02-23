@@ -1,4 +1,4 @@
-JMVC_3_1 -> JMVC_3_2
+JMVC_3_1 -> JMVC_3_2 (JMVC_4_0)
 Date            : Feb 19, 2009
 Authors         : TUT (Software coordinators) & USTC
 Contribution    : SW improvement
