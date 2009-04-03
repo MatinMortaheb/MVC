@@ -1518,6 +1518,8 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
   rpcSliceHeader->setLastFragmentFlag                   ( true );
   rpcSliceHeader->setBaseLayerUsesConstrainedIntraPred  ( false );
   rpcSliceHeader->setFgsComponentSep                    ( false );
+  // ying, April 03 2009
+  rpcSliceHeader->setAnchorPicFlag                      ( rcFrameSpec.isAnchor());
 
 
   //===== set deblocking filter parameters =====

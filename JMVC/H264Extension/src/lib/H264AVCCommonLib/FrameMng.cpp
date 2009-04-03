@@ -732,13 +732,8 @@ ErrVal FrameMng::xSetReferenceLists( SliceHeader& rcSH )
   {
     rcSH.getRefPicList( LIST_1 ).reset();
   }
+// remove the previous code that disabled inter picture initialization for anchor pictures, -Ying
 
-  if(rcSH.getNalUnitType() == NAL_UNIT_CODED_SLICE_SCALABLE)
-  {
-    if(rcSH.getAnchorPicFlag()) //no temporal pics
-        return Err::m_nOK;      
-  }
-  
   //===== initial lists =====
   if( ! rcSH.isInterB() )
   {
