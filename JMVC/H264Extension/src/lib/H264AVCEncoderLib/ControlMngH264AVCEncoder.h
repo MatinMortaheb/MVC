@@ -132,7 +132,6 @@ protected:
 public:
   static ErrVal create( ControlMngH264AVCEncoder*& rpcControlMngH264AVCEncoder );
   ErrVal init(  FrameMng*               pcFrameMng,
-//                MCTFEncoder*            apcMCTFEncoder          [MAX_LAYERS], ying
                 SliceEncoder*           pcSliceEncoder,
                 ControlMngH264AVCEncoder*  pcControlMng,
                 BitWriteBuffer*         pcBitWriteBuffer,
@@ -169,12 +168,7 @@ public:
   ErrVal initParameterSets( const SequenceParameterSet& rcSPS,
                             const PictureParameterSet&  rcPPSLP,
                             const PictureParameterSet&  rcPPSHP );
-//ying 
-/*
-  ErrVal initParameterSetsForFGS( const SequenceParameterSet& rcSPS,
-                            const PictureParameterSet&  rcPPSLP,
-                            const PictureParameterSet&  rcPPSHP );
-*/
+
   ErrVal initMbForFiltering( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
 
   ErrVal initSlice( SliceHeader& rcSH, ProcessingState eProcessingState );
@@ -205,7 +199,6 @@ public:
 
 protected:
   FrameMng*               m_pcFrameMng;
-//  MCTFEncoder*            m_apcMCTFEncoder          [MAX_LAYERS]; ying
   SliceEncoder*           m_pcSliceEncoder;
   ControlMngH264AVCEncoder*  m_pcControlMng;
   BitWriteBuffer*         m_pcBitWriteBuffer;

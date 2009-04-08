@@ -117,11 +117,8 @@ class QuarterPelFilter;
 class SampleWeighting;
 class ParameterSetMng;
 class PocCalculator;
-
-//class DecodedPicBuffer;
-//class MCTFDecoder;
 class ReconstructionBypass;
-//class RQFGSDecoder; ying
+
 
 
 H264AVC_NAMESPACE_BEGIN

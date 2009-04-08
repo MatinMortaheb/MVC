@@ -94,18 +94,15 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 
 #include "H264AVCEncoderLib.h"
 #include "H264AVCCommonLib/TraceFile.h"
-//#include "GOPEncoder.h"
-// ying {{
 #include "H264AVCCommonLib/TraceFile.h"
 #include "H264AVCCommonLib/MbDataCtrl.h"
 #include "DownConvert.h"
 #include "H264AVCCommonLib/Sei.h"  //NonRequired JVT-Q066 (06-04-08)
-// ying }}
 
 
 H264AVC_NAMESPACE_BEGIN
 
-// ying {{
+
 class H264AVCEncoder;
 class SliceHeader;
 class SliceEncoder;
@@ -122,13 +119,12 @@ class ParameterSetMng;
 class ControlMngH264AVCEncoder;
 class MotionEstimation;
 class IntFrame;
-// ying }}
+
 class PocCalculator;
 class CodingParameter;
 class NalUnitEncoder;
 class ControlMngIf;
 class ParameterSetMng;
-//class MCTFEncoder; ying
 class FrameMng;
 
 
@@ -210,7 +206,7 @@ protected:
 public:
   static  ErrVal create ( H264AVCEncoder*&  rpcH264AVCEncoder );
   virtual ErrVal destroy();
-  virtual ErrVal init   ( //MCTFEncoder*      apcMCTFEncoder[MAX_LAYERS], ying
+  virtual ErrVal init   ( 
                           ParameterSetMng*  pcParameterSetMng,
                           PocCalculator*    pcPocCalculator,
                           NalUnitEncoder*   pcNalUnitEncoder,
@@ -233,46 +229,14 @@ public:
 														, UInt  PDSInitialDelayNonAnc
 														);
 //~JVT-W080
-//ying
-/*	
-	ErrVal process            ( ExtBinDataAccessorList&   rcExtBinDataAccessorList, 
-                              PicBuffer*                apcOriginalPicBuffer   [MAX_LAYERS],
-                              PicBuffer*                apcReconstructPicBuffer[MAX_LAYERS],
-                              PicBufferList*            apcPicBufferOutputList,
-                              PicBufferList*            apcPicBufferUnusedList );
-  */
+
   ErrVal finish             ( ExtBinDataAccessorList&   rcExtBinDataAccessorList, 
                               PicBufferList*            apcPicBufferOutputList,
                               PicBufferList*            apcPicBufferUnusedList,
                               UInt&                     ruiNumCodedFrames,
                               Double&                   rdHighestLayerOutputRate );
 
-/*
-  ErrVal  getBaseLayerStatus  ( UInt&         ruiBaseLayerId,
-                                UInt&         ruiBaseLayerIdMotionOnly,
-                                Int&          riSpatialScalabilityType,
-                                UInt          uiLayerId,
-                                Int           iPoc );
-               
-  ErrVal  getBaseLayerData    ( IntFrame*&    pcFrame,
-                                IntFrame*&    pcResidual,
-                                MbDataCtrl*&  pcMbDataCtrl,
-																MbDataCtrl*&  pcMbDataCtrlEL,
-                                Bool&         bConstrainedIPredBL,
-                                Bool&         bForCopyOnly,
-                                Int                             iSpatialScalability,
-                                UInt          uiBaseLayerId,
-                                Int           iPoc,
-                                Bool          bMotion );
-
-  ErrVal  getBaseLayerSH      ( SliceHeader*& rpcSliceHeader,
-                                UInt          uiBaseLayerId,
-                                Int           iPoc );
-
-  UInt*   getGOPBitsBase      ( UInt          uiBaseLayerId );
-  UInt*   getGOPBitsFGS       ( UInt          uiBaseLayerId );
-  UInt*   getGOPBits					( UInt					uiScalableLayerId );
-*/ //ying                 
+             
   //{{Quality level estimation and modified truncation- JVTO044 and m12007
   //France Telecom R&D-(nathalie.cammas@francetelecom.com)
   ErrVal writeQualityLevelInfosSEI( ExtBinDataAccessor* pcExtBinDataAccessor, 
@@ -322,15 +286,7 @@ protected:
 																			, UInt  PDSInitialDelayNonAnc
 														         );
 //~JVT-W080
-// ying
-/*
-  ErrVal xProcessGOP        ( UInt                      uiLayer,
-                              UInt&                     uiScalableLayer,
-                              PicBuffer*                pcOriginalPicBuffer, 
-                              PicBuffer*                pcReconstructPicBuffer, 
-                              PicBufferList&            rcPicBufferOutputList, 
-                              PicBufferList&            rcPicBufferUnusedList );
-*/
+
 protected:
   std::list<SequenceParameterSet*>  m_cUnWrittenSPS;
   std::list<PictureParameterSet*>   m_cUnWrittenPPS;
@@ -349,7 +305,6 @@ protected:
 	Bool															m_bScalableSeiMessage;
   Double														m_dFinalBitrate[MAX_LAYERS * MAX_DSTAGES * MAX_QUALITY_LEVELS];
 	Double														m_dFinalFramerate[MAX_LAYERS * MAX_DSTAGES * MAX_QUALITY_LEVELS];
-//  MCTFEncoder*                      m_apcMCTFEncoder    [MAX_LAYERS]; ying
   AccessUnitList                    m_cAccessUnitList;
 };
 

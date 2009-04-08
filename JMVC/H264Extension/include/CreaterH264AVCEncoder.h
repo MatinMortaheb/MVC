@@ -123,11 +123,9 @@ class MotionEstimationQuarterPel;
 class RateDistortion;
 class RateDistortionRateConstraint;
 class History;
-//class MCTFEncoder; ying
 class XDistortion;
 class ControlMngH264AVCEncoder;
 class ReconstructionBypass;
-//class RQFGSEncoder; ying
 class PicEncoder;
 
 
@@ -197,10 +195,8 @@ protected:
 
 protected:
   H264AVCEncoder*           m_pcH264AVCEncoder;
-//  RQFGSEncoder*             m_pcRQFGSEncoder; ying
   FrameMng*                 m_pcFrameMng;
 
-//  MCTFEncoder*              m_apcMCTFEncoder          [MAX_LAYERS]; ying
   SliceEncoder*             m_pcSliceEncoder;
   ControlMngH264AVCEncoder* m_pcControlMng;
   BitWriteBuffer*           m_pcBitWriteBuffer;

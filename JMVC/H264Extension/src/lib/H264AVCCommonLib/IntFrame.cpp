@@ -93,7 +93,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 H264AVC_NAMESPACE_BEGIN
 
 
-//ying {{
+
 //////////////////////////////////////////////////////////////////////////
 // DPB UNIT
 //////////////////////////////////////////////////////////////////////////
@@ -275,7 +275,7 @@ DPBUnit::markOutputted()
 }
 
 
-// ying }}
+
 
 
 IntFrame::IntFrame( YuvBufferCtrl& rcYuvFullPelBufferCtrl,

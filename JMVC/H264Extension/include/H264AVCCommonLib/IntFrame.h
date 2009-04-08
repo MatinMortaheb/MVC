@@ -94,7 +94,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 
 #include "H264AVCCommonLib/IntYuvPicBuffer.h"
 
-//ying
+
 #include "H264AVCCommonLib/MbDataCtrl.h"
 #include "DownConvert.h"
 
@@ -116,7 +116,7 @@ class RecPicBufUnit;
 
 class YuvBufferCtrl; 
 
-//ying
+
 class DPBUnit
 {
 protected:
@@ -205,7 +205,7 @@ public:
   ErrVal  load            ( PicBuffer*        pcPicBuffer );
   ErrVal  store           ( PicBuffer*        pcPicBuffer );
   ErrVal  extendFrame     ( QuarterPelFilter* pcQuarterPelFilter );
-//ying  
+
   Void      setDPBUnit      ( DPBUnit*  pcDPBUnit ) { m_pcDPBUnit = pcDPBUnit; }
   DPBUnit*  getDPBUnit      ()                      { return m_pcDPBUnit; }
 
@@ -400,7 +400,7 @@ protected:
   Bool            m_bHalfPel;
   Bool            m_bExtended;
 
-  DPBUnit*        m_pcDPBUnit; //ying
+  DPBUnit*        m_pcDPBUnit; 
 
   Bool			  m_bUnusedForRef; // JVT-Q065 EIDR
   // JVT-R057 LA-RDO{

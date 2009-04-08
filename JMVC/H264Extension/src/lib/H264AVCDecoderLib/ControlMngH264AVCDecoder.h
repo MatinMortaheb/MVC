@@ -164,11 +164,7 @@ public:
   ErrVal initParameterSets    ( const SequenceParameterSet& rcSPS,
                                 const PictureParameterSet&  rcPPSLP,
                                 const PictureParameterSet&  rcPPSHP  )    { return Err::m_nERR; }
-/*
-  ErrVal initParameterSetsForFGS    ( const SequenceParameterSet& rcSPS,
-                                const PictureParameterSet&  rcPPSLP,
-                                const PictureParameterSet&  rcPPSHP  )    { return Err::m_nERR; }
-*/ //ying
+
   ErrVal initSlice            ( SliceHeader& rcSH, ProcessingState eProcessingState );
   ErrVal finishSlice          ( const SliceHeader& rcSH, Bool& rbPicDone, Bool& rbFrameDone );
   ErrVal initSliceForCoding   ( const SliceHeader& rcSH ) { return Err::m_nERR; }

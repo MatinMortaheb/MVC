@@ -212,15 +212,7 @@ __inline Bool FrameMng::xFindAndErase( FUList& rcFUList, FrameUnit* pcFrameUnit 
 
 __inline ErrVal FrameMng::xAddToFreeList( FrameUnit* pcFrameUnit )
 {
-/*  if( pcFrameUnit->getFGSPicBuffer() )
-  {
-    pcFrameUnit->getFGSPicBuffer()->setUnused();
-    if( ! pcFrameUnit->getFGSPicBuffer()->isUsed() )
-    {
-      m_cPicBufferUnusedList.push_back( pcFrameUnit->getFGSPicBuffer() );
-    }
-  }
-*/
+
   if( pcFrameUnit->getPicBuffer() )
   {
     pcFrameUnit->getPicBuffer()->setUnused();
@@ -410,14 +402,23 @@ ErrVal FrameMng::RefreshOrederedPOCList()
 }
 //JVT-S036 }
 
-//ying
+
 ErrVal FrameMng::initSlice( SliceHeader *rcSH )
 {
   m_uiMaxFrameNumCurr = ( 1 << ( rcSH->getSPS().getLog2MaxFrameNum() ) );
   m_uiMaxFrameNumPrev = ( 1 << ( rcSH->getSPS().getLog2MaxFrameNum() ) );
   m_uiNumRefFrames    = rcSH->getSPS().getNumRefFrames();
 
-  m_iMaxEntriesinDPB= (min (rcSH->getSPS().getMaxDPBSize(), 18))* (rcSH->getSPS().getSpsMVC()->getNumViewMinus1()+1); 
+  
+  
+  UInt Num_Views=1;
+  if (rcSH->getSPS().SpsMVC!=NULL)
+	  Num_Views = rcSH->getSPS().SpsMVC->getNumViewMinus1()+1;
+  UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;
+
+  m_iMaxEntriesinDPB = rcSH->getSPS().getMaxDPBSize();
+  m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+  //printf("final MaxDPB=%d\n",	m_iMaxEntriesinDPB);
 
   if( ! m_iMaxEntriesinDPB )
   {
@@ -447,7 +448,16 @@ ErrVal FrameMng::initSPS( const SequenceParameterSet& rcSPS )
   m_uiNumRefFrames    = rcSPS.getNumRefFrames();
   if( rcSPS.getProfileIdc() == MULTI_VIEW_PROFILE )
   {
-    m_iMaxEntriesinDPB= rcSPS.getMaxDPBSize();
+    
+	UInt Num_Views=1;
+	if (rcSPS.SpsMVC!=NULL)
+	  Num_Views = rcSPS.SpsMVC->getNumViewMinus1()+1;
+	UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;
+
+	m_iMaxEntriesinDPB = rcSPS.getMaxDPBSize();
+	m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+	
+
   }
   else
   {
@@ -608,7 +618,7 @@ ErrVal FrameMng::storePicture( const SliceHeader& rcSH )
   RNOK( xStoreCurrentPicture( rcSH ) );
 
   //===== set pictures for output =====
-  RNOK( xSetOutputListMVC( m_pcCurrentFrameUnit, rcSH.getSPS().getSpsMVC()->getNumViewMinus1()+1) );
+  RNOK( xSetOutputListMVC( m_pcCurrentFrameUnit, rcSH) );
 
 
   if( rcSH.getNalRefIdc() )
@@ -732,7 +742,6 @@ ErrVal FrameMng::xSetReferenceLists( SliceHeader& rcSH )
   {
     rcSH.getRefPicList( LIST_1 ).reset();
   }
-// remove the previous code that disabled inter picture initialization for anchor pictures, -Ying
 
   //===== initial lists =====
   if( ! rcSH.isInterB() )
@@ -856,11 +865,7 @@ ErrVal FrameMng::xStoreCurrentPicture( const SliceHeader& rcSH )
   pcTempPicBuffer->setViewId(rcSH.getViewId());
   m_uiLastViewId = rcSH.getViewId();
 
-  // Base layer
-  /*
-  m_pcCurrentFrameUnit->getFGSReconstruction(0)->load(& cTempPicBuffer);
-  m_pcCurrentFrameUnit->setFGSReconCount(1);
-  */
+ 
 
   RNOK( m_pcCurrentFrameUnit->getFrame().extendFrame( m_pcQuarterPelFilter ) );
 
@@ -1013,7 +1018,7 @@ ErrVal FrameMng::xSlidingWindowUpdate()
   UInt uiSV = 0;
   FUList::iterator iter = m_cShortTermList.begin();
   FUList::iterator end  = m_cShortTermList.end();
-  //PUrvin
+  
   FUList::iterator temp;
   FrameUnit * pMinFrameUnit = NULL;  
   UInt uiMinFrameNumWrap  = m_uiMaxFrameNumCurr;
@@ -1023,8 +1028,7 @@ ErrVal FrameMng::xSlidingWindowUpdate()
     {
       uiSV++; 
       if ( ((*iter)->getFrameNumber() % m_uiMaxFrameNumCurr) < uiMinFrameNumWrap)
-      {
-        //uiminFrameNumWrap= (*iter)->getFrameNumber() % m_uiMaxFrameNumCurr;
+      {        
         pMinFrameUnit=(*iter);
         temp = iter;
       }
@@ -1032,10 +1036,8 @@ ErrVal FrameMng::xSlidingWindowUpdate()
     }
   }
   if (uiSV >= m_uiNumRefFrames ) 
-  {
-//    RNOK( xRemove( pMinFrameUnit ) );
-    RNOK( xRemoveFromRefList( m_cShortTermList, temp ) );
-  }
+     RNOK( xRemoveFromRefList( m_cShortTermList, temp ) );
+  
   return Err::m_nOK;
 }
 
@@ -1278,10 +1280,12 @@ ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
   return Err::m_nOK;
 }
 
-ErrVal FrameMng::xSetOutputListMVC( FrameUnit* pcFrameUnit, UInt uiNumOfViews )
+
+ErrVal FrameMng::xSetOutputListMVC( FrameUnit* pcFrameUnit, const SliceHeader& rcSH )
 {
   ROTRS( m_iEntriesInDPB <= m_iMaxEntriesinDPB, Err::m_nOK );
 
+  UInt uiNumOfViews = rcSH.getSPS().getSpsMVC()->getNumViewMinus1()+1;	
   UInt uiOutput = 0;
 
   for (UInt i = 0; i < uiNumOfViews; i++ )
@@ -1290,15 +1294,13 @@ ErrVal FrameMng::xSetOutputListMVC( FrameUnit* pcFrameUnit, UInt uiNumOfViews )
       Int     iMinPOCtoOuput = MSYS_INT_MAX;
       FUIter  iter;
       for( iter = m_cNonRefList.begin(); iter != m_cNonRefList.end(); iter++ )
-      {
-          if( (*iter)->getMaxPOC() < iMinPOCtoOuput && ( (*iter) != pcFrameUnit) && (*iter)->getFrame().getViewId() == i)
-          {
-              iMinPOCtoOuput = (*iter)->getMaxPOC();
-          }
+      {          
+		  if( (*iter)->getMaxPOC() < iMinPOCtoOuput && ( (*iter) != pcFrameUnit) && (*iter)->getFrame().getViewId() == rcSH.getSPS().getSpsMVC()->m_uiViewCodingOrder[i])
+			  iMinPOCtoOuput = (*iter)->getMaxPOC();
+         
       }
 
-//      ROT( iMinPOCtoOuput == MSYS_INT_MAX );
-      if(iMinPOCtoOuput == MSYS_INT_MAX)
+     if(iMinPOCtoOuput == MSYS_INT_MAX)
           continue;
       
       uiOutput++;
@@ -1306,22 +1308,16 @@ ErrVal FrameMng::xSetOutputListMVC( FrameUnit* pcFrameUnit, UInt uiNumOfViews )
       //===== output =====
       for( iter = m_cOrderedPOCList.begin(); iter != m_cOrderedPOCList.end(); iter++ )
       {
-          if( (*iter)->getMaxPOC() <= iMinPOCtoOuput && (*iter)->getFrame().getViewId() == i )
+          if( (*iter)->getMaxPOC() <= iMinPOCtoOuput && (*iter)->getFrame().getViewId() == rcSH.getSPS().getSpsMVC()->m_uiViewCodingOrder[i] )
           {
-/*              if( (*iter)->getFGSPicBuffer() )
-              {
-                  (*iter)->getFGSPicBuffer()->setCts( (UInt64)((*iter)->getMaxPOC()) ); // HS: decoder robustness
-                  m_cPicBufferOutputList.push_back( (*iter)->getFGSPicBuffer() );
-              }
-              else 
-*/
+
               if ((*iter)->getPicBuffer() )  //JVT-S036 
               {
                   (*iter)->getPicBuffer()->setCts( (UInt64)((*iter)->getMaxPOC()) ); // HS: decoder robustness
                   m_cPicBufferOutputList.push_back( (*iter)->getPicBuffer() );
               }
               (*iter)->setOutputDone();
-              if( xFindAndErase( m_cNonRefList, *iter ) )
+              if( xFindAndErase( m_cNonRefList, *iter ) ) 
               {
                   RNOK( xAddToFreeList( *iter ) );
               }

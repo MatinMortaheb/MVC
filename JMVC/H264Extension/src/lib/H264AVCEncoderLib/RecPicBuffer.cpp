@@ -296,7 +296,14 @@ RecPicBuffer::initSPS( const SequenceParameterSet& rcSPS )
 {
   ROF( m_bInitDone );
 
+  UInt Num_Views=1;
+  if (rcSPS.SpsMVC!=NULL)
+	  Num_Views = rcSPS.SpsMVC->getNumViewMinus1()+1;
+  UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;
+
   UInt uiMaxFramesInDPB = rcSPS.getMaxDPBSize();
+  uiMaxFramesInDPB = min ( mvcScaleFactor*uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+
   RNOK( xCreateData( uiMaxFramesInDPB, rcSPS ) );
   m_uiNumRefFrames      = rcSPS.getNumRefFrames();
   m_uiMaxFrameNum       = ( 1 << ( rcSPS.getLog2MaxFrameNum() ) );

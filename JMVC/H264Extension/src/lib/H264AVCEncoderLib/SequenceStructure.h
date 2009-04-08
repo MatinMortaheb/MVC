@@ -110,14 +110,13 @@ public:
                                         MmcoBuffer* pcMmcoBuf,
                                         RplrBuffer* pcRplrBufL0,
                                         RplrBuffer* pcRplrBufL1 );
-// ying {{
+
   ErrVal           init              ( UChar        ucType, UInt uiFrameNum, UInt uiFrameNumPoc, UInt uiTemporalLevel );
   Void             copy              ( FrameSpec    cFrameSpec);
   ErrVal           updateNumbers     ( UInt         uiFrameNumIn,            UInt uiFrameNumPocIn, UInt uiMaxFrameNum);
   ErrVal           updateType        ( UInt         uiInterViewFwd,          UInt uiInterViewBwd);
   ErrVal           updateAnchor      ( UInt         uiAnchorPeriod);
   UInt              getFrameNum       ()                  const;
-//  }}
   Bool              isInitialized     ()                  const;
 
   UInt              getContFrameNumber()                  const;

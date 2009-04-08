@@ -209,24 +209,7 @@ public:
 	  UInt           uiNumMaxIter,
 	  UInt           uiIterSearchRange,
 	  Double         dLambda );
-//ying
-  /*
 
-  ErrVal  encodeFGS           ( MbDataAccess&   rcMbDataAccess,
-                                MbDataAccess*   pcMbDataAccessBase,
-                                RefFrameList&   rcRefFrameList0,
-                                RefFrameList&   rcRefFrameList1,
-                                const IntFrame& rcOrigFrame,
-                                IntFrame*       pcPredSignal,
-                                IntFrame*       pcBQPredSignal,
-                                RefFrameList*   pcRefFrameListDiff,
-                                FGSCoder*       pcFGSCoder,
-                                IntYuvMbBuffer& rcBaseLayerBuffer,
-                                UInt            uiNumMaxIter,
-                                UInt            uiIterSearchRange,
-                                Double          dLambda,
-                                Int             iMaxQpDelta );
-*/
 //TMM_WP
   ErrVal getPredWeights( SliceHeader& rcSH, ListIdx eLstIdx, 
                          Double(*pafWeight)[3], IntFrame* pOrgFrame,
@@ -439,17 +422,7 @@ protected:
                                   Int				iSpatialScalabilityType,
                                   MbDataAccess*     pcMbDataAccessBaseMotion,
                                   Bool              bResidualPred );
-//ying
-  /*
-  ErrVal  xEstimateMbFGSSkip    ( IntMbTempData*&   rpcMbTempData,
-                                  IntMbTempData*&   rpcMbBestData,
-                                  RefFrameList&     rcRefFrameList0,
-                                  RefFrameList&     rcRefFrameList1,
-                                  MbDataAccess*     pcMbDataAccessBase,
-                                  IntYuvMbBuffer&   rcBaseLayerBuffer,
-                                  IntFrame*         pcPredSignal,
-                                  Int               iMaxQpDelta );
-*/
+
 	//-- JVT-R091
   ErrVal  xEstimateMbSR					( IntMbTempData*&   rpcIntMbTempData,
                                   IntMbTempData*&   rpcIntMbBestData,

@@ -93,8 +93,6 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 #include "BitReadBuffer.h"
 #include "DecError.h"
 
-//#include "H264AVCCommonLib/FGSCoder.h" ying
-
 // h264 namepace begin
 H264AVC_NAMESPACE_BEGIN
 

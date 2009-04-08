@@ -120,7 +120,6 @@ class H264AVCCOMMONLIB_API FrameMng
   public:
     FrameUnit* popBack()  { FrameUnit* pcFU = back();   pop_back();   return pcFU; }
     FrameUnit* popFront() { FrameUnit* pcFU = front();  pop_front();  return pcFU; }
-// big clean up, and fix, add view id for all list getting. ying
 
   Void setRefPicList( RefPicList<RefPic>& rcRefPicList , SliceHeader& rcSH)
   {
@@ -344,7 +343,7 @@ protected:
   ErrVal            xMmcoMarkShortTermAsUnused( const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums );
   ErrVal            xMmcoMarkShortTermAsUnusedBase( const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums ); //JVT-S036 
 
-          ErrVal            xSetOutputListMVC              ( FrameUnit* pcFrameUnit, UInt uiNumOfViews );
+          ErrVal            xSetOutputListMVC              ( FrameUnit* pcFrameUnit, const SliceHeader& rcSH );		
 
           private:
           UInt              xSortPocOrderedList                 ();

@@ -105,7 +105,7 @@ class H264AVCCOMMONLIB_API SpsMvcExtension
 {
 public:
 
-  SpsMvcExtension()// ying:  add initialization for the construction 
+  SpsMvcExtension()//  add initialization for the construction 
 : m_num_views_minus_1         ( 0    )
 , m_num_anchor_refs_list0     ( NULL ) 
 , m_num_anchor_refs_list1     ( NULL )
@@ -512,7 +512,8 @@ public:
   static ErrVal create                    ( SequenceParameterSet*& rpcSPS );
   ErrVal        destroy                   ();
 
-  static UInt   getLevelIdc               ( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic );
+  static UInt   getLevelIdc               ( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic, int Num_Views );
+  
   UInt          getMaxDPBSize             () const;
 
   NalUnitType           getNalUnitType                        ()          const { return m_eNalUnitType; }

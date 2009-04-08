@@ -294,7 +294,8 @@ PicEncoder::uninit()
 
 ErrVal
 PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
-                                       Bool&               rbMoreSets )
+                                       Bool&               rbMoreSets,
+									   UInt Num_Of_Views_Minus_1)
 {
   if( ! m_pcSPSBase)
   {
@@ -310,8 +311,8 @@ PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
 	
 	m_adMVCSeqBits[0] += uiSPSBits; //SEI 
 
-  }
-  else if ( ! m_pcSPS )
+  }  
+  else if ( ! m_pcSPS  && Num_Of_Views_Minus_1>0 )	
   {
     //===== create SPS =====
     RNOK( xInitSPS(false) );
@@ -340,7 +341,7 @@ PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
 	m_adMVCSeqBits[0] += uiPPSBits; //SEI 
     
   }
-  else if( ! m_pcPPS )
+  else if( ! m_pcPPS && Num_Of_Views_Minus_1>0 )
   {
     //===== create PPS =====
     RNOK( xInitPPS(false) );
@@ -875,6 +876,11 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
 {
   ROF( m_bInit );
 
+  UInt  uiLevelIdc;	
+  UInt uiDPBSize;
+  UInt mvcScaleFactor=1;
+  UInt NumViews=1;
+
   SequenceParameterSet*&  rpcSPS = bAVCSPS ?  m_pcSPSBase: m_pcSPS; 
   ROT( rpcSPS );
   //===== determine parameters =====
@@ -884,20 +890,32 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   UInt  uiOutFreq   = (UInt)ceil( m_pcCodingParameter->getMaximumFrameRate() );
   UInt  uiMvRange   = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange();
 
-//  UInt              uiDPBSize           = ( m_pcCodingParameter->getGOPSize() );
-//Increase DPB by 4 to allow for interview pictures
-  //UInt              uiDPBSize           = ( 1 << m_pcCodingParameter->getDecompositionStages());
-  UInt              uiDPBSize           = max(2, 1 << m_pcCodingParameter->getDecompositionStages());//BUG_FIX @20090218
-  if (!bAVCSPS) uiDPBSize+= 4;
-  m_pcCodingParameter->setDPBSize      ( uiDPBSize );
-
-  UInt  uiLevelIdc  = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, uiDPBSize );
-
+ 
   //===== create parameter sets =====
   RNOK( SequenceParameterSet::create( rpcSPS ) );
+  if( !bAVCSPS)  
+  {
+    m_pcSPS->SpsMVC = new SpsMvcExtension; 
+    memcpy( m_pcSPS->SpsMVC, &(m_pcCodingParameter->SpsMVC), sizeof ( SpsMvcExtension )) ;
+	NumViews = rpcSPS->SpsMVC->getNumViewMinus1()+1;
+  }
+  else //  AVC base SPS
+     m_pcSPSBase->SpsMVC = NULL;
+  
+
+ 
+  //uiDPBSize           = max(2, 1 << m_pcCodingParameter->getDecompositionStages());//BUG_FIX @20090218
+  uiDPBSize = max (2, (1 <<(m_pcCodingParameter->getDecompositionStages()-1)) + m_pcCodingParameter->getDecompositionStages());
+  if (!bAVCSPS)
+	  uiDPBSize += 4;	 // up-to extra 4 interview pictures
+  
+  m_pcCodingParameter->setDPBSize      ( uiDPBSize );
+
+  UInt decDPBSize = max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16;
+  uiLevelIdc  = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, decDPBSize, NumViews ) ; 
+  //printf("bAVCSPS=%d decDPBSize=%d LevelIdc=%d\n",bAVCSPS,decDPBSize, uiLevelIdc);
 
   //===== set SPS parameters =====
-  //rpcSPS->setNalUnitType                           ( NAL_UNIT_SPS );
   rpcSPS->setNalUnitType                           ( bAVCSPS ?  NAL_UNIT_SPS : NAL_UNIT_SUBSET_SPS );
   rpcSPS->setLayerId                               ( 0 );
   rpcSPS->setProfileIdc                            ( bAVCSPS ? ( m_pcCodingParameter->get8x8Mode() >0  ? HIGH_PROFILE : MAIN_PROFILE  ) : MVC_PROFILE );
@@ -905,7 +923,10 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   rpcSPS->setConstrainedSet1Flag                   ( false );
   rpcSPS->setConstrainedSet2Flag                   ( false );
   rpcSPS->setConstrainedSet3Flag                   ( false );
-  rpcSPS->setConstrainedSet4Flag                   ( false );
+  if (rpcSPS->getProfileIdc() == HIGH_PROFILE || rpcSPS->getProfileIdc() == MAIN_PROFILE)
+	rpcSPS->setConstrainedSet4Flag                   ( true );
+  else
+	rpcSPS->setConstrainedSet4Flag                   ( false );
   rpcSPS->setLevelIdc                              ( uiLevelIdc );
   rpcSPS->setSeqParameterSetId                     ( uiSPSId );
   rpcSPS->setSeqScalingMatrixPresentFlag           ( m_pcCodingParameter->get8x8Mode() > 1 );
@@ -913,7 +934,10 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   ROT(m_pcCodingParameter->getPicOrderCntType()==2 && m_pcCodingParameter->getGOPSize()>1);//Poc type 2 supported when GOPSize =1
   rpcSPS->setPicOrderCntType                       ( m_pcCodingParameter->getPicOrderCntType() );
   rpcSPS->setLog2MaxPicOrderCntLsb                 ( m_pcCodingParameter->getLog2MaxPocLsb() );
-  rpcSPS->setNumRefFrames                          ( m_pcCodingParameter->getDPBSize ());
+  if (!bAVCSPS)
+	  mvcScaleFactor=2;
+  rpcSPS->setNumRefFrames                          ( min (16, m_pcCodingParameter->getDPBSize()/mvcScaleFactor) ); 
+  
   rpcSPS->setRequiredFrameNumUpdateBehaviourFlag   ( true );
   rpcSPS->setFrameWidthInMbs                       ( uiMbX );
   rpcSPS->setFrameHeightInMbs                      ( uiMbY );
@@ -921,14 +945,6 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
 
   rpcSPS->setCurrentViewId(m_pcCodingParameter->getCurentViewId());
 
-  if( !bAVCSPS)  //  AVC base SPS
-  {
-    m_pcSPS->SpsMVC = new SpsMvcExtension; 
-    memcpy( m_pcSPS->SpsMVC, &(m_pcCodingParameter->SpsMVC), sizeof ( SpsMvcExtension )) ;
-//    //m_pcSPS->SpsMVC = &(m_pcCodingParameter->SpsMVC); // need to destroy SpsMVC when m_pcSPS is released 
-  }
-  else 
-     m_pcSPSBase->SpsMVC = NULL;
   
 
   return Err::m_nOK;
@@ -1518,7 +1534,6 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
   rpcSliceHeader->setLastFragmentFlag                   ( true );
   rpcSliceHeader->setBaseLayerUsesConstrainedIntraPred  ( false );
   rpcSliceHeader->setFgsComponentSep                    ( false );
-  // ying, April 03 2009
   rpcSliceHeader->setAnchorPicFlag                      ( rcFrameSpec.isAnchor());
 
 

@@ -428,7 +428,7 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 		RNOK	( pcWriteIf->writeUvlc( m_uiNumReorderFrames[i],		"ScalableSEI:num_reorder_frames" ) );
 		RNOK	( pcWriteIf->writeUvlc( m_uiMaxDecFrameBuffering[i],		"ScalableSEI:max_dec_frame_buffering" ) );
 	}
-	//}}SEI JJ, Ying
+	
   }
   return Err::m_nOK;
 
@@ -670,7 +670,7 @@ SEI::FullframeSnapshotSei::write( HeaderSymbolWriteIf *pcWriteIf )
 {
 	UInt uiStart = pcWriteIf->getNumberOfWrittenBits();
 	UInt uiPayloadSize = 0;
-	// bug fix for LSJ, ying
+	
 	RNOK( pcWriteIf->writeUvlc( getSnapShotId(), "FullframeSnapshotSei: SnapshotId" ) );
 
 	uiPayloadSize = ( pcWriteIf->getNumberOfWrittenBits() - uiStart + 7 )/8;
@@ -915,9 +915,6 @@ if( eMessageType == VIEW_DEPENDENCY_STRUCTURE_SEI )
 //JVT-W080, omit parsing
   if( eMessageType == PARALLEL_DEC_SEI )
 	{
-//		ParallelDecodingSEI* pcPdSEI = (ParallelDecodingSEI*)rpcSEIMessage;
-// fix for Liu Hui, Ying
-
 		return Err::m_nOK;   
 	}
 //~JVT-W080
@@ -2558,7 +2555,7 @@ SEI::ViewDependencyStructureSei::write(HeaderSymbolWriteIf* pcWriteIf )
   RNOK(pcWriteIf->writeFlag(m_bNonAnchorUpdateFlag, "ViewDependencyStructureSei: non_anchor_update_flag"));
   if (m_bAnchorUpdateFlag)
   {
-    for ( UInt i = 1; i< m_uiNumOfViews; i++) // ying
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) 
     {
       for ( UInt j = 0; j< m_puiNumAnchorL0Refs[i]; j++)
       {
@@ -2572,7 +2569,7 @@ SEI::ViewDependencyStructureSei::write(HeaderSymbolWriteIf* pcWriteIf )
   }
   if (m_bNonAnchorUpdateFlag)
   {
-    for ( UInt i = 1; i< m_uiNumOfViews; i++) // ying
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) 
     {
       for ( UInt j = 0; j< m_puiNumNonAnchorL0Refs[i]; j++)
       {
@@ -2594,7 +2591,7 @@ SEI::ViewDependencyStructureSei::read(HeaderSymbolReadIf* pcReadIf)
   RNOK(pcReadIf->getFlag(m_bNonAnchorUpdateFlag, "ViewDependencyStructureSei: non_anchor_update_flag"));
   if (m_bAnchorUpdateFlag)
   {
-    for ( UInt i = 1; i< m_uiNumOfViews; i++) //ying
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) 
     {
       m_ppbAnchorRefL0Flag[i] = new Bool[m_puiNumAnchorL0Refs[i]];
       m_ppbAnchorRefL1Flag[i] = new Bool[m_puiNumAnchorL1Refs[i]];
@@ -2610,10 +2607,9 @@ SEI::ViewDependencyStructureSei::read(HeaderSymbolReadIf* pcReadIf)
   }
   if (m_bNonAnchorUpdateFlag)
   {
-    for ( UInt i = 1; i< m_uiNumOfViews; i++) //ying
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) 
     {
-      //m_puiNumNonAnchorL0Refs[i] = num_refs_list0_nonanc[i];
-      //m_puiNumNonAnchorL1Refs[i] = num_refs_list1_nonanc[i];
+  
       m_ppbNonAnchorRefL0Flag[i] = new Bool[m_puiNumNonAnchorL0Refs[i]];
       m_ppbNonAnchorRefL1Flag[i] = new Bool[m_puiNumNonAnchorL1Refs[i]];
       for ( UInt j = 0; j< m_puiNumNonAnchorL0Refs[i]; j++)

@@ -116,7 +116,6 @@ ControlMngH264AVCEncoder::ControlMngH264AVCEncoder():
   ::memset( m_apcYuvFullPelBufferCtrl, 0x00, MAX_LAYERS*sizeof(Void*) );
   ::memset( m_apcYuvHalfPelBufferCtrl, 0x00, MAX_LAYERS*sizeof(Void*) );
   ::memset( m_apcPocCalculator,        0x00, MAX_LAYERS*sizeof(Void*) );
-//  ::memset( m_apcMCTFEncoder,          0x00, MAX_LAYERS*sizeof(Void*) ); ying
   ::memset( m_auiMbXinFrame,           0x00, MAX_LAYERS*sizeof(UInt ) );
   ::memset( m_auiMbYinFrame,           0x00, MAX_LAYERS*sizeof(UInt ) );
 }
@@ -125,20 +124,6 @@ ControlMngH264AVCEncoder::~ControlMngH264AVCEncoder()
 {
 }
 
-/*
-ErrVal
-ControlMngH264AVCEncoder::initParameterSetsForFGS( const SequenceParameterSet&  rcSPS,
-                                             const PictureParameterSet&   rcPPSLP,
-                                             const PictureParameterSet&   rcPPSHP )
-{
-  UInt  uiLayer             = rcSPS.getLayerId          ();
-  if( ! m_bMVCMode )
-  {
-    RNOK( m_apcMCTFEncoder[uiLayer]->initParameterSetsForFGS( rcSPS, rcPPSLP, rcPPSHP ) );
-  }
-  return Err::m_nOK;
-}
-*/
 
 ErrVal
 ControlMngH264AVCEncoder::initParameterSets( const SequenceParameterSet&  rcSPS,
@@ -154,12 +139,7 @@ ControlMngH264AVCEncoder::initParameterSets( const SequenceParameterSet&  rcSPS,
   //===== initialize buffer controls and MCTFEncoder =====
   RNOK( m_apcYuvFullPelBufferCtrl[uiLayer]->initSPS( uiMbY<<4, uiMbX<<4, YUV_Y_MARGIN, YUV_X_MARGIN    ) );
   RNOK( m_apcYuvHalfPelBufferCtrl[uiLayer]->initSPS( uiMbY<<4, uiMbX<<4, YUV_Y_MARGIN, YUV_X_MARGIN, 1 ) );
-/*  
-  if( ! m_bMVCMode )
-  {
-  RNOK( m_apcMCTFEncoder         [uiLayer]->initParameterSets( rcSPS, rcPPSLP, rcPPSHP ) );
-  }
-*/ // ying
+
   return Err::m_nOK;
 }
 
@@ -209,8 +189,7 @@ ErrVal ControlMngH264AVCEncoder::uninit()
   {
     m_apcYuvFullPelBufferCtrl [uiLayer] = 0;
     m_apcYuvHalfPelBufferCtrl [uiLayer] = 0;
-//    m_apcMCTFEncoder          [uiLayer] = 0; ying
-    m_apcPocCalculator        [uiLayer] = 0;
+   m_apcPocCalculator        [uiLayer] = 0;
   }
 
 
@@ -218,8 +197,7 @@ ErrVal ControlMngH264AVCEncoder::uninit()
 }
 
 ErrVal ControlMngH264AVCEncoder::init( FrameMng*               pcFrameMng,
-//                                    MCTFEncoder*            apcMCTFEncoder          [MAX_LAYERS], ying
-                                    SliceEncoder*           pcSliceEncoder,
+                                   SliceEncoder*           pcSliceEncoder,
                                     ControlMngH264AVCEncoder*  pcControlMng,
                                     BitWriteBuffer*         pcBitWriteBuffer,
                                     BitCounter*             pcBitCounter,
@@ -289,19 +267,16 @@ ErrVal ControlMngH264AVCEncoder::init( FrameMng*               pcFrameMng,
   m_pcRateDistortion    = pcRateDistortion;
 
 
-//  ROT( NULL == apcMCTFEncoder ); ying
   ROT( NULL == apcPocCalculator );
   ROT( NULL == apcYuvFullPelBufferCtrl );
   ROT( NULL == apcYuvHalfPelBufferCtrl );
 
   for( UInt uiLayer = 0; uiLayer < MAX_LAYERS; uiLayer++ )
   {
-//    ROT( NULL == apcMCTFEncoder         [uiLayer] ); ying
     ROT( NULL == apcPocCalculator       [uiLayer] );
     ROT( NULL == apcYuvFullPelBufferCtrl[uiLayer] );
     ROT( NULL == apcYuvHalfPelBufferCtrl[uiLayer] );
 
-//    m_apcMCTFEncoder          [uiLayer] = apcMCTFEncoder          [uiLayer]; ying
     m_apcPocCalculator        [uiLayer] = apcPocCalculator        [uiLayer];
     m_apcYuvFullPelBufferCtrl [uiLayer] = apcYuvFullPelBufferCtrl [uiLayer];
     m_apcYuvHalfPelBufferCtrl [uiLayer] = apcYuvHalfPelBufferCtrl [uiLayer];

@@ -111,10 +111,6 @@ public:
                                         const PictureParameterSet&  rcPPSLP,
                                         const PictureParameterSet&  rcPPSHP )           = 0;
 
-/*  virtual ErrVal initParameterSetsForFGS    ( const SequenceParameterSet& rcSPS,
-                                        const PictureParameterSet&  rcPPSLP,
-                                        const PictureParameterSet&  rcPPSHP )           = 0;
-*/ //ying
   virtual ErrVal initSlice            ( SliceHeader&                rcSH,
                                         ProcessingState             eProcessingState )  = 0;
   virtual ErrVal finishSlice          ( const SliceHeader&          rcSH,

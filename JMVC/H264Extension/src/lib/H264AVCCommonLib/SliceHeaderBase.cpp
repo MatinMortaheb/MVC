@@ -306,7 +306,7 @@ SliceHeaderBase::SliceHeaderBase( const SequenceParameterSet& rcSPS,
 , m_view_id                           (0) 
 , m_bNonIDRFlag                       (true)
 , m_reserved_zero_bits                (0)
-, m_bInterViewRef                     (false) // maybe shall be replaced by inter_view_flag, ying
+, m_bInterViewRef                     (false) // maybe shall be replaced by inter_view_flag
 , m_bIsEncodingFlag                   (false)
 {
   ::memset( m_auiNumRefIdxActive        , 0x00, 2*sizeof(UInt) );

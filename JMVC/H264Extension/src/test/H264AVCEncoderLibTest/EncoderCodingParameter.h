@@ -193,14 +193,13 @@ public:
 protected:
   Bool    equals( const Char* str1, const Char* str2, UInt nLetter ) { return 0 == ::strncmp( str1, str2, nLetter); }
 
-//ying {{
+
   Void    xAppendStringWithNO( std::string&  rcInStr, std::string&  rcoutStr, UInt uiV, char * type)
   {
     char aAppendedID[10]="";
 
     rcoutStr=rcInStr; 
     rcoutStr.append("_");
-    //itoa(uiV, aAppendedID, 10 );
     sprintf(aAppendedID, "%d", uiV);
     rcoutStr.append(aAppendedID);
     rcoutStr.append(type);
@@ -210,7 +209,7 @@ protected:
                                UInt                    uiViewId,
                                std::string&            rcBitstreamFile );
   //original xReadFromFile, xReadFromFile2 and xReadFromFile3 are deleted
-//  }}
+
 
   ErrVal  xReadFromFile_MVAcquisitionInfo      ( std::string&            rcFilename);	// SEI JVT-W060, JVT-Z038
   ErrVal  GetExponentMantissa_MVAcquisitionInfo (double Number, UInt Mant_Precision, UInt *Exponent, UInt *Mantissa );// JVT-Z038

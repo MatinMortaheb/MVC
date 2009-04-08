@@ -106,7 +106,6 @@ class QuarterPelFilter;
 class FrameMng;
 class Frame;
 
-//class FGSCoder; ying 
 class Transform;
 
 #if defined( WIN32 )
@@ -216,35 +215,7 @@ public:
                                         RefFrameList&   rcRefFrameList0, 
                                         RefFrameList&   rcRefFrameList1, 
                                         IntYuvMbBuffer* pcYuvMbBuffer);
-// ying{{
-/*
-  ErrVal xAdjustMbResidual            ( IntYuvMbBuffer& rcMbBufferDiff,
-                                        MbDataAccess*   pcMbDataAccess,
-                                        FGSCoder*       pcFGSCoder,
-                                        SliceHeader*    pcSliceHeader );
 
-  ErrVal adaptiveMotionCompensationMb(  IntYuvMbBuffer* pcMbBufferMC,
-                                        RefFrameList*   pcRefFrameListDiff,
-                                        MbDataAccess*   pcMbDataAccessMotion,
-                                        FGSCoder*       pcFGSCoder );
-
-  ErrVal xAdaptiveMotionCompensation  ( YuvBufferCtrl*  pcYuvFullPelBufferCtrl,
-                                        IntFrame*       pcMCFrame,
-                                        IntFrame*       pcBaseFrame,
-                                        RefFrameList*   pcRefFrameListBase,
-                                        MbDataCtrl*     pcMbDataCtrl,
-                                        FGSCoder*       pcFGSCoder,
-                                        SliceHeader*    pcSliceHeader );
-
-  ErrVal loadAdaptiveRefPredictors    ( YuvBufferCtrl*  pcYuvFullPelBufferCtrl,
-                                        IntFrame*       pcPredSignal, 
-                                        IntFrame*       pcBaseFrame, 
-                                        RefFrameList*   cRefListDiff,
-                                        MbDataCtrl*     pcMbDataCtrl,
-                                        FGSCoder*       pcFGSCoder,
-                                        SliceHeader*    pcSliceHeader);
-
-*/ // ying}}
   ErrVal updateMb(MbDataAccess&   rcMbDataAccess,
                   IntFrame*       pcMCFrame,
                   IntFrame*       pcPrdFrame,

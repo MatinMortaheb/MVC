@@ -129,7 +129,8 @@ public:
   ErrVal          uninit                        ();
   
   ErrVal          writeAndInitParameterSets     ( ExtBinDataAccessor*         pcExtBinDataAccessor,
-                                                  Bool&                       rbMoreSets );
+                                                  Bool&                       rbMoreSets,
+												   UInt Num_Of_Views_Minus_1);
   ErrVal          process                       ( PicBuffer*                  pcInputPicBuffer,
                                                   PicBufferList&              rcOutputList,
                                                   PicBufferList&              rcUnusedList,

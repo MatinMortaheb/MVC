@@ -220,7 +220,7 @@ public:
   RecPicBufUnit*  getLastUnit           ();
   RecPicBufUnit*  getCurrUnit           ();
   RecPicBufUnit*  getRecPicBufUnit      ( Int                         iPoc );
-//ying
+
   ErrVal AddMultiviewRef (RecPicBufUnitList& recPicBufUnitList,
 			                    RefFrameList& rcList, const int maxListSize,
 			                    const MultiviewReferenceDirection refDirection, SliceHeader&   rcSliceHeader); //JVT-W056  Samsung

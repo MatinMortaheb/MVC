@@ -125,7 +125,8 @@ const SequenceParameterSet::LevelLimit SequenceParameterSet::m_aLevelLimit[52] =
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //29
   { 1,  40500,  1620,   6075*1024,  10000,  10000, 1024, 2, 32 },                //30
   { 1, 108000,  3600,  13500*1024,  14000,  14000, 2048, 4, 16 },                //31
-  { 1, 216000,  5120,  15360*1024,  20000,  20000, 2048, 4, 16 },                //32
+  //{ 1, 216000,  5120,  15360*1024,  20000,  20000, 2048, 4, 16 },                //32
+  { 1, 216000,  5120,  13500*1024,  20000,  20000, 2048, 4, 16 },                //32
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //33
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //34
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //35
@@ -135,7 +136,8 @@ const SequenceParameterSet::LevelLimit SequenceParameterSet::m_aLevelLimit[52] =
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //39
   { 1, 245760,  8192,  24576*1024,  20000,  25000, 2048, 4, 16 },                //40
   { 1, 245760,  8192,  24576*1024,  50000,  62500, 2048, 2, 16 },                //41
-  { 1, 491520,  8192,  24576*1024,  50000,  62500, 2048, 2, 16 },                //42
+  //{ 1, 491520,  8192,  24576*1024,  50000,  62500, 2048, 2, 16 },                //42
+  { 1, 491520,  8192,  26112*1024,  50000,  62500, 2048, 2, 16 },                //42
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //43
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //44
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //45
@@ -143,7 +145,8 @@ const SequenceParameterSet::LevelLimit SequenceParameterSet::m_aLevelLimit[52] =
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //47
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //48
   { 0,      0,     0,           0,      0,      0,    0, 0, 0 },                 //49
-  { 1, 589824, 22080,  82620*1024, 135000, 135000, 2048, 2, 16 },                //50
+  //{ 1, 589824, 22080,  82620*1024, 135000, 135000, 2048, 2, 16 },                //50
+  { 1, 589824, 22080,  75300*1024, 135000, 135000, 2048, 2, 16 },                //50
   { 1, 983040, 36864, 138240*1024, 240000, 240000, 2048, 2, 16 }                 //51
 };
 
@@ -209,7 +212,7 @@ SequenceParameterSet::create( SequenceParameterSet*& rpcSPS )
 ErrVal
 SequenceParameterSet::destroy()
 {
-// previous implementation has memory leak! // ying
+
 	if ( m_eProfileIdc == MVC_PROFILE ) // 
 	{
 		SpsMVC->releaseViewSPSMemory_num_refs_for_lists();
@@ -247,11 +250,15 @@ SequenceParameterSet::xGetLevelLimit( const LevelLimit*& rpcLevelLimit, Int iLev
 
 
 UInt
-SequenceParameterSet::getLevelIdc( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic )
+SequenceParameterSet::getLevelIdc( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic, int Num_Views )
 {
+
+ 
+  UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;	
   UInt uiFrameSize = uiMbY * uiMbX;
-  UInt uiMbPerSec  = uiFrameSize * uiOutFreq;
+  UInt uiMbPerSec  = uiFrameSize * uiOutFreq * Num_Views;
   UInt uiDPBSizeX2 = (uiFrameSize*16*16*3/2) * uiNumRefPic * 2;
+  UInt uiMaxDPBSizeX2_B = (uiFrameSize*16*16*3/2) * (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) * 2;
 
   for( Int n = 0; n < 52; n++ )
   {
@@ -262,9 +269,9 @@ SequenceParameterSet::getLevelIdc( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt 
       UInt  uiMbPerLine  = (UInt)sqrt( (Double) pcLevelLimit->uiMaxFrameSize * 8 );
       if( ( uiMbPerLine                   >= uiMbX        ) &&
           ( uiMbPerLine                   >= uiMbY        ) &&
-          ( pcLevelLimit->uiMaxMbPerSec   >= uiMbPerSec   ) &&
-          ( pcLevelLimit->uiMaxFrameSize  >= uiFrameSize  ) &&
-          ( pcLevelLimit->uiMaxDPBSizeX2  >= uiDPBSizeX2  ) &&
+          ( mvcScaleFactor * pcLevelLimit->uiMaxMbPerSec   >= uiMbPerSec   ) &&
+          ( pcLevelLimit->uiMaxFrameSize  >= uiFrameSize  ) &&         
+		  (	min (mvcScaleFactor*pcLevelLimit->uiMaxDPBSizeX2, uiMaxDPBSizeX2_B) >= uiDPBSizeX2	) &&
           ( pcLevelLimit->uiMaxVMvRange   >= uiMvRange    )    )
       {
         return n;

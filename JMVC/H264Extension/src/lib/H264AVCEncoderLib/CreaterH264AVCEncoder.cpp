@@ -108,11 +108,9 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 #include "MotionEstimation.h"
 #include "MotionEstimationQuarterPel.h"
 #include "RateDistortion.h"
-//#include "GOPEncoder.h"
 #include "ControlMngH264AVCEncoder.h"
 #include "CreaterH264AVCEncoder.h"
 #include "H264AVCCommonLib/TraceFile.h"
-//#include "FGSSubbandEncoder.h" ying
 #include "PicEncoder.h"
 #include "Multiview.h"
 
@@ -143,14 +141,12 @@ CreaterH264AVCEncoder::CreaterH264AVCEncoder():
   m_pcMotionEstimation    ( NULL ),
   m_pcRateDistortion      ( NULL ),
   m_pcHistory             ( NULL ),
-//  m_pcRQFGSEncoder        ( NULL ), ying
   m_pcPicEncoder          ( NULL ),
   m_bTraceEnable          ( true )
 {
   ::memset( m_apcYuvFullPelBufferCtrl, 0x00, MAX_LAYERS*sizeof(Void*) );
   ::memset( m_apcYuvHalfPelBufferCtrl, 0x00, MAX_LAYERS*sizeof(Void*) );
   ::memset( m_apcPocCalculator,        0x00, MAX_LAYERS*sizeof(Void*) );
-//  ::memset( m_apcMCTFEncoder,          0x00, MAX_LAYERS*sizeof(Void*) ); ying
   m_pcReconstructionBypass = NULL;
 }
 
@@ -178,7 +174,7 @@ CreaterH264AVCEncoder::writeParameterSets( ExtBinDataAccessor* pcExtBinDataAcces
 {
   if( m_pcCodingParameter->getMVCmode() )
   {
-    RNOK( m_pcPicEncoder->writeAndInitParameterSets( pcExtBinDataAccessor, rbMoreSets ) );
+    RNOK( m_pcPicEncoder->writeAndInitParameterSets( pcExtBinDataAccessor, rbMoreSets, m_pcCodingParameter->SpsMVC.getNumViewMinus1() ) );
     m_pcH264AVCEncoder->setScalableSEIMessage(); // due to Nokia's (Ye-Kui's) weird implementation
     return Err::m_nOK;
   }
@@ -261,24 +257,14 @@ CreaterH264AVCEncoder::process( ExtBinDataAccessorList&  rcExtBinDataAccessorLis
                                 PicBufferList*           apcPicBufferOutputList,
                                 PicBufferList*           apcPicBufferUnusedList )
 {
-//  if( m_pcCodingParameter->getMVCmode() )
-//  {
+
   apcPicBufferUnusedList->push_back( apcReconstructPicBuffer[0] );
   RNOK( m_pcPicEncoder  ->process  ( apcOriginalPicBuffer   [0],
                                     *apcPicBufferOutputList,
                                     *apcPicBufferUnusedList,
                                      rcExtBinDataAccessorList ) );
     return Err::m_nOK;
-//  }
-  //ying
-/*
-  RNOK( m_pcH264AVCEncoder->process( rcExtBinDataAccessorList, 
-                                     apcOriginalPicBuffer, 
-                                     apcReconstructPicBuffer, 
-                                     apcPicBufferOutputList, 
-                                     apcPicBufferUnusedList ) );
-  return Err::m_nOK;
-  */
+
 }
 
 
@@ -341,12 +327,10 @@ CreaterH264AVCEncoder::xCreateEncoder()
   RNOK( Transform                   ::create( m_pcTransform ) );
   RNOK( SampleWeighting             ::create( m_pcSampleWeighting ) );
   RNOK( XDistortion                 ::create( m_pcXDistortion ) );
-//  RNOK( RQFGSEncoder                ::create( m_pcRQFGSEncoder ) ); ying
   RNOK( PicEncoder                  ::create( m_pcPicEncoder ) );
 
   for( UInt uiLayer = 0; uiLayer < MAX_LAYERS; uiLayer++ )
   {
-//    RNOK( MCTFEncoder   ::create( m_apcMCTFEncoder         [uiLayer] ) ); ying
     RNOK( PocCalculator ::create( m_apcPocCalculator       [uiLayer] ) );
     RNOK( YuvBufferCtrl ::create( m_apcYuvFullPelBufferCtrl[uiLayer] ) );
     RNOK( YuvBufferCtrl ::create( m_apcYuvHalfPelBufferCtrl[uiLayer] ) );
@@ -380,7 +364,6 @@ CreaterH264AVCEncoder::destroy()
   RNOK( m_pcH264AVCEncoder        ->destroy() );
   RNOK( m_pcControlMng            ->destroy() );
   RNOK( m_pcReconstructionBypass  ->destroy() );
-//  RNOK( m_pcRQFGSEncoder          ->destroy() ); ying
   RNOK( m_pcPicEncoder            ->destroy() );
 
   if( NULL != m_pcRateDistortion )
@@ -390,7 +373,6 @@ CreaterH264AVCEncoder::destroy()
 
   for( UInt uiLayer = 0; uiLayer < MAX_LAYERS; uiLayer++ )
   {
-// ying    RNOK( m_apcMCTFEncoder          [uiLayer] ->destroy() );
     RNOK( m_apcYuvFullPelBufferCtrl [uiLayer] ->destroy() );
     RNOK( m_apcYuvHalfPelBufferCtrl [uiLayer] ->destroy() );
     RNOK( m_apcPocCalculator        [uiLayer] ->destroy() );
@@ -453,7 +435,6 @@ CreaterH264AVCEncoder::init( CodingParameter* pcCodingParameter )
                                             m_pcSampleWeighting) );
 
   RNOK( m_pcControlMng              ->init( m_pcFrameMng,
-//                                            m_apcMCTFEncoder, ying
                                             m_pcSliceEncoder,
                                             m_pcControlMng,
                                             m_pcBitWriteBuffer,
@@ -493,7 +474,7 @@ CreaterH264AVCEncoder::init( CodingParameter* pcCodingParameter )
     AddVectorOfFilesToUseAsReference
     (m_pcCodingParameter->m_MultiviewReferenceFileParams);
 
-  RNOK( m_pcH264AVCEncoder          ->init( //m_apcMCTFEncoder, ying
+  RNOK( m_pcH264AVCEncoder          ->init( 
                                             m_pcParameterSetMng,
                                             m_apcPocCalculator[0],
                                             m_pcNalUnitEncoder,
@@ -501,53 +482,7 @@ CreaterH264AVCEncoder::init( CodingParameter* pcCodingParameter )
                                             pcCodingParameter,
                                             m_pcFrameMng ) );
 
-/*  RNOK( m_pcRQFGSEncoder            ->init( m_apcYuvFullPelBufferCtrl,
-                                            m_apcYuvHalfPelBufferCtrl,
-                                            m_pcQuarterPelFilter,
-                                            m_pcMotionEstimation,
-                                            m_pcMbCoder,
-                                            m_pcTransform,
-                                            m_pcControlMng,
-                                            m_pcMbEncoder ) );
-  for( UInt uiLayer = 0; uiLayer < m_pcCodingParameter->getNumberOfLayers(); uiLayer++ )
-  {
-    RNOK( m_apcMCTFEncoder[uiLayer]->init( m_pcCodingParameter,
-                                          &m_pcCodingParameter->getLayerParameters(uiLayer),
-                                           m_pcH264AVCEncoder,
-                                           m_pcSliceEncoder,
-//                                           m_pcRQFGSEncoder, ying
-                                           m_pcLoopFilter,
-                                           m_apcPocCalculator        [uiLayer],
-                                           m_pcNalUnitEncoder,
-                                           m_apcYuvFullPelBufferCtrl [uiLayer],
-                                           m_apcYuvHalfPelBufferCtrl [uiLayer],
-                                           m_pcQuarterPelFilter,
-                                           m_pcMotionEstimation ) );
-  }
-  //Bug_Fix JVT-R057{
-  if(m_pcCodingParameter->getLARDOEnable())
-  {
-    Bool bFlag=false;
 
-	for( UInt uiLayer = 0; uiLayer < m_pcCodingParameter->getNumberOfLayers(); uiLayer++ )
-	{
-		if(!m_apcMCTFEncoder[uiLayer]->getLARDOEnable())
-		{
-		   bFlag=true;
-		   break;
-		}
-	}
-
-	if(bFlag)
-	{
-		for( UInt uiLayer = 0; uiLayer < m_pcCodingParameter->getNumberOfLayers(); uiLayer++ )
-		{ 
-            m_apcMCTFEncoder[uiLayer]->setLARDOEnable(false);
-		}
-	}
-  }
-  */
-  //Bug_Fix JVT-R057}
   return Err::m_nOK;
 }
 
@@ -576,12 +511,10 @@ CreaterH264AVCEncoder::uninit()
   RNOK( m_pcH264AVCEncoder        ->uninit() );
   RNOK( m_pcControlMng            ->uninit() );
   RNOK( m_pcReconstructionBypass  ->uninit() );
-//  RNOK( m_pcRQFGSEncoder          ->uninit() ); ying
   RNOK( m_pcPicEncoder            ->uninit() );
 
   for( UInt uiLayer = 0; uiLayer < m_pcCodingParameter->getNumberOfLayers(); uiLayer++ )
   {
-//    RNOK( m_apcMCTFEncoder         [uiLayer] ->uninit() ); ying
     RNOK( m_apcYuvFullPelBufferCtrl[uiLayer] ->uninit() );
     RNOK( m_apcYuvHalfPelBufferCtrl[uiLayer] ->uninit() );
   }

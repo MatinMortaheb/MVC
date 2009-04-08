@@ -89,8 +89,6 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 
 #include "H264AVCCommonLib/Transform.h"
 #include "H264AVCCommonLib/FrameMng.h"
-//#include "H264AVCCommonLib/FGSCoder.h"
-//ying
 #include "IntraPredictionSearch.h"
 #include "MotionEstimation.h"
 #include "CodingParameter.h"
@@ -1522,103 +1520,7 @@ MbEncoder::estimatePrediction( MbDataAccess&   rcMbDataAccess,
 
   return Err::m_nOK;
 }
-//ying
-/*
 
-ErrVal  MbEncoder::encodeFGS( MbDataAccess&   rcMbDataAccess,
-                              MbDataAccess*   pcMbDataAccessBase,
-                              RefFrameList&   rcRefFrameList0,
-                              RefFrameList&   rcRefFrameList1,
-                              const IntFrame& rcOrigFrame,
-                              IntFrame*       pcPredSignal,
-                              IntFrame*       pcBQPredSignal,
-                              RefFrameList*   pcRefFrameListDiff,
-                              FGSCoder*       pcFGSCoder,
-                              IntYuvMbBuffer& rcBaseLayerBuffer,
-                              UInt            uiNumMaxIter,
-                              UInt            uiIterSearchRange,
-                              Double          dLambda,
-                              Int             iMaxQpDelta )
-{
-  ROF( bInitDone );
-
-  Bool  bLowPass = pcMbDataAccessBase->getSH().getTemporalLevel() == 0;
-  Bool  bIntra   = pcMbDataAccessBase->getMbData().isIntra();
-  UInt  uiQp     = rcMbDataAccess.getSH().getPicQp();
-  RNOK( m_pcRateDistortionIf->setMbQpLambda( rcMbDataAccess, uiQp, dLambda ) );
-
-  m_pcIntMbBestIntraChroma  = NULL;
-  m_pcIntMbBestData   ->init( rcMbDataAccess );
-  m_pcIntMbTempData   ->init( rcMbDataAccess );
-  m_pcIntMbBest8x8Data->init( rcMbDataAccess );
-  m_pcIntMbTemp8x8Data->init( rcMbDataAccess );
-
-  m_pcIntPicBuffer                  = NULL;
-  IntYuvPicBuffer*  pcOrgPicBuffer  = const_cast<IntFrame&>( rcOrigFrame ).getFullPelYuvBuffer();
-  m_pcXDistortion->loadOrgMbPelData ( pcOrgPicBuffer, m_pcIntOrgMbPelData );
-  m_pcTransform  ->setQp            ( rcMbDataAccess, bLowPass || bIntra );
-
-  ROT( bIntra );
-
-  m_pcTransform->setClipMode( false );
-
-  if( ! rcBaseLayerBuffer.isZero() )
-  {
-    // residual prediction
-    m_pcIntOrgMbPelData->subtract( rcBaseLayerBuffer );
-    RNOK  ( xEstimateMbDirect    ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1,                                                 pcMbDataAccessBase, true ) );
-    RNOK  ( xEstimateMb16x16     ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, false, uiNumMaxIter, uiIterSearchRange, false,  pcMbDataAccessBase, true ) );
-    RNOK  ( xEstimateMb16x8      ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, false, uiNumMaxIter, uiIterSearchRange, false,  pcMbDataAccessBase, true ) );
-    RNOK  ( xEstimateMb8x16      ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, false, uiNumMaxIter, uiIterSearchRange, false,  pcMbDataAccessBase, true ) );
-    RNOK  ( xEstimateMb8x8       ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, false, uiNumMaxIter, uiIterSearchRange, false,  pcMbDataAccessBase, true ) );
-    RNOK  ( xEstimateMb8x8Frext  ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, false, uiNumMaxIter, uiIterSearchRange, false,  pcMbDataAccessBase, true ) );
-    m_pcIntOrgMbPelData->add     ( rcBaseLayerBuffer );
-  }
-  RNOK  ( xEstimateMbDirect    ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1,                                                 pcMbDataAccessBase, false ) );
-  RNOK  ( xEstimateMb16x16     ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, false, uiNumMaxIter, uiIterSearchRange, false,  pcMbDataAccessBase, false ) );
-  RNOK  ( xEstimateMb16x8      ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, false, uiNumMaxIter, uiIterSearchRange, false,  pcMbDataAccessBase, false ) );
-  RNOK  ( xEstimateMb8x16      ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, false, uiNumMaxIter, uiIterSearchRange, false,  pcMbDataAccessBase, false ) );
-  RNOK  ( xEstimateMb8x8       ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, false, uiNumMaxIter, uiIterSearchRange, false,  pcMbDataAccessBase, false ) );
-  RNOK  ( xEstimateMb8x8Frext  ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, false, uiNumMaxIter, uiIterSearchRange, false,  pcMbDataAccessBase, false ) );
-
-  if( rcMbDataAccess.getSH().getArFgsUsageFlag() )
-  {
-    //----- adaptive-reference motion compensation (AR-FGS) -----
-    ROF( pcBQPredSignal );
-    if( m_pcIntMbBestData->getResidualPredFlag( PART_16x16 ) )
-      m_pcIntOrgMbPelData->subtract( rcBaseLayerBuffer );
-
-    m_pcIntMbBestData->loadBuffer( pcBQPredSignal->getFullPelYuvBuffer() );
-    RNOK( m_pcMotionEstimation->adaptiveMotionCompensationMb( m_pcIntMbBestData,
-                                                              pcRefFrameListDiff,
-                                                              &m_pcIntMbBestData->getMbDataAccess(),
-                                                              pcFGSCoder ) );
-    if( m_pcIntMbBestData->isTransformSize8x8() )
-    {
-      RNOK( xSetRdCost8x8InterMb( *m_pcIntMbBestData, pcMbDataAccessBase, rcRefFrameList0, rcRefFrameList1, false, 0, true ) );
-    }
-    else
-    {
-      RNOK( xSetRdCostInterMb( *m_pcIntMbBestData, pcMbDataAccessBase, rcRefFrameList0, rcRefFrameList1, false, 0, true ) );
-    }
-    if( m_pcIntMbBestData->getResidualPredFlag( PART_16x16 ) )
-      m_pcIntOrgMbPelData->add( rcBaseLayerBuffer );
-  }
-
-  RNOK  ( xEstimateMbFGSSkip   ( m_pcIntMbTempData, m_pcIntMbBestData, rcRefFrameList0, rcRefFrameList1, pcMbDataAccessBase, rcBaseLayerBuffer, pcPredSignal, iMaxQpDelta ) );
-  m_pcTransform->setClipMode( true );
-
-  xStoreEstimation( rcMbDataAccess, *m_pcIntMbBestData, NULL, m_pcIntMbBestData->getBLSkipFlag() ? NULL : pcPredSignal, false, &rcBaseLayerBuffer );
-
-  m_pcIntMbBestData   ->uninit();
-  m_pcIntMbTempData   ->uninit();
-  m_pcIntMbBest8x8Data->uninit();
-  m_pcIntMbTemp8x8Data->uninit();
-
-  return Err::m_nOK;
-}
-
-*/ //ying}}
 
 ErrVal
 MbEncoder::compensatePrediction( MbDataAccess&   rcMbDataAccess,
@@ -4306,67 +4208,7 @@ MbEncoder::xEstimateMbSR( IntMbTempData*&   rpcIntMbTempData,
 }
 //--
 
-//ying
-/*
 
-ErrVal  
-MbEncoder::xEstimateMbFGSSkip( IntMbTempData*&   rpcMbTempData,
-                               IntMbTempData*&   rpcMbBestData,
-                               RefFrameList&     rcRefFrameList0,
-                               RefFrameList&     rcRefFrameList1,
-                               MbDataAccess*     pcMbDataAccessBase,
-                               IntYuvMbBuffer&   rcBaseLayerBuffer,
-                               IntFrame*         pcPredSignal,
-                               Int               iMaxQpDelta )
-{
-  Bool    bLowPass    = pcMbDataAccessBase->getSH().getTemporalLevel() == 0;
-
-  Bool    b8x8Ok      = pcMbDataAccessBase->getSH().getPPS().getTransform8x8ModeFlag() && pcMbDataAccessBase->getMbData().is8x8TrafoFlagPresent() &&
-                        ! ( pcMbDataAccessBase->getMbData().getMbMode() == MODE_SKIP && pcMbDataAccessBase->getSH().isInterP() );
-  Bool    bResidualCoded = ( pcMbDataAccessBase->getMbData().getMbCbp() & 0xF ) ||
-                             pcMbDataAccessBase->getMbData().getResidualPredFlag( PART_16x16 );
-  UInt    uiMinTrafo  =   b8x8Ok &&
-                          bResidualCoded && pcMbDataAccessBase->getMbData().isTransformSize8x8() ? 1 : 0;
-  UInt    uiMaxTrafo  = ! b8x8Ok ||
-                          bResidualCoded && ! pcMbDataAccessBase->getMbData().isTransformSize8x8() ? 1 : 2;
-
-  UChar   ucQpRequant = max( 0,  pcMbDataAccessBase->getMbData().getQp() - FGSCoder::RQ_QP_DELTA );
-  UChar   ucMinQp     = pcMbDataAccessBase->getMbData().getMbCbp() != 0 ? ucQpRequant :
-                        (UChar)min( MAX_QP, max( MIN_QP, rpcMbTempData->getSH().getPicQp() - iMaxQpDelta ) );
-  UChar   ucMaxQp     = pcMbDataAccessBase->getMbData().getMbCbp() != 0 ? ucQpRequant :
-                        (UChar)min( MAX_QP, max( MIN_QP, rpcMbTempData->getSH().getPicQp() + iMaxQpDelta ) );
-
-  m_pcIntOrgMbPelData->subtract( rcBaseLayerBuffer );
-
-  for( UChar ucQp = ucMinQp; ucQp <= ucMaxQp; ucQp++ )
-  for( UInt uiTrafo = uiMinTrafo; uiTrafo < uiMaxTrafo; uiTrafo++ ) 
-  {
-    rpcMbTempData->clear               ();
-    rpcMbTempData->loadBuffer          ( pcPredSignal->getFullPelYuvBuffer() );
-    rpcMbTempData->copyMotion          ( pcMbDataAccessBase->getMbData() );
-    rpcMbTempData->setBLSkipFlag       ( true  );
-    rpcMbTempData->setResidualPredFlag ( true );
-    rpcMbTempData->setTransformSize8x8 ( uiTrafo > 0 );
-    rpcMbTempData->setQp               ( ucQp );
-    m_pcTransform->setQp               ( *rpcMbTempData, bLowPass );
-
-    if( uiTrafo > 0 )
-    {
-      RNOK( xSetRdCost8x8InterMb( *rpcMbTempData, pcMbDataAccessBase, rcRefFrameList0, rcRefFrameList1, true, 0, true ) );
-    }
-    else
-    {
-      RNOK( xSetRdCostInterMb   ( *rpcMbTempData, pcMbDataAccessBase, rcRefFrameList0, rcRefFrameList1, true, 0, true ) );
-    }
-    RNOK( xCheckBestEstimation(  rpcMbTempData, rpcMbBestData ) );
-  }
-
-  m_pcIntOrgMbPelData->add( rcBaseLayerBuffer );
-
-  return Err::m_nOK;
-}
-
-*///ying}}
 
 ErrVal
 MbEncoder::xEstimateMbSkip( IntMbTempData*&  rpcMbTempData,

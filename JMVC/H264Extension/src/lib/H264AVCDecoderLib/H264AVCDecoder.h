@@ -91,17 +91,15 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 #endif // _MSC_VER > 1000
 
 
-//#include "GOPDecoder.h"
+
 #include "H264AVCCommonLib/Sei.h" 
-// ying{{
+
 #include "H264AVCCommonLib/MbDataCtrl.h"
 #include "DownConvert.h"
 #include "H264AVCCommonLib/MotionCompensation.h"
 
 // TMM_ESS 
 #include "ResizeParameters.h"
-// ying}}
-//#include "Multiview_dec.h"
 
 
 H264AVC_NAMESPACE_BEGIN
@@ -115,7 +113,6 @@ class HeaderSymbolReadIf;
 class ParameterSetMng;
 class NalUnitParser;
 class ControlMngIf;
-//class RQFGSDecoder; ying
 
 
 class H264AVCDECODERLIB_API H264AVCDecoder
@@ -127,10 +124,9 @@ protected:
 public:
   static  ErrVal create ( H264AVCDecoder*& rpcH264AVCDecoder );
   ErrVal destroy();
-  ErrVal init   ( /*MCTFDecoder*        apcMCTFDecoder[MAX_LAYERS],*/
+  ErrVal init   ( 
                   SliceReader*        pcSliceReader,
                   SliceDecoder*       pcSliceDecoder,
-//                  RQFGSDecoder*       pcRQFGSDecoder, ying
                   FrameMng*           pcFrameMng,
                   NalUnitParser*      pcNalUnitParser,
                   ControlMngIf*       pcControlMng,
@@ -275,17 +271,11 @@ protected:
                                       PicBufferList&   rcPicBufferOutputList,
                                       PicBufferList&   rcPicBufferUnusedList,
                                       Bool            bHighestLayer); //JVT-T054
-//  ErrVal  xReconstructLastFGS       (Bool bHighestLayer); //JVT-T054
-/*  ErrVal  xDecodeFGSRefinement      ( SliceHeader*&   rpcSliceHeader,
-                                      PicBuffer*&     rpcPicBuffer );
-*/ //ying
+
   ErrVal  xZeroIntraMacroblocks     ( IntFrame*       pcFrame,
                                       MbDataCtrl*     pcMbDataCtrl,
                                       SliceHeader*    pcSliceHeader );
-/*
-  ErrVal  setDiffPrdRefLists        ( RefFrameList&               diffPrdRefList,
-                                      YuvBufferCtrl*              pcYuvFullPelBufferCtrl);
-                                      */
+
   ErrVal  freeDiffPrdRefLists       ( RefFrameList& diffPrdRefList);
 
 protected:
@@ -308,8 +298,7 @@ protected:
   Bool                          m_bFrameDone;
   MotionCompensation*           m_pcMotionCompensation;
 
-  //MCTFDecoder*                  m_apcMCTFDecoder[MAX_LAYERS];
-  //RQFGSDecoder*                 m_pcRQFGSDecoder; ying
+ 
   PicBuffer*                    m_pcFGSPicBuffer;
 
   Bool                          m_bEnhancementLayer;
@@ -360,9 +349,7 @@ protected:
   Bool							m_bOpPresentFlag;
   UInt						    m_uiOperationPointId;
   UInt							m_uiNumActiveViews;
-  //UInt							m_uiViewId[MAX_VIEWS]; // YSH
   UInt							m_uiNumDecodeViews;
-  //UInt							m_uiDecodeView[MAX_VIEWS]; // YSH
   UInt							m_uiNumOpMinus1;
   UInt							m_uiNumViews[MAX_OPERATION_POINTS];
   UInt*							m_OpViewId[MAX_OPERATION_POINTS];
