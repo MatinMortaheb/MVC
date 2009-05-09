@@ -1725,7 +1725,7 @@ PicEncoder::xEncodePicture( ExtBinDataAccessorList& rcExtBinDataAccessorList,
   rcSliceHeader.setAVCFlag( this->getAVCFlag()!=0);  //JVT-W035
   rcSliceHeader.setViewId(this->getViewId());
   rcSliceHeader.setAnchorPicFlag(TimeForVFrameP(rcSliceHeader.getPoc()));
-  rcSliceHeader.setReservedZeroBits(0);
+  rcSliceHeader.setReservedOneBit(1); // bug fix: prefix NAL (NTT)
   rcSliceHeader.setInterViewFalg(this->derivation_Inter_View_Flag(this->getViewId(), rcSliceHeader)); // JVT-W056 Samsung
 
   //===== start picture =====

@@ -2785,7 +2785,7 @@ H264AVCDecoder::xInitSlice( SliceHeader* pcSliceHeader )
 	pcSliceHeader->setAnchorPicFlag (m_pcNalUnitParser->getAnchorPicFlag());
 	pcSliceHeader->setNonIDRFlag    (m_pcNalUnitParser->getNonIDRFlag());  
 	pcSliceHeader->setInterViewFalg (m_pcNalUnitParser->getInterViewFlag()); //JVT-W056 Samsung
-	pcSliceHeader->setReservedZeroBits(0);
+	pcSliceHeader->setReservedOneBit(1); // bug fix: prefix NAL (NTT)
   }
 
   return Err::m_nOK;

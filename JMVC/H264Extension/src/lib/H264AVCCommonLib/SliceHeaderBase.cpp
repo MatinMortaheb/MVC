@@ -306,6 +306,7 @@ SliceHeaderBase::SliceHeaderBase( const SequenceParameterSet& rcSPS,
 , m_view_id                           (0) 
 , m_bNonIDRFlag                       (true)
 , m_reserved_zero_bits                (0)
+, m_reserved_one_bit                  (1)     // bug fix: prefix NAL (NTT)
 , m_bInterViewRef                     (false) // maybe shall be replaced by inter_view_flag
 , m_bIsEncodingFlag                   (false)
 {
@@ -385,7 +386,7 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
 		RNOK (  pcWriteIf->writeCode( m_uiTemporalLevel,                  3,                              "NALU HEADER: temporal_id"));
 		RNOK  ( pcWriteIf->writeCode( this->getAnchorPicFlag(),           1,                              "NALU HEADER: anchor_pic_flag" ) );
 		RNOK  ( pcWriteIf->writeCode( this->getInterViewFlag(),		    		1,														  "NALU HEADER: inter_view_flag") ); 
-    RNOK  ( pcWriteIf->writeCode( this->getReservedZeroBits(),        1,                              "NALU HEADER: reserved_zero_one_bit" ) );
+    RNOK  ( pcWriteIf->writeCode( this->getReservedOneBit(),          1,                              "NALU HEADER: reserved_one_bit" ) ); // bug fix: prefix NAL (NTT)
 	
 		return Err::m_nOK;
 
@@ -683,7 +684,7 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
 		RNOK (  pcWriteIf->writeCode( m_uiTemporalLevel,                  3,                              "NALU HEADER: temporal_id"));
 		RNOK  ( pcWriteIf->writeCode( this->getAnchorPicFlag(),           1,                              "NALU HEADER: anchor_pic_flag" ) );
 		RNOK  ( pcWriteIf->writeCode( this->getInterViewFlag(),		    		1,														  "NALU HEADER: inter_view_flag") ); 
-    RNOK  ( pcWriteIf->writeCode( this->getReservedZeroBits(),        1,                              "NALU HEADER: reserved_zero_one_bit" ) );
+    RNOK  ( pcWriteIf->writeCode( this->getReservedOneBit(),          1,                              "NALU HEADER: reserved_one_bit" ) ); // bug fix: prefix NAL (NTT)
 		
 	}
 	

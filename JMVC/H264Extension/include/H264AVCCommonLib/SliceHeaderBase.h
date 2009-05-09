@@ -656,6 +656,7 @@ public:
   Bool 		getNonIDRFlag()           const { return m_bNonIDRFlag;        }       // u(1) // JVT-W035 
 	Bool		getInterViewFlag()					const	{	return m_inter_view_flag;}       // u(1) // JVT-W056  Samsung
   UInt		getReservedZeroBits()     const { return m_reserved_zero_bits;}     // u(1) // JVT-W035
+  UInt    getReservedOneBit()       const { return m_reserved_one_bit; }      // u(1) // bug fix: prefix NAL (NTT)
   void                              setFrameNum      (const int num) { m_uiFrameNum=num; }
 
   UInt                              getNumMbsInSlice              ()  const { return m_uiNumMbsInSlice; }
@@ -824,6 +825,7 @@ public:
   Void  setNonIDRFlag       (Bool bNonIDRFlag)              { m_bNonIDRFlag       = bNonIDRFlag;      } 
 	Void	setInterViewFalg				(Bool inter_view_flag)			{ m_inter_view_flag	=	inter_view_flag;	}  // JVT-W056  Samsung
   Void  setReservedZeroBits (UInt reserved_zero_bits)       { m_reserved_zero_bits=reserved_zero_bits;} 
+  Void  setReservedOneBit   (UInt reserved_one_bit)         { m_reserved_one_bit  = reserved_one_bit; } // bug fix: prefix NAL (NTT) 
 // JVT-W035
 
   //{{Variable Lengh NAL unit header data with priority and dead substream flag
@@ -941,6 +943,7 @@ protected:
   Bool		m_bNonIDRFlag;//u(1)
 	Bool		m_inter_view_flag; //u(1)  JVT-W056 Samsung
   UInt		m_reserved_zero_bits; // u(1)
+  UInt		m_reserved_one_bit; // u(1) // bug fix: prefix NAL (NTT)
  
   //JVT-P031
   Bool                        m_bFragmentedFlag;

@@ -204,6 +204,7 @@ protected:
     Bool        m_bNonIDRFlag;         // u(1)  
 		Bool    m_inter_view_flag; // u(1) JVT-W056 Samsung
     UInt		m_reserved_zero_bits; // u(6)
+  UInt		m_reserved_one_bit;   // u(1) // bug fix: prefix NAL (NTT)
   //JVT-P031
   Bool          m_bFragmentedFlag;
   Bool          m_bCheckAllNALUs;

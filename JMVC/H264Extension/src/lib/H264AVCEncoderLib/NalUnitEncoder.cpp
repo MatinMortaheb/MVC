@@ -199,7 +199,8 @@ NalUnitEncoder::closeNalUnit( UInt& ruiBits )
 
   //===== write trailing bits =====
   if( NAL_UNIT_END_OF_SEQUENCE != m_eNalUnitType &&
-      NAL_UNIT_END_OF_STREAM   != m_eNalUnitType )
+      NAL_UNIT_END_OF_STREAM      != m_eNalUnitType &&
+      NAL_UNIT_CODED_SLICE_PREFIX != m_eNalUnitType )   // bug fix: no trailing bit for prefix NAL (NTT)
   {
     RNOK ( xWriteTrailingBits() );
   }
