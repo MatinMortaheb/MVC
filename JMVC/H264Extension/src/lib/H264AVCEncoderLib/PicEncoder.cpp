@@ -905,7 +905,7 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
 
  
   //uiDPBSize           = max(2, 1 << m_pcCodingParameter->getDecompositionStages());//BUG_FIX @20090218
-  uiDPBSize = max (2, (1 <<(m_pcCodingParameter->getDecompositionStages()-1)) + m_pcCodingParameter->getDecompositionStages());
+  uiDPBSize = 4+ max (2, (1 <<(m_pcCodingParameter->getDecompositionStages()-1)) + m_pcCodingParameter->getDecompositionStages());
   if (!bAVCSPS)
 	  uiDPBSize += 4;	 // up-to extra 4 interview pictures
   

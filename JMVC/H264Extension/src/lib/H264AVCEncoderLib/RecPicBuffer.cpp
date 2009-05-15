@@ -859,9 +859,11 @@ RecPicBuffer::xMarkShortTermUnused( RecPicBufUnit*  pcCurrentRecPicBufUnit,
   RecPicBufUnitList::iterator end             = m_cUsedRecPicBufUnitList.end  ();
   for( ; iter != end; iter++ )
   {
-    if( (*iter)->isNeededForRef() && (*iter)->getPicNum( uiCurrPicNum, m_uiMaxFrameNum ) == iPicNumN )
+    //if( (*iter)->isNeededForRef() && (*iter)->getPicNum( uiCurrPicNum, m_uiMaxFrameNum ) == iPicNumN )
+	if( (*iter)->getPicNum( uiCurrPicNum, m_uiMaxFrameNum ) == iPicNumN )
     {
-      (*iter)->markNonRef();
+	  if ((*iter)->isNeededForRef())
+			(*iter)->markNonRef();
       return Err::m_nOK;
     }
   }

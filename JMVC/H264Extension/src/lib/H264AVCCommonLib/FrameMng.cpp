@@ -1331,6 +1331,9 @@ ErrVal FrameMng::xSetOutputListMVC( FrameUnit* pcFrameUnit, const SliceHeader& r
 
   }
 
+  if (!uiOutput)
+	  printf("Oops! Current prediction structure seems to require a larger DPB size than is allowed by the standard.\n");
+
   ROF(uiOutput);
 
   return Err::m_nOK;

@@ -1,3 +1,11 @@
+JMVC_4_1 -> JMVC_4_1_1
+Date            : May 15, 2009
+Authors         : MERL (software coordinators)
+Contribution    : SW improvement
+- Fixed a potential encoder-crash issue when using a large GOP with hierarchical-B
+- Displays an error-message when the decoder reaches the DPB limit 
+
+
 JMVC_4_0_2 -> JMVC_4_1 
 Date            : May 07, 2009
 Authors         : NTT
