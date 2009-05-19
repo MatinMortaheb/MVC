@@ -1,4 +1,4 @@
-JMVC_4_1_1 -> JMVC_4_2
+JMVC_4_1_1 -> JMVC_4_2 (JMVC_5_0)
 Date            : May 18, 2009
 Authors         : MERL (software coordinators)
 Contribution    : SW improvement
