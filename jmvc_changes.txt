@@ -1,3 +1,9 @@
+JMVC_4_1_1 -> JMVC_4_2
+Date            : May 18, 2009
+Authors         : MERL (software coordinators)
+Contribution    : SW improvement
+- Encoder displays an error-message when the required DPB-size cannot be supported by the determined level. 
+
 JMVC_4_1 -> JMVC_4_1_1
 Date            : May 15, 2009
 Authors         : MERL (software coordinators)

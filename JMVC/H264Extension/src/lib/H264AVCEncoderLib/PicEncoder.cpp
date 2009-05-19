@@ -902,18 +902,27 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   else //  AVC base SPS
      m_pcSPSBase->SpsMVC = NULL;
   
-
+	
+  if (!bAVCSPS)
+	  mvcScaleFactor=2;
  
   //uiDPBSize           = max(2, 1 << m_pcCodingParameter->getDecompositionStages());//BUG_FIX @20090218
   uiDPBSize = 4+ max (2, (1 <<(m_pcCodingParameter->getDecompositionStages()-1)) + m_pcCodingParameter->getDecompositionStages());
   if (!bAVCSPS)
-	  uiDPBSize += 4;	 // up-to extra 4 interview pictures
-  
-  m_pcCodingParameter->setDPBSize      ( uiDPBSize );
+	  uiDPBSize += 4;	 // up-to extra 4 interview pictures  
+  m_pcCodingParameter->setDPBSize      ( uiDPBSize ); // set the encoder DPB size
 
-  UInt decDPBSize = max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16;
+  
+  UInt decDPBSize = 1<<(int)(ceil((float)log((float)m_pcCodingParameter->getGOPSize())/(float)log(2.0))-1);
+  decDPBSize = (decDPBSize+1)*NumViews; // time-first & hierarchical-B decoding
+  if (NumViews>1)
+	  decDPBSize +=2;// time-first & hierarchical-B decoding
   uiLevelIdc  = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, decDPBSize, NumViews ) ; 
-  //printf("bAVCSPS=%d decDPBSize=%d LevelIdc=%d\n",bAVCSPS,decDPBSize, uiLevelIdc);
+  if (uiLevelIdc== MSYS_UINT_MAX) {
+	  printf("With hierarchical-B & time-first decoding, the current configuration for full-view decoding requires %d DPB-frames.",decDPBSize);
+	  printf("However, it does not conform to any level. Encoder terminates.\n");
+	  exit(1);	
+  } 
 
   //===== set SPS parameters =====
   rpcSPS->setNalUnitType                           ( bAVCSPS ?  NAL_UNIT_SPS : NAL_UNIT_SUBSET_SPS );
@@ -934,8 +943,6 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   ROT(m_pcCodingParameter->getPicOrderCntType()==2 && m_pcCodingParameter->getGOPSize()>1);//Poc type 2 supported when GOPSize =1
   rpcSPS->setPicOrderCntType                       ( m_pcCodingParameter->getPicOrderCntType() );
   rpcSPS->setLog2MaxPicOrderCntLsb                 ( m_pcCodingParameter->getLog2MaxPocLsb() );
-  if (!bAVCSPS)
-	  mvcScaleFactor=2;
   rpcSPS->setNumRefFrames                          ( min (16, m_pcCodingParameter->getDPBSize()/mvcScaleFactor) ); 
   
   rpcSPS->setRequiredFrameNumUpdateBehaviourFlag   ( true );
@@ -944,6 +951,11 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   rpcSPS->setDirect8x8InferenceFlag                ( true );
 
   rpcSPS->setCurrentViewId(m_pcCodingParameter->getCurentViewId());
+  
+  UInt uiMaxFramesInDPB = rpcSPS->getMaxDPBSize();
+  uiMaxFramesInDPB = min ( mvcScaleFactor*uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16) );
+  printf("bAVCSPS=%d decDPBSize=%d LevelIdc=%d\n",bAVCSPS,uiMaxFramesInDPB, uiLevelIdc);
+  
 
   
 
