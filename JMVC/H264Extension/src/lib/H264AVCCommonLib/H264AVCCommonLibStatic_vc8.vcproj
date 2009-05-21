@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="H264AVCCommonLibStatic"
 	ProjectGUID="{5C23B105-7DEC-40A8-86B8-612F117880E9}"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform

@@ -657,14 +657,14 @@ Void MbDataAccess::xSpatialDirectMode( ParIdx8x8 eParIdx, Bool b8x8 )
     Bool b = false; 
     if (m_rcSliceHeader.getIsEncodingFlag())
     {
-      if (m_rcSliceHeader.getRefFrameList(LIST_0)->getEntry(0)->getViewId() == m_rcSliceHeader.getViewId() 
-      && m_rcSliceHeader.getRefFrameList(LIST_1)->getEntry(0)->getViewId() == m_rcSliceHeader.getViewId() )
+      if (/*m_rcSliceHeader.getRefFrameList(LIST_0)->getEntry(0)->getViewId() == m_rcSliceHeader.getViewId() 
+      && */m_rcSliceHeader.getRefFrameList(LIST_1)->getEntry(0)->getViewId() == m_rcSliceHeader.getViewId() )
         b = true;
     }
     else 
     {
-      if( (m_rcSliceHeader.getRefPicList(LIST_0).get(0).getFrame()->getViewId() == m_rcSliceHeader.getViewId())
-           && m_rcSliceHeader.getRefPicList(LIST_1).get(0).getFrame()->getViewId()== m_rcSliceHeader.getViewId()) 
+      if( /*(m_rcSliceHeader.getRefPicList(LIST_0).get(0).getFrame()->getViewId() == m_rcSliceHeader.getViewId())
+           &&*/ m_rcSliceHeader.getRefPicList(LIST_1).get(0).getFrame()->getViewId()== m_rcSliceHeader.getViewId()) 
         b =true;
     }
 

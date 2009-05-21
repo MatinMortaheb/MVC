@@ -455,6 +455,8 @@ MbEncoder::encodeMacroblock( MbDataAccess&  rcMbDataAccess,
 {
   ROF( m_bInitDone );
 
+  Bool bBiPred8x8Disable = rcMbDataAccess.getSH().getSPS().getBiPred8x8Disabled();
+
   UInt  uiQp = rcMbDataAccess.getMbData().getQp();
   RNOK( m_pcRateDistortionIf->setMbQpLambda( rcMbDataAccess, uiQp, dLambda ) );
 
@@ -486,7 +488,8 @@ MbEncoder::encodeMacroblock( MbDataAccess&  rcMbDataAccess,
     RNOK( xEstimateMb16x8     ( m_pcIntMbTempData,  m_pcIntMbBestData,  rcList0,  rcList1,  false,  uiNumMaxIter, uiIterSearchRange,  false,  NULL, false ) );
     RNOK( xEstimateMb8x16     ( m_pcIntMbTempData,  m_pcIntMbBestData,  rcList0,  rcList1,  false,  uiNumMaxIter, uiIterSearchRange,  false,  NULL, false ) );
 
-    RNOK( xEstimateMb8x8      ( m_pcIntMbTempData,  m_pcIntMbBestData,  rcList0,  rcList1,  false,  uiNumMaxIter, uiIterSearchRange,  false,  NULL, false ) );
+    RNOK( xEstimateMb8x8      ( m_pcIntMbTempData,  m_pcIntMbBestData,  rcList0,  rcList1,  false,  uiNumMaxIter, uiIterSearchRange,  false,  NULL, false, 
+                                bBiPred8x8Disable) );
     RNOK( xEstimateMb8x8Frext ( m_pcIntMbTempData,  m_pcIntMbBestData,  rcList0,  rcList1,  false,  uiNumMaxIter, uiIterSearchRange,  false,  NULL, false ) );
   }
   RNOK(   xEstimateMbIntra16  ( m_pcIntMbTempData,  m_pcIntMbBestData,  rcMbDataAccess.getSH().isInterB() ) );
@@ -5463,7 +5466,8 @@ MbEncoder::xEstimateMb8x8 ( IntMbTempData*&   rpcMbTempData,
                             UInt              uiIterSearchRange,
                             Bool              bQPelRefinementOnly,
                             MbDataAccess*     pcMbDataAccessBase,
-                            Bool              bResidualPred )
+                            Bool              bResidualPred, 
+                            Bool              bBiPred8x8Disable)
 {
   Bool  bPSlice  = rpcMbTempData->getMbDataAccess().getSH().isInterP();
   UInt  uiBits   = ( ! bPSlice ? 9 : 5 ); // for signalling macroblock mode
@@ -5485,9 +5489,9 @@ MbEncoder::xEstimateMb8x8 ( IntMbTempData*&   rpcMbTempData,
 	//S051}
     RNOK( xEstimateSubMbDirect  ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1, false,                                               uiBits,                      pcMbDataAccessBase ) );
     RNOK( xEstimateSubMb8x8     ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1, false, bBiPredOnly, uiNumMaxIter, uiIterSearchRange, uiBits, bQPelRefinementOnly, pcMbDataAccessBase ) );
-    RNOK( xEstimateSubMb8x4     ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1,        bBiPredOnly, uiNumMaxIter, uiIterSearchRange, uiBits, bQPelRefinementOnly, pcMbDataAccessBase ) );
-    RNOK( xEstimateSubMb4x8     ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1,        bBiPredOnly, uiNumMaxIter, uiIterSearchRange, uiBits, bQPelRefinementOnly, pcMbDataAccessBase ) );
-    RNOK( xEstimateSubMb4x4     ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1,        bBiPredOnly, uiNumMaxIter, uiIterSearchRange, uiBits, bQPelRefinementOnly, pcMbDataAccessBase ) );
+    RNOK( xEstimateSubMb8x4     ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1,        bBiPredOnly, uiNumMaxIter, uiIterSearchRange, uiBits, bQPelRefinementOnly, pcMbDataAccessBase, bBiPred8x8Disable ) );
+    RNOK( xEstimateSubMb4x8     ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1,        bBiPredOnly, uiNumMaxIter, uiIterSearchRange, uiBits, bQPelRefinementOnly, pcMbDataAccessBase, bBiPred8x8Disable ) );
+    RNOK( xEstimateSubMb4x4     ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1,        bBiPredOnly, uiNumMaxIter, uiIterSearchRange, uiBits, bQPelRefinementOnly, pcMbDataAccessBase, bBiPred8x8Disable ) );
 
     //----- store parameters in MbTempData -----
     rpcMbTempData->rdCost()  += m_pcIntMbBest8x8Data->rdCost    ();
@@ -6146,7 +6150,8 @@ MbEncoder::xEstimateSubMb8x4( Par8x8            ePar8x8,
                               UInt              uiIterSearchRange,
                               UInt              uiAddBits,
                               Bool              bQPelRefinementOnly,
-                              MbDataAccess*     pcMbDataAccessBase )
+                              MbDataAccess*     pcMbDataAccessBase,
+                              Bool              bBiPred8x8Disable)
 {
   ROF( rcRefFrameList0.getActive() <= 32 );
   ROF( rcRefFrameList1.getActive() <= 32 );
@@ -6366,7 +6371,7 @@ MbEncoder::xEstimateSubMb8x4( Par8x8            ePar8x8,
 
   
   //===== BI PREDICTION =====
-  if( rcRefFrameList0.getActive() && rcRefFrameList1.getActive() )
+  if( !bBiPred8x8Disable && rcRefFrameList0.getActive() && rcRefFrameList1.getActive() )
   {
     //----- initialize with forward and backward estimation -----
     iRefIdxBi [0] = iRefIdx [0];
@@ -6632,7 +6637,8 @@ MbEncoder::xEstimateSubMb4x8( Par8x8            ePar8x8,
                               UInt              uiIterSearchRange,
                               UInt              uiAddBits,
                               Bool              bQPelRefinementOnly,
-                              MbDataAccess*     pcMbDataAccessBase )
+                              MbDataAccess*     pcMbDataAccessBase,
+                              Bool              bBiPred8x8Disable)
 {
   ROF( rcRefFrameList0.getActive() <= 32 );
   ROF( rcRefFrameList1.getActive() <= 32 );
@@ -6851,7 +6857,7 @@ MbEncoder::xEstimateSubMb4x8( Par8x8            ePar8x8,
 
   
   //===== BI PREDICTION =====
-  if( rcRefFrameList0.getActive() && rcRefFrameList1.getActive() )
+  if( !bBiPred8x8Disable && rcRefFrameList0.getActive() && rcRefFrameList1.getActive() )
   {
     //----- initialize with forward and backward estimation -----
     iRefIdxBi [0] = iRefIdx [0];
@@ -7117,7 +7123,8 @@ MbEncoder::xEstimateSubMb4x4( Par8x8            ePar8x8,
                               UInt              uiIterSearchRange,
                               UInt              uiAddBits,
                               Bool              bQPelRefinementOnly,
-                              MbDataAccess*     pcMbDataAccessBase )
+                              MbDataAccess*     pcMbDataAccessBase,
+                              Bool              bBiPred8x8Disable)
 {
   ROF( rcRefFrameList0.getActive() <= 32 );
   ROF( rcRefFrameList1.getActive() <= 32 );
@@ -7350,7 +7357,7 @@ MbEncoder::xEstimateSubMb4x4( Par8x8            ePar8x8,
 
   
   //===== BI PREDICTION =====
-  if( rcRefFrameList0.getActive() && rcRefFrameList1.getActive() )
+  if( !bBiPred8x8Disable && rcRefFrameList0.getActive() && rcRefFrameList1.getActive() )
   {
     //----- initialize with forward and backward estimation -----
     iRefIdxBi [0] = iRefIdx [0];
