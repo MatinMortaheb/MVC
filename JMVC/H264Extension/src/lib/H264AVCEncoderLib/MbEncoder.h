@@ -478,8 +478,7 @@ protected:
                                   UInt              uiIterSearchRange,
                                   Bool              bQPelRefinementOnly,
                                   MbDataAccess*     pcMbDataAccessBaseMotion,
-                                  Bool              bResidualPred,
-                                  Bool              bBiPred8x8Disable = false);
+                                  Bool              bResidualPred );
   ErrVal  xEstimateMb8x8Frext   ( IntMbTempData*&   rpcMbTempData,
                                   IntMbTempData*&   rpcMbBestData,
                                   RefFrameList&     rcRefFrameList0,
@@ -520,8 +519,7 @@ protected:
                                   UInt              uiIterSearchRange,
                                   UInt              uiAddBits,
                                   Bool              bQPelRefinementOnly,
-                                  MbDataAccess*     pcMbDataAccessBaseMotion,
-                                  Bool              bBiPred8x8Disable = false);
+                                  MbDataAccess*     pcMbDataAccessBaseMotion );
   ErrVal  xEstimateSubMb4x8     ( Par8x8            ePar8x8,
                                   IntMbTempData*&   rpcMbTempData,
                                   IntMbTempData*&   rpcMbBestData,
@@ -532,8 +530,7 @@ protected:
                                   UInt              uiIterSearchRange,
                                   UInt              uiAddBits,
                                   Bool              bQPelRefinementOnly,
-                                  MbDataAccess*     pcMbDataAccessBaseMotion, 
-                                  Bool              bBiPred8x8Disable = false);
+                                  MbDataAccess*     pcMbDataAccessBaseMotion );
   ErrVal  xEstimateSubMb4x4     ( Par8x8            ePar8x8,
                                   IntMbTempData*&   rpcMbTempData,
                                   IntMbTempData*&   rpcMbBestData,
@@ -544,8 +541,7 @@ protected:
                                   UInt              uiIterSearchRange,
                                   UInt              uiAddBits,
                                   Bool              bQPelRefinementOnly,
-                                  MbDataAccess*     pcMbDataAccessBaseMotion,
-                                  Bool              bBiPred8x8Disable = false);
+                                  MbDataAccess*     pcMbDataAccessBaseMotion );
   
   ErrVal  xCheckBestEstimation  ( IntMbTempData*&   rpcMbTempData,
                                   IntMbTempData*&   rpcMbBestData );

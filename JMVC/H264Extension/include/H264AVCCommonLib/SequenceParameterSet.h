@@ -515,7 +515,6 @@ public:
   static UInt   getLevelIdc               ( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic, int Num_Views );
   
   UInt          getMaxDPBSize             () const;
-  Bool  getBiPred8x8Disabled  ()                  const;
 
   NalUnitType           getNalUnitType                        ()          const { return m_eNalUnitType; }
   UInt                  getLayerId                            ()          const { return m_uiLayerId; }

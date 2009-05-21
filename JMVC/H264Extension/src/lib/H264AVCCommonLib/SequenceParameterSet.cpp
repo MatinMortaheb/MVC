@@ -239,17 +239,6 @@ SequenceParameterSet::getMaxDPBSize() const
 }
 
 
-Bool
-SequenceParameterSet::getBiPred8x8Disabled()  const
-{
-  if( m_eProfileIdc == MULTI_VIEW_PROFILE || m_eProfileIdc == MAIN_PROFILE || 
-      m_eProfileIdc == HIGH_PROFILE || ( ( m_eProfileIdc == BASELINE_PROFILE || m_eProfileIdc == EXTENDED_PROFILE ) && m_bConstrainedSet1Flag ) )
-  {
-    return ( m_uiLevelIdc >= 31 );
-  }
-  return false;
-}
-
 ErrVal
 SequenceParameterSet::xGetLevelLimit( const LevelLimit*& rpcLevelLimit, Int iLevelIdc )
 {

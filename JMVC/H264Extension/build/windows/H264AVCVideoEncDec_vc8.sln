@@ -1,5 +1,5 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DownConvertStatic", "..\..\src\tools\DownConvert\DownConvertStatic_vc8.vcproj", "{E89A623A-EE7D-41A0-921A-26472D977E2D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H264AVCCommonLibStatic", "..\..\src\lib\H264AVCCommonLib\H264AVCCommonLibStatic_vc8.vcproj", "{5C23B105-7DEC-40A8-86B8-612F117880E9}"
