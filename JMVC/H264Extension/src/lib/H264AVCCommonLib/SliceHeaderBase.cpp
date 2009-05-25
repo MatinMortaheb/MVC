@@ -308,7 +308,6 @@ SliceHeaderBase::SliceHeaderBase( const SequenceParameterSet& rcSPS,
 , m_reserved_zero_bits                (0)
 , m_reserved_one_bit                  (1)     // bug fix: prefix NAL (NTT)
 , m_bInterViewRef                     (false) // maybe shall be replaced by inter_view_flag
-, m_bIsEncodingFlag                   (false)
 {
   ::memset( m_auiNumRefIdxActive        , 0x00, 2*sizeof(UInt) );
   ::memset( m_aauiNumRefIdxActiveUpdate , 0x00, 2*sizeof(UInt)*MAX_TEMP_LEVELS );

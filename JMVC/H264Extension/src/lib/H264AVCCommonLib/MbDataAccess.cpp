@@ -654,24 +654,8 @@ Void MbDataAccess::xSpatialDirectMode( ParIdx8x8 eParIdx, Bool b8x8 )
   //===== check co-located =====
   if( ! bAllColNonZero )
   {
-    Bool b = false; 
-    if (m_rcSliceHeader.getIsEncodingFlag())
-    {
-      if (m_rcSliceHeader.getRefFrameList(LIST_0)->getEntry(0)->getViewId() == m_rcSliceHeader.getViewId() 
-      && m_rcSliceHeader.getRefFrameList(LIST_1)->getEntry(0)->getViewId() == m_rcSliceHeader.getViewId() )
-        b = true;
-    }
-    else 
-    {
-      if( (m_rcSliceHeader.getRefPicList(LIST_0).get(0).getFrame()->getViewId() == m_rcSliceHeader.getViewId())
-           && m_rcSliceHeader.getRefPicList(LIST_1).get(0).getFrame()->getViewId()== m_rcSliceHeader.getViewId()) 
-        b =true;
-    }
-
-    if (b)
-    {
-      SChar   scRefIdxCol;
-      Mv      acMvCol[4];
+    SChar   scRefIdxCol;
+    Mv      acMvCol[4];
 
     if( ! bAllColNonZero )
     {
@@ -701,7 +685,6 @@ Void MbDataAccess::xSpatialDirectMode( ParIdx8x8 eParIdx, Bool b8x8 )
           bColZeroFlagBlk2 = ( acMvCol[2].getAbsHor() <= 1 && acMvCol[2].getAbsVer() <= 1 );
           bColZeroFlagBlk3 = ( acMvCol[3].getAbsHor() <= 1 && acMvCol[3].getAbsVer() <= 1 );
         }
-      }
     }
   }
 

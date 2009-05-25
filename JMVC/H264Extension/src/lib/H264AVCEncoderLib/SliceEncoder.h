@@ -122,38 +122,8 @@ public:
   ErrVal uninit();
 
   MbEncoder*  getMbEncoder            () { return m_pcMbEncoder; }
-  ErrVal      encodeIntraPicture      ( UInt&         ruiBits,
-                                        ControlData&  rcControlData,
-                                        IntFrame*     pcFrame,
-                                        IntFrame*     pcRecSubband,
-                                        IntFrame*     pcBaseLayer,
-                                        IntFrame*     pcPredSignal,
-                                        UInt          uiMbInRow,
-                                        Double        dLambda );
-  ErrVal      encodeInterPictureP     ( UInt&         ruiBits,
-                                        IntFrame*     pcFrame,
-                                        IntFrame*     pcRecSubband,
-                                        IntFrame*     pcPredSignal,
-                                        ControlData&  rcControlData,
-                                        UInt          uiMbInRow,
-                                        RefFrameList& rcRefFrameList,
-                                        RefFrameList&    rcRefFrameListBase
-                                        );
-  ErrVal      encodeHighPassPicture   ( UInt&         ruiMbCoded,
-                                        UInt&         ruiBits,
-                                        SliceHeader&  rcSH,
-                                        IntFrame*     pcFrame,
-                                        IntFrame*     pcResidual,
-                                        IntFrame*     pcPredSignal,
-																				IntFrame*			pcSRFrame, // JVT-R091
-                                        IntFrame*     pcBaseSubband,
-                                        IntFrame*     pcBaseLayer,
-                                        MbDataCtrl*   pcMbDataCtrl,
-                                        MbDataCtrl*   pcMbDataCtrlBaseMotion,
-                                        UInt          uiMbInRow,
-                                        Double        dLambda,
-                                        Int           iMaxDeltaQp,
-                                        Int						iSpatialScalabilityType);
+
+
 
   ErrVal      encodeSlice             ( SliceHeader&  rcSliceHeader,
                                         IntFrame*     pcFrame,

@@ -162,17 +162,6 @@ public:
                                 Bool            bLowPass,
                                 Int             iMaxQpDelta );
 
-  ErrVal  encodeInterP        ( MbDataAccess&   rcMbDataAccess,
-                                MbDataAccess*   pcMbDataAccessBase,
-                                Int             iSpatialScalabilityType,
-                                IntFrame*       pcFrame,
-                                IntFrame*       pcRecSubband,
-                                IntFrame*       pcPredSignal,
-                                IntFrame*       pcBaseLayerRec,
-                                IntFrame*       pcBaseLayerSbb,
-                                RefFrameList&   rcRefFrameList0,
-                                RefFrameList*   pcRefFrameList0Base,
-                                Double          dLambda );
   ErrVal  compensatePrediction( MbDataAccess&   rcMbDataAccess,
                                 IntFrame*       pcMCFrame,
                                 RefFrameList&   rcRefFrameList0,
@@ -186,21 +175,6 @@ public:
                                  ListIdx         eListPrd,
                                  IntFrame*       pcPrdFrame);
 
-
-  ErrVal  estimatePrediction  ( MbDataAccess&   rcMbDataAccess,
-                                MbDataAccess*   pcMbDataAccessBase,
-                                Int							iSpatialScalabilityType,
-                                RefFrameList&   rcRefFrameList0,
-                                RefFrameList&   rcRefFrameList1,
-                                const IntFrame* pcBaseLayerFrame,
-                                const IntFrame* pcBaseLayerResidual,
-                                const IntFrame& rcOrigFrame,
-                                IntFrame&       rcIntraRecFrame,
-                                Bool            bBiPredOnly,
-                                UInt            uiNumMaxIter,
-                                UInt            uiIterSearchRange,
-								Bool			bBLSkipEnable, // JVT-Q065 EIDR
-                                Double          dLambda );
 
   ErrVal  encodeMacroblock    ( MbDataAccess&  rcMbDataAccess,
 	  IntFrame*      pcFrame,

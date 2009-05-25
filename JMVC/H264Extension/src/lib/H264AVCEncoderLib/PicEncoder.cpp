@@ -1864,7 +1864,6 @@ PicEncoder::xSetRefPictures(SliceHeader&                rcSliceHeader,
                             RefFrameList&               rcList0,
                             RefFrameList&               rcList1 )
 {
-  rcSliceHeader.setIsEncodingFlag(true);
   ROTRS( rcSliceHeader.isIntra(), Err::m_nOK );
 
   if( rcSliceHeader.isInterP() )

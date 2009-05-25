@@ -418,7 +418,6 @@ ErrVal FrameMng::initSlice( SliceHeader *rcSH )
 
   m_iMaxEntriesinDPB = rcSH->getSPS().getMaxDPBSize();
   m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
-  //printf("final MaxDPB=%d\n",	m_iMaxEntriesinDPB);
 
   if( ! m_iMaxEntriesinDPB )
   {

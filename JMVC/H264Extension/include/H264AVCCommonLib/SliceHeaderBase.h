@@ -855,9 +855,7 @@ public:
   Void          setBaseQualityLevelCGSSNR(UInt ui) { m_uiBaseQualityLevelCGSSNR = ui;}
 //JVT-T054}
 
-  Void          setIsEncodingFlag(Bool b) { m_bIsEncodingFlag = b;}
-  Bool          getIsEncodingFlag() { return m_bIsEncodingFlag;}
-
+  
   Void   setInterViewRef              ( Bool        b)    { m_bInterViewRef=b;}             // 
   Bool   getInterViewRef              ( )                 { return m_bInterViewRef;}
 	
