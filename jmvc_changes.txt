@@ -1,3 +1,11 @@
+JMVC_5_0 1 -> JMVC_5_0_2
+Date            : June 09, 2009
+Authors         : MERL
+Contribution    : SW improvement
+- Bug fix for decoder DPB initialization 
+(Now it correctly uses level_idc from the SUBSET_SPS to calculate the DPB size when there are multiple views in the bitstream.)
+
+
 JMVC_5_0  -> JMVC_5_0_1
 Date            : May 25, 2009
 Authors         : Qualcomm

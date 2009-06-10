@@ -216,6 +216,7 @@ protected:
   //MCTFDecoder*            m_apcMCTFDecoder          [MAX_LAYERS];
   H264AVCDecoder*         m_pcH264AVCDecoder;
   Bool                    m_uiInitilized            [MAX_LAYERS];
+  Bool                    m_uiInitilized_MultiView            [MAX_LAYERS];
   ResizeParameters        m_ResizeParameter[MAX_LAYERS]; // TMM_ESS
   ResizeParameters        m_ResizeParameterCGSSNR[MAX_LAYERS][MAX_FGS_LAYERS]; // JVT-T054
 };

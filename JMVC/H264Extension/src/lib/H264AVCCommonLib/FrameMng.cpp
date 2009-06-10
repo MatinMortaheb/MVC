@@ -424,19 +424,21 @@ ErrVal FrameMng::initSlice( SliceHeader *rcSH )
     printf("WARNING: Size of Decoded picture buffer is less than 1 frame!");
   }
 
-  if( m_pcRefinementIntFrame )
+  if( rcSH->getSPS().getNalUnitType() == NAL_UNIT_CODED_SLICE || rcSH->getSPS().getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR)
   {
-    RNOK( m_pcRefinementIntFrame->init( false ) );
+	if( m_pcRefinementIntFrame )
+	{
+		RNOK( m_pcRefinementIntFrame->init( false ) );
+	}
+	if( m_pcRefinementIntFrameSpatial )
+	{
+		RNOK( m_pcRefinementIntFrameSpatial->init( false ) );
+	}
+	if( m_pcPredictionIntFrame )
+	{
+		RNOK( m_pcPredictionIntFrame->init( false ) );
+	}
   }
-  if( m_pcRefinementIntFrameSpatial )
-  {
-    RNOK( m_pcRefinementIntFrameSpatial->init( false ) );
-  }
-  if( m_pcPredictionIntFrame )
-  {
-    RNOK( m_pcPredictionIntFrame->init( false ) );
-  }
-
   return Err::m_nOK;
 }
 

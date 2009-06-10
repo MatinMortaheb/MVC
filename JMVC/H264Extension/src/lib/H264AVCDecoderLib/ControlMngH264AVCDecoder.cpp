@@ -117,6 +117,7 @@ ControlMngH264AVCDecoder::ControlMngH264AVCDecoder():
     m_apcPocCalculator        [uiLayer] = NULL;
     m_apcYuvFullPelBufferCtrl [uiLayer] = NULL;
     m_uiInitilized            [uiLayer] = false;
+	m_uiInitilized_MultiView  [uiLayer] = false;
   }
 }
 
@@ -336,7 +337,10 @@ ErrVal ControlMngH264AVCDecoder::initSlice0( SliceHeader *rcSH )
   }
 //JVT-T054}
 */
-  ROTRS( m_uiInitilized[uiLayer], Err::m_nOK );
+
+  ROTRS( ( rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE || rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR) && m_uiInitilized[uiLayer], Err::m_nOK );
+  ROTRS( ( rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_SCALABLE || rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_SCALABLE) && m_uiInitilized_MultiView[uiLayer], Err::m_nOK );
+
   m_auiMbXinFrame[uiLayer]  = rcSH->getSPS().getFrameWidthInMbs   ();
   m_auiMbYinFrame[uiLayer]  = rcSH->getSPS().getFrameHeightInMbs  ();
 
@@ -371,7 +375,11 @@ ErrVal ControlMngH264AVCDecoder::initSlice0( SliceHeader *rcSH )
 
   RNOK( xInitESS( rcSH ) );
 
-  m_uiInitilized[uiLayer] = true;
+  if ( rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE || rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR)
+	m_uiInitilized[uiLayer] = true;
+  if ( rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_SCALABLE || rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_SCALABLE)
+	m_uiInitilized_MultiView[uiLayer] = true;
+
 
   return Err::m_nOK;
 }
