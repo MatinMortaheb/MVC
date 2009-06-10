@@ -312,7 +312,8 @@ PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
 	m_adMVCSeqBits[0] += uiSPSBits; //SEI 
 
   }  
-  else if ( ! m_pcSPS  && Num_Of_Views_Minus_1>0 )	
+  //else if ( ! m_pcSPS  && Num_Of_Views_Minus_1>0 )	
+  else if ( ! m_pcSPS )	  
   {
     //===== create SPS =====
     RNOK( xInitSPS(false) );
@@ -341,7 +342,8 @@ PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
 	m_adMVCSeqBits[0] += uiPPSBits; //SEI 
     
   }
-  else if( ! m_pcPPS && Num_Of_Views_Minus_1>0 )
+  //else if( ! m_pcPPS && Num_Of_Views_Minus_1>0 )
+  else if( ! m_pcPPS )
   {
     //===== create PPS =====
     RNOK( xInitPPS(false) );

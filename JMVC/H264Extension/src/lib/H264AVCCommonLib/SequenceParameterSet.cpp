@@ -216,7 +216,8 @@ SequenceParameterSet::destroy()
 	if ( m_eProfileIdc == MVC_PROFILE ) // 
 	{
 		SpsMVC->releaseViewSPSMemory_num_refs_for_lists();
-		SpsMVC->releaseViewSPSMemory_ref_for_lists();
+		if (SpsMVC->getNumViewMinus1()>0) // this is necessary due to JVT-Y061
+			SpsMVC->releaseViewSPSMemory_ref_for_lists();
 		SpsMVC->releaseViewSPSMemory_num_level_related_memory_2D();
 		SpsMVC->releaseViewSPSMemory_num_level_related_memory_3D();
 		SpsMVC->releaseViewSPSMemory_num_level_related_memory();
