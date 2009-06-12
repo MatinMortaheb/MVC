@@ -448,7 +448,8 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
 	RNOK(     pcWriteIf->writeUvlc( m_uiPicParameterSetId,                        "SH: pic_parameter_set_id" ) );
 	RNOK(     pcWriteIf->writeCode( m_uiFrameNum,
 									getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
-	if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE )
+	//if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE ) // fix Ying @QCT
+  if  ( this->getNonIDRFlag() == false )
 	{
 		RNOK(   pcWriteIf->writeUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
 	}
@@ -694,7 +695,7 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
   RNOK(     pcWriteIf->writeUvlc( m_uiPicParameterSetId,                        "SH: pic_parameter_set_id" ) );
   RNOK(     pcWriteIf->writeCode( m_uiFrameNum,
                                   getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
-  if( NNalUnitType == NAL_UNIT_CODED_SLICE_IDR )
+  if( isIdrNalUnit()  ) // bug fix Ying @ QCT
   {
     RNOK(   pcWriteIf->writeUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
   }
@@ -1412,7 +1413,7 @@ SliceHeaderBase::xReadMVCCompatible( HeaderSymbolReadIf* pcReadIf )
   RNOK(     pcReadIf->getCode( m_uiFrameNum,
                                getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
 
-  if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR ) // JVT-W035 
+  if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR || !getNonIDRFlag() ) // JVT-W035 ying @ QCT, the first condition might be useless
   {
     RNOK(   pcReadIf->getUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
   }

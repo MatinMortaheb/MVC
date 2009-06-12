@@ -1,3 +1,11 @@
+JMVC_5_0_4 -> JMVC_5_0_5 
+Date            : June 12, 2009
+Authors         : Qualcomm
+Contribution    : SW improvement
+Changes:
+- Bug fix for idr_pic_id in the non-base views
+
+
 JMVC_5_0_3 -> JMVC_5_0_4 
 Date            : June 10, 2009
 Authors         : NTT
