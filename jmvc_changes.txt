@@ -1,3 +1,11 @@
+JMVC_5_0_3 -> JMVC_5_0_4 
+Date            : June 10, 2009
+Authors         : NTT
+Contribution    : SW improvement
+Changes:
+- Bug fix for the level constraint H.10.2 q)
+
+
 JMVC_5_0 2 -> JMVC_5_0_3
 Date            : June 10, 2009
 Authors         : MERL
