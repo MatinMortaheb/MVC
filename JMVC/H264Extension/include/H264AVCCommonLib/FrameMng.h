@@ -246,7 +246,7 @@ class H264AVCCOMMONLIB_API FrameMng
                   FrameUnit* pcFU = (*iter);
                   if((/*pcFU->getFGSPicBuffer() || */pcFU->getPicBuffer()) && 
                      rcSH.getSPS().getSpsMVC()->getViewIDByViewIndex(rcSH.getViewId(), ui, eListIdx, bAnchor) == pcFU->getFrame().getViewId() 
-                     && rcSH.getPoc() == pcFU->getFrame().getPOC() ) 
+                     && rcSH.getPoc() == pcFU->getFrame().getPOC() && pcFU->getFrame().getInterViewFlag() ) 
                   {
                     //rcRefFrameList.add(  &( pcFU->getFGSPicBuffer() ? pcFU->getFGSFrame() : pcFU->getFrame() ) );
                     rcRefFrameList.add(  & pcFU->getFrame() ); // memory

@@ -1139,6 +1139,7 @@ RecPicBuffer::xRefListRemapping( RefFrameList&  rcList,
     UInt  uiCurrViewId    = pcSliceHeader->getViewId();
     Bool  bAnchor         = pcSliceHeader->getAnchorPicFlag();
     Int   iPicViewIdx     = -1; //JVT-AB204_r1, ying
+	Int IndexSkipCount=0;
 
     while( RPLR_END != ( uiCommand = rcRplrBuffer.get( uiIndex ).getCommand( uiIdentifier ) ) )
     {
@@ -1208,7 +1209,7 @@ RecPicBuffer::xRefListRemapping( RefFrameList&  rcList,
         }
 
         //----- reference list re-ordering -----
-        RNOK( rcList.setElementAndRemove( uiIndex, uiRemoveIndex, pcFrame ) );
+        RNOK( rcList.setElementAndRemove( uiIndex-IndexSkipCount, uiRemoveIndex, pcFrame ) );
         uiIndex++;
       } // short-term
       else // 4 or 5
@@ -1249,34 +1250,44 @@ RecPicBuffer::xRefListRemapping( RefFrameList&  rcList,
         //----- get frame -----
         RecPicBufUnitList::iterator iter = m_cUsedRecPicBufUnitList.begin();
         RecPicBufUnitList::iterator end  = m_cUsedRecPicBufUnitList.end  ();
+        Bool InterViewFlag=false;
         for( ; iter != end; iter++ )
         {
+		  InterViewFlag = m_pcPicEncoder->derivation_Inter_View_Flag((*iter)->getViewId(), *pcSliceHeader);
           if ((*iter)->getViewId() == targetViewId && 
-              (*iter)->getPoc()    == pcSliceHeader->getPoc() )
+              (*iter)->getPoc()    == pcSliceHeader->getPoc() && InterViewFlag)
           {
             pcFrame = (*iter)->getRecFrame();
             break;
           }
         }
-        if( ! pcFrame )
-        {
-          fprintf( stderr, "\nERROR: MISSING Inter-View PICTURE for RPLR\n\n" );
-          RERR(); 
-        }
-        //----- find picture in reference list -----
-        UInt uiRemoveIndex = MSYS_UINT_MAX;
-        for( UInt uiPos = uiIndex; uiPos < rcList.getActive(); uiPos++ ) // active is equal to size
-        {
-          if( rcList.getEntry( uiPos ) == pcFrame )
-          {
-            uiRemoveIndex = uiPos;
-            break;
-          }
-        }
 
-        //----- reference list re-ordering -----
-        RNOK( rcList.setElementAndRemove( uiIndex, uiRemoveIndex, pcFrame ) );
-        uiIndex++;
+		if (InterViewFlag == true)
+		{
+			if( !pcFrame )
+			{
+			fprintf( stderr, "\nERROR: MISSING Inter-View PICTURE for RPLR\n\n" );
+			RERR(); 
+			}
+			//----- find picture in reference list -----
+			UInt uiRemoveIndex = MSYS_UINT_MAX;
+			for( UInt uiPos = uiIndex; uiPos < rcList.getActive(); uiPos++ ) // active is equal to size
+			{
+			if( rcList.getEntry( uiPos ) == pcFrame )
+			{
+				uiRemoveIndex = uiPos;
+				break;
+			}
+			}
+
+			//----- reference list re-ordering -----
+			RNOK( rcList.setElementAndRemove( uiIndex-IndexSkipCount, uiRemoveIndex, pcFrame ) );
+			uiIndex++;
+		} else
+		{
+			uiIndex++;
+			IndexSkipCount++;
+		}
       } // inter-view 
     } // while
   }

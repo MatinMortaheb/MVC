@@ -1138,11 +1138,13 @@ ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
   UInt      uiIdentifier;
 // JVT-V043
   Int       iPicViewIdx   = -1; //JVT-AB204_r1, ying
+  Int IndexSkipCount=0;
   
   while( RPLR_END != ( uiCommand = rcRplrBuffer.get( uiIndex ).getCommand( uiIdentifier ) ) )
   {
     FUIter    iter;
     const Frame* pcFrame = NULL;
+	Bool InterViewFlag=false;
     
     if( uiCommand == RPLR_LONG )
     //===== LONG TERM INDEX =====
@@ -1257,25 +1259,36 @@ ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
         }
       }
      //---- set frame ----
-       pcFrame = &((*iter)->getFrame() );    
+      InterViewFlag = (*iter)->getFrame().getInterViewFlag(); 
+	  if (InterViewFlag == true)
+       pcFrame = &((*iter)->getFrame() ); 
     }
     //---- find picture in reference list -----
-    UInt uiRemoveIndex = MSYS_UINT_MAX;
-    if( NULL != pcFrame )
-    {
-      for( UInt uiPos = uiIndex; uiPos < rcList.size(); uiPos++ )
-      {
-        if( rcList.get( uiPos ).getFrame() == pcFrame )
-        {
-          uiRemoveIndex = uiPos;
-          break;
-        }
-      }
-    }
+    if ( (uiCommand == RPLR_VIEW_NEG || uiCommand == RPLR_VIEW_POS) && InterViewFlag == false )
+	{
+		uiIndex++;
+		IndexSkipCount++;
 
-    //----- reference list reordering ----- shift
-    rcList.getElementAndRemove( uiIndex, uiRemoveIndex ).setFrame( pcFrame );
-    uiIndex++;
+	} else 
+	{
+		//---- find picture in reference list -----
+		UInt uiRemoveIndex = MSYS_UINT_MAX;
+		if( NULL != pcFrame )
+		{
+		for( UInt uiPos = uiIndex; uiPos < rcList.size(); uiPos++ )
+		{
+			if( rcList.get( uiPos ).getFrame() == pcFrame )
+			{
+			uiRemoveIndex = uiPos;
+			break;
+			}
+		}
+		}
+
+		//----- reference list reordering ----- shift
+		rcList.getElementAndRemove( uiIndex-IndexSkipCount, uiRemoveIndex ).setFrame( pcFrame );
+		uiIndex++;
+	}  
   }
 
   return Err::m_nOK;
@@ -1469,18 +1482,19 @@ FrameMng::xSetBFrameListMVC ( SliceHeader& rcSH)
   UInt uiInterPredSizeL0 = rcList0.size();
   UInt uiInterPredSizeL1 = rcList1.size();
   
-  for( uiIdx=0; uiIdx< uiInterViewPredRefNumFwd; uiIdx++)
+    //for( uiIdx=0; uiIdx< uiInterViewPredRefNumFwd; uiIdx++)
+  for( uiIdx=0; uiIdx< cTempFrameList0.size(); uiIdx++)
   {
     rcList0.next();
     rcList0.getElementAndRemove(uiIdx + uiInterPredSizeL0 , uiIdx+uiInterPredSizeL0 ).setFrame( cTempFrameList0.get(uiIdx));
   }
   
-  for( uiIdx=0; uiIdx< uiInterViewPredRefNumBwd; uiIdx++)
+  //for( uiIdx=0; uiIdx< uiInterViewPredRefNumBwd; uiIdx++)
+  for( uiIdx=0; uiIdx< cTempFrameList1.size(); uiIdx++)
   {
     rcList1.next();
     rcList1.getElementAndRemove(uiIdx + uiInterPredSizeL1 , uiIdx+uiInterPredSizeL1 ).setFrame( cTempFrameList1.get(uiIdx));
   }
-  
   return Err::m_nOK;
 }  
 //  }}
