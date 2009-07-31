@@ -164,6 +164,7 @@ SequenceParameterSet::SequenceParameterSet  ()
 , m_bConstrainedSet2Flag                    ( false )
 , m_bConstrainedSet3Flag                    ( false )
 , m_bConstrainedSet4Flag                    ( false )
+, m_bConstrainedSet5Flag                    ( false )
 , m_uiLevelIdc                              ( 0 )
 , m_uiSeqParameterSetId                     ( MSYS_UINT_MAX )
 //, m_bNalUnitExtFlag                         ( true  )  //JVT-S036 lsj
@@ -303,7 +304,8 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
   RNOK  ( pcWriteIf->writeFlag( m_bConstrainedSet2Flag,                   "SPS: constrained_set2_flag" ) );
   RNOK  ( pcWriteIf->writeFlag( m_bConstrainedSet3Flag,                   "SPS: constrained_set3_flag" ) );
   RNOK  ( pcWriteIf->writeFlag( m_bConstrainedSet4Flag,                   "SPS: constrained_set4_flag" ) );
-  RNOK  ( pcWriteIf->writeCode( 0,                                3,      "SPS: reserved_zero_3bits" ) );
+  RNOK  ( pcWriteIf->writeFlag( m_bConstrainedSet5Flag,                   "SPS: constrained_set5_flag" ) );
+  RNOK  ( pcWriteIf->writeCode( 0,                                2,      "SPS: reserved_zero_2bits" ) );
   RNOK  ( pcWriteIf->writeCode( getLevelIdc(),                    8,      "SPS: level_idc" ) );
   RNOK  ( pcWriteIf->writeUvlc( getSeqParameterSetId(),                   "SPS: seq_parameter_set_id" ) );
   
@@ -443,7 +445,8 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
   RNOK  ( pcReadIf->getFlag( m_bConstrainedSet2Flag,                      "SPS: constrained_set2_flag" ) );
   RNOK  ( pcReadIf->getFlag( m_bConstrainedSet3Flag,                      "SPS: constrained_set3_flag" ) );
   RNOK  ( pcReadIf->getFlag( m_bConstrainedSet4Flag,                      "SPS: constrained_set4_flag" ) );
-  RNOK  ( pcReadIf->getCode( uiTmp,                               3,      "SPS: reserved_zero_3bits" ) );
+  RNOK  ( pcReadIf->getFlag( m_bConstrainedSet5Flag,                      "SPS: constrained_set5_flag" ) );
+  RNOK  ( pcReadIf->getCode( uiTmp,                               2,      "SPS: reserved_zero_2bits" ) );
   ROT   ( uiTmp );
   RNOK  ( pcReadIf->getCode( m_uiLevelIdc,                        8,      "SPS: level_idc" ) );
   RNOK  ( pcReadIf->getUvlc( m_uiSeqParameterSetId,                       "SPS: seq_parameter_set_id" ) );

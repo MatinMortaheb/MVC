@@ -1,3 +1,10 @@
+JMVC_5_0_6 -> JMVC_5_1
+Date            : July 31, 2009
+Authors         : Panasonic
+Contribution    : SW improvement
+Changes:
+- Implementation of constraint5_flag in SPS
+
 JMVC_5_0_5 -> JMVC_5_0_6 
 Date            : June 25, 2009
 Authors         : MERL

@@ -524,6 +524,7 @@ public:
   Bool                  getConstrainedSet2Flag                ()          const { return m_bConstrainedSet2Flag; }
   Bool                  getConstrainedSet3Flag                ()          const { return m_bConstrainedSet3Flag; }
   Bool                  getConstrainedSet4Flag                ()          const { return m_bConstrainedSet4Flag; }
+  Bool                  getConstrainedSet5Flag                ()          const { return m_bConstrainedSet5Flag; }
   UInt                  getLevelIdc                           ()          const { return m_uiLevelIdc;}
   UInt                  getSeqParameterSetId                  ()          const { return m_uiSeqParameterSetId;}
   Bool                  getSeqScalingMatrixPresentFlag        ()          const { return m_bSeqScalingMatrixPresentFlag; }
@@ -556,6 +557,7 @@ public:
   Void  setConstrainedSet2Flag                ( Bool        b  )          { m_bConstrainedSet2Flag                  = b;  }
   Void  setConstrainedSet3Flag                ( Bool        b  )          { m_bConstrainedSet3Flag                  = b;  }
   Void  setConstrainedSet4Flag                ( Bool        b  )          { m_bConstrainedSet4Flag                  = b;  }
+  Void  setConstrainedSet5Flag                ( Bool        b  )          { m_bConstrainedSet5Flag                  = b;  }
   Void  setLevelIdc                           ( UInt        ui )          { m_uiLevelIdc                            = ui; }
   Void  setSeqParameterSetId                  ( UInt        ui )          { m_uiSeqParameterSetId                   = ui; }
   Void  setSeqScalingMatrixPresentFlag        ( Bool        b  )          { m_bSeqScalingMatrixPresentFlag          = b;  }
@@ -612,6 +614,7 @@ protected:
   Bool          m_bConstrainedSet2Flag;
   Bool          m_bConstrainedSet3Flag;
   Bool          m_bConstrainedSet4Flag;
+  Bool          m_bConstrainedSet5Flag;
   UInt          m_uiLevelIdc;
   UInt          m_uiSeqParameterSetId;
   Bool          m_bSeqScalingMatrixPresentFlag;

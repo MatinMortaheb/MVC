@@ -938,6 +938,10 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
 	rpcSPS->setConstrainedSet4Flag                   ( true );
   else
 	rpcSPS->setConstrainedSet4Flag                   ( false );
+  if (rpcSPS->getProfileIdc() == MULTI_VIEW_PROFILE && NumViews<3)
+	rpcSPS->setConstrainedSet5Flag                   ( true );
+  else
+	rpcSPS->setConstrainedSet5Flag                   ( false );
   rpcSPS->setLevelIdc                              ( uiLevelIdc );
   rpcSPS->setSeqParameterSetId                     ( uiSPSId );
   rpcSPS->setSeqScalingMatrixPresentFlag           ( m_pcCodingParameter->get8x8Mode() > 1 );
