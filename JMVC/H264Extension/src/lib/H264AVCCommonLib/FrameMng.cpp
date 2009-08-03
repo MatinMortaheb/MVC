@@ -403,7 +403,8 @@ ErrVal FrameMng::RefreshOrederedPOCList()
 //JVT-S036 }
 
 
-ErrVal FrameMng::initSlice( SliceHeader *rcSH )
+//ErrVal FrameMng::initSlice( SliceHeader *rcSH )
+ErrVal FrameMng::initSlice( SliceHeader *rcSH , UInt NumOfViewsInTheStream)
 {
   m_uiMaxFrameNumCurr = ( 1 << ( rcSH->getSPS().getLog2MaxFrameNum() ) );
   m_uiMaxFrameNumPrev = ( 1 << ( rcSH->getSPS().getLog2MaxFrameNum() ) );
@@ -412,12 +413,14 @@ ErrVal FrameMng::initSlice( SliceHeader *rcSH )
   
   
   UInt Num_Views=1;
-  if (rcSH->getSPS().SpsMVC!=NULL)
+  //if (rcSH->getSPS().SpsMVC!=NULL)
+  if ((rcSH->getSPS().SpsMVC!=NULL) && NumOfViewsInTheStream>1)
 	  Num_Views = rcSH->getSPS().SpsMVC->getNumViewMinus1()+1;
   UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;
 
   m_iMaxEntriesinDPB = rcSH->getSPS().getMaxDPBSize();
   m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+  printf("MaxNumRefFrames=%d NumViews=%d dec DPB-size=%d\n",m_uiNumRefFrames,Num_Views,	m_iMaxEntriesinDPB);
 
   if( ! m_iMaxEntriesinDPB )
   {

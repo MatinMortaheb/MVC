@@ -167,6 +167,7 @@ public:
                         Bool&             bDiscardable
                         //~JVT-P031
 						,Bool&			  UnitAVCFlag	//JVT-S036 
+						,UInt NumOfViewsInTheStream
                         ); 
 //Dec. 1 fix view order for base view {{                        
   UInt*   getViewOrder  () { return m_puiViewOrder; } 

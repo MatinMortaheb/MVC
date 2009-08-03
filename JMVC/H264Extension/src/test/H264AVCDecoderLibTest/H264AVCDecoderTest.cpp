@@ -308,7 +308,8 @@ ErrVal H264AVCDecoderTest::go()
       RNOK( m_pcH264AVCDecoder->initPacket( &cBinDataAccessorTmp[uiFragNb], 
                                             uiNalUnitType, uiMbX, uiMbY, uiSize,  true, 
 		  false, //FRAG_FIX_3
-		  bStart, auiStartPos[uiFragNb], auiEndPos[uiFragNb], bFragmented, bDiscardable ) );
+//		  bStart, auiStartPos[uiFragNb], auiEndPos[uiFragNb], bFragmented, bDiscardable ) );
+		  bStart, auiStartPos[uiFragNb], auiEndPos[uiFragNb], bFragmented, bDiscardable, this->m_pcParameter->getNumOfViews() ) );
 
       uiTotalLength += auiEndPos[uiFragNb] - auiStartPos[uiFragNb];
 
@@ -350,7 +351,9 @@ ErrVal H264AVCDecoderTest::go()
 					//uiNonRequiredPic, //NonRequired JVT-Q066
                     false, bConcatenated, //FRAG_FIX_3
 					bStart, auiStartPos[uiFragNb+1], auiEndPos[uiFragNb+1], 
-                    bFragmented, bDiscardable) );
+//                    bFragmented, bDiscardable) );
+                    bFragmented, bDiscardable, this->m_pcParameter->getNumOfViews()) );
+
             }
 
         else if( uiNalUnitType == 14 )
@@ -360,7 +363,9 @@ ErrVal H264AVCDecoderTest::go()
 					//uiNonRequiredPic, //NonRequired JVT-Q066
                     false, bConcatenated, //FRAG_FIX_3
 					bStart, auiStartPos[uiFragNb+1], auiEndPos[uiFragNb+1], 
-                    bFragmented, bDiscardable) );
+//                    bFragmented, bDiscardable) );
+                    bFragmented, bDiscardable,this->m_pcParameter->getNumOfViews()) );
+                    
               }
               else
                   m_pcH264AVCDecoder->initPacket( &cBinDataAccessor );

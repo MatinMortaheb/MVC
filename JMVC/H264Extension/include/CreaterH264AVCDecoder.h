@@ -160,8 +160,10 @@ public:
                       UInt&             ruiStartPos,
                       UInt&             ruiEndPos,
                       Bool&              bFragmented,
-                      Bool&              bDiscardable
+                      Bool&              bDiscardable,
                       //~JVT-P031
+					  UInt NumOfViewInTheStream
+                      
                       ); 
 
 //JVT-S036  start

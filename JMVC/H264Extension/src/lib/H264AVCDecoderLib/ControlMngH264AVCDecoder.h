@@ -155,7 +155,9 @@ public:
   ErrVal initMbForDecoding    ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
   ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
 
-  ErrVal initSlice0           (SliceHeader *rcSH);
+//  ErrVal initSlice0           (SliceHeader *rcSH);
+  ErrVal initSlice0           (SliceHeader *rcSH, UInt NumOfViewsInTheStream);
+  
   // TMM_ESS 
   ErrVal initSPS              ( SequenceParameterSet& rcSequenceParameterSet,
                                 UInt  uiLayer );

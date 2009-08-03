@@ -160,7 +160,9 @@ public:
   ErrVal destroy();
 
 
-  ErrVal initSlice0       (SliceHeader *rcSH)                     { return Err::m_nERR; }
+//  ErrVal initSlice0       (SliceHeader *rcSH)                     { return Err::m_nERR; }
+  ErrVal initSlice0       (SliceHeader *rcSH,UInt NumOfViewsInTheStream)                     { return Err::m_nERR; }
+
  
   // TMM_ESS
   ErrVal initSPS          ( SequenceParameterSet&       rcSPS, UInt  uiLayer   ) { return Err::m_nERR; }  

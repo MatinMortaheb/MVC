@@ -1160,7 +1160,7 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 														Bool&             bDiscardable
                             //~JVT-P031
 														 ,Bool&			  UnitAVCFlag    //JVT-S036 
-                            )
+														 ,UInt NumOfViewsInTheStream                            )
 {
   ROF( m_bInitDone );
   UInt uiLayerId;
@@ -1230,7 +1230,8 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
     ruiStartPos += (uiHeaderBits+7)>>3; 
   	ruiStartPos = 0; //FRAG_FIX
     //~JVT-P031
-    RNOK( m_pcControlMng      ->initSlice0(m_pcSliceHeader) );
+//    RNOK( m_pcControlMng      ->initSlice0(m_pcSliceHeader) );
+    RNOK( m_pcControlMng      ->initSlice0(m_pcSliceHeader,NumOfViewsInTheStream) );
     m_pcSliceHeader->setKeyPictureFlag (KeyPicFlag);
     m_bActive = true;
     rbStartDecoding = true; //JVT-P031
@@ -1403,7 +1404,8 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
         ruiStartPos += (uiHeaderBits+7)>>3; 
         ruiStartPos = 0; //FRAG_FIX
         //~JVT-P031
-        RNOK( m_pcControlMng->initSlice0(m_pcSliceHeader) );
+//        RNOK( m_pcControlMng->initSlice0(m_pcSliceHeader) );
+        RNOK( m_pcControlMng->initSlice0(m_pcSliceHeader,NumOfViewsInTheStream) );
         // m_pcSliceHeader->setKeyPictureFlag (KeyPicFlag);
         m_bActive = true;
         rbStartDecoding = true; //JVT-P031
@@ -1497,7 +1499,9 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
         }//FIX_FRAG_CAVLC
         if(!bDiscardable)
           //~JVT-P031
-          RNOK( m_pcControlMng      ->initSlice0(m_pcSliceHeader) );
+//          RNOK( m_pcControlMng      ->initSlice0(m_pcSliceHeader) );
+          RNOK( m_pcControlMng      ->initSlice0(m_pcSliceHeader,NumOfViewsInTheStream) );
+
         if(m_pcSliceHeader) //JVT-P031
           m_pcSliceHeader->setKeyPictureFlag (KeyPicFlag);
         //JVT-P031

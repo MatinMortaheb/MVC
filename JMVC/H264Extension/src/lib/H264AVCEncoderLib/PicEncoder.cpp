@@ -883,6 +883,10 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   UInt mvcScaleFactor=1;
   UInt NumViews=1;
 
+  if (bAVCSPS)
+	  printf("\nInitilizating parameters for NAL_UNIT_SPS...\n");
+  else
+	  printf("\nInitilizating parameters for NAL_UNIT_SUBSET_SPS...\n");
   SequenceParameterSet*&  rpcSPS = bAVCSPS ?  m_pcSPSBase: m_pcSPS; 
   ROT( rpcSPS );
   //===== determine parameters =====
@@ -922,7 +926,7 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   uiLevelIdc  = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, decDPBSize, NumViews ) ; 
   if (uiLevelIdc== MSYS_UINT_MAX) {
 	  printf("With hierarchical-B & time-first decoding, the current configuration for full-view decoding requires %d DPB-frames.",decDPBSize);
-	  printf("However, it does not conform to any level. Encoder terminates.\n");
+	  printf("However, it exceeds the limit of MaxDpbFrames as specified in H.10.2.\nEncoder terminates.\n");
 	  exit(1);	
   } 
 
@@ -949,7 +953,7 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   ROT(m_pcCodingParameter->getPicOrderCntType()==2 && m_pcCodingParameter->getGOPSize()>1);//Poc type 2 supported when GOPSize =1
   rpcSPS->setPicOrderCntType                       ( m_pcCodingParameter->getPicOrderCntType() );
   rpcSPS->setLog2MaxPicOrderCntLsb                 ( m_pcCodingParameter->getLog2MaxPocLsb() );
-  rpcSPS->setNumRefFrames                          ( min (16, m_pcCodingParameter->getDPBSize()/mvcScaleFactor) ); 
+  //rpcSPS->setNumRefFrames                          ( min (16, m_pcCodingParameter->getDPBSize()/mvcScaleFactor) ); 
   
   rpcSPS->setRequiredFrameNumUpdateBehaviourFlag   ( true );
   rpcSPS->setFrameWidthInMbs                       ( uiMbX );
@@ -960,7 +964,9 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   
   UInt uiMaxFramesInDPB = rpcSPS->getMaxDPBSize();
   uiMaxFramesInDPB = min ( mvcScaleFactor*uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16) );
-  printf("bAVCSPS=%d decDPBSize=%d LevelIdc=%d\n",bAVCSPS,uiMaxFramesInDPB, uiLevelIdc);
+  rpcSPS->setNumRefFrames ( min (16, uiMaxFramesInDPB/mvcScaleFactor) ); 
+
+  printf("bAVCSPS=%d NumViews=%d Max_NumRefFrames=%d encDPBsize=%d decDPBSize=%d LevelIdc=%d\n",bAVCSPS,NumViews, rpcSPS->getNumRefFrames(), uiDPBSize, uiMaxFramesInDPB, uiLevelIdc);
   
 
   

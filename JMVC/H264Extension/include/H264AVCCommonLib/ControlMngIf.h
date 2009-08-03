@@ -102,7 +102,9 @@ protected:
   virtual ~ControlMngIf() {};
 
 public:
-  virtual ErrVal initSlice0           (SliceHeader *rcSH)                               = 0;
+//  virtual ErrVal initSlice0           (SliceHeader *rcSH)                               = 0;
+  virtual ErrVal initSlice0           (SliceHeader *rcSH, UInt NumOfViewsInTheStream)                               = 0;
+  
 // TMM_ESS 
   virtual ErrVal initSPS              ( SequenceParameterSet&       rcSPS,
                                         UInt  uiLayer )                                 = 0;

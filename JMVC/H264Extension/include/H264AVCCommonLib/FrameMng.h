@@ -300,7 +300,9 @@ public:
           ErrVal			xSlidingWindowUpdateBase    ( UInt mCurrFrameNum); //JVT-S036 
           ErrVal			xMMCOUpdateBase				( SliceHeader* rcSH ); //JVT-S036 
 
-          ErrVal initSlice( SliceHeader *rcSH );
+//          ErrVal initSlice( SliceHeader *rcSH );
+          ErrVal initSlice( SliceHeader *rcSH , UInt NumOfViewsInTheStream);
+          
           ErrVal initSPS( const SequenceParameterSet& rcSPS );
 
 

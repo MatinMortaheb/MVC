@@ -320,23 +320,12 @@ ErrVal ControlMngH264AVCDecoder::initMbForFiltering( UInt uiMbIndex )
 }
 
 
-ErrVal ControlMngH264AVCDecoder::initSlice0( SliceHeader *rcSH )
+//ErrVal ControlMngH264AVCDecoder::initSlice0( SliceHeader *rcSH )
+ErrVal ControlMngH264AVCDecoder::initSlice0( SliceHeader *rcSH, UInt NumOfViewsInTheStream )
+
 {
   UInt  uiLayer             = rcSH->getLayerId                    ();
-  /*
-//JVT-T054{
-  if(rcSH->getBaseLayerId() != MSYS_UINT_MAX && rcSH->getQualityLevel() != 0)
-  {
-    if( !m_apcMCTFDecoder[uiLayer]->isActive())
-    {
-      m_apcMCTFDecoder[uiLayer]->initSlice0( rcSH );
-    }
-    //if(!m_apcMCTFDecoder[uiLayer]->getResizeParameters())
-      RNOK( xInitESS( rcSH ) );
-    return Err::m_nOK;
-  }
-//JVT-T054}
-*/
+
 
   ROTRS( ( rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE || rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR) && m_uiInitilized[uiLayer], Err::m_nOK );
   ROTRS( ( rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_SCALABLE || rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_SCALABLE) && m_uiInitilized_MultiView[uiLayer], Err::m_nOK );
@@ -354,7 +343,8 @@ ErrVal ControlMngH264AVCDecoder::initSlice0( SliceHeader *rcSH )
     m_bLayer0IsAVC  = ( rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE || 
                         rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR);
     
-    RNOK( m_pcFrameMng->initSlice               ( rcSH ) );
+    //RNOK( m_pcFrameMng->initSlice               ( rcSH ) );
+    RNOK( m_pcFrameMng->initSlice               ( rcSH, NumOfViewsInTheStream ) );
     m_pcH264AVCDecoder->setReconstructionLayerId( uiLayer );
     m_pcH264AVCDecoder->setBaseAVCCompatible    ( m_bLayer0IsAVC );
   }
@@ -367,10 +357,7 @@ ErrVal ControlMngH264AVCDecoder::initSlice0( SliceHeader *rcSH )
       rcSH->getNalUnitType() == NAL_UNIT_CODED_SLICE_IDR_SCALABLE) &&
 			rcSH->getTrueSlice())//TMM_EC
   {
-    /*
-      if(!rcSH->getSvcMvcFlag() )
-        m_apcMCTFDecoder[uiLayer]->initSlice0( rcSH );
-        */
+  
   }
 
   RNOK( xInitESS( rcSH ) );
