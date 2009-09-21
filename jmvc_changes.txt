@@ -1,3 +1,11 @@
+JMVC_5_1 -> JMVC_5_2
+Date            : Sep. 21, 2009
+Authors         : Qualcomm
+Contribution    : SW improvement
+Changes:
+- This version does not have interlace support and created before interlace tools are added.
+
+
 JMVC_5_1 -> JMVC_5_1_1
 Date            : Aug. 3, 2009
 Authors         : MERL
