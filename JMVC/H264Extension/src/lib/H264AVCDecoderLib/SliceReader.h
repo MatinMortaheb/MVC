@@ -114,7 +114,14 @@ public:
 
   // JVT-S054 (2) (REPLACE)
   //ErrVal process( const SliceHeader& rcSH, UInt& ruiMbRead );
+
+#ifdef   LF_INTERLACE
+  //ErrVal process( SliceHeader& rcSH, Bool bDump = false );
   ErrVal process( SliceHeader& rcSH, UInt& ruiMbRead );
+#else //!LF_INTERLACE
+  //ErrVal process( const SliceHeader& rcSH, UInt& ruiMbRead );
+    ErrVal process( SliceHeader& rcSH, UInt& ruiMbRead );
+#endif //LF_INTERLACE
   
   ErrVal readSliceHeader  ( NalUnitType   eNalUnitType,
 

@@ -91,9 +91,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 #endif // _MSC_VER > 1000
 
 
-
 #include "H264AVCCommonLib/Sei.h" 
-
 #include "H264AVCCommonLib/MbDataCtrl.h"
 #include "DownConvert.h"
 #include "H264AVCCommonLib/MotionCompensation.h"
@@ -171,6 +169,13 @@ public:
                         ); 
 //Dec. 1 fix view order for base view {{                        
   UInt*   getViewOrder  () { return m_puiViewOrder; } 
+#ifdef LF_INTERLACE
+  void addViewOrder()
+  {
+	  	m_puiViewOrder=new UInt[1];
+		m_puiViewOrder[0]=0;
+  }
+#endif
 //}}           
   //JVT-P031
   ErrVal  initPacket( BinDataAccessor*  pcBinDataAccessor);
@@ -180,6 +185,15 @@ public:
   Void    setDependencyInitialized(Bool b) { m_bDependencyInitialized = b;}
   Void    initNumberOfFragment();
   //~JVT-P031
+
+  UInt    getCrop(UInt ui)
+  {
+	  if(ui<4) 
+		  return m_uiCropOffset[ui];
+	  else
+		  return 0;
+  };
+
   ErrVal  process   ( PicBuffer*        pcPicBuffer,
                       PicBufferList&    rcPicBufferOutputList,
                       PicBufferList&    rcPicBufferUnusedList,
@@ -299,7 +313,7 @@ protected:
   Bool                          m_bFrameDone;
   MotionCompensation*           m_pcMotionCompensation;
 
- 
+
   PicBuffer*                    m_pcFGSPicBuffer;
 
   Bool                          m_bEnhancementLayer;
@@ -389,6 +403,7 @@ protected:
   SliceHeader*                  m_pcSliceHeaderStored;
   Int                           m_iPrevPoc;
   //~JVT-P031
+  UInt                    m_uiCropOffset[4];//lufeng
 
   SliceHeader::PredWeightTable  m_acLastPredWeightTable[2];
 

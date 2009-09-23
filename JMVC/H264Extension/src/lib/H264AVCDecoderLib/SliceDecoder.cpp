@@ -167,7 +167,13 @@ ErrVal SliceDecoder::processVirtual(const SliceHeader& rcSH, Bool bReconstructAl
   for( ; uiMbRead; uiMbAddress++ )
   {
     MbDataAccess* pcMbDataAccess;
-		RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbAddress ) );
+	UInt uiMbY, uiMbX, uiMbIndex;
+#ifdef LF_INTERLACE
+    rcSH.getMbPositionFromAddress( uiMbY, uiMbX, uiMbIndex, uiMbAddress );
+		RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbY, uiMbX , rcSH.isMbAff()) );
+#else
+			RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbAddress ) );
+#endif
 
 	  pcMbDataAccess->getMbData().setMbMode(MODE_SKIP);
 	  pcMbDataAccess->getMbData().deactivateMotionRefinement();
@@ -194,10 +200,17 @@ SliceDecoder::process( const SliceHeader& rcSH, Bool bReconstructAll, UInt uiMbR
   {
 
     MbDataAccess* pcMbDataAccess;
+#ifdef LF_INTERLACE
+	UInt uiMbY, uiMbX, uiMbIndex;
 
+//	printf("\n\nMB: %d\n\n",uiMbAddress);
+
+    rcSH.getMbPositionFromAddress( uiMbY, uiMbX, uiMbIndex, uiMbAddress );
+		RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbY, uiMbX , rcSH.isMbAff()) );
+#else
     //RNOK( pcMbDataCtrl  ->initMb            (  pcMbDataAccess, uiMbY, uiMbX ) ); //--TM problem
     RNOK( m_pcControlMng->initMbForDecoding(  pcMbDataAccess, uiMbAddress ) );
-
+#endif
 
     RNOK( m_pcMbDecoder ->process( *pcMbDataAccess, bReconstructAll ) );
     //--ICU/ETRI FMO Implementation
@@ -233,8 +246,13 @@ SliceDecoder::decode( SliceHeader&   rcSH,
   //===== loop over macroblocks =====
   for( ; uiMbRead; )  //--ICU/ETRI FMO Implementation  //  for( UInt uiMbAddress = rcSH.getFirstMbInSlice(); uiMbRead; uiMbAddress++, uiMbRead-- )
   {
+#ifdef LF_INTERLACE
+	UInt uiMbY, uiMbX, uiMbIndex;
+    rcSH.getMbPositionFromAddress( uiMbY, uiMbX, uiMbIndex, uiMbAddress );
+#else
     UInt          uiMbY               = uiMbAddress / uiMbInRow;
     UInt          uiMbX               = uiMbAddress % uiMbInRow;
+#endif
     MbDataAccess* pcMbDataAccess      = 0;
     MbDataAccess* pcMbDataAccessBase  = 0;
 
@@ -243,8 +261,12 @@ SliceDecoder::decode( SliceHeader&   rcSH,
     {
       RNOK( pcMbDataCtrlBase->initMb        (  pcMbDataAccessBase, uiMbY, uiMbX ) );
     }
+#ifdef LF_INTERLACE
+		RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbY, uiMbX , rcSH.isMbAff()) );
+#else
     RNOK( m_pcControlMng->initMbForDecoding (  uiMbAddress  ) );
-
+#endif
+	
     RNOK( m_pcMbDecoder ->decode            ( *pcMbDataAccess,
                                               pcMbDataAccessBase,
                                               pcFrame,
@@ -319,7 +341,15 @@ SliceDecoder::compensatePrediction( SliceHeader&   rcSH )
     for(UInt uiMbIndex = uiFirstMbInSlice; uiMbIndex<=uiLastMbInSlice;)
     {
       MbDataAccess* pcMbDataAccess  = 0;
+#ifdef LF_INTERLACE
+	UInt uiMbY, uiMbX;
+	    const UInt uiMbsInRow = rcSH.getSPS().getFrameWidthInMbs();
+            uiMbY = ( uiMbIndex / uiMbsInRow );
+        uiMbX = ( uiMbIndex % uiMbsInRow );
+		RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbY, uiMbX , rcSH.isMbAff()) );
+#else
       RNOK( m_pcControlMng->initMbForDecoding   (  pcMbDataAccess, uiMbIndex ) );
+#endif
       RNOK( m_pcMbDecoder ->compensatePrediction( *pcMbDataAccess            ) );
 
   	  uiMbIndex = rcSH.getFMO()->getNextMBNr(uiMbIndex);    

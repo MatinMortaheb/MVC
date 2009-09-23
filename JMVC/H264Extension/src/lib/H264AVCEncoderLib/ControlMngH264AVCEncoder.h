@@ -162,7 +162,6 @@ public:
 
 //  ErrVal initSlice0       (SliceHeader *rcSH)                     { return Err::m_nERR; }
   ErrVal initSlice0       (SliceHeader *rcSH,UInt NumOfViewsInTheStream)                     { return Err::m_nERR; }
-
  
   // TMM_ESS
   ErrVal initSPS          ( SequenceParameterSet&       rcSPS, UInt  uiLayer   ) { return Err::m_nERR; }  
@@ -171,22 +170,31 @@ public:
                             const PictureParameterSet&  rcPPSLP,
                             const PictureParameterSet&  rcPPSHP );
 
-  ErrVal initMbForFiltering( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
-
   ErrVal initSlice( SliceHeader& rcSH, ProcessingState eProcessingState );
   ErrVal finishSlice( const SliceHeader& rcSH, Bool& rbPicDone, Bool& rbFrameDone );
 
   ErrVal initMbForParsing( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
-  ErrVal initMbForDecoding( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
 
   ErrVal initSliceForCoding   ( const SliceHeader& rcSH );
   ErrVal initSliceForReading  ( const SliceHeader& rcSH ) { return Err::m_nERR; }
   ErrVal initSliceForDecoding ( const SliceHeader& rcSH ) { return Err::m_nERR; }
   ErrVal initSliceForFiltering( const SliceHeader& rcSH );
 
-  ErrVal initMbForCoding      ( MbDataAccess& rcMbDataAccess, UInt uiMbIndex );
   ErrVal initMbForDecoding    ( UInt uiMbIndex ) { return Err::m_nERR; };
+//  ErrVal initMbForFiltering   ( UInt uiMbIndex );
+
+#ifdef LF_INTERLACE
+  ErrVal initMbForCoding( MbDataAccess& rcMbDataAccess, UInt uiMbY, UInt uiMbX, Bool bMbAFF, Bool bFieldFlag );
+  ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMbX, Bool bMbAFF );
+  ErrVal initMbForFiltering   ( UInt uiMbY, UInt uiMbX, Bool bMbAFF ){ return Err::m_nERR; };
+  ErrVal initMbForDecoding    (MbDataAccess*& rpcMbDataAccess,UInt uiMbY, UInt uiMbX, Bool bMbAFF  ){ return Err::m_nERR; }
+#else
+  ErrVal initMbForDecoding( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
+  ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
   ErrVal initMbForFiltering   ( UInt uiMbIndex );
+    ErrVal initMbForCoding      ( MbDataAccess& rcMbDataAccess, UInt uiMbIndex );
+#endif
+
 
   UvlcWriter*  getUvlcWriter()  { return m_pcUvlcWriter;  };
   CabacWriter* getCabacWriter() { return m_pcCabacWriter; };

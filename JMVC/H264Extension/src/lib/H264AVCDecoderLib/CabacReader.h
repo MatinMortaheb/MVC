@@ -216,6 +216,9 @@ public:
   ErrVal  intraPredModeLuma   ( MbDataAccess& rcMbDataAccess, LumaIdx cIdx );
   ErrVal  intraPredModeChroma ( MbDataAccess& rcMbDataAccess );
   ErrVal  samplesPCM          ( MbDataAccess& rcMbDataAccess );
+#ifdef   LF_INTERLACE
+  ErrVal  fieldFlag           ( MbDataAccess& rcMbDataAccess );
+#endif //LF_INTERLACE
 
   ErrVal  residualBlock8x8    ( MbDataAccess& rcMbDataAccess, B8x8Idx cIdx );
   ErrVal  intraPredModeLuma8x8( MbDataAccess& rcMbDataAccess, B8x8Idx cIdx );
@@ -249,12 +252,24 @@ protected:
   ErrVal xReadBCbp( MbDataAccess& rcMbDataAccess, Bool& rbCoded, ResidualMode eResidualMode, LumaIdx cIdx );
   ErrVal xReadBCbp( MbDataAccess& rcMbDataAccess, Bool& rbCoded, ResidualMode eResidualMode, ChromaIdx cIdx );
 
+#ifdef   LF_INTERLACE
   ErrVal xReadCoeff( TCoeff*        piCoeff,
-                     ResidualMode   eResidualMode,
-                     const UChar*   pucScan
-                     );
+      ResidualMode   eResidualMode,
+      const UChar*   pucScan, 
+      Bool           bFieldModel);
+#else //!LF_INTERLACE
+  ErrVal xReadCoeff( TCoeff*        piCoeff,
+      ResidualMode   eResidualMode,
+      const UChar*   pucScan);
+#endif //LF_INTERLACE
 
 protected:
+#ifdef   LF_INTERLACE
+    CabacContextModel2DBuffer m_cFieldFlagCCModel;
+    CabacContextModel2DBuffer m_cFldMapCCModel;
+    CabacContextModel2DBuffer m_cFldLastCCModel;
+#endif //LF_INTERLACE
+
   CabacContextModel2DBuffer m_cBCbpCCModel;
   CabacContextModel2DBuffer m_cMapCCModel;
   CabacContextModel2DBuffer m_cLastCCModel;

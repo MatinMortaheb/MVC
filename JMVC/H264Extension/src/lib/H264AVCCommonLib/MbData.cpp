@@ -89,6 +89,17 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 
 H264AVC_NAMESPACE_BEGIN
 
+#ifdef LF_INTERLACE
+Void MbData::copy( const MbData& rcMbData )
+{
+    MbDataStruct::          copy    ( rcMbData );
+    m_pcMbTCoeffs         ->copyFrom( *rcMbData.m_pcMbTCoeffs );
+    m_apcMbMotionData [0] ->copyFrom( *rcMbData.m_apcMbMotionData [0] );
+    m_apcMbMvdData    [0] ->copyFrom( *rcMbData.m_apcMbMvdData    [0] );
+    m_apcMbMotionData [1] ->copyFrom( *rcMbData.m_apcMbMotionData [1] );
+    m_apcMbMvdData    [1] ->copyFrom( *rcMbData.m_apcMbMvdData    [1] );
+}
+#endif
 
 ErrVal
 MbData::saveAll( FILE* pFile )
@@ -123,13 +134,16 @@ MbData::copyMotion( MbData& rcMbData,
 {
   m_uiSliceId   = ( uiSliceId != MSYS_UINT_MAX ? uiSliceId : m_uiSliceId );
   m_bBLSkipFlag = rcMbData.m_bBLSkipFlag;
-
+  m_bSkipFlag   = rcMbData.m_bSkipFlag;
   m_eMbMode     = rcMbData.m_eMbMode;
   m_aBlkMode[0] = rcMbData.m_aBlkMode[0];
   m_aBlkMode[1] = rcMbData.m_aBlkMode[1];
   m_aBlkMode[2] = rcMbData.m_aBlkMode[2];
   m_aBlkMode[3] = rcMbData.m_aBlkMode[3]; 
   m_usFwdBwd    = rcMbData.m_usFwdBwd;
+#ifdef   LF_INTERLACE
+  m_bFieldFlag  = rcMbData.m_bFieldFlag; //th060201
+#endif
 
   m_apcMbMotionData[0]->copyFrom( *rcMbData.m_apcMbMotionData[0] );
   m_apcMbMotionData[1]->copyFrom( *rcMbData.m_apcMbMotionData[1] );

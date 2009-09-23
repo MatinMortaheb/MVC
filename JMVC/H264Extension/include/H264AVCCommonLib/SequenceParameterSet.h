@@ -512,6 +512,11 @@ public:
   static ErrVal create                    ( SequenceParameterSet*& rpcSPS );
   ErrVal        destroy                   ();
 
+#ifdef   LF_INTERLACE
+  SequenceParameterSet& operator = ( const SequenceParameterSet& rcSPS );
+#endif //LF_INTERLACE
+
+//  static UInt   getLevelIdc               ( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic );
   static UInt   getLevelIdc               ( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic, int Num_Views );
   
   UInt          getMaxDPBSize             () const;
@@ -544,6 +549,7 @@ public:
   Bool                  getDirect8x8InferenceFlag             ()          const { return m_bDirect8x8InferenceFlag;}
   UInt                  getMbInFrame                          ()          const { return m_uiFrameWidthInMbs * m_uiFrameHeightInMbs;}
   Bool                  getInitState                          ()          const { return m_bInitDone; }
+  UInt                  getCropOffset                         (UInt idx)  const { return m_frame_crop_offset[idx];}
 
   Bool getFGSCodingMode                       ()                          const { return m_bFGSCodingMode;   }
   UInt getGroupingSize                        ()                          const { return m_uiGroupingSize;   }
@@ -569,7 +575,11 @@ public:
   Void  setOffsetForTopToBottomField          ( Int         i  )          { m_iOffsetForTopToBottomField            = i;  }
   Void  setNumRefFramesInPicOrderCntCycle     ( UInt        ui )          { m_uiNumRefFramesInPicOrderCntCycle      = ui; }
   Void  setOffsetForRefFrame                  ( UInt        ui, 
-                                                Int         i  )          { m_aiOffsetForRefFrame[ui]               = i;  }
+                                                Int         i  )          { m_aiOffsetForRefFrame[ui]               = i;  
+#ifdef LF_INTERLACE//I dont know which to use now
+                                                                            m_piOffsetForRefFrame.set(ui,i);
+#endif
+                                                                          }
   Void  setNumRefFrames                       ( UInt        ui )          { m_uiNumRefFrames                        = ui; }
   Void  setRequiredFrameNumUpdateBehaviourFlag( Bool        b  )          { m_bRequiredFrameNumUpdateBehaviourFlag  = b;  }
   Void  setFrameWidthInMbs                    ( UInt        ui )          { m_uiFrameWidthInMbs                     = ui; }
@@ -596,6 +606,28 @@ public:
   UInt getCurrentViewId() {return m_uiCurrentViewId;}
   Void setCurrentViewId(UInt ui) {m_uiCurrentViewId = ui;}
 
+
+#ifdef   LF_INTERLACE
+  Bool                  getFrameMbsOnlyFlag()                           const { return m_bFrameMbsOnlyFlag; }
+  Bool                  getMbAdaptiveFrameFieldFlag()                   const { return m_bMbAdaptiveFrameFieldFlag; }
+#endif //LF_INTERLACE
+
+#ifdef   LF_INTERLACE
+  //  Void  setFieldFlagCoded                     ( Bool        b  )          { m_bFieldFlagCoded                       = b;  }
+  Void  setFrameMbsOnlyFlag                   ( Bool        b  )          { m_bFrameMbsOnlyFlag                     = b;  }
+  Void  setMbAdaptiveFrameFieldFlag           ( Bool        b  )          { m_bMbAdaptiveFrameFieldFlag             = b;  }
+
+  ErrVal initOffsetForRefFrame( UInt uiSize )
+  {
+      ROT ( uiSize<1 );
+
+      RNOK( m_piOffsetForRefFrame.uninit() );
+      RNOK( m_piOffsetForRefFrame.init( uiSize ) );
+
+      return Err::m_nOK;
+  }
+#endif //LF_INTERLACE
+
 protected:
   static ErrVal xGetLevelLimit        ( const LevelLimit*&    rpcLevelLimit,
                                         Int                   iLevelIdc );
@@ -620,6 +652,9 @@ protected:
   Bool          m_bSeqScalingMatrixPresentFlag;
   ScalingMatrix m_cSeqScalingMatrix;
   UInt          m_uiLog2MaxFrameNum;
+#ifdef   LF_INTERLACE
+  DynBuf<Int>   m_piOffsetForRefFrame;
+#endif //LF_INTERLACE
 	UInt          m_uiPicOrderCntType;
   UInt          m_uiLog2MaxPicOrderCntLsb;
   Bool          m_bDeltaPicOrderAlwaysZeroFlag;
@@ -652,6 +687,14 @@ protected:
   UInt          m_uiPosVect[16];
 
   UInt          m_uiCurrentViewId;
+
+#ifdef   LF_INTERLACE
+  //  Bool          m_bFieldFlagCoded;
+  Bool          m_bFrameMbsOnlyFlag;
+  Bool          m_bMbAdaptiveFrameFieldFlag;
+#endif //LF_INTERLACE
+
+  UInt         m_frame_crop_offset[4];//lufeng: frame cropping
 private:
   static const LevelLimit m_aLevelLimit[52];
 };

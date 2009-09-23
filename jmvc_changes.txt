@@ -1,3 +1,11 @@
+JMVC_5_2 -> JMVC_6_0
+Date            : September 22, 2009
+Authors         : Panasonic
+Contribution    : SW improvement
+Changes:
+- Added interlaced support for MVC. New cfg options MbAff and Paff added to support Field Picture Coding, Macroblock Adaptive Frame Field coding and Picture Adaptive Frame Field coding.
+
+
 JMVC_5_1 -> JMVC_5_2
 Date            : Sep. 21, 2009
 Authors         : Qualcomm

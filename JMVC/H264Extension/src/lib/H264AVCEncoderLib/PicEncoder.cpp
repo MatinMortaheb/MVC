@@ -365,8 +365,7 @@ PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
   rbMoreSets = ! m_bInitParameterSets;
 
   return Err::m_nOK;
-}
- 
+} 
 // ying {{ new configuration file
 ErrVal
 PicEncoder::xInitFrameSpecSpecial() // for 12 and 15 only
@@ -716,8 +715,136 @@ PicEncoder::xUpdateFrameSepNextGOP()
   return Err::m_nOK;
 }
 
-//  }}
+#ifdef LF_INTERLACE
+ErrVal
+PicEncoder::process( PicBuffer*               pcInputPicBuffer,
+                    PicBufferList&           rcOutputList,
+                    PicBufferList&           rcUnusedList,
+                    ExtBinDataAccessorList&  rcExtBinDataAccessorList )
+{
+    ROF( m_bInitParameterSets );
 
+    //===== add picture to input picture buffer =====
+    RNOK( m_pcInputPicBuffer->add( pcInputPicBuffer ) );
+
+    //===== encode following access units that are stored in input picture buffer =====
+    while( true )
+    {
+        InputAccessUnit* pcInputAccessUnit = NULL;
+
+        //----- get next frame specification and input access unit -----
+        if( ! m_pcInputPicBuffer->empty() )
+        {
+
+            pcInputAccessUnit       = m_pcInputPicBuffer->remove( m_cFrameSpecification.getContFrameNumber() );
+        }
+        if( ! pcInputAccessUnit )
+        {
+            break;
+        }
+        //----- initialize picture -----
+        Double          dLambda         = 0;
+        UInt            uiPictureBits   = 0;
+        SliceHeader*    pcSliceHeader   = 0;
+		SliceHeader*    pcSliceHeaderTemp = 0;
+        RecPicBufUnit*  pcRecPicBufUnit = 0;//rec pic for current coded frame/field
+        PicBuffer*      pcOrigPicBuffer = pcInputAccessUnit->getInputPicBuffer();//input frame
+
+		const Bool bFieldCoded = ( m_pcCodingParameter->getPAff()==1? true : 
+			(m_pcCodingParameter->getPAff()==2? (( rand()%2 ) ? true : false) : false));
+		
+		RNOK( xInitSliceHeader( pcSliceHeaderTemp, m_cFrameSpecification, dLambda, false, bFieldCoded?TOP_FIELD:FRAME  ) );
+
+		if (   (NAL_UNIT_CODED_SLICE_IDR != m_cFrameSpecification.getNalUnitType() || !this->getAVCFlag())&&
+            (m_MultiviewRefPicManager.CountNumMultiviewReferenceStreams() > 0) ) {
+                Double          dLambdaForMVC   = 0;
+                SliceHeader*    pcSliceHeaderForMVC   = 0;
+                //RNOK( xInitSliceHeader( pcSliceHeaderForMVC, m_cFrameSpecification, 
+                //    dLambdaForMVC, /* fakeHeader = */ true ) );//get frame poc
+                //int poc = pcSliceHeaderForMVC->getPoc();
+ 
+                UInt poc=m_cFrameSpecification.getContFrameNumber();
+
+                RNOK( xInitSliceHeader( pcSliceHeaderForMVC, m_cFrameSpecification, 
+                    dLambdaForMVC, /* fakeHeader = */ true ,bFieldCoded?TOP_FIELD:FRAME ) );//init frame/field SH
+
+
+                m_MultiviewRefPicManager.AddMultiviewReferencesPicturesToBuffer
+                    (m_pcRecPicBuffer, pcSliceHeaderForMVC, rcOutputList, 
+                    rcUnusedList, *m_pcSPS, poc , this->TimeForVFrameP(poc));
+                delete pcSliceHeaderForMVC;
+        }
+
+		RNOK( m_pcRecPicBuffer->initCurrRecPicBufUnit( pcRecPicBufUnit, pcOrigPicBuffer, pcSliceHeaderTemp, rcOutputList, rcUnusedList ) );//init pcRecPicBufUnit
+        pcRecPicBufUnit->getRecFrame()->clearPicStat();//frame not encoded
+
+        const Bool m_bBotFieldFirst=false;
+        UInt    uiNumPics     = ( bFieldCoded ? 2 : 1 );
+        PicType eFirstPicType = ( bFieldCoded ? ( m_bBotFieldFirst ? BOT_FIELD : TOP_FIELD ) : FRAME );
+        PicType eLastPicType  = ( bFieldCoded ? ( m_bBotFieldFirst ? TOP_FIELD : BOT_FIELD ) : FRAME );
+		UInt    uiFirstPicPoc = 0;
+
+        //----- encoding -----
+        for( UInt uiPicType = 0; uiPicType < uiNumPics; uiPicType++ )
+        {
+            PicType ePicType    = ( uiPicType ? eLastPicType : eFirstPicType );
+
+            //----- initialize picture -----
+            dLambda         = 0;
+            uiPictureBits   = 0;
+
+            RNOK( xInitSliceHeader( pcSliceHeader, m_cFrameSpecification, dLambda, false, ePicType ) );
+			if(uiPicType == 1)pcSliceHeader->setPoc(uiFirstPicPoc,eFirstPicType);//set first field poc 
+            pcRecPicBufUnit->getRecFrame()->setPoc( *pcSliceHeader );//update poc for frame/field
+            
+            // JVT-V043 encoder
+            m_pcRecPicBuffer->SetPictureEncoder(this->getpicEncoder()); //JVT-W056
+            RNOK( xInitReorderingInterView ( pcSliceHeader) );
+
+            //JVT-W080
+            if( getPdsEnable() && m_cFrameSpecification.isAnchor() )
+            {
+                setPdsInitialDelayMinus2L0( m_pcCodingParameter->getPdsInitialDelayMinus2L0Anc() );
+                setPdsInitialDelayMinus2L1( m_pcCodingParameter->getPdsInitialDelayMinus2L1Anc() );
+            }
+            else if( getPdsEnable() )
+            {
+                setPdsInitialDelayMinus2L0( m_pcCodingParameter->getPdsInitialDelayMinus2L0NonAnc() );
+                setPdsInitialDelayMinus2L1( m_pcCodingParameter->getPdsInitialDelayMinus2L1NonAnc() );	
+            }
+            //~JVT-W080    
+
+      
+            RNOK( xEncodePicture( rcExtBinDataAccessorList, *pcRecPicBufUnit, *pcSliceHeader, dLambda, uiPictureBits ) );
+            m_uiWrittenBytes += ( uiPictureBits >> 3 );
+
+            //SEI {
+            m_adMVCSeqBits[pcSliceHeader->getTemporalLevel()] += uiPictureBits;
+            m_auiMVCNumFramesCoded[pcSliceHeader->getTemporalLevel()] ++;
+            xModifyMaxBitrate( uiPictureBits );
+            //SEI }
+
+			if(uiPicType == 0)uiFirstPicPoc=pcSliceHeader->getPoc(eFirstPicType);
+			
+            //----- reset -----
+            delete pcSliceHeader;
+			pcSliceHeader=0;
+		}//end of paff test
+
+		 m_MultiviewRefPicManager.RemoveMultiviewReferencesPicturesFromBuffer(m_pcRecPicBuffer);
+
+         //----- store picture -----
+         RNOK( m_pcRecPicBuffer->store( pcRecPicBufUnit, pcSliceHeaderTemp, rcOutputList, rcUnusedList ) );
+		 delete pcSliceHeaderTemp;
+		//----- reset -----
+        delete pcInputAccessUnit;
+        xGetNextFrameSpec(); //new configuration file
+
+    }
+
+    return Err::m_nOK;
+}
+#else
 ErrVal
 PicEncoder::process( PicBuffer*               pcInputPicBuffer,
                      PicBufferList&           rcOutputList,
@@ -811,7 +938,7 @@ PicEncoder::process( PicBuffer*               pcInputPicBuffer,
 
   return Err::m_nOK;
 }
-
+#endif
 
 ErrVal
 PicEncoder::finish( PicBufferList&  rcOutputList,
@@ -887,6 +1014,7 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
 	  printf("\nInitilizating parameters for NAL_UNIT_SPS...\n");
   else
 	  printf("\nInitilizating parameters for NAL_UNIT_SUBSET_SPS...\n");
+
   SequenceParameterSet*&  rpcSPS = bAVCSPS ?  m_pcSPSBase: m_pcSPS; 
   ROT( rpcSPS );
   //===== determine parameters =====
@@ -896,10 +1024,9 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   UInt  uiOutFreq   = (UInt)ceil( m_pcCodingParameter->getMaximumFrameRate() );
   UInt  uiMvRange   = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange();
 
- 
   //===== create parameter sets =====
   RNOK( SequenceParameterSet::create( rpcSPS ) );
-  if( !bAVCSPS)  
+ if( !bAVCSPS)  
   {
     m_pcSPS->SpsMVC = new SpsMvcExtension; 
     memcpy( m_pcSPS->SpsMVC, &(m_pcCodingParameter->SpsMVC), sizeof ( SpsMvcExtension )) ;
@@ -933,7 +1060,14 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   //===== set SPS parameters =====
   rpcSPS->setNalUnitType                           ( bAVCSPS ?  NAL_UNIT_SPS : NAL_UNIT_SUBSET_SPS );
   rpcSPS->setLayerId                               ( 0 );
+
+#ifdef LF_INTERLACE
+  rpcSPS->setProfileIdc                            ( bAVCSPS ? ( m_pcCodingParameter->get8x8Mode() >0  ? HIGH_PROFILE : MAIN_PROFILE  ) :
+	  ((m_pcCodingParameter->getMbAff() != 0 || m_pcCodingParameter->getPAff() != 0 )? STEREO_HIGH_PROFILE : MVC_PROFILE ));//lufeng
+#else
   rpcSPS->setProfileIdc                            ( bAVCSPS ? ( m_pcCodingParameter->get8x8Mode() >0  ? HIGH_PROFILE : MAIN_PROFILE  ) : MVC_PROFILE );
+#endif
+
   rpcSPS->setConstrainedSet0Flag                   ( false );
   rpcSPS->setConstrainedSet1Flag                   ( false );
   rpcSPS->setConstrainedSet2Flag                   ( false );
@@ -953,21 +1087,35 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   ROT(m_pcCodingParameter->getPicOrderCntType()==2 && m_pcCodingParameter->getGOPSize()>1);//Poc type 2 supported when GOPSize =1
   rpcSPS->setPicOrderCntType                       ( m_pcCodingParameter->getPicOrderCntType() );
   rpcSPS->setLog2MaxPicOrderCntLsb                 ( m_pcCodingParameter->getLog2MaxPocLsb() );
-  //rpcSPS->setNumRefFrames                          ( min (16, m_pcCodingParameter->getDPBSize()/mvcScaleFactor) ); 
-  
+  // rpcSPS->setNumRefFrames                          ( min (16, m_pcCodingParameter->getDPBSize()/mvcScaleFactor) ); 
   rpcSPS->setRequiredFrameNumUpdateBehaviourFlag   ( true );
   rpcSPS->setFrameWidthInMbs                       ( uiMbX );
   rpcSPS->setFrameHeightInMbs                      ( uiMbY );
   rpcSPS->setDirect8x8InferenceFlag                ( true );
 
+#ifdef LF_INTERLACE
+  rpcSPS->setMbAdaptiveFrameFieldFlag( (m_pcCodingParameter->getMbAff()?true:false) ); //th test
+  if( rpcSPS->getMbAdaptiveFrameFieldFlag() && uiMbY % 2)
+  {
+      printf(" mbaff ignored ");
+      rpcSPS->setMbAdaptiveFrameFieldFlag( false ); //not allowed
+  }
+    rpcSPS->setFrameMbsOnlyFlag( ! (m_pcCodingParameter->getMbAff() != 0 || m_pcCodingParameter->getPAff() != 0 ));
+#endif
+
   rpcSPS->setCurrentViewId(m_pcCodingParameter->getCurentViewId());
   
   UInt uiMaxFramesInDPB = rpcSPS->getMaxDPBSize();
   uiMaxFramesInDPB = min ( mvcScaleFactor*uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16) );
-  rpcSPS->setNumRefFrames ( min (16, uiMaxFramesInDPB/mvcScaleFactor) ); 
 
+#ifdef LF_INTERLACE
+  if( (m_pcCodingParameter->getMbAff() != 0 || m_pcCodingParameter->getPAff() != 0 ))
+	  rpcSPS->setNumRefFrames ( min (16, uiMaxFramesInDPB/mvcScaleFactor) -  m_uiGOPSize/2); //Need to consider non-ref frames cslim 130909
+  else
+#endif
+	  rpcSPS->setNumRefFrames ( min (16, uiMaxFramesInDPB/mvcScaleFactor) ); 
   printf("bAVCSPS=%d NumViews=%d Max_NumRefFrames=%d encDPBsize=%d decDPBSize=%d LevelIdc=%d\n",bAVCSPS,NumViews, rpcSPS->getNumRefFrames(), uiDPBSize, uiMaxFramesInDPB, uiLevelIdc);
-  
+
 
   
 
@@ -1505,11 +1653,20 @@ PicEncoder::xInitReorderingInterView (SliceHeader*&     rpcSliceHeader)
 
 }
 
+#ifdef LF_INTERLACE
+ErrVal
+PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
+                  			      FrameSpec&  rcFrameSpec,
+                              Double&           rdLambda,
+                              Bool              fakeHeader,
+							  PicType           ePicType)
+#else
 ErrVal
 PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
                   			      FrameSpec&  rcFrameSpec,
                               Double&           rdLambda,
                               Bool              fakeHeader)
+#endif
 {
   ROF( m_bInitParameterSets );
 
@@ -1538,6 +1695,19 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
   rpcSliceHeader->setViewId(this->getViewId());	
   rpcSliceHeader->setAVCFlag( getAVCFlag()!=0);  //JVT-W035
 
+#ifdef LF_INTERLACE
+  if (fakeHeader)//bad method: for multiview header
+  {
+      rpcSliceHeader->setFieldPicFlag                   ( false );
+      rpcSliceHeader->setBottomFieldFlag                ( false );
+  }
+  else
+  {
+      rpcSliceHeader->setFieldPicFlag                   ( ePicType != FRAME );//lufeng
+      rpcSliceHeader->setBottomFieldFlag                ( ePicType == BOT_FIELD );//lufeng
+  }
+
+#endif
 
   //===== set general parameters =====
   rpcSliceHeader->setFirstMbInSlice                     ( 0 );
@@ -1558,6 +1728,7 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
   rpcSliceHeader->setLastFragmentFlag                   ( true );
   rpcSliceHeader->setBaseLayerUsesConstrainedIntraPred  ( false );
   rpcSliceHeader->setFgsComponentSep                    ( false );
+    // ying, April 03 2009
   rpcSliceHeader->setAnchorPicFlag                      ( rcFrameSpec.isAnchor());
 
 
@@ -1573,14 +1744,67 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
   rpcSliceHeader->setSimplePriorityId( rpcSliceHeader->getViewId()== 0 ? rpcSliceHeader->getTemporalLevel() : ( m_uiMaxTL+rpcSliceHeader->getViewId()%2 +1) ); // JVT-W035
   //===== set prediction and update list sizes =====
   //===== reference picture list ===== (init with default data, later updated)
+
+#ifdef LF_INTERLACE
+  SliceType eSliceType;
+#endif
+  //if(rcFrameSpec.isIdrNalUnit())
+  //{
+	 // if(ePicType==BOT_FIELD)
+	 // {
+  //        UInt auiNumViewRef [2];
+  //        
+  //        auiNumViewRef [LIST_0]=m_uiAnchorNumFwdViewRef;
+  //        auiNumViewRef [LIST_1]=m_uiAnchorNumBwdViewRef;
+  //        auiNumViewRef [LIST_0]++;//ref to top
+  //        eSliceType =( auiNumViewRef [LIST_1] > 0 ? B_SLICE : auiNumViewRef [LIST_0] > 0 ? P_SLICE : I_SLICE);
+  //        rpcSliceHeader->setSliceType( eSliceType );
+  //        rpcSliceHeader->setNumRefIdxActive( LIST_0, auiNumViewRef[LIST_0] );
+  //        rpcSliceHeader->setNumRefIdxActive( LIST_1, auiNumViewRef[LIST_1] );
+  //        rpcSliceHeader->setNalUnitType( NAL_UNIT_CODED_SLICE );
+  //        rpcSliceHeader->setNonIDRFlag( (rpcSliceHeader->getNalUnitType () == NAL_UNIT_CODED_SLICE_IDR ) ? false : true ); // JVT-W035
+	 // }
+  //}
   //if( !rcFrameSpec.isIdrNalUnit())
   {
     //--- prediction ---
     UInt auiNumViewRef [2];
+
     if( rcFrameSpec.getSliceType()==I_SLICE) rcFrameSpec.setNumRefIdxActive(LIST_0, 0);
     if( rcFrameSpec.getSliceType()!=B_SLICE) rcFrameSpec.setNumRefIdxActive(LIST_1, 0);
+
+#ifdef LF_INTERLACE
+	if(ePicType==FRAME)
+	{
+		auiNumViewRef [LIST_0] = ( TimeForVFrameP(rcFrameSpec.getContFrameNumber()) ? m_uiAnchorNumFwdViewRef : rcFrameSpec.getNumRefIdxActive(LIST_0) + m_uiNonAncNumFwdViewRef );
+		auiNumViewRef [LIST_1] = ( TimeForVFrameP(rcFrameSpec.getContFrameNumber()) ? m_uiAnchorNumBwdViewRef : rcFrameSpec.getNumRefIdxActive(LIST_1) + m_uiNonAncNumBwdViewRef );
+	}
+	else//lufeng: field ref num modify, not support anchor picture
+	{
+		auiNumViewRef [LIST_0]=m_uiAnchorNumFwdViewRef;
+		auiNumViewRef [LIST_1]=m_uiAnchorNumBwdViewRef;
+		if(!TimeForVFrameP(rcFrameSpec.getContFrameNumber()))//not anchor
+		{
+			auiNumViewRef [LIST_0]=m_uiNonAncNumFwdViewRef;
+			auiNumViewRef [LIST_1]=m_uiNonAncNumBwdViewRef;
+			auiNumViewRef [LIST_0]+=rcFrameSpec.getNumRefIdxActive(LIST_0)*2;
+			auiNumViewRef [LIST_1]+=rcFrameSpec.getNumRefIdxActive(LIST_1)*2;
+		}
+		if(ePicType==BOT_FIELD)
+		{
+			if(rcFrameSpec.getNalRefIdc())
+				auiNumViewRef [LIST_0]++;//ref to top
+			if(NAL_UNIT_CODED_SLICE_IDR)
+			{
+				rpcSliceHeader->setNalUnitType( NAL_UNIT_CODED_SLICE );
+		        rpcSliceHeader->setNonIDRFlag( true); // JVT-W035
+			}
+		}
+	}
+#else
     auiNumViewRef [LIST_0] = ( TimeForVFrameP(rcFrameSpec.getContFrameNumber()) ? m_uiAnchorNumFwdViewRef : rcFrameSpec.getNumRefIdxActive(LIST_0) + m_uiNonAncNumFwdViewRef );
     auiNumViewRef [LIST_1] = ( TimeForVFrameP(rcFrameSpec.getContFrameNumber()) ? m_uiAnchorNumBwdViewRef : rcFrameSpec.getNumRefIdxActive(LIST_1) + m_uiNonAncNumBwdViewRef );
+#endif
 
     SliceType eSliceType =( auiNumViewRef [LIST_1] > 0 ? B_SLICE : auiNumViewRef [LIST_0] > 0 ? P_SLICE : I_SLICE);
     rpcSliceHeader->setSliceType( eSliceType );
@@ -1606,6 +1830,15 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
     }
     else
     {
+#ifdef LF_INTERLACE
+	 if( ! (rpcSliceHeader->getSPS().getFrameMbsOnlyFlag()) )//not support rplr&mmco for interlaced coding now
+	 {
+		 rpcSliceHeader->getRplrBuffer( LIST_0 ).setRefPicListReorderingFlag( false );
+		 rpcSliceHeader->getRplrBuffer( LIST_1 ).setRefPicListReorderingFlag( false );
+		 rpcSliceHeader->setAdaptiveRefPicBufferingFlag(false);
+	 }
+	 else{
+#endif
      if( rcFrameSpec.getMmcoBuf() )
      {
       rpcSliceHeader->setAdaptiveRefPicBufferingFlag( rcFrameSpec.getAdaptiveRefPicBufferingFlag());
@@ -1624,13 +1857,17 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
       rpcSliceHeader->getRplrBuffer( LIST_1 ).copy( *(StatBuf<Rplr,32>*)rcFrameSpec.getRplrBuf( LIST_1 ) );
      }
     }
-
+#ifdef LF_INTERLACE
+	}
+#endif
   }
 
-
-  //===== set picture order count =====
+#ifdef LF_INTERLACE
+  RNOK( m_pcPocCalculator->setPoc( *rpcSliceHeader, rcFrameSpec.getContFrameNumber()
+	  * (rpcSliceHeader->getSPS().getFrameMbsOnlyFlag()?1:2)+(ePicType==BOT_FIELD?1:0)) );//lufeng
+#else
   RNOK( m_pcPocCalculator->setPoc( *rpcSliceHeader, rcFrameSpec.getContFrameNumber() ) );
-
+#endif
   
 #if 0
   //===== initialize prediction weights =====
@@ -1739,22 +1976,42 @@ PicEncoder::xEncodePicture( ExtBinDataAccessorList& rcExtBinDataAccessorList,
                             RecPicBufUnit&          rcRecPicBufUnit,
                             SliceHeader&            rcSliceHeader,
                             Double                  dLambda,
-                            UInt&                   ruiBits  )
+                            UInt&                   ruiBits)
 {
   UInt  uiBits = 0;
-
+#ifdef LF_INTERLACE
+    if (rcSliceHeader.getPicType() !=FRAME)
+    {
+             m_pcRecPicBuffer->SetCodeAsVFrameFlag(false);
+    }
+    else
+    {
+         m_pcRecPicBuffer->SetCodeAsVFrameFlag(TimeForVFrameP
+        	  (m_cFrameSpecification.getContFrameNumber()));
+		//			        (rcSliceHeader.getPoc()));//lufeng: not support VFrameP for field coding
+    }
+#else
   m_pcRecPicBuffer->SetCodeAsVFrameFlag(TimeForVFrameP
 					(rcSliceHeader.getPoc()));
+#endif
   rcSliceHeader.setSvcMvcFlag(this->getSvcMvcFlag());
   rcSliceHeader.setAVCFlag( this->getAVCFlag()!=0);  //JVT-W035
   rcSliceHeader.setViewId(this->getViewId());
-  rcSliceHeader.setAnchorPicFlag(TimeForVFrameP(rcSliceHeader.getPoc()));
+  rcSliceHeader.setAnchorPicFlag(TimeForVFrameP(rcSliceHeader.getPoc()));//lufeng: getPoc should be getContFrameNumber for field coding
   rcSliceHeader.setReservedOneBit(1); // bug fix: prefix NAL (NTT)
   rcSliceHeader.setInterViewFalg(this->derivation_Inter_View_Flag(this->getViewId(), rcSliceHeader)); // JVT-W056 Samsung
 
+#ifdef LF_INTERLACE
+  if( rcSliceHeader.getPicType()!=FRAME )
+    {
+		if(rcRecPicBufUnit.getRecFrame())
+          RNOK( rcRecPicBufUnit.getRecFrame()->addFieldBuffer( rcSliceHeader.getPicType() ));
+    }
+#endif
+
   //===== start picture =====
   RefFrameList  cList0, cList1;
-  RNOK( xStartPicture( rcRecPicBufUnit, rcSliceHeader, cList0, cList1 ) );
+  RNOK( xStartPicture( rcRecPicBufUnit, rcSliceHeader, cList0, cList1 ) );//treat ref_list
 //  bug fix for TD March 19
   xSetRefPictures(rcSliceHeader, cList0, cList1);
 //TMM_WP
@@ -1810,6 +2067,30 @@ PicEncoder::xEncodePicture( ExtBinDataAccessorList& rcExtBinDataAccessorList,
 
     //----- real coding -----
 
+#ifdef LF_INTERLACE
+        //lufeng: add mbaff here
+		if (rcSliceHeader.isMbAff()&&!rcSliceHeader.getFieldPicFlag())
+	{
+		RNOK( m_pcSliceEncoder->encodeSliceMbAff( rcSliceHeader,
+			rcRecPicBufUnit.getRecFrame  (),
+			rcRecPicBufUnit.getMbDataCtrl(),
+			cList0,
+			cList1,
+			m_uiFrameWidthInMb,
+			dLambda ) );
+	}
+	else
+	{
+#endif
+#ifdef LF_INTERLACE
+		RNOK( m_pcSliceEncoder->encodeSlice( rcSliceHeader,
+			rcRecPicBufUnit.getRecFrame  ()->getPic(rcSliceHeader.getPicType()),
+			rcRecPicBufUnit.getMbDataCtrl(),
+			cList0,
+			cList1,
+			m_uiFrameWidthInMb,
+			dLambda ) );
+#else
     RNOK( m_pcSliceEncoder->encodeSlice( rcSliceHeader,
                                          rcRecPicBufUnit.getRecFrame  (),
                                          rcRecPicBufUnit.getMbDataCtrl(),
@@ -1817,6 +2098,11 @@ PicEncoder::xEncodePicture( ExtBinDataAccessorList& rcExtBinDataAccessorList,
                                          cList1,
                                          m_uiFrameWidthInMb,
                                          dLambda ) );
+#endif
+#ifdef LF_INTERLACE
+	}
+#endif
+
 
     //----- close NAL unit -----
     RNOK( m_pcNalUnitEncoder->closeNalUnit( uiBitsSlice ) );
@@ -1826,7 +2112,7 @@ PicEncoder::xEncodePicture( ExtBinDataAccessorList& rcExtBinDataAccessorList,
   }
 
   //===== finish =====
-  RNOK( xFinishPicture( rcRecPicBufUnit, rcSliceHeader, cList0, cList1, uiBits ) );
+  RNOK( xFinishPicture( rcRecPicBufUnit, rcSliceHeader, cList0, cList1, uiBits ) );//deblocking, psnr
   ruiBits += uiBits;
 
   return Err::m_nOK;
@@ -1874,21 +2160,70 @@ PicEncoder::xWritePrefixUnit( ExtBinDataAccessorList& rcExtBinDataAccessorList, 
 ErrVal          
 PicEncoder::xSetRefPictures(SliceHeader&                rcSliceHeader,
                             RefFrameList&               rcList0,
-                            RefFrameList&               rcList1 )
+                            RefFrameList&               rcList1)
 {
   ROTRS( rcSliceHeader.isIntra(), Err::m_nOK );
 
   if( rcSliceHeader.isInterP() )
   {
+#ifdef LF_INTERLACE
+      rcSliceHeader.setRefFrameList(&rcList0,rcSliceHeader.getPicType() ,LIST_0);
+#else
     rcSliceHeader.setRefFrameList(&rcList0, LIST_0);
+#endif
   }
   else // rcSliceHeader.isInterB()
   {
-    rcSliceHeader.setRefFrameList(&rcList0, LIST_0);
-    rcSliceHeader.setRefFrameList(&rcList1, LIST_1);
+#ifdef LF_INTERLACE
+      rcSliceHeader.setRefFrameList(&rcList0,rcSliceHeader.getPicType() ,LIST_0);
+      rcSliceHeader.setRefFrameList(&rcList1,rcSliceHeader.getPicType() ,LIST_1);
+#else
+      rcSliceHeader.setRefFrameList(&rcList0, LIST_0);
+          rcSliceHeader.setRefFrameList(&rcList1, LIST_1);
+#endif
+
   }
   return Err::m_nOK;
 }
+
+#ifdef LF_INTERLACE
+ErrVal
+PicEncoder::xFieldList(    SliceHeader&   rcSliceHeader,
+                           RefFrameList&  rcList,
+                           RefFrameList&  rcListTemp )
+{
+	PicType               eCurrPicType      = rcSliceHeader.getPicType();
+    PicType               eOppositePicture  = ( eCurrPicType == TOP_FIELD ? BOT_FIELD : TOP_FIELD );
+
+    //----- initialize field list for short term pictures -----
+    UInt  uiCurrentParityIndex  = 0;
+    UInt  uiOppositeParityIndex = 0;
+
+    while( uiCurrentParityIndex < rcListTemp.getActive() || uiOppositeParityIndex < rcListTemp.getActive() )
+    {
+        //--- current parity ---
+        while( uiCurrentParityIndex < rcListTemp.getActive() )
+        {
+			if( rcListTemp[++uiCurrentParityIndex]->isPicReady( eCurrPicType ) )
+            {
+				rcList.add(rcListTemp[uiCurrentParityIndex]->getPic(eCurrPicType));
+                break;
+            }
+        }
+        //--- opposite parity ---
+		while( uiOppositeParityIndex < rcListTemp.getActive() )
+        {
+			if( rcListTemp[++uiOppositeParityIndex]->isPicReady( eOppositePicture ) )
+            {
+				rcList.add(rcListTemp[uiOppositeParityIndex]->getPic(eOppositePicture));
+                break;
+            }
+        }
+    }
+
+    return Err::m_nOK;
+}
+#endif
 
 ErrVal
 PicEncoder::xStartPicture( RecPicBufUnit& rcRecPicBufUnit,
@@ -1897,6 +2232,14 @@ PicEncoder::xStartPicture( RecPicBufUnit& rcRecPicBufUnit,
                            RefFrameList&  rcList1 )
 {
   //===== initialize reference picture lists and update slice header =====
+  //RefFrameList rcListTemp0, rcListTemp1;
+//===== initialize reference picture lists and update slice header =====
+#ifdef LF_INTERLACE
+  ROTRS( rcSliceHeader.isIntra(), Err::m_nOK );
+  
+  RNOK( m_pcRecPicBuffer->getRefLists( rcList0, rcList1, rcSliceHeader,m_pcQuarterPelFilter ) );//deal with the ref_list
+  
+#else  
   RNOK( m_pcRecPicBuffer->getRefLists( rcList0, rcList1, rcSliceHeader ) );
 
   //===== init half-pel buffers =====
@@ -1925,11 +2268,20 @@ PicEncoder::xStartPicture( RecPicBufUnit& rcRecPicBufUnit,
       RNOK( pcRefFrame->extendFrame( m_pcQuarterPelFilter ) );
     }
   }
+#endif
 
   //===== reset macroblock data =====
+
+#ifdef LF_INTERLACE
+  if(rcSliceHeader.getPicType()!=BOT_FIELD)//new frame
+  {
+   	  RNOK( rcRecPicBufUnit.getMbDataCtrl()->reset() );
+	  RNOK( rcRecPicBufUnit.getMbDataCtrl()->clear() );
+  }
+#else
   RNOK( rcRecPicBufUnit.getMbDataCtrl()->reset() );
   RNOK( rcRecPicBufUnit.getMbDataCtrl()->clear() );
-
+#endif
   return Err::m_nOK;
 }
 
@@ -1969,6 +2321,7 @@ PicEncoder::xFinishPicture( RecPicBufUnit&  rcRecPicBufUnit,
   }
 
   //===== deblocking =====
+#ifdef LF_INTERLACE
   RNOK( m_pcLoopFilter->process( rcSliceHeader,
                                  rcRecPicBufUnit.getRecFrame(),
                                  rcRecPicBufUnit.getMbDataCtrl(),
@@ -1976,10 +2329,63 @@ PicEncoder::xFinishPicture( RecPicBufUnit&  rcRecPicBufUnit,
                                  m_uiFrameWidthInMb,
                                  &rcList0,
                                  &rcList1,
-								 true,
-                                 false ) );
+                                 false) );
+#else
+  RNOK( m_pcLoopFilter->process( rcSliceHeader,
+                                  rcRecPicBufUnit.getRecFrame(),
+                                  rcRecPicBufUnit.getMbDataCtrl(),
+                                  rcRecPicBufUnit.getMbDataCtrl(),
+                                  m_uiFrameWidthInMb,
+                                  &rcList0,
+                                  &rcList1,
+                                  true,
+                                  false ) );
+#endif
 
   //===== get PSNR =====
+#ifdef LF_INTERLACE
+  if(rcSliceHeader.getPicType()==FRAME||rcSliceHeader.getPicType()==BOT_FIELD)//lufeng: support field
+  {
+	  Double dPSNR[3];
+	  RNOK( xGetPSNR( rcRecPicBufUnit, dPSNR ) );
+
+	  //===== output =====
+	  printf( "%4d %c %s %s %4d  QP%3d  Y %7.4lf dB  U %7.4lf dB  V %7.4lf dB   bits%8d\n",
+		m_uiCodedFrames,
+		rcSliceHeader.getSliceType  ()==I_SLICE ? 'I' :
+		rcSliceHeader.getSliceType  ()==P_SLICE ? 'P' : 'B',
+		rcSliceHeader.getNalUnitType()==NAL_UNIT_CODED_SLICE_IDR ? "IDR" :
+		rcSliceHeader.getNalRefIdc  ()==NAL_REF_IDC_PRIORITY_LOWEST ? "   " : "REF",
+			rcSliceHeader.getInterViewFlag() == true ? "REF_VIEW" : "       ", //JVT-W056  samsung
+		rcSliceHeader.getPoc(),
+		rcSliceHeader.getPicQp(),
+		dPSNR[0],
+		dPSNR[1],
+		dPSNR[2],
+		uiBits
+		);
+	  
+	  //===== update parameters =====
+	  m_uiCodedFrames++;
+	  ETRACE_NEWFRAME;
+
+  }
+  else
+  {
+	  //===== output =====
+	  printf( "%4d %c %s %s %4d  QP%3d  bits%8d\n",
+		m_uiCodedFrames,
+		rcSliceHeader.getSliceType  ()==I_SLICE ? 'I' :
+		rcSliceHeader.getSliceType  ()==P_SLICE ? 'P' : 'B',
+		rcSliceHeader.getNalUnitType()==NAL_UNIT_CODED_SLICE_IDR ? "IDR" :
+		rcSliceHeader.getNalRefIdc  ()==NAL_REF_IDC_PRIORITY_LOWEST ? "   " : "REF",
+			rcSliceHeader.getInterViewFlag() == true ? "REF_VIEW" : "       ", //JVT-W056  samsung
+		rcSliceHeader.getPoc(),
+		rcSliceHeader.getPicQp(),
+		uiBits
+		);
+  }
+#else
   Double dPSNR[3];
   RNOK( xGetPSNR( rcRecPicBufUnit, dPSNR ) );
 
@@ -2002,6 +2408,8 @@ PicEncoder::xFinishPicture( RecPicBufUnit&  rcRecPicBufUnit,
   //===== update parameters =====
   m_uiCodedFrames++;
   ETRACE_NEWFRAME;
+#endif
+
 
   return Err::m_nOK;
 }
@@ -2015,7 +2423,11 @@ PicEncoder::xGetPSNR( RecPicBufUnit&  rcRecPicBufUnit,
   RNOK( m_pcYuvBufferCtrlFullPel->initMb() );
 
   //===== set parameters =====
-  const YuvBufferCtrl::YuvBufferParameter&  cBufferParam  = m_pcYuvBufferCtrlFullPel->getBufferParameter();
+#ifdef LF_INTERLACE
+const YuvBufferCtrl::YuvBufferParameter&  cBufferParam  = m_pcYuvBufferCtrlFullPel->getBufferParameter(FRAME);
+#else
+const YuvBufferCtrl::YuvBufferParameter&  cBufferParam  = m_pcYuvBufferCtrlFullPel->getBufferParameter();
+#endif  
   IntFrame*                                 pcFrame       = rcRecPicBufUnit.getRecFrame  ();
   PicBuffer*                                pcPicBuffer   = rcRecPicBufUnit.getPicBuffer ();
   

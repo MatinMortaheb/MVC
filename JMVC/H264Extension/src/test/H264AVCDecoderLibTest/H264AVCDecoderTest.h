@@ -109,6 +109,7 @@ public:
   ErrVal go();
   ErrVal destroy();
   ErrVal setec( UInt uiErrorConceal);//TMM_EC
+  ErrVal setCrop();
 
 protected:
   ErrVal xGetNewPicBuffer ( PicBuffer*& rpcPicBuffer, UInt uiSize );

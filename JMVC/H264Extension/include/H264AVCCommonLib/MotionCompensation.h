@@ -132,6 +132,9 @@ protected:
     const PW*       m_apcPW[2];
     YuvPicBuffer*   m_apcRefBuffer[2];
     Mv3D            m_aacMv[2][6];
+#ifdef   LF_INTERLACE
+    Short           m_sChromaOffset[2];
+#endif //LF_INTERLACE
   };
 
   class IntMC8x8D
@@ -150,6 +153,9 @@ protected:
     IntYuvPicBuffer*  m_apcRefBuffer[2];
     Mv3D              m_aacMv[2][6];
     Mv3D              m_aacMvd[2][6];  // differential motion vector 
+#ifdef   LF_INTERLACE
+    Short           m_sChromaOffset[2];
+#endif //LF_INTERLACE
   };
 
 protected:
@@ -264,7 +270,12 @@ public:
 
   ErrVal compensateDirectBlock( MbDataAccess& rcMbDataAccess, YuvMbBuffer *pcRecBuffer, B8x8Idx c8x8Idx, Bool& rbValid, Bool bFaultTolerant, Bool bCalcMv = true );
   ErrVal compensateDirectBlock( MbDataAccess& rcMbDataAccess, IntYuvMbBuffer *pcRecBuffer, B8x8Idx c8x8Idx, RefFrameList& rcRefFrameListL0, RefFrameList& rcRefFrameListL1 );
+#ifdef   LF_INTERLACE
+  ErrVal initMb( UInt uiMbY, UInt uiMbX, MbDataAccess& rcMbDataAccess);
+#else
   ErrVal initMb( UInt uiMbY, UInt uiMbX);
+#endif
+
 
 
 protected:
@@ -285,6 +296,9 @@ protected:
 
 
 private:
+#ifdef   LF_INTERLACE
+    __inline Short xCorrectChromaMv( const MbDataAccess& rcMbDataAccess, PicType eRefPicType );
+#endif //LF_INTERLACE
   __inline Void xGetMbPredData( MbDataAccess& rcMbDataAccess, MC8x8D& rcMC8x8D );
   __inline Void xGetBlkPredData( MbDataAccess& rcMbDataAccess, MC8x8D& rcMC8x8D, BlkMode eBlkMode );
   __inline Void xPredChromaPel( Pel* pucDest, Int iDestStride, Pel* pucSrc, Int iSrcStride, Mv cMv, Int iSizeY, Int iSizeX );

@@ -144,6 +144,9 @@ public:
   virtual ErrVal  deltaQp             ( MbDataAccess& rcMbDataAccess ) = 0;
   virtual ErrVal  intraPredModeLuma   ( MbDataAccess& rcMbDataAccess, LumaIdx cIdx ) = 0;
   virtual ErrVal  intraPredModeChroma ( MbDataAccess& rcMbDataAccess ) = 0;
+#ifdef   LF_INTERLACE
+  virtual ErrVal  fieldFlag           ( MbDataAccess& rcMbDataAccess ) = 0;
+#endif //LF_INTERLACE
   virtual ErrVal  samplesPCM          ( MbDataAccess& rcMbDataAccess ) = 0;
 
   virtual ErrVal  startSlice          ( const SliceHeader& rcSliceHeader ) = 0;

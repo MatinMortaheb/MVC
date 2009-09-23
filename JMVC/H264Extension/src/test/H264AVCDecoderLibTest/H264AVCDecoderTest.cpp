@@ -162,7 +162,7 @@ ErrVal H264AVCDecoderTest::destroy()
     RNOK( m_pcReadBitstream->destroy() );  
   }
 */
-  AOF( m_cActivePicBufferList.empty() );
+//  AOF( m_cActivePicBufferList.empty() );
   
   //===== delete picture buffer =====
   PicBufferList::iterator iter;
@@ -353,7 +353,6 @@ ErrVal H264AVCDecoderTest::go()
 					bStart, auiStartPos[uiFragNb+1], auiEndPos[uiFragNb+1], 
 //                    bFragmented, bDiscardable) );
                     bFragmented, bDiscardable, this->m_pcParameter->getNumOfViews()) );
-
             }
 
         else if( uiNalUnitType == 14 )
@@ -365,7 +364,6 @@ ErrVal H264AVCDecoderTest::go()
 					bStart, auiStartPos[uiFragNb+1], auiEndPos[uiFragNb+1], 
 //                    bFragmented, bDiscardable) );
                     bFragmented, bDiscardable,this->m_pcParameter->getNumOfViews()) );
-                    
               }
               else
                   m_pcH264AVCDecoder->initPacket( &cBinDataAccessor );
@@ -424,6 +422,8 @@ ErrVal H264AVCDecoderTest::go()
 	// ROI DECODE ICU/ETRI
 	m_pcH264AVCDecoder->RoiDecodeInit();
 
+	setCrop();//lufeng: support frame cropping
+
     // picture output
     while( ! cPicBufferOutputList.empty() )
     {
@@ -431,8 +431,17 @@ ErrVal H264AVCDecoderTest::go()
 //JVT-V054    
       if(!m_pcWriteYuv->getFileInitDone() )
       {
-        UInt *vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
-       	m_pcWriteYuv->xInitMVC(m_pcParameter->cYuvFile, vcOrder, m_pcParameter->getNumOfViews()); // JVT-AB024 modified remove active view info SEI  			
+		  UInt *vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
+#ifdef LF_INTERLACE
+		  if(vcOrder == NULL)//lufeng: in order to output non-MVC seq
+          {
+			  UInt order=0;
+			  m_pcH264AVCDecoder->addViewCodingOrder();
+			  vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
+		  }
+#endif
+       		m_pcWriteYuv->xInitMVC(m_pcParameter->cYuvFile, vcOrder, m_pcParameter->getNumOfViews()); // JVT-AB024 modified remove active view info SEI  			
+		/*  }*/
       }
 
         PicBuffer* pcPicBufferTmp = cPicBufferOutputList.front();
@@ -454,7 +463,7 @@ ErrVal H264AVCDecoderTest::go()
         }
 
 		  
-          if(m_pcParameter->getNumOfViews() > 0)
+          if(m_pcParameter->getNumOfViews() > 0)// && m_pcH264AVCDecoder->getViewCodingOrder()!=NULL)// lufeng: to write non-MVC seq	 
           {
 			  UInt view_cnt;
 			  for (view_cnt=0; view_cnt < m_pcParameter->getNumOfViews(); view_cnt++)
@@ -506,7 +515,11 @@ ErrVal H264AVCDecoderTest::go()
   return Err::m_nOK;
 }
 
+ErrVal H264AVCDecoderTest::setCrop()
+{
+	UInt uiCrop[4];
+	m_pcH264AVCDecoder->setCrop(uiCrop);
+	m_pcWriteYuv->setCrop(uiCrop);
 
-
-
-
+	return Err::m_nOK;
+}

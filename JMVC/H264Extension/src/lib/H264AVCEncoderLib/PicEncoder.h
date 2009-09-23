@@ -190,10 +190,18 @@ private:
 
   ErrVal  xInitReorderingInterView  ( SliceHeader*&               rpcSliceHeader ); // JVT-V043  related
 
+#ifdef LF_INTERLACE
+  ErrVal  xInitSliceHeader          ( SliceHeader*&               rpcSliceHeader,
+                                      FrameSpec&                  rcFrameSpec,
+                                      Double&                     dLambda, 
+                                      Bool                        fakeHeader=false,
+									  PicType                     ePicType=FRAME);
+#else
   ErrVal  xInitSliceHeader          ( SliceHeader*&               rpcSliceHeader,
                                       FrameSpec&                  rcFrameSpec,
                                       Double&                     dLambda, 
                                       Bool                        fakeHeader=false );
+#endif
 
   UIntList                      m_cLPFrameNumList;                    
 //  }}
@@ -217,7 +225,7 @@ private:
                                                   RecPicBufUnit&              rcRecPicBufUnit,
                                                   SliceHeader&                rcSliceHeader,
                                                   Double                      dLambda,
-                                                  UInt&                       ruiBits );
+                                                  UInt&                       ruiBits);
   ErrVal          xFinishPicture                ( RecPicBufUnit&              rcRecPicBufUnit,
                                                   SliceHeader&                rcSliceHeader,
                                                   RefFrameList&               rcList0,
@@ -226,6 +234,12 @@ private:
   ErrVal          xGetPSNR                      ( RecPicBufUnit&              rcRecPicBufUnit,
                                                   Double*                     adPSNR );
 
+#ifdef LF_INTERLACE
+ErrVal
+xFieldList(    SliceHeader&   rcSliceHeader,
+                           RefFrameList&  rcList,
+                           RefFrameList&  rcListTemp );//lufeng
+#endif
 
 // ying GOP stucture support, simplify the configuration files {{
   ErrVal          xInitFrameSpec               ();
@@ -239,7 +253,7 @@ private:
 
 ErrVal xSetRefPictures(SliceHeader&                rcSliceHeader,
                        RefFrameList&               rcList0,
-                       RefFrameList&               rcList1 );
+                       RefFrameList&               rcList1);
 
 private:
   Bool                        m_bInit;
@@ -280,7 +294,7 @@ private:
   PictureParameterSet*        m_pcPPSBase;
   PictureParameterSet*        m_pcPPS;
   
-  RecPicBuffer*               m_pcRecPicBuffer;
+  RecPicBuffer*               m_pcRecPicBuffer;//buffer for recpics
 
   //===== references =====
   CodingParameter*            m_pcCodingParameter;

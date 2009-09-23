@@ -85,7 +85,9 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 #include <string.h>
 #include <time.h>
 
+#ifndef DOWN_CONVERT_STATIC
 #define DOWN_CONVERT_STATIC
+#endif
 
 //#define OLD_DYADIC_UPSAMPLE //to be outcommented to use the old MPEG-4 (dyadic) upsampling filter for both luma and chroma
 

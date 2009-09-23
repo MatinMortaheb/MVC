@@ -104,6 +104,10 @@ public:
   ErrVal  copy            ( PocCalculator*& rpcPocCalculator );
   ErrVal  destroy         ();
 
+#ifdef   LF_INTERLACE
+  ErrVal  initSPS         ( const SequenceParameterSet&  rcSequenceParameterSet );
+#endif //LF_INTERLACE
+
   ErrVal  setPoc          ( SliceHeader& rcSliceHeader, Int iContFrameNumber );
   ErrVal  calculatePoc    ( SliceHeader& rcSliceHeader );
 
@@ -111,7 +115,11 @@ protected:
   ErrVal  xInitSPS        ( const SequenceParameterSet& rcSPS );
 
 private:
+#ifdef   LF_INTERLACE
+    UInt    m_iLastIdrFieldNum;
+#else //!LF_INTERLACE
   UInt    m_iLastIdrFrameNum;
+#endif //LF_INTERLACE
   Int     m_iBitsLsb;
   Int     m_iTop2BotOffset;
 

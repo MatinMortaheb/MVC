@@ -146,77 +146,200 @@ SliceHeader::xInitScalingMatrix()
 
   return Err::m_nOK;
 }
+#ifdef   LF_INTERLACE
+Void SliceHeader::getMbPositionFromAddress( UInt& ruiMbY, UInt& ruiMbX, const UInt uiMbAddress ) const 
+{
+    const UInt uiMbsInRow = getSPS().getFrameWidthInMbs();
+    if( isMbAff() )
+    {
+        ruiMbY = ( 2*(uiMbAddress/(2*uiMbsInRow))+uiMbAddress%2);
+        ruiMbX = ( (uiMbAddress/2) % uiMbsInRow);
+    }
+    else
+    {
+        ruiMbY = ( uiMbAddress / uiMbsInRow );
+        ruiMbX = ( uiMbAddress % uiMbsInRow );
+    }
+}
 
+Void SliceHeader::getMbPositionFromAddress( UInt& ruiMbY, UInt& ruiMbX, UInt& ruiMbIndex, const UInt uiMbAddress ) const 
+{
+    const UInt uiMbsInRow = getSPS().getFrameWidthInMbs();
+    if( isMbAff() )
+    {
+        ruiMbY = ( 2*(uiMbAddress/(2*uiMbsInRow))+uiMbAddress%2);
+        ruiMbX = ( (uiMbAddress/2) % uiMbsInRow);
+        ruiMbIndex = uiMbsInRow * ruiMbY + ruiMbX;
+    }
+    else
+    {
+        ruiMbY = ( uiMbAddress / uiMbsInRow );
+        ruiMbX = ( uiMbAddress % uiMbsInRow );
+        ruiMbIndex = uiMbAddress;
+    }
+}
 
-
+UInt SliceHeader::getMbIndexFromAddress( UInt uiMbAddress ) const
+{
+    if( isMbAff() )
+    {
+        UInt uiMbIndex;
+        const UInt uiMbsInRow = getSPS().getFrameWidthInMbs();
+        uiMbIndex = uiMbsInRow*(2*(uiMbAddress/(2*uiMbsInRow))+uiMbAddress%2) + (uiMbAddress/2) % uiMbsInRow;
+        return uiMbIndex;
+    }
+    return uiMbAddress;
+}
+#endif
 
 SliceHeader::~SliceHeader()
 {
 }
 
 
-
+#ifdef   LF_INTERLACE
 ErrVal
 SliceHeader::compare( const SliceHeader* pcSH,
-                      Bool&              rbNewFrame ) const
+                     Bool&              rbNewPic,
+                     Bool&              rbNewFrame ) const
+#else //!LF_INTERLACE
+ErrVal
+SliceHeader::compare( const SliceHeader* pcSH,
+                     Bool&              rbNewFrame ) const
+#endif //LF_INTERLACE
 {
-  rbNewFrame = true;
+#ifdef   LF_INTERLACE
+    rbNewPic = rbNewFrame = true;
+#else //!LF_INTERLACE
+    rbNewFrame = true;
+#endif //LF_INTERLACE
 
-  if( isIdrNalUnit() )
-  {
-    ROTRS( NULL == pcSH,                                    Err::m_nOK ); //very first frame
-    ROTRS( ! pcSH->isIdrNalUnit(),                          Err::m_nOK ); //previous no idr
-    ROTRS( getIdrPicId() != pcSH->getIdrPicId(),            Err::m_nOK );
-  }
+    if( isIdrNalUnit() )
+    {
+        ROTRS( NULL == pcSH,                                    Err::m_nOK ); //very first frame
+        ROTRS( ! pcSH->isIdrNalUnit(),                          Err::m_nOK ); //previous no idr
+        ROTRS( getIdrPicId() != pcSH->getIdrPicId(),            Err::m_nOK );
+    }
 
-  ROTRS( NULL == pcSH,                                      Err::m_nOK );
-  ROTRS( getFrameNum() != pcSH->getFrameNum(),              Err::m_nOK );
-  ROTRS( getNalRefIdc() == 0 && pcSH->getNalRefIdc() != 0,  Err::m_nOK );
-  ROTRS( getNalRefIdc() != 0 && pcSH->getNalRefIdc() == 0,  Err::m_nOK );
-  ROTRS( getPicOrderCntLsb() != pcSH->getPicOrderCntLsb(),  Err::m_nOK );
+    ROTRS( NULL == pcSH,                                      Err::m_nOK );
+#ifdef   LF_INTERLACE
+    ROTRS( isNalRefIdc() != pcSH->isNalRefIdc(),              Err::m_nOK );
+    ROTRS( getFrameNum() != pcSH->getFrameNum(),              Err::m_nOK );
+#else //!LF_INTERLACE
+    ROTRS( getFrameNum() != pcSH->getFrameNum(),              Err::m_nOK );
+    ROTRS( getNalRefIdc() == 0 && pcSH->getNalRefIdc() != 0,  Err::m_nOK );
+    ROTRS( getNalRefIdc() != 0 && pcSH->getNalRefIdc() == 0,  Err::m_nOK );
+#endif //LF_INTERLACE
 
-  ROTRS( getViewId() != pcSH->getViewId(),                  Err::m_nOK );
+    ROTRS( getViewId() != pcSH->getViewId(),                  Err::m_nOK );
 
-  rbNewFrame = false;
+#ifdef   LF_INTERLACE
+    ROTRS( getFieldPicFlag() != pcSH->getFieldPicFlag(),      Err::m_nOK );
 
-  return Err::m_nOK;
+    const Bool bSameParity = ( ! getFieldPicFlag() || ( getBottomFieldFlag() == pcSH->getBottomFieldFlag() ) );
+    rbNewFrame = bSameParity;
+
+    if( getSPS().getPicOrderCntType() == 0 )
+    {
+        ROTRS( getPicOrderCntLsb() != pcSH->getPicOrderCntLsb(), Err::m_nOK );
+        ROTRS( ! getFieldPicFlag() && (getDeltaPicOrderCntBottom() != pcSH->getDeltaPicOrderCntBottom()), Err::m_nOK );
+    }
+
+    if( getSPS().getPicOrderCntType() == 1 )
+    {
+        ROTRS( getDeltaPicOrderCnt( 0 ) != pcSH->getDeltaPicOrderCnt( 0 ), Err::m_nOK );
+        ROTRS( ! getFieldPicFlag() && (getDeltaPicOrderCnt( 1 ) != pcSH->getDeltaPicOrderCnt( 1 )), Err::m_nOK );
+    }
+#else //!LF_INTERLACE
+    ROTRS( getPicOrderCntLsb() != pcSH->getPicOrderCntLsb(),  Err::m_nOK );
+#endif //LF_INTERLACE
+
+#ifdef   LF_INTERLACE
+    ROTRS( ! getFieldPicFlag() && (getDeltaPicOrderCntBottom() != pcSH->getDeltaPicOrderCntBottom()), Err::m_nOK );
+#endif //LF_INTERLACE
+
+
+    rbNewFrame = false;
+
+#ifdef   LF_INTERLACE
+    if( isIdrNalUnit() )
+    {
+        ROTRS( ! pcSH->isIdrNalUnit(),                          Err::m_nOK ); //prev no idr
+    }
+    ROTRS( ! bSameParity,  Err::m_nOK ); // differ
+
+    rbNewPic = false;
+#endif //LF_INTERLACE
+
+    return Err::m_nOK;
 }
 
-
-
-
+#ifdef   LF_INTERLACE
+Int
+SliceHeader::getDistScaleFactor( PicType eMbPicType,
+                                SChar sL0RefIdx,
+                                SChar sL1RefIdx ) const
+#else //!LF_INTERLACE
 Int
 SliceHeader::getDistScaleFactor( SChar sL0RefIdx,
-                                 SChar sL1RefIdx ) const
+                                SChar sL1RefIdx ) const
+#endif //LF_INTERLACE
 {
-  const Frame*  pcFrameL0 = getRefPic( sL0RefIdx, LIST_0 ).getFrame();
-  const Frame*  pcFrameL1 = getRefPic( sL1RefIdx, LIST_1 ).getFrame();
-  Int           iDiffPocD = pcFrameL1->getPOC() - pcFrameL0->getPOC();
-  if( iDiffPocD == 0 )
-  {
-    return 1024;
-  }
-  else
-  {
-    Int iDiffPocB = getPoc() - pcFrameL0->getPOC();
-    Int iTDB      = gClipMinMax( iDiffPocB, -128, 127 );
-    Int iTDD      = gClipMinMax( iDiffPocD, -128, 127 );
-    Int iX        = (0x4000 + abs(iTDD/2)) / iTDD;
-    Int iScale    = gClipMinMax( (iTDB * iX + 32) >> 6, -1024, 1023 );
-    return iScale;
-  }
+#ifdef   LF_INTERLACE
+    const Frame*  pcFrameL0 = getRefPic( sL0RefIdx, eMbPicType, LIST_0 ).getFrame();
+    const Frame*  pcFrameL1 = getRefPic( sL1RefIdx, eMbPicType, LIST_1 ).getFrame();
+#else //!LF_INTERLACE
+    const Frame*  pcFrameL0 = getRefPic( sL0RefIdx, LIST_0 ).getFrame();
+    const Frame*  pcFrameL1 = getRefPic( sL1RefIdx, LIST_1 ).getFrame();
+#endif //LF_INTERLACE
+    Int           iDiffPocD = pcFrameL1->getPOC() - pcFrameL0->getPOC();
+    if( iDiffPocD == 0 )
+    {
+        return 1024;
+    }
+    else
+    {
+#ifdef   LF_INTERLACE
+        Int iDiffPocB = getPoc( eMbPicType ) - pcFrameL0->getPOC();
+#else //!LF_INTERLACE
+        Int iDiffPocB = getPoc() - pcFrameL0->getPOC();
+#endif //LF_INTERLACE
+        Int iTDB      = gClipMinMax( iDiffPocB, -128, 127 );
+        Int iTDD      = gClipMinMax( iDiffPocD, -128, 127 );
+        Int iX        = (0x4000 + abs(iTDD/2)) / iTDD; //th fix
+        Int iScale    = gClipMinMax( (iTDB * iX + 32) >> 6, -1024, 1023 );
+        return iScale;
+    }
 }
 
 //TMM_EC {{
+
+#ifdef   LF_INTERLACE
+Int
+SliceHeader::getDistScaleFactorVirtual( PicType eMbPicType,
+                                SChar sL0RefIdx,
+                                SChar sL1RefIdx,
+                                RefFrameList& rcRefFrameListL0, 
+                                RefFrameList& rcRefFrameListL1 ) const
+#else //!LF_INTERLACE
 Int
 SliceHeader::getDistScaleFactorVirtual( SChar sL0RefIdx,
-                                 SChar sL1RefIdx,
-																 RefFrameList& rcRefFrameListL0, 
-																 RefFrameList& rcRefFrameListL1 ) const
-{
-  const IntFrame*  pcFrameL0 = rcRefFrameListL0[sL0RefIdx];
+                                       SChar sL1RefIdx,
+                                       RefFrameList& rcRefFrameListL0, 
+                                       RefFrameList& rcRefFrameListL1 ) const
+#endif //LF_INTERLACE
 
-  const IntFrame*  pcFrameL1 = rcRefFrameListL1[sL1RefIdx];
+{
+
+#ifdef   LF_INTERLACE
+    const IntFrame*  pcFrameL0 = rcRefFrameListL0[sL0RefIdx];
+
+    const IntFrame*  pcFrameL1 = rcRefFrameListL1[sL1RefIdx];
+#else //!LF_INTERLACE
+    const IntFrame*  pcFrameL0 = rcRefFrameListL0[sL0RefIdx];
+
+    const IntFrame*  pcFrameL1 = rcRefFrameListL1[sL1RefIdx];
+#endif //LF_INTERLACE
   Int           iDiffPocD = pcFrameL1->getPOC() - pcFrameL0->getPOC();
   if( iDiffPocD == 0 )
   {
@@ -224,7 +347,11 @@ SliceHeader::getDistScaleFactorVirtual( SChar sL0RefIdx,
   }
   else
   {
+#ifdef   LF_INTERLACE
+    Int iDiffPocB = getPoc( eMbPicType ) - pcFrameL0->getPOC();
+#else //!LF_INTERLACE
     Int iDiffPocB = getPoc() - pcFrameL0->getPOC();
+#endif //LF_INTERLACE
     Int iTDB      = gClipMinMax( iDiffPocB, -128, 127 );
     Int iTDD      = gClipMinMax( iDiffPocD, -128, 127 );
     Int iX        = (0x4000 + (iTDD>>1)) / iTDD;
@@ -234,26 +361,43 @@ SliceHeader::getDistScaleFactorVirtual( SChar sL0RefIdx,
 }
 //TMM_EC }}
 
+#ifdef   LF_INTERLACE
+Int
+SliceHeader::getDistScaleFactorScal( PicType eMbPicType,
+                                    SChar sL0RefIdx,
+                                    SChar sL1RefIdx ) const
+#else //!LF_INTERLACE
 Int
 SliceHeader::getDistScaleFactorScal( SChar sL0RefIdx,
-                                     SChar sL1RefIdx ) const
+                                    SChar sL1RefIdx ) const
+#endif //LF_INTERLACE
 {
-  IntFrame* pcFrameL0 = getRefFrameList( LIST_0 )->getEntry( sL0RefIdx-1 );
-  IntFrame* pcFrameL1 = getRefFrameList( LIST_1 )->getEntry( sL1RefIdx-1 );
-  Int           iDiffPocD = pcFrameL1->getPOC() - pcFrameL0->getPOC();
-  if( iDiffPocD == 0 )
-  {
-    return 1024;
-  }
-  else
-  {
-    Int iDiffPocB = getPoc() - pcFrameL0->getPOC();
-    Int iTDB      = gClipMinMax( iDiffPocB, -128, 127 );
-    Int iTDD      = gClipMinMax( iDiffPocD, -128, 127 );
-    Int iX        = (0x4000 + abs(iTDD/2)) / iTDD;
-    Int iScale    = gClipMinMax( (iTDB * iX + 32) >> 6, -1024, 1023 );
-    return iScale;
-  }
+#ifdef   LF_INTERLACE
+    IntFrame* pcFrameL0     = getRefFrameList( eMbPicType, LIST_0 )->getEntry( sL0RefIdx-1 );
+    IntFrame* pcFrameL1     = getRefFrameList( eMbPicType, LIST_1 )->getEntry( sL1RefIdx-1 );
+#else //!LF_INTERLACE
+    IntFrame* pcFrameL0 = getRefFrameList( LIST_0 )->getEntry( sL0RefIdx-1 );
+    IntFrame* pcFrameL1 = getRefFrameList( LIST_1 )->getEntry( sL1RefIdx-1 );
+#endif //LF_INTERLACE
+    Int       iDiffPocD = pcFrameL1->getPOC() - pcFrameL0->getPOC();
+    if( iDiffPocD == 0 )
+    {
+        return 1024;
+    }
+    else
+    {
+#ifdef   LF_INTERLACE
+        Int iDiffPocB = getPoc() - pcFrameL0->getPOC();
+#else //!LF_INTERLACE
+        Int iDiffPocB = getPoc() - pcFrameL0->getPOC();
+#endif //LF_INTERLACE
+        Int iTDB      = gClipMinMax( iDiffPocB, -128, 127 );
+        Int iTDD      = gClipMinMax( iDiffPocD, -128, 127 );
+        //    Int iX        = (0x4000 + (iTDD>>1)) / iTDD; 
+        Int iX        = (0x4000 + abs(iTDD/2)) / iTDD; //th fix
+        Int iScale    = gClipMinMax( (iTDB * iX + 32) >> 6, -1024, 1023 );
+        return iScale;
+    }
 }
 
 

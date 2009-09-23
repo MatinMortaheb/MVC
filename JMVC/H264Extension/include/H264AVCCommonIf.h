@@ -176,31 +176,78 @@ private:
 typedef MyList< ExtBinDataAccessor* > ExtBinDataAccessorList;
 typedef MyList< ExtBinDataAccessorList* > ExtBinDataAccessorListList;
 
+#ifdef   LF_INTERLACE
+enum PicStruct
+{
+    PS_NOT_SPECIFIED = -1,
+    PS_FRAME         =  0, // frame	field_pic_flag shall be 0	1
+    PS_TOP           =  1, // top field	field_pic_flag shall be 1, bottom_field_flag shall be 0 1
+    PS_BOT           =  2, // bottom field field_pic_flag shall be 1, bottom_field_flag shall be 1 1
+    PS_TOP_BOT       =  3, // top field, bottom field, in that order field_pic_flag shall be 0 2
+    PS_BOT_TOP       =  4  // bottom field, top field, in that order field_pic_flag shall be 0 2
+};
+#endif //LF_INTERLACE
+
 class PicBuffer
 {
 public:
-  PicBuffer( Pel* pcBuffer = NULL, Void* pcMediaPacket  = NULL, UInt64 ui64Cts = 0) : m_pcMediaPacket(pcMediaPacket), m_pcBuffer(pcBuffer), m_iInUseCout(0), m_ui64Cts(ui64Cts) {}
-  Void setUnused() { m_iInUseCout--; }
-  Void setUsed()   { m_iInUseCout++; }
-  Bool isUsed()    { return 0 != m_iInUseCout; }
-  Pel* getBuffer() { return m_pcBuffer; }
-  operator Pel*()  { return m_pcBuffer; }
-  Void* getMediaPacket() { return m_pcMediaPacket; }
-  UInt64& getCts() { return m_ui64Cts; }
-  
-  Void setCts( UInt64 ui64 ) { m_ui64Cts = ui64; } // HS: decoder robustness
+    PicBuffer( Pel* pcBuffer = NULL, Void* pcMediaPacket  = NULL, UInt64 ui64Cts = 0) 
+        : m_pcMediaPacket( pcMediaPacket )
+        , m_pcBuffer     ( pcBuffer )
+        , m_iInUseCout   ( 0 )
+        , m_ui64Cts      ( ui64Cts )
+#ifdef   LF_INTERLACE
+        , m_ePicStruct   ( PS_NOT_SPECIFIED )
+        , m_iTopPoc      ( 0 )
+        , m_iBotPoc      ( 0 )
+        , m_iFramePoc    ( 0 )
+        , m_uiIdrPicId   ( 0 )
+        , m_bFieldCoded  ( false )
+#endif //LF_INTERLACE
+    {}
 
-  UInt          getViewId       ()  const { return m_uiViewId; }
-  Void          setViewId       (UInt v_id)  { m_uiViewId = v_id; }
+    Void setUnused()           { m_iInUseCout--; }
+    Void setUsed()             { m_iInUseCout++; }
+    Bool isUsed()              { return 0 != m_iInUseCout; }
+    Pel* getBuffer()           { return m_pcBuffer; }
+    operator Pel*()            { return m_pcBuffer; }
+    Void* getMediaPacket()     { return m_pcMediaPacket; }
+    UInt64& getCts()           { return m_ui64Cts; }
+    Void setCts( UInt64 ui64 ) { m_ui64Cts = ui64; } // HS: decoder robustness
+
+#ifdef   LF_INTERLACE
+    Void setPicStruct     ( PicStruct e  ) { m_ePicStruct  = e;  }
+    Void setFieldCoding   ( Bool      b  ) { m_bFieldCoded = b;  }
+    Void setIdrPicId      ( UInt      ui ) { m_uiIdrPicId  = ui; }
+    Void setTopPOC        ( Int       i  ) { m_iTopPoc     = i;  }
+    Void setBotPOC        ( Int       i  ) { m_iBotPoc     = i;  }
+    Void setFramePOC      ( Int       i  ) { m_iFramePoc   = i;  }
+
+    PicStruct getPicStruct() const  { return m_ePicStruct; }
+    Bool isFieldCoded     () const  { return m_bFieldCoded; }
+    UInt getIdrPicId      () const  { return m_uiIdrPicId; }
+    Int  getTopPOC        () const  { return m_iTopPoc; }
+    Int  getBotPOC        () const  { return m_iBotPoc; }
+    Int  getFramePOC      () const  { return m_iFramePoc; }
+#endif //LF_INTERLACE
+
+    UInt          getViewId       ()  const { return m_uiViewId; }
+    Void          setViewId       (UInt v_id)  { m_uiViewId = v_id; }
 
 private:
-  Void*   m_pcMediaPacket;
-  Pel*    m_pcBuffer;
-  Int     m_iInUseCout;
-  UInt64  m_ui64Cts;
-
-  UInt          m_uiViewId;
-
+    Void*  m_pcMediaPacket;
+    Pel*   m_pcBuffer;
+    Int    m_iInUseCout;
+    UInt64 m_ui64Cts;
+#ifdef   LF_INTERLACE
+    PicStruct m_ePicStruct;
+    Int       m_iTopPoc;
+    Int       m_iBotPoc;
+    Int       m_iFramePoc;
+    UInt      m_uiIdrPicId;
+    Bool      m_bFieldCoded;
+#endif //LF_INTERLACE
+    UInt          m_uiViewId;
 };
 
 typedef MyList< PicBuffer* > PicBufferList;

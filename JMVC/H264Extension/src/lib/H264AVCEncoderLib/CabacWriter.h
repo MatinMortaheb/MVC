@@ -189,6 +189,7 @@ public:
   ErrVal  RQupdateVlcTable         () { return Err::m_nOK; };
   ErrVal  RQvlcFlush               () { return Err::m_nOK; };
 
+    ErrVal  fieldFlag           ( MbDataAccess& rcMbDataAccess ); //th
   ErrVal  blockModes( MbDataAccess& rcMbDataAccess );
   ErrVal  mbMode( MbDataAccess& rcMbDataAccess/*, Bool bBLQRefFlag*/ );
   ErrVal  resPredFlag( MbDataAccess& rcMbDataAccess );
@@ -260,16 +261,30 @@ protected:
 
   ErrVal xWriteBCbp( MbDataAccess& rcMbDataAccess, UInt uiNumSig, ResidualMode eResidualMode, LumaIdx cIdx );
   ErrVal xWriteBCbp( MbDataAccess& rcMbDataAccess, UInt uiNumSig, ResidualMode eResidualMode, ChromaIdx cIdx );
-  ErrVal xWriteCoeff( UInt          uiNumSig,
-                      TCoeff*       piCoeff,
-                      ResidualMode  eResidualMode,
-                      const UChar*  pucScan );
+
+#ifdef LF_INTERLACE
+ErrVal xWriteCoeff( UInt         uiNumSig,
+                                 TCoeff*      piCoeff,
+                                 ResidualMode eResidualMode,
+                                 const UChar* pucScan,
+								 Bool            bFieldModel);
+#else //!LF_INTERLACE
+ErrVal xWriteCoeff( UInt         uiNumSig,
+                                 TCoeff*      piCoeff,
+                                 ResidualMode eResidualMode,
+                                 const UChar* pucScan );
+#endif //LF_INTERLACE
   UInt   xGetNumberOfSigCoeff( TCoeff* piCoeff, ResidualMode eResidualMode, const UChar* pucScan );
 
   ErrVal xWriteBlockMode( UInt uiBlockMode );
 
 
 protected:
+#ifdef   LF_INTERLACE
+    CabacContextModel2DBuffer m_cFieldFlagCCModel;
+    CabacContextModel2DBuffer m_cFldMapCCModel;
+    CabacContextModel2DBuffer m_cFldLastCCModel;
+#endif //LF_INTERLACE
   CabacContextModel2DBuffer m_cBLSkipCCModel;
 
   CabacContextModel2DBuffer m_cBCbpCCModel;

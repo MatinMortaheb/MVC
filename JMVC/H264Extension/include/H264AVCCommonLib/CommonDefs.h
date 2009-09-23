@@ -92,7 +92,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 
 #define _JSVM_VERSION_ "6.5" //added by jerome.vieron@thomson.net
 #define _JMVM_VERSION_ "7.0" //added by purvin.pandit@thomson.net
-#define _JMVC_VERSION_ "5.2" //added by ying.chen@tut.fi
+#define _JMVC_VERSION_ "6.0" //added by ying.chen@tut.fi
 
 #define MB_BUFFER_WIDTH 24
 #define MB_BASE_WIDTH   16
@@ -110,6 +110,20 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 
 H264AVC_NAMESPACE_BEGIN
 
+#ifdef   LF_INTERLACE
+enum PicType
+{
+	NOT_SPECIFIED   = 0x00,
+	TOP_FIELD       = 0x01,
+	BOT_FIELD       = 0x02,
+	FRAME           = 0x03,
+	MAX_FRAME_TYPE  = 0x04
+};
+#endif //LF_INTERLACE
+
+#if JM_MVC_COMPATIBLE
+#define DELTA_POC 0//lufeng: offset for negtive poc
+#endif
 
 enum ParIdx16x16
 {
@@ -262,6 +276,7 @@ enum Profile
   HIGH_444_INTRA_PROFILE = 244,
 
   MULTI_VIEW_PROFILE= 118,
+  STEREO_HIGH_PROFILE= 128,
 
   SCALABLE_PROFILE  = 83
 };
@@ -294,7 +309,7 @@ H264AVC_NAMESPACE_END
 #define MAX_FRAME_NUM_LOG2  9
 
 #define YUV_X_MARGIN        32
-#define YUV_Y_MARGIN        64
+#define YUV_Y_MARGIN        128
 
 #define MAX_LAYERS          8
 #define MAX_TEMP_LEVELS     8

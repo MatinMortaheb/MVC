@@ -155,7 +155,9 @@ public:
 
   operator MbTransformCoeffs& ()                                        { return *m_pcMbTCoeffs; }
 
-
+#ifdef LF_INTERLACE
+  Void copy( const MbData& rcMbData );
+#endif
   ErrVal  loadAll( FILE* pFile );
   ErrVal  saveAll( FILE* pFile );
 
@@ -247,6 +249,19 @@ protected:
                           Int  aaiPartInfo[4]);
 };
 
+class MbDataBuffer : public MbData
+{
+public :
+    MbDataBuffer()
+    {
+        MbData::init( &m_cMbTransformCoeffs, m_acMbMvData, m_acMbMvData+1, m_acMbMotionData, m_acMbMotionData + 1);
+    }
+    virtual ~MbDataBuffer() {}
+
+    MbTransformCoeffs m_cMbTransformCoeffs;
+    MbMvData          m_acMbMvData[2];
+    MbMotionData      m_acMbMotionData[2];
+};
 
 H264AVC_NAMESPACE_END
 

@@ -428,7 +428,7 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 		RNOK	( pcWriteIf->writeUvlc( m_uiNumReorderFrames[i],		"ScalableSEI:num_reorder_frames" ) );
 		RNOK	( pcWriteIf->writeUvlc( m_uiMaxDecFrameBuffering[i],		"ScalableSEI:max_dec_frame_buffering" ) );
 	}
-	
+	//}}SEI JJ, Ying
   }
   return Err::m_nOK;
 
@@ -670,7 +670,7 @@ SEI::FullframeSnapshotSei::write( HeaderSymbolWriteIf *pcWriteIf )
 {
 	UInt uiStart = pcWriteIf->getNumberOfWrittenBits();
 	UInt uiPayloadSize = 0;
-	
+	// bug fix for LSJ, ying
 	RNOK( pcWriteIf->writeUvlc( getSnapShotId(), "FullframeSnapshotSei: SnapshotId" ) );
 
 	uiPayloadSize = ( pcWriteIf->getNumberOfWrittenBits() - uiStart + 7 )/8;
@@ -915,6 +915,9 @@ if( eMessageType == VIEW_DEPENDENCY_STRUCTURE_SEI )
 //JVT-W080, omit parsing
   if( eMessageType == PARALLEL_DEC_SEI )
 	{
+//		ParallelDecodingSEI* pcPdSEI = (ParallelDecodingSEI*)rpcSEIMessage;
+// fix for Liu Hui, Ying
+
 		return Err::m_nOK;   
 	}
 //~JVT-W080
@@ -1075,7 +1078,7 @@ SEI::ReservedSei::write( HeaderSymbolWriteIf* pcWriteIf )
 ErrVal
 SEI::ReservedSei::read( HeaderSymbolReadIf* pcReadIf )
 {
-  AF();
+  AF()
   return Err::m_nOK;
 }
 
@@ -2534,12 +2537,13 @@ SEI::ViewDependencyStructureSei::init( UInt uiNumOfViews
   }
   else
   {
-    for( UInt i = 0; i<uiNumOfViews; i++)
+	UInt i;
+    for( i = 0; i<uiNumOfViews; i++)
     {
       m_puiNumAnchorL0Refs[i] = puinum_refs_list0_anc[i];
       m_puiNumAnchorL1Refs[i] = puinum_refs_list1_anc[i];
     }
-    for( UInt i = 0; i<uiNumOfViews; i++)
+    for( i = 0; i<uiNumOfViews; i++)
     {
       m_puiNumNonAnchorL0Refs[i] = puinum_refs_list0_nonanc[i];
       m_puiNumNonAnchorL1Refs[i] = puinum_refs_list1_nonanc[i];
@@ -2555,13 +2559,14 @@ SEI::ViewDependencyStructureSei::write(HeaderSymbolWriteIf* pcWriteIf )
   RNOK(pcWriteIf->writeFlag(m_bNonAnchorUpdateFlag, "ViewDependencyStructureSei: non_anchor_update_flag"));
   if (m_bAnchorUpdateFlag)
   {
-    for ( UInt i = 1; i< m_uiNumOfViews; i++) 
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) // ying
     {
-      for ( UInt j = 0; j< m_puiNumAnchorL0Refs[i]; j++)
+	  UInt j;	
+      for ( j = 0; j< m_puiNumAnchorL0Refs[i]; j++)
       {
         pcWriteIf->writeFlag( m_ppbAnchorRefL0Flag[i][j], "ViewDependencyStructureSei: anchor_ref_l0_flag");
       }
-      for ( UInt j = 0; j< m_puiNumAnchorL1Refs[i]; j++)
+      for ( j = 0; j< m_puiNumAnchorL1Refs[i]; j++)
       {
         pcWriteIf->writeFlag( m_ppbAnchorRefL1Flag[i][j], "ViewDependencyStructureSei: anchor_ref_l1_flag");
       }
@@ -2569,13 +2574,14 @@ SEI::ViewDependencyStructureSei::write(HeaderSymbolWriteIf* pcWriteIf )
   }
   if (m_bNonAnchorUpdateFlag)
   {
-    for ( UInt i = 1; i< m_uiNumOfViews; i++) 
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) // ying
     {
-      for ( UInt j = 0; j< m_puiNumNonAnchorL0Refs[i]; j++)
+	  UInt j;	
+      for ( j = 0; j< m_puiNumNonAnchorL0Refs[i]; j++)
       {
         pcWriteIf->writeFlag( m_ppbNonAnchorRefL0Flag[i][j], "ViewDependencyStructureSei: non_anchor_ref_l0_flag");
       }
-      for ( UInt j = 0; j< m_puiNumNonAnchorL1Refs[i]; j++)
+      for ( j = 0; j< m_puiNumNonAnchorL1Refs[i]; j++)
       {
         pcWriteIf->writeFlag( m_ppbNonAnchorRefL1Flag[i][j], "ViewDependencyStructureSei: non_anchor_ref_l1_flag");
       }
@@ -2591,15 +2597,17 @@ SEI::ViewDependencyStructureSei::read(HeaderSymbolReadIf* pcReadIf)
   RNOK(pcReadIf->getFlag(m_bNonAnchorUpdateFlag, "ViewDependencyStructureSei: non_anchor_update_flag"));
   if (m_bAnchorUpdateFlag)
   {
-    for ( UInt i = 1; i< m_uiNumOfViews; i++) 
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) //ying
     {
       m_ppbAnchorRefL0Flag[i] = new Bool[m_puiNumAnchorL0Refs[i]];
       m_ppbAnchorRefL1Flag[i] = new Bool[m_puiNumAnchorL1Refs[i]];
-      for ( UInt j = 0; j< m_puiNumAnchorL0Refs[i]; j++)
+
+	  UInt j;
+      for ( j = 0; j< m_puiNumAnchorL0Refs[i]; j++)
       {
         pcReadIf->getFlag( m_ppbAnchorRefL0Flag[i][j], "ViewDependencyStructureSei: anchor_ref_l0_flag");
       }
-      for ( UInt j = 0; j< m_puiNumAnchorL1Refs[i]; j++)
+      for ( j = 0; j< m_puiNumAnchorL1Refs[i]; j++)
       {
         pcReadIf->getFlag( m_ppbAnchorRefL1Flag[i][j], "ViewDependencyStructureSei: anchor_ref_l1_flag");
       }
@@ -2607,16 +2615,17 @@ SEI::ViewDependencyStructureSei::read(HeaderSymbolReadIf* pcReadIf)
   }
   if (m_bNonAnchorUpdateFlag)
   {
-    for ( UInt i = 1; i< m_uiNumOfViews; i++) 
+    for ( UInt i = 1; i< m_uiNumOfViews; i++) //ying
     {
-  
       m_ppbNonAnchorRefL0Flag[i] = new Bool[m_puiNumNonAnchorL0Refs[i]];
       m_ppbNonAnchorRefL1Flag[i] = new Bool[m_puiNumNonAnchorL1Refs[i]];
-      for ( UInt j = 0; j< m_puiNumNonAnchorL0Refs[i]; j++)
+
+	  UInt j;
+      for ( j = 0; j< m_puiNumNonAnchorL0Refs[i]; j++)
       {
         pcReadIf->getFlag( m_ppbNonAnchorRefL0Flag[i][j], "ViewDependencyStructureSei: non_anchor_ref_l0_flag");
       }
-      for ( UInt j = 0; j< m_puiNumNonAnchorL1Refs[i]; j++)
+      for ( j = 0; j< m_puiNumNonAnchorL1Refs[i]; j++)
       {
         pcReadIf->getFlag( m_ppbNonAnchorRefL1Flag[i][j], "ViewDependencyStructureSei: non_anchor_ref_l1_flag");
       }

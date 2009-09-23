@@ -103,11 +103,30 @@ class QuarterPelFilter;
 class H264AVCCOMMONLIB_API Frame
 {
 public:
-	Frame( YuvBufferCtrl& rcYuvFullPelBufferCtrl, YuvBufferCtrl& rcYuvHalfPelBufferCtrl );
-	virtual ~Frame();
+#ifdef   LF_INTERLACE
+  class PocOrder
+  {
+  public:
+      __inline Int operator() ( const Frame* pcFrame1, const Frame* pcFrame2 )
+      {
+          return pcFrame1->getPOC() < pcFrame2->getPOC();
+      }
+  };
+#endif //LF_INTERLACE
+
+#ifdef   LF_INTERLACE
+  Frame( YuvBufferCtrl& rcYuvFullPelBufferCtrl, YuvBufferCtrl& rcYuvHalfPelBufferCtrl, PicType ePicType );
+#else //!LF_INTERLACE
+  Frame( YuvBufferCtrl& rcYuvFullPelBufferCtrl, YuvBufferCtrl& rcYuvHalfPelBufferCtrl );
+#endif //LF_INTERLACE
+  virtual ~Frame();
   ErrVal init( Pel* pucYuvBuffer, FrameUnit* pcFrameUnit );
   ErrVal uninit();
+#ifdef   LF_INTERLACE
+  ErrVal extendFrame( QuarterPelFilter* pcQuarterPelFilter, Bool bFrameMbsOnly, Bool bFGS );
+#else //!LF_INTERLACE
   ErrVal extendFrame( QuarterPelFilter* pcQuarterPelFilter );
+#endif //LF_INTERLACE
 
   FrameUnit*       getFrameUnit()         { return m_pcFrameUnit; }
   const FrameUnit* getFrameUnit()   const { return m_pcFrameUnit; }
@@ -117,6 +136,12 @@ public:
   Bool  isPOCAvailable()            const { return m_bPOCisSet; }
   Int   getPOC        ()            const { return m_iPOC; }
   Void  setPOC        ( Int iPOC )        { m_iPOC = iPOC; m_bPOCisSet = true; }
+
+#ifdef   LF_INTERLACE
+  PicType getPicType()              const { return m_ePicType; }
+  Bool isShortTerm()                const;
+  //Int   getPOC        (PicType ePicType)  const {return ePicType==FRAME?m_iPOC:(ePicType==TOP_FIELD?m_cTopField.setPOC( iPoc ):m_cBotField.setPOC( iPoc ));}
+#endif //LF_INTERLACE
 
   const Int stamp()                 const { return m_iStamp; }
   Int& stamp()                            { return m_iStamp; }
@@ -138,6 +163,9 @@ protected:
   Int           m_iStamp;
   UInt          m_uiViewId;
 	Bool					m_uiInterviewflag; //JVT-W056
+#ifdef   LF_INTERLACE
+    const PicType m_ePicType;
+#endif //LF_INTERLACE
 };
 
 
@@ -159,7 +187,6 @@ private:
   const Frame* m_pcFrame;
   Int          m_iStamp;
 };
-
 
 
 H264AVC_NAMESPACE_END

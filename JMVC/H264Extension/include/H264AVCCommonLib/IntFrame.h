@@ -193,8 +193,14 @@ typedef MyList<DPBUnit*>  DPBUnitList;
 class H264AVCCOMMONLIB_API IntFrame
 {
 public:
-	IntFrame                ( YuvBufferCtrl&    rcYuvFullPelBufferCtrl,
-                            YuvBufferCtrl&    rcYuvHalfPelBufferCtrl );
+#ifdef   LF_INTERLACE
+    IntFrame                ( YuvBufferCtrl&    rcYuvFullPelBufferCtrl,
+        YuvBufferCtrl&    rcYuvHalfPelBufferCtrl,
+        PicType ePicType = FRAME);
+#else //!LF_INTERLACE
+    IntFrame                ( YuvBufferCtrl&    rcYuvFullPelBufferCtrl,
+        YuvBufferCtrl&    rcYuvHalfPelBufferCtrl );
+#endif //LF_INTERLACE
 	virtual ~IntFrame       ();
 
   ErrVal  init            ( Bool              bHalfPel = false );
@@ -204,6 +210,9 @@ public:
 
   ErrVal  load            ( PicBuffer*        pcPicBuffer );
   ErrVal  store           ( PicBuffer*        pcPicBuffer );
+#ifdef LF_INTERLACE
+  ErrVal extendFrame( QuarterPelFilter* pcQuarterPelFilter, PicType ePicType, Bool bFrameMbsOnlyFlag );
+#endif
   ErrVal  extendFrame     ( QuarterPelFilter* pcQuarterPelFilter );
 
   Void      setDPBUnit      ( DPBUnit*  pcDPBUnit ) { m_pcDPBUnit = pcDPBUnit; }
@@ -271,6 +280,10 @@ public:
 	  }
 // JVT-Q065 EIDR}
     m_iPOC        = pcSrcFrame->m_iPOC;
+#ifdef LF_INTERLACE
+    m_iTopFieldPoc  = pcSrcFrame->m_iTopFieldPoc;
+    m_iBotFieldPoc  = pcSrcFrame->m_iBotFieldPoc;
+#endif
     RNOK( m_cFullPelYuvBuffer.copy( &pcSrcFrame->m_cFullPelYuvBuffer ) );
   
     return Err::m_nOK;
@@ -373,9 +386,84 @@ public:
 // JVT-Q065 EIDR}
 
   Bool  isHalfPel()   { return m_bHalfPel; }
+  Void  setHalfPel(Bool b)   { m_bHalfPel=b; }//lufeng
 
   Bool  isExtended () { return m_bExtended; }
   Void  clearExtended() { m_bExtended = false; }
+  Void  setExtended  ()                  { m_bExtended = true; }
+
+#ifdef LF_INTERLACE
+  Bool  isPocAvailable()           const { return m_bPocIsSet; }
+  Int   getPoc        ()           const { return m_iPOC; }
+  Int   getTopFieldPoc()           const { return m_iTopFieldPoc; }
+  Int   getBotFieldPoc()           const { return m_iBotFieldPoc; }
+  Void  setPoc        ( Int iPoc )       { m_iPOC = iPoc; m_bPocIsSet = true; }
+  Void  setPoc        ( const SliceHeader& rcSH )
+  {
+      ASSERT( m_ePicType==FRAME );
+      const PicType ePicType = rcSH.getPicType();
+
+      if( ePicType & TOP_FIELD )
+      {
+          m_iTopFieldPoc = rcSH.getTopFieldPoc();
+          if( m_pcIntFrameTopField && m_pcIntFrameBotField )
+          {
+              m_pcIntFrameTopField->setPoc( m_iTopFieldPoc );
+              setPoc( m_pcIntFrameBotField->isPocAvailable() ? max( m_pcIntFrameBotField->getPoc(), m_iTopFieldPoc ) : m_iTopFieldPoc );
+          }
+      }
+      if( ePicType & BOT_FIELD )
+      {
+          m_iBotFieldPoc = rcSH.getBotFieldPoc();
+          if( m_pcIntFrameTopField && m_pcIntFrameBotField )
+          {
+              m_pcIntFrameBotField->setPoc( m_iBotFieldPoc );
+              setPoc( m_pcIntFrameTopField->isPocAvailable() ? min( m_pcIntFrameTopField->getPoc(), m_iBotFieldPoc ) : m_iBotFieldPoc );
+          }
+      }
+      if( ! m_pcIntFrameTopField || ! m_pcIntFrameBotField )
+      {
+          setPoc( max( m_iTopFieldPoc, m_iBotFieldPoc ) );
+      }
+  }
+
+  IntFrame* getPic( PicType ePicType);
+  ErrVal addFrameFieldBuffer();//th 
+  ErrVal removeFieldBuffers();//th
+  ErrVal removeFrameFieldBuffer();
+
+  ErrVal addFieldBuffer( PicType ePicType);//th 
+  ErrVal removeFieldBuffer( PicType ePicType);//th
+
+  IntFrame* getTopField() { AOT( FRAME != m_ePicType); AOT(NULL == m_pcIntFrameTopField); return m_pcIntFrameTopField; } //th
+  IntFrame* getBotField() { AOT( FRAME != m_ePicType); AOT(NULL == m_pcIntFrameBotField); return m_pcIntFrameBotField; } //th
+
+  Void clearPicStat()//lufeng
+  {
+    m_ePicStat=NOT_SPECIFIED;
+  }
+  Void updatePicStat(PicType ePicType)//lufeng
+  {
+	  if(m_ePicStat==FRAME)return;
+	  if(ePicType==m_ePicStat)return;
+	  if(ePicType==FRAME)m_ePicStat=FRAME;
+	  else if(m_ePicStat==NOT_SPECIFIED)
+	  {
+		m_ePicStat=ePicType;
+	  }
+	  else
+	  {
+		m_ePicStat=FRAME;
+	  }
+
+  }
+  Bool isPicReady(PicType ePicType)//lufeng
+  {
+	  if(ePicType==FRAME)return (m_ePicStat==FRAME);
+	  else if(m_ePicStat==FRAME)return true;
+	  return (m_ePicStat==ePicType);
+  }
+#endif//LF_INTERLACE
 
   UInt  getViewId()      const   { return m_uiViewId; }
   Void  setViewId( UInt uiViewId ) { m_uiViewId = uiViewId; }
@@ -392,6 +480,12 @@ public:
   Void   zeroChannelDistortion();
   Void   setChannelDistortion(IntFrame*p1) { if(p1) m_piChannelDistortion=p1->m_piChannelDistortion; else m_piChannelDistortion=NULL;}
   // JVT-R057 LA-RDO}  
+
+#ifdef   LF_INTERLACE
+	PicType getPicType()              const { return m_ePicType; }
+	Void setPicType(PicType e)       { m_ePicType = e; }
+#endif //LF_INTERLACE
+
 protected:
   IntYuvPicBuffer m_cFullPelYuvBuffer;
   IntYuvPicBuffer m_cHalfPelYuvBuffer;
@@ -400,7 +494,19 @@ protected:
   Bool            m_bHalfPel;
   Bool            m_bExtended;
 
-  DPBUnit*        m_pcDPBUnit; 
+  DPBUnit*        m_pcDPBUnit; //ying
+
+#ifdef   LF_INTERLACE
+  	Bool            m_bPocIsSet;
+    Int             m_iTopFieldPoc;
+    Int             m_iBotFieldPoc;
+  PicType         m_ePicType;
+
+  IntFrame* m_pcIntFrameTopField;//th
+  IntFrame* m_pcIntFrameBotField;//th
+
+  PicType       m_ePicStat;//lufeng
+#endif //LF_INTERLACE
 
   Bool			  m_bUnusedForRef; // JVT-Q065 EIDR
   // JVT-R057 LA-RDO{
@@ -411,6 +517,52 @@ protected:
   UInt            m_uiViewId;
 
 };
+
+
+#ifdef LF_INTERLACE
+H264AVCCOMMONLIB_API extern __inline ErrVal gSetFrameFieldLists ( RefFrameList& rcTopFieldList, RefFrameList& rcBotFieldList, RefFrameList& rcRefFrameList )
+{
+    ROTRS( NULL == &rcRefFrameList, Err::m_nOK );
+
+    rcTopFieldList.reset();
+    rcBotFieldList.reset();
+
+    const Int iMaxEntries = min( rcRefFrameList.getSize(), rcRefFrameList.getActive() );
+    for( Int iFrmIdx = 0; iFrmIdx < iMaxEntries; iFrmIdx++ )
+    {
+        IntFrame* pcTopField = rcRefFrameList.getEntry( iFrmIdx )->getPic( TOP_FIELD );
+        IntFrame* pcBotField = rcRefFrameList.getEntry( iFrmIdx )->getPic( BOT_FIELD );
+        rcTopFieldList.add( pcTopField );
+        rcTopFieldList.add( pcBotField );
+        rcBotFieldList.add( pcBotField );
+        rcBotFieldList.add( pcTopField );
+    }
+
+    return Err::m_nOK;
+}
+
+
+
+H264AVCCOMMONLIB_API extern __inline ErrVal gSetFrameFieldArrays( IntFrame* apcFrame[4], IntFrame* pcFrame )
+{
+    if( pcFrame == NULL )
+    {
+        apcFrame[0] = NULL;
+        apcFrame[1] = NULL;
+        apcFrame[2] = NULL;
+        apcFrame[3] = NULL;
+    }
+    else
+    {
+        RNOK( pcFrame->addFrameFieldBuffer() );
+        apcFrame[0] = pcFrame->getPic( TOP_FIELD );
+        apcFrame[1] = pcFrame->getPic( BOT_FIELD );
+        apcFrame[2] = pcFrame->getPic( FRAME     );
+        apcFrame[3] = pcFrame->getPic( FRAME     );
+    }
+    return Err::m_nOK;
+}
+#endif
 
 
 H264AVC_NAMESPACE_END

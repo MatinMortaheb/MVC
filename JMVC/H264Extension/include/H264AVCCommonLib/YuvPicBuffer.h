@@ -100,7 +100,11 @@ class IntYuvMbBuffer;
 class H264AVCCOMMONLIB_API YuvPicBuffer
 {
 public:
+#ifdef   LF_INTERLACE
+	YuvPicBuffer( YuvBufferCtrl& rcYuvBufferCtrl, PicType ePicType );
+#else //!LF_INTERLACE
   YuvPicBuffer( YuvBufferCtrl& rcYuvBufferCtrl );
+#endif //LF_INTERLACE
 	virtual ~YuvPicBuffer();
 
   Pel* getBuffer()      { return m_pucYuvBuffer; }
@@ -138,36 +142,55 @@ public:
   const Int getCXMargin()   const { return m_rcYuvBufferCtrl.getXMargin()>>1; }
   const Int getCYMargin()   const { return m_rcYuvBufferCtrl.getYMargin()>>1; }
 
+#ifdef   LF_INTERLACE
+  PicType getPicType() const { return m_ePicType; }
+#endif //LF_INTERLACE
+
   ErrVal loadBuffer( YuvPicBuffer *pcSrcYuvPicBuffer ); //TMM_EC
   ErrVal loadBuffer( YuvMbBuffer *pcYuvMbBuffer );
   ErrVal loadBuffer( IntYuvMbBuffer *pcYuvMbBuffer );
   ErrVal fillMargin();
+#ifdef   LF_INTERLACE
+  ErrVal loadBufferAndFillMargin( YuvPicBuffer *pcSrcYuvPicBuffer );
+#endif //LF_INTERLACE
 
   ErrVal init( Pel*& rpucYuvBuffer );
   ErrVal uninit();
 
   Bool isValid()        { return NULL != m_pucYuvBuffer; }
 
+#ifdef   LF_INTERLACE
+  Pel* getLumOrigin()      const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getLumOrigin( m_ePicType ); }
+  Pel* getCbOrigin()       const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getCbOrigin ( m_ePicType ); }
+  Pel* getCrOrigin()       const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getCrOrigin ( m_ePicType ); }
+#else //!LF_INTERLACE
   Pel* getLumOrigin()      const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getLumOrigin(); }
   Pel* getCbOrigin()       const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getCbOrigin (); }
   Pel* getCrOrigin()       const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getCrOrigin (); }
+#endif //LF_INTERLACE
 
   ErrVal copy( YuvPicBuffer* pcPicBuffer ); // HS: decoder robustness
 protected:
-  Void xFillPlaneMargin( Pel *pucDest, Int iHeight, Int iWidth, Int iStride, Int iXMargin, Int iYMargin );
-  Void xDump( FILE* hFile, Pel* pPel, Int iHeight, Int iWidth, Int iStride );
+    Void xFillPlaneMargin( Pel *pucDest, Int iHeight, Int iWidth, Int iStride, Int iXMargin, Int iYMargin );
+#ifdef   LF_INTERLACE
+    Void xCopyFillPlaneMargin( Pel *pucSrc, Pel *pucDest, Int iHeight, Int iWidth, Int iStride, Int iXMargin, Int iYMargin );
+#endif //LF_INTERLACE
+    Void xDump( FILE* hFile, Pel* pPel, Int iHeight, Int iWidth, Int iStride );
 
 protected:
-  const YuvBufferCtrl::YuvBufferParameter& m_rcBufferParam;
-//TMM_EC {{
+    const YuvBufferCtrl::YuvBufferParameter& m_rcBufferParam;
+    //TMM_EC {{
 public:
-	YuvBufferCtrl& m_rcYuvBufferCtrl;
+    YuvBufferCtrl& m_rcYuvBufferCtrl;
 protected:	
-//TMM_EC }}
-  Int  m_iStride;
-  Pel* m_pPelCurr;
-  Pel* m_pucYuvBuffer;
-  Pel* m_pucOwnYuvBuffer;
+    //TMM_EC }}
+    Int  m_iStride;
+    Pel* m_pPelCurr;
+    Pel* m_pucYuvBuffer;
+    Pel* m_pucOwnYuvBuffer;
+#ifdef   LF_INTERLACE
+    PicType m_ePicType;
+#endif //LF_INTERLACE
 };
 
 

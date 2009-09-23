@@ -114,10 +114,19 @@ public:
 
   ErrVal uninit();
 
+#ifdef LF_INTERLACE
+  ErrVal  encode            ( MbDataAccess& rcMbDataAccess,
+                              MbDataAccess* pcMbDataAccessBase,
+                              Int									iSpatialScalabilityType,
+                              Bool          bTerminateSlice, 
+							  Bool          bSendTerminateSlice);
+#else
   ErrVal  encode            ( MbDataAccess& rcMbDataAccess,
                               MbDataAccess* pcMbDataAccessBase,
                               Int									iSpatialScalabilityType,
                               Bool          bTerminateSlice );
+#endif
+
   ErrVal  encodeMotion      ( MbDataAccess& rcMbDataAccess,
                               MbDataAccess* pcMbDataAccessBase );
   UInt    getBitCount       ()  { return m_pcMbSymbolWriteIf->getNumberOfWrittenBits(); }

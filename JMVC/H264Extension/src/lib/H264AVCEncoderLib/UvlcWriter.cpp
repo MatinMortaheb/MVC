@@ -281,12 +281,12 @@ const UChar g_aucCbpInter[48] =
 };
 
 const UInt g_auiISymCode[3][16] =
-{ {  0,  1                                                        },
+{ {  0,  1,  2,  3,  4,  5,  6,  7                                },
   {  0,  4,  5, 28,  6, 29, 30, 31                                },
   {  0,  4,  5, 28, 12, 29, 60,252, 13, 61,124,253,125,254,510,511}
 };
 const UInt g_auiISymLen[3][16] =
-{ { 1, 1                                          },
+{ { 3, 3, 3, 3, 3, 3, 3, 3                        },
   { 1, 3, 3, 5, 3, 5, 5, 5                        },
   { 1, 3, 3, 5, 4, 5, 6, 8, 4, 6, 7, 8, 7, 8, 9, 9}
 };
@@ -626,6 +626,21 @@ ErrVal UvlcWriter::blockModes( MbDataAccess& rcMbDataAccess )
   return Err::m_nOK;
 }
 
+#ifdef LF_INTERLACE
+ErrVal UvlcWriter::fieldFlag( MbDataAccess& rcMbDataAccess )//th
+{
+    ETRACE_T( "MbFieldFlag" );
+
+    UInt uiBit = rcMbDataAccess.getMbData().getFieldFlag() ? 1 : 0;
+
+    RNOK( xWriteFlag( uiBit ) );
+
+    ETRACE_N;
+
+    return Err::m_nOK;
+}
+#endif
+
 ErrVal UvlcWriter::skipFlag( MbDataAccess& rcMbDataAccess, Bool bNotAllowed )
 {
   rcMbDataAccess.getMbTCoeffs().setAllCoeffCount( 0 );
@@ -911,6 +926,10 @@ ErrVal UvlcWriter::residualBlock( MbDataAccess& rcMbDataAccess,
   const UChar*  pucScan;
   const TCoeff* piCoeff = rcMbDataAccess.getMbTCoeffs().get( cIdx );
 
+#ifdef LF_INTERLACE
+  const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
+#endif
+
   Int   iLevel;
   Int   iRun      = 0;
   UInt  uiPos     = 0;
@@ -920,19 +939,31 @@ ErrVal UvlcWriter::residualBlock( MbDataAccess& rcMbDataAccess,
   {
   case LUMA_I16_DC:
     {
-      pucScan  = g_aucLumaFrameDCScan;
+#ifdef LF_INTERLACE
+      pucScan = (bFrame) ? g_aucLumaFrameDCScan : g_aucLumaFieldDCScan;
+#else
+	  pucScan  = g_aucLumaFrameDCScan;
+#endif
       uiMaxPos = 16;
       break;
     }
   case LUMA_I16_AC:
     {
-      pucScan  = g_aucFrameScan;
+#ifdef LF_INTERLACE
+      pucScan = (bFrame) ? g_aucFrameScan : g_aucFieldScan;
+#else
+	  pucScan  = g_aucFrameScan;
+#endif
       uiPos=1;
       break;
     }
   case LUMA_SCAN:
     {
-      pucScan  = g_aucFrameScan;
+#ifdef LF_INTERLACE      
+	  pucScan = (bFrame) ? g_aucFrameScan : g_aucFieldScan;
+#else
+	  pucScan  = g_aucFrameScan;
+#endif
       break;
     }
   default:
@@ -1022,6 +1053,9 @@ ErrVal UvlcWriter::residualBlock( MbDataAccess& rcMbDataAccess,
                                   ResidualMode  eResidualMode )
 {
   const TCoeff* piCoeff = rcMbDataAccess.getMbTCoeffs().get( cIdx );
+#ifdef LF_INTERLACE
+  const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
+#endif
   const UChar*  pucScan;
   Int           iRun = 0, iLevel;
   UInt          uiPos, uiMaxPos;
@@ -1036,7 +1070,11 @@ ErrVal UvlcWriter::residualBlock( MbDataAccess& rcMbDataAccess,
     }
   case CHROMA_AC:
     {
-      pucScan = g_aucFrameScan;
+#ifdef LF_INTERLACE
+      pucScan = (bFrame) ? g_aucFrameScan : g_aucFieldScan;
+#else
+	  pucScan = g_aucFrameScan;
+#endif
       uiPos=1;  uiMaxPos=16;
       break;
     }
@@ -1525,7 +1563,13 @@ ErrVal UvlcWriter::residualBlock8x8( MbDataAccess&  rcMbDataAccess,
 {
   ROF( eResidualMode == LUMA_SCAN );
 
+#ifdef LF_INTERLACE
+  const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
+  const UChar*  pucScan = (bFrame) ? g_aucFrameScan64 : g_aucFieldScan64;
+#else
   const UChar*  pucScan = g_aucFrameScan64;
+#endif
+
   const TCoeff* piCoeff = rcMbDataAccess.getMbTCoeffs().get8x8( c8x8Idx );
 
   UInt  uiBlk;
@@ -1612,10 +1656,17 @@ UvlcWriter::RQpeekCbp4x4( MbDataAccess&  rcMbDataAccess,
   UInt    uiSymbol  = 0;
   TCoeff* piCoeff   = rcMbDataAccess.    getMbTCoeffs().get( cIdx );
   TCoeff* piBCoeff  = rcMbDataAccessBase.getMbTCoeffs().get( cIdx );
-
+#ifdef LF_INTERLACE
+    const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
+  const UChar*  pucScan = (bFrame) ? g_aucFrameScan : g_aucFieldScan;
+#endif
   for( UInt ui = 0; ui < 16; ui++ )  
   {
-    if( piCoeff[ g_aucFrameScan[ui] ] && !piBCoeff[ g_aucFrameScan[ui] ] )
+#ifdef LF_INTERLACE
+    if( piCoeff[ pucScan[ui] ] && !piBCoeff[ pucScan[ui] ] )
+#else
+	if( piCoeff[ g_aucFrameScan[ui] ] && !piBCoeff[ g_aucFrameScan[ui] ] )
+#endif
     {
       uiSymbol = 1;
       break;
@@ -1725,10 +1776,18 @@ UvlcWriter::RQencodeBCBP_ChromaAC( MbDataAccess&  rcMbDataAccess,
   UInt    uiSymbol  = 0;
   TCoeff* piCoeff   = rcMbDataAccess.getMbTCoeffs().get( cIdx );
   TCoeff* piBCoeff  = rcMbDataAccessBase.getMbTCoeffs().get( cIdx );
+#ifdef LF_INTERLACE
+    const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
 
+  const UChar*  pucScan = (bFrame) ? g_aucFrameScan : g_aucFieldScan;
+#endif
   for( UInt ui = 1; ui < 16; ui++ )  
   {
-    if( piCoeff[ g_aucFrameScan[ui] ] && !piBCoeff[ g_aucFrameScan[ui] ] )
+#ifdef LF_INTERLACE
+    if( piCoeff[ pucScan[ui] ] && !piBCoeff[ pucScan[ui] ] )
+#else
+	if( piCoeff[ g_aucFrameScan[ui] ] && !piBCoeff[ g_aucFrameScan[ui] ] )
+#endif
     {
       uiSymbol = 1;
       break;
@@ -1808,7 +1867,12 @@ UvlcWriter::RQencodeNewTCoeff_8x8( MbDataAccess&   rcMbDataAccess,
 {
   TCoeff*       piCoeff     = rcMbDataAccess    .getMbTCoeffs().get8x8( c8x8Idx );
   TCoeff*       piCoeffBase = rcMbDataAccessBase.getMbTCoeffs().get8x8( c8x8Idx );
+#ifdef LF_INTERLACE
+  const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
+  const UChar*  pucScan = (bFrame) ? g_aucFrameScan64 : g_aucFieldScan64;
+#else
   const UChar*  pucScan     = g_aucFrameScan64;
+#endif
 
   ROT( piCoeffBase[pucScan[uiScanIndex]] );
 
@@ -1841,7 +1905,13 @@ UvlcWriter::RQencodeNewTCoeff_Luma ( MbDataAccess&   rcMbDataAccess,
 {
   TCoeff*       piCoeff     = rcMbDataAccess    .getMbTCoeffs().get( cIdx );
   TCoeff*       piCoeffBase = rcMbDataAccessBase.getMbTCoeffs().get( cIdx );
+#ifdef LF_INTERLACE
+  const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
+  const UChar*  pucScan = (bFrame) ? g_aucFrameScan : g_aucFieldScan;
+#else
   const UChar*  pucScan     = g_aucFrameScan;
+#endif
+
   UInt          uiStart     = 0;
   UInt          uiStop      = 16;
 
@@ -1867,7 +1937,12 @@ UvlcWriter::RQencodeNewTCoeff_Chroma ( MbDataAccess&   rcMbDataAccess,
 {
   TCoeff*       piCoeff     = rcMbDataAccess    .getMbTCoeffs().get( cIdx );
   TCoeff*       piCoeffBase = rcMbDataAccessBase.getMbTCoeffs().get( cIdx );
+#ifdef LF_INTERLACE
+  const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
+  const UChar*  pucScan     = ( eResidualMode == CHROMA_DC ? g_aucIndexChromaDCScan : ((bFrame) ? g_aucFrameScan : g_aucFieldScan));
+#else
   const UChar*  pucScan     = ( eResidualMode == CHROMA_DC ? g_aucIndexChromaDCScan : g_aucFrameScan );
+#endif
   UInt          uiStart     = ( eResidualMode == CHROMA_AC ? 1 : 0  );
   UInt          uiStop      = ( eResidualMode == CHROMA_DC ? 4 : 16 );
 
@@ -2099,7 +2174,12 @@ UvlcWriter::RQencodeTCoeffRef_8x8( MbDataAccess&   rcMbDataAccess,
 {
   TCoeff*       piCoeff     = rcMbDataAccess    .getMbTCoeffs().get8x8( c8x8Idx );
   TCoeff*       piCoeffBase = rcMbDataAccessBase.getMbTCoeffs().get8x8( c8x8Idx );
+#ifdef LF_INTERLACE
+  const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
+  const UChar*  pucScan = (bFrame) ? g_aucFrameScan64 : g_aucFieldScan64;
+#else
   const UChar*  pucScan     = g_aucFrameScan64;
+#endif
 
   ETRACE_T( "LUMA_8x8_REF" );
   ETRACE_V( c8x8Idx.b8x8Index() );
@@ -2118,7 +2198,12 @@ UvlcWriter::RQencodeTCoeffRef_Luma ( MbDataAccess&   rcMbDataAccess,
 {
   TCoeff*       piCoeff     = rcMbDataAccess    .getMbTCoeffs().get( cIdx );
   TCoeff*       piCoeffBase = rcMbDataAccessBase.getMbTCoeffs().get( cIdx );
+#ifdef LF_INTERLACE
+  const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
+  const UChar*  pucScan = (bFrame) ? g_aucFrameScan : g_aucFieldScan;
+#else
   const UChar*  pucScan     = g_aucFrameScan;
+#endif
 
   ETRACE_T( "LUMA_4x4_REF" );
   ETRACE_V( cIdx.b4x4() );
@@ -2189,7 +2274,13 @@ UvlcWriter::RQencodeTCoeffRef_Chroma ( MbDataAccess&   rcMbDataAccess,
 {
   TCoeff*       piCoeff     = rcMbDataAccess    .getMbTCoeffs().get( cIdx );
   TCoeff*       piCoeffBase = rcMbDataAccessBase.getMbTCoeffs().get( cIdx );
+#ifdef LF_INTERLACE
+  const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
+  const UChar*  pucScan     = ( eResidualMode == CHROMA_DC ? g_aucIndexChromaDCScan : ((bFrame) ? g_aucFrameScan : g_aucFieldScan) );
+#else
   const UChar*  pucScan     = ( eResidualMode == CHROMA_DC ? g_aucIndexChromaDCScan : g_aucFrameScan );
+#endif
+
 
   ETRACE_T( "CHROMA_4x4_REF" );
   ETRACE_V( cIdx );

@@ -176,6 +176,18 @@ public:
                                  IntFrame*       pcPrdFrame);
 
 
+#ifdef LF_INTERLACE
+  ErrVal  encodeMacroblock    ( MbDataAccess&  rcMbDataAccess,
+	  IntFrame*      pcFrame,
+	  IntFrame*      pcOrigFrame,
+	  RefFrameList&  rcList0,
+	  RefFrameList&  rcList1,
+	  UInt           uiNumMaxIter,
+	  UInt           uiIterSearchRange,
+	  Double         dLambda, 
+      Double&       rdCost
+      );
+#else
   ErrVal  encodeMacroblock    ( MbDataAccess&  rcMbDataAccess,
 	  IntFrame*      pcFrame,
 	  RefFrameList&  rcList0,
@@ -183,7 +195,21 @@ public:
 	  UInt           uiNumMaxIter,
 	  UInt           uiIterSearchRange,
 	  Double         dLambda );
+#endif
 
+#ifdef LF_INTERLACE
+    ErrVal  encodeMacroblock    ( MbDataAccess&  rcMbDataAccess,
+	  IntFrame*      pcFrame,
+	  IntFrame*      pcOrigFrame,
+	  RefFrameList&  rcList0,
+	  RefFrameList&  rcList1,
+	  UInt           uiNumMaxIter,
+	  UInt           uiIterSearchRange,
+	  Double         dLambda, 
+      Double&       rdCost,
+	  Bool            bSkipModeAllowed
+      );
+#endif
 //TMM_WP
   ErrVal getPredWeights( SliceHeader& rcSH, ListIdx eLstIdx, 
                          Double(*pafWeight)[3], IntFrame* pOrgFrame,
@@ -396,7 +422,6 @@ protected:
                                   Int				iSpatialScalabilityType,
                                   MbDataAccess*     pcMbDataAccessBaseMotion,
                                   Bool              bResidualPred );
-
 	//-- JVT-R091
   ErrVal  xEstimateMbSR					( IntMbTempData*&   rpcIntMbTempData,
                                   IntMbTempData*&   rpcIntMbBestData,
@@ -413,6 +438,15 @@ protected:
                                   RefFrameList&     rcRefFrameList1,
                                   MbDataAccess*     pcMbDataAccessBaseMotion,
                                   Bool              bResidualPred );
+#ifdef LF_INTERLACE
+  ErrVal xEstimateMbDirect( IntMbTempData*&  rpcMbTempData,
+                              IntMbTempData*&  rpcMbBestData,
+                              RefFrameList&    rcRefFrameList0,
+                              RefFrameList&    rcRefFrameList1,
+                              MbDataAccess*    pcMbDataAccessBaseMotion,
+                              Bool             bResidualPred,
+							  Bool             bSkipModeAllowed);
+#endif
   ErrVal  xEstimateMb16x16      ( IntMbTempData*&   rpcMbTempData,
                                   IntMbTempData*&   rpcMbBestData,
                                   RefFrameList&     rcRefFrameList0,
@@ -563,6 +597,9 @@ protected:
 
   IntYuvMbBuffer  *m_pcIntOrgMbPelData;
   IntYuvPicBuffer *m_pcIntPicBuffer;
+#ifdef LF_INTERLACE
+	  IntYuvPicBuffer *m_pcIntPicBufferOrig;
+#endif
   IntYuvPicBuffer *m_pcIntraPredPicBuffer;
 
   UInt m_uiMaxRefFrames[2];

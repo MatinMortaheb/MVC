@@ -154,23 +154,28 @@ ErrVal
 RecPicBufUnit::init( SliceHeader* pcSliceHeader,
                      PicBuffer*   pcPicBuffer )
 {
+#ifdef LF_INTERLACE
+    m_iPoc                = pcSliceHeader->getPoc();
+#else
   m_iPoc                  = pcSliceHeader->getPoc();
+#endif //LF_INTERLACE
   m_uiFrameNum            = pcSliceHeader->getFrameNum();
   m_bExisting             = true;
   m_bNeededForReference   = pcSliceHeader->getNalRefIdc() != NAL_REF_IDC_PRIORITY_LOWEST;
   m_bOutputted            = false;
   m_pcPicBuffer           = pcPicBuffer;
   m_multiviewRefDirection = NOT_MULTIVIEW;
-
-
+#ifdef LF_INTERLACE
+  m_pcReconstructedFrame->setPoc( *pcSliceHeader );
+#else
   m_pcReconstructedFrame->setPOC( m_iPoc );
+#endif
 
   m_uiViewId              = pcSliceHeader->getViewId();
   m_pcReconstructedFrame->setViewId(pcSliceHeader->getViewId());
 
   return Err::m_nOK;
 }
-
 
 ErrVal
 RecPicBufUnit::initNonEx( Int   iPoc,
@@ -432,26 +437,126 @@ RecPicBuffer::store( RecPicBufUnit*   pcRecPicBufUnit,
     m_uiLastRefFrameNum = pcRecPicBufUnit->getFrameNum();
   }
 
+#ifdef LF_INTERLACE
+  pcRecPicBufUnit->getRecFrame()->updatePicStat(FRAME);//lufeng
+#endif
+
   return Err::m_nOK;
 }
 
+#ifdef LF_INTERLACE
+ErrVal
+RecPicBuffer::xFieldList(    SliceHeader&   rcSliceHeader,
+                           RefFrameList&  rcList,
+                           RefFrameList&  rcListTemp )
+{
+	PicType               eCurrPicType      = rcSliceHeader.getPicType();
+    PicType               eOppositePicture  = ( eCurrPicType == TOP_FIELD ? BOT_FIELD : TOP_FIELD );
+
+    //----- initialize field list for short term pictures -----
+    UInt  uiCurrentParityIndex  = 0;
+    UInt  uiOppositeParityIndex = 0;
+
+    while( uiCurrentParityIndex < rcListTemp.getActive() || uiOppositeParityIndex < rcListTemp.getActive() )
+    {
+        //--- current parity ---
+        while( uiCurrentParityIndex < rcListTemp.getActive() )
+        {
+			if( rcListTemp[++uiCurrentParityIndex]->isPicReady( eCurrPicType ) )
+            {
+				rcList.add(rcListTemp[uiCurrentParityIndex]->getPic(eCurrPicType));
+                break;
+            }
+        }
+        //--- opposite parity ---
+		while( uiOppositeParityIndex < rcListTemp.getActive() )
+        {
+			if( rcListTemp[++uiOppositeParityIndex]->isPicReady( eOppositePicture ) )
+            {
+				rcList.add(rcListTemp[uiOppositeParityIndex]->getPic(eOppositePicture));
+                break;
+            }
+        }
+    }
+
+    return Err::m_nOK;
+}
+
+ErrVal
+RecPicBuffer::ProcessRef(SliceHeader&   rcSliceHeader, RefFrameList&  rcList ,RefFrameList&  rcListTemp, QuarterPelFilter* pcQuarterPelFilter)
+{
+  UInt uiPos; 
+  PicType ePicType=rcSliceHeader.getPicType();
+  bool bFieldPic=(ePicType!=FRAME);
+
+  for( uiPos = 0; uiPos < rcListTemp.getSize() ; uiPos++ )
+  {
+    IntFrame* pcRefFrame = rcListTemp.getEntry( uiPos );
+	if( 1)//! ( pcRefFrame->isHalfPel() && pcRefFrame->isPicReady(FRAME) ) )
+    {
+      RNOK( pcRefFrame->initHalfPel() );
+    }
+    if( ! pcRefFrame->isExtended() )
+    {
+		RNOK( pcRefFrame->extendFrame( pcQuarterPelFilter, FRAME, rcSliceHeader.getSPS().getFrameMbsOnlyFlag() ));
+    }
+  }
+
+  if(bFieldPic)//lufeng
+	xFieldList(rcSliceHeader,rcList,rcListTemp);
+  else
+  {
+	   for( uiPos = 0; uiPos < rcListTemp.getSize() ; uiPos++ )
+	   {
+		   rcListTemp[uiPos+1]->getFullPelYuvBuffer()->fillMargin();//lufeng: for frame ref
+		 rcList.add(rcListTemp[uiPos+1]);
+	   }
+  }
+
+  return Err::m_nOK;
+}
+#endif
+
+#ifdef LF_INTERLACE
 // JVT-V043 and some cleanup
 ErrVal
 RecPicBuffer::getRefLists( RefFrameList&  rcList0,
                            RefFrameList&  rcList1,
+                           SliceHeader&   rcSliceHeader,
+						   QuarterPelFilter* pcQuarterPelFilter)
+#else
+ErrVal
+RecPicBuffer::getRefLists( RefFrameList&  rcList0,
+                           RefFrameList&  rcList1,
                            SliceHeader&   rcSliceHeader )
+#endif
 {
   //===== clear lists =====
+	RefFrameList rcListTemp0, rcListTemp1;
   rcList0.reset();
   rcList1.reset();
   ROTRS( rcSliceHeader.isIntra(), Err::m_nOK );
 
+#ifdef LF_INTERLACE
+  PicType ePicType = rcSliceHeader.getPicType();
+#endif
   if( rcSliceHeader.isInterP() )
   {
- 
+#ifdef LF_INTERLACE
+	  RNOK( xInitRefListPSlice  ( rcListTemp0 , ePicType, rcSliceHeader.getNalRefIdc()>0) );
+    
+	ProcessRef(rcSliceHeader,rcList0,rcListTemp0,pcQuarterPelFilter);//lufeng
+#else
     RNOK( xInitRefListPSlice  ( rcList0 ) );
+#endif
+
+
+#ifdef LF_INTERLACE
+	AddMultiviewRef (m_cUsedRecPicBufUnitList, rcList0, rcSliceHeader.getNumRefIdxActive(LIST_0), FORWARD, rcSliceHeader, pcQuarterPelFilter);//JVT-W056  Samsung
+#else
     AddMultiviewRef (m_cUsedRecPicBufUnitList, rcList0, rcSliceHeader.getNumRefIdxActive(LIST_0), FORWARD, rcSliceHeader);//JVT-W056  Samsung
-    RNOK( xRefListRemapping   ( rcList0, LIST_0, &rcSliceHeader ) );
+#endif
+	RNOK( xRefListRemapping   ( rcList0, LIST_0, &rcSliceHeader ) );
 
     RNOK( xAdaptListSize      ( rcList0, LIST_0,  rcSliceHeader ) );
     RNOK( xDumpRefList        ( rcList0, LIST_0 ) );
@@ -459,10 +564,26 @@ RecPicBuffer::getRefLists( RefFrameList&  rcList0,
   else // rcSliceHeader.isInterB()
   {
     
-	  RNOK( xInitRefListsBSlice ( rcList0, rcList1 ) );
+#ifdef LF_INTERLACE
+	RNOK( xInitRefListsBSlice ( rcListTemp0, rcListTemp1 , ePicType , rcSliceHeader.getNalRefIdc()>0) );
+#else
+	RNOK( xInitRefListsBSlice ( rcList0, rcList1 ) );
+#endif
+    
+#ifdef LF_INTERLACE
+	ProcessRef(rcSliceHeader,rcList0,rcListTemp0,pcQuarterPelFilter);//lufeng
+	ProcessRef(rcSliceHeader,rcList1,rcListTemp1,pcQuarterPelFilter);//lufeng
+#endif
+
+#ifdef LF_INTERLACE
+	AddMultiviewRef(m_cUsedRecPicBufUnitList, rcList0, rcSliceHeader.getNumRefIdxActive(LIST_0), FORWARD, rcSliceHeader, pcQuarterPelFilter);//JVT-W056  Samsung
+    AddMultiviewRef(m_cUsedRecPicBufUnitList, rcList1, rcSliceHeader.getNumRefIdxActive(LIST_1), BACKWARD, rcSliceHeader, pcQuarterPelFilter);//JVT-W056  Samsung
+#else
     AddMultiviewRef(m_cUsedRecPicBufUnitList, rcList0, rcSliceHeader.getNumRefIdxActive(LIST_0), FORWARD, rcSliceHeader);//JVT-W056  Samsung
     AddMultiviewRef(m_cUsedRecPicBufUnitList, rcList1, rcSliceHeader.getNumRefIdxActive(LIST_1), BACKWARD, rcSliceHeader);//JVT-W056  Samsung
-    RNOK( xRefListRemapping   ( rcList0, LIST_0, &rcSliceHeader ) );
+#endif
+
+	RNOK( xRefListRemapping   ( rcList0, LIST_0, &rcSliceHeader ) );
     RNOK( xRefListRemapping   ( rcList1, LIST_1, &rcSliceHeader ) );
     
     RNOK( xAdaptListSize      ( rcList0, LIST_0,  rcSliceHeader ) );
@@ -963,10 +1084,19 @@ RecPicBuffer::xDumpRecPicBuffer()
 // and the format has also been adjusted (AddMultiviewRef)
 // Simplified again for JVT-V043 7 Feb. 2007
 // and some cleanup
+#ifdef LF_INTERLACE
+ErrVal 
+RecPicBuffer::AddMultiviewRef( RecPicBufUnitList& recPicBufUnitList,
+			                          RefFrameList& rcList, const int maxListSize,
+			                          const MultiviewReferenceDirection refDirection, SliceHeader&   rcSliceheader,
+									  QuarterPelFilter* pcQuarterPelFilter) {
+#else
 ErrVal 
 RecPicBuffer::AddMultiviewRef( RecPicBufUnitList& recPicBufUnitList,
 			                          RefFrameList& rcList, const int maxListSize,
 			                          const MultiviewReferenceDirection refDirection, SliceHeader&   rcSliceheader) {
+#endif
+
 
   RefFrameList tempList;
   RecPicBufUnitList::iterator iter;
@@ -974,19 +1104,51 @@ RecPicBuffer::AddMultiviewRef( RecPicBufUnitList& recPicBufUnitList,
   for (iter  = recPicBufUnitList.begin();iter != recPicBufUnitList.end(); iter++) {
     if ( refDirection == (*iter)->GetMultiviewReferenceDirection() ) {
 			if(m_pcPicEncoder->derivation_Inter_View_Flag((*iter)->getViewId(), rcSliceheader)){                        //JVT-W056  Samsung
-				RecPicBufUnit* bufUnitToAdd = (*iter);             
+				RecPicBufUnit* bufUnitToAdd = (*iter);   
+#ifdef LF_INTERLACE
+				if( 1)
+				{
+					RNOK( bufUnitToAdd->getRecFrame()->initHalfPel() );
+				}
+				if( ! bufUnitToAdd->getRecFrame()->isExtended() )
+				{
+					RNOK( bufUnitToAdd->getRecFrame()->extendFrame( pcQuarterPelFilter, FRAME, rcSliceheader.getSPS().getFrameMbsOnlyFlag() ));
+				}
+				rcList.add( bufUnitToAdd->getRecFrame()->getPic(rcSliceheader.getPicType()) );
+#else
 				rcList.add( bufUnitToAdd->getRecFrame() );
+#endif
 			}
     }
   }
   return Err::m_nOK;
 }
 
+#ifdef LF_INTERLACE
+ErrVal
+RecPicBuffer::xInitRefListPSlice( RefFrameList& rcList , PicType ePicType , Bool bRef)
+#else
 ErrVal
 RecPicBuffer::xInitRefListPSlice( RefFrameList& rcList)
+#endif
 {
   //----- get current frame num -----
   UInt uiCurrFrameNum = m_pcCurrRecPicBufUnit->getFrameNum();
+
+#ifdef LF_INTERLACE
+  Bool bFieldRef=bRef&&(ePicType==BOT_FIELD);
+	if(bFieldRef)//LF_INTERLACE
+	{
+		m_pcCurrRecPicBufUnit->getRecFrame()->updatePicStat(TOP_FIELD);
+		if( CodeAsVFrameP())
+		{
+			rcList.add(m_pcCurrRecPicBufUnit->getRecFrame());
+			return Err::m_nOK;
+		}
+		m_cUsedRecPicBufUnitList.pushBack(m_pcCurrRecPicBufUnit);
+		uiCurrFrameNum++;
+	}
+#endif
 
   //----- generate decreasing POC list -----
   for( Int iMaxPicNum = (Int)uiCurrFrameNum; 
@@ -1003,7 +1165,8 @@ RecPicBuffer::xInitRefListPSlice( RefFrameList& rcList)
       (*iter)->isNeededForRef() &&
           (*iter)->getPicNum( uiCurrFrameNum, m_uiMaxFrameNum ) < iMaxPicNum &&
          ( ! pNext ||
-          (*iter)->getPicNum( uiCurrFrameNum, m_uiMaxFrameNum ) > pNext->getPicNum( uiCurrFrameNum, m_uiMaxFrameNum ) ) )
+          (*iter)->getPicNum( uiCurrFrameNum, m_uiMaxFrameNum ) > pNext->getPicNum( uiCurrFrameNum, m_uiMaxFrameNum ) )
+          && (*iter)->getViewId()==m_pcCurrRecPicBufUnit->getViewId())
       {
         pNext = (*iter);
       }
@@ -1013,21 +1176,54 @@ RecPicBuffer::xInitRefListPSlice( RefFrameList& rcList)
       break;
     }
     iMaxPicNum = pNext->getPicNum( uiCurrFrameNum, m_uiMaxFrameNum );
-    rcList.add( pNext->getRecFrame() );
+
+	rcList.add( pNext->getRecFrame() );
   }
 // move the inter-view appending out, ying
+
+#ifdef LF_INTERLACE
+	if(bFieldRef)//LF_INTERLACE
+	{
+		m_cUsedRecPicBufUnitList.popBack();
+	}
+#endif
 
   return Err::m_nOK;
 }
 
 
+#ifdef LF_INTERLACE
+ErrVal
+RecPicBuffer::xInitRefListsBSlice( RefFrameList&  rcList0,
+                                   RefFrameList&  rcList1,
+								   PicType ePicType,
+								   Bool bRef)
+#else
 ErrVal
 RecPicBuffer::xInitRefListsBSlice( RefFrameList&  rcList0,
                                    RefFrameList&  rcList1)
+#endif
 {
   RefFrameList  cDecreasingPocList;
   RefFrameList  cIncreasingPocList;
   Int           iCurrPoc = m_pcCurrRecPicBufUnit->getPoc();
+  
+#ifdef LF_INTERLACE
+  Bool bFieldRef=bRef&&(ePicType==BOT_FIELD);
+
+	if(bFieldRef)//LF_INTERLACE
+	{
+		m_pcCurrRecPicBufUnit->getRecFrame()->updatePicStat(TOP_FIELD);
+		if( CodeAsVFrameP())
+		{
+			rcList0.add(m_pcCurrRecPicBufUnit->getRecFrame());
+			rcList1.add(m_pcCurrRecPicBufUnit->getRecFrame());
+			return Err::m_nOK;
+		}
+		m_cUsedRecPicBufUnitList.pushBack(m_pcCurrRecPicBufUnit);
+		iCurrPoc++;
+	}
+#endif
 
   //----- generate decreasing Poc list -----
   for( Int iMaxPoc = iCurrPoc; 
@@ -1042,7 +1238,8 @@ RecPicBuffer::xInitRefListsBSlice( RefFrameList&  rcList0,
       if( (*iter)->isNeededForRef() &&
         (*iter)->getPoc() < iMaxPoc &&
         ( ! pNext ||
-        (*iter)->getPoc() > pNext->getPoc() ) )
+        (*iter)->getPoc() > pNext->getPoc() ) 
+        && (*iter)->getViewId()==m_pcCurrRecPicBufUnit->getViewId())
       {
         pNext = (*iter);
       }
@@ -1054,7 +1251,12 @@ RecPicBuffer::xInitRefListsBSlice( RefFrameList&  rcList0,
     iMaxPoc = pNext->getPoc();
     cDecreasingPocList.add( pNext->getRecFrame() );
   }
-
+#ifdef LF_INTERLACE
+  if(bFieldRef)//LF_INTERLACE
+	{
+		iCurrPoc--;
+	}
+#endif
   //----- generate increasing Poc list -----
   for( Int iMinPoc = iCurrPoc; 
        ! CodeAsVFrameP(); 
@@ -1068,7 +1270,8 @@ RecPicBuffer::xInitRefListsBSlice( RefFrameList&  rcList0,
       if( (*iter)->isNeededForRef() &&
         (*iter)->getPoc() > iMinPoc &&
         ( ! pNext ||
-        (*iter)->getPoc() < pNext->getPoc() ) )
+        (*iter)->getPoc() < pNext->getPoc() ) 
+        && (*iter)->getViewId()==m_pcCurrRecPicBufUnit->getViewId())
       {
         pNext = (*iter);
       }
@@ -1114,6 +1317,13 @@ RecPicBuffer::xInitRefListsBSlice( RefFrameList&  rcList0,
       rcList1.switchFirst();
     }
   }
+
+#ifdef LF_INTERLACE
+  	if(bFieldRef)//LF_INTERLACE
+	{
+		m_cUsedRecPicBufUnitList.popBack();
+	}
+#endif
 
 // remove the inter-view appending out 
   return Err::m_nOK;
@@ -1209,8 +1419,9 @@ RecPicBuffer::xRefListRemapping( RefFrameList&  rcList,
         }
 
         //----- reference list re-ordering -----
-        RNOK( rcList.setElementAndRemove( uiIndex-IndexSkipCount, uiRemoveIndex, pcFrame ) );
-        uiIndex++;
+       RNOK( rcList.setElementAndRemove( uiIndex-IndexSkipCount, uiRemoveIndex, pcFrame ) );
+
+	   uiIndex++;
       } // short-term
       else // 4 or 5
       {
@@ -1255,14 +1466,19 @@ RecPicBuffer::xRefListRemapping( RefFrameList&  rcList,
         {
 		  InterViewFlag = m_pcPicEncoder->derivation_Inter_View_Flag((*iter)->getViewId(), *pcSliceHeader);
           if ((*iter)->getViewId() == targetViewId && 
+#ifdef LF_INTERLACE
+			  (*iter)->getPoc()    == pcSliceHeader->getPoc(TOP_FIELD) && InterViewFlag) //lufeng: same frame for top/bot field
+          {
+            pcFrame = (*iter)->getRecFrame()->getPic(pcSliceHeader->getPicType());
+#else
               (*iter)->getPoc()    == pcSliceHeader->getPoc() && InterViewFlag)
           {
             pcFrame = (*iter)->getRecFrame();
+#endif
             break;
           }
         }
-
-		if (InterViewFlag == true)
+ 		if (InterViewFlag == true)
 		{
 			if( !pcFrame )
 			{
@@ -1300,7 +1516,7 @@ ErrVal
 RecPicBuffer::xDumpRefList( RefFrameList& rcList,
                             ListIdx       eListIdx  )
 {
-#if 1 // NO_DEBUG
+#if 0 // NO_DEBUG
   return Err::m_nOK;
 #endif
 

@@ -762,6 +762,9 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 	m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("PDISEIMessage",           &m_uiPdsEnable,                                        0 );
 	m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("PDIInitialDelayAnc",      &m_uiPdsInitialDelayAnc,                               0 );
 	m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("PDIInitialDelayNonAnc",   &m_uiPdsInitialDelayNonAnc,                            0 );
+//lufeng: read from .cfg
+    m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("MbAff",      &m_uiMbAff,                               0 );
+    m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("PAff",   &m_uiPAff,                            0 );
 //~JVT-W080
   m_CurrentViewId = uiViewId; 
   m_bAVCFlag      = false;
@@ -1007,6 +1010,17 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 	
   }
 
+  /*if(m_uiPAff>0&&m_uiIntraPeriod<m_uiTotalFrames)//lufeng
+	{
+      fprintf(stderr, "anchor picture not supported in field coding, set IntraPeriod >= totalFrames\n");
+      AF();
+    }*/
+
+  if((m_uiPAff>0)&&(CodingParameter::SpsMVC.getNumViewMinus1()>1))//hwsun
+	{
+      fprintf(stderr, "field coding is used for 1/2 views only, set NumViewsMinusOne <= 1\n");
+      AF();
+    }
 
   if (m_uiMultiviewAcquisitionInfoSEIEnable==1) // SEI JVT-W060
   {
@@ -1061,7 +1075,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
       }
 
 
-      printf( "SPS: num_views_minus_1%d\n",CodingParameter::SpsMVC.m_num_views_minus_1 ); // ue(v)
+      printf( "SPS: num_views_minus_1: %d\n",CodingParameter::SpsMVC.m_num_views_minus_1 ); // ue(v)
 
       for (i=0;i<= CodingParameter::SpsMVC.m_num_views_minus_1; i++)
       {

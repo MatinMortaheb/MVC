@@ -553,7 +553,96 @@ Void QuarterPelFilter::xPredElse( Pel* pucDest, Pel* pucSrc, Int iDestStride, In
 }
 
 
+#ifdef   LF_INTERLACE
+ErrVal QuarterPelFilter::filterFrame( YuvPicBuffer *pcPelBuffer, YuvPicBuffer *pcHalfPelBuffer )
+{
+    ROT( NULL == pcPelBuffer );
+    ROT( NULL == pcHalfPelBuffer );
 
+    Pel*    pucSrc      = pcPelBuffer->getMbLumAddr ();
+    Int     iHeight     = pcPelBuffer->getLHeight   ();
+    Int     iWidth      = pcPelBuffer->getLWidth    ();
+    Int     iStride     = pcPelBuffer->getLStride   ();
+    Int     iMargin     = pcPelBuffer->getLXMargin  ();
+    UInt    uiTmpXSize  = (iMargin + iWidth + iMargin) * 2;
+    UInt    uiTmpYSize  = iMargin + iHeight + iMargin;
+    Int     iMarginNew  = iMargin-4;
+    Int     x, y;
+
+    XPel*  psTemp      = new XPel[uiTmpXSize * uiTmpYSize];
+
+    ROT( NULL == psTemp )
+
+        XPel*  ps          = &psTemp[ iMargin * uiTmpXSize + 2*iMargin ]; // fix provided by Shijun Sun
+
+    for( y = 0; y < iHeight; y++ )
+    {
+        for( x = -iMarginNew; x < iWidth+iMarginNew; x++ )
+        {
+            Int iTemp;
+            iTemp  = pucSrc[x - 0];
+            iTemp += pucSrc[x + 1];
+            iTemp  = iTemp << 2;
+            iTemp -= pucSrc[x - 1];
+            iTemp -= pucSrc[x + 2];
+            iTemp += iTemp << 2;
+            iTemp += pucSrc[x - 2];
+            iTemp += pucSrc[x + 3];
+            ps[2*x]    = pucSrc[x]<<5;
+            ps[2*x+1]  = iTemp;
+        }
+
+        ps     += uiTmpXSize;
+        pucSrc += iStride;
+    }
+
+    // bot
+    ps -= iMargin*2;               // fix provided by Shijun Sun
+    for( y = 0; y < iMargin; y++ ) // fix provided by Shijun Sun
+    {
+        ::memcpy( &ps[y*uiTmpXSize], &ps[(y-1)*uiTmpXSize], uiTmpXSize*sizeof(XPel) );
+    }
+
+    //top
+    ps = &psTemp[ iMargin * uiTmpXSize ]; // fix provided by Shijun Sun
+    for( y = 0; y < iMargin; y++ )        // fix provided by Shijun Sun
+    {
+        ::memcpy( &ps[-(y+1)*uiTmpXSize], &ps[-y*uiTmpXSize], uiTmpXSize*sizeof(XPel) );
+    }
+
+    ps = &psTemp[ 4*uiTmpXSize + 2*iMargin ]; // fix provided by Shijun Sun
+    iStride = uiTmpXSize;
+
+    Int   iDesStrideHP  = pcHalfPelBuffer->getLStride();
+    Pel* pucDesHP       = pcHalfPelBuffer->getMbLumAddr();
+    pucDesHP -= (iMarginNew*iDesStrideHP)<<1;
+
+    for( y = -iMarginNew; y < iHeight+iMarginNew; y++ )
+    {
+        for( x = -2*iMarginNew; x < 2*(iWidth+iMarginNew); x++ )
+        {
+            Int iTemp;
+            iTemp  = ps[x - 0*iStride];
+            iTemp += ps[x + 1*iStride];
+            iTemp  = iTemp << 2;
+            iTemp -= ps[x - 1*iStride];
+            iTemp -= ps[x + 2*iStride];
+            iTemp += iTemp << 2;
+            iTemp += ps[x - 2*iStride];
+            iTemp += ps[x + 3*iStride];
+
+            pucDesHP[x]              = xClip( ( ps[x] + 16) / 32);
+            pucDesHP[x+iDesStrideHP] = xClip( ( iTemp + 512) / 1024);
+        }
+        pucDesHP += iDesStrideHP<<1;
+        ps     += iStride;
+    }
+
+    delete [] psTemp;
+    psTemp = NULL;
+    return Err::m_nOK;
+}
+#endif //LF_INTERLACE
 
 
 ErrVal QuarterPelFilter::filterFrame( IntYuvPicBuffer *pcPelBuffer, IntYuvPicBuffer *pcHalfPelBuffer )

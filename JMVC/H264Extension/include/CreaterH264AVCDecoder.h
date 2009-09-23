@@ -117,8 +117,8 @@ class QuarterPelFilter;
 class SampleWeighting;
 class ParameterSetMng;
 class PocCalculator;
-class ReconstructionBypass;
 
+class ReconstructionBypass;
 
 
 H264AVC_NAMESPACE_BEGIN
@@ -142,6 +142,10 @@ public:
   //JVT-V054
   UInt* getViewCodingOrder();
 
+#ifdef LF_INTERLACE
+    void addViewCodingOrder();
+#endif
+
   ErrVal uninit     ( Bool bCloseTrace ); 
   ErrVal process    ( PicBuffer*        pcPicBuffer,
                       PicBufferList&    rcPicBufferOutputList,
@@ -160,9 +164,9 @@ public:
                       UInt&             ruiStartPos,
                       UInt&             ruiEndPos,
                       Bool&              bFragmented,
-                      Bool&              bDiscardable,
+                      Bool&              bDiscardable
                       //~JVT-P031
-					  UInt NumOfViewInTheStream
+					  ,UInt NumOfViewInTheStream
                       
                       ); 
 
@@ -201,6 +205,8 @@ public:
 	Void setAVCFlag ( Bool aFlag ) { UnitAVCFlag = aFlag; } //JVT-S036 
 
   Void	  RoiDecodeInit();
+
+  Void    setCrop(UInt *uiCrop);
 
 protected:
   ErrVal xCreateDecoder();

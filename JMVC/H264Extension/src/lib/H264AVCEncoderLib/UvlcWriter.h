@@ -160,6 +160,7 @@ public:
   ErrVal  mbMode( MbDataAccess& rcMbDataAccess/*, Bool bBLQRefFlag*/ );
   ErrVal  resPredFlag( MbDataAccess& rcMbDataAccess );
   ErrVal  resPredFlag_FGS( MbDataAccess& rcMbDataAccess, Bool bBaseCoeff );
+  ErrVal  fieldFlag           ( MbDataAccess& rcMbDataAccess ); //th
 	ErrVal  smoothedRefFlag( MbDataAccess& rcMbDataAccess );	// JVT-R091
 
   ErrVal  mvd( MbDataAccess& rcMbDataAccess, ListIdx eLstIdx );

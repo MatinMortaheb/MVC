@@ -186,7 +186,6 @@ ErrVal SliceEncoder::uninit()
 }
 
 
-
 ErrVal
 SliceEncoder::encodeSlice( SliceHeader&  rcSliceHeader,
                            IntFrame*     pcFrame,
@@ -210,6 +209,22 @@ SliceEncoder::encodeSlice( SliceHeader&  rcSliceHeader,
   //===== initialization =====
   RNOK( pcMbDataCtrl  ->initSlice         ( rcSliceHeader, ENCODE_PROCESS, false, pcMbDataCtrlL1 ) );
   RNOK( m_pcControlMng->initSliceForCoding( rcSliceHeader ) );
+
+#ifdef LF_INTERLACE
+	UInt uiPos;
+	for( uiPos = 0; uiPos < rcList0.getActive(); uiPos++ )
+    {
+	  IntFrame* pcRefFrame = rcList0.getEntry(uiPos);
+	  pcRefFrame->getFullPelYuvBuffer()->fillMargin();
+	}
+	for( uiPos = 0; uiPos < rcList1.getActive(); uiPos++ )
+    {
+	  IntFrame* pcRefFrame = rcList1.getEntry(uiPos);
+	  pcRefFrame->getFullPelYuvBuffer()->fillMargin();
+	}
+	//lufeng:frame/field margin
+#endif
+
 //JVT-W080
 	if( getPdsEnable() )
 	{
@@ -232,7 +247,13 @@ SliceEncoder::encodeSlice( SliceHeader&  rcSliceHeader,
     MbDataAccess* pcMbDataAccess  = 0;
 
     RNOK( pcMbDataCtrl  ->initMb          (  pcMbDataAccess, uiMbY, uiMbX ) );
-    RNOK( m_pcControlMng->initMbForCoding ( *pcMbDataAccess, uiMbAddress  ) );
+ 
+#ifdef LF_INTERLACE
+        RNOK( m_pcControlMng    ->initMbForCoding ( *pcMbDataAccess,    uiMbY, uiMbX,  0,0) );
+#else
+        RNOK( m_pcControlMng    ->initMbForCoding ( *pcMbDataAccess,    uiMbAddress  ) );
+#endif
+
 //JVT-W080
     if( getPdsEnable() )
 		{
@@ -241,7 +262,22 @@ SliceEncoder::encodeSlice( SliceHeader&  rcSliceHeader,
 		}
 //~JVT-W080
 
+#ifdef LF_INTERLACE
+    Double cost;
+    RNOK( m_pcMbEncoder ->encodeMacroblock( *pcMbDataAccess,
+                                             pcFrame,
+											 pcFrame,
+                                             rcList0,
+                                             rcList1,
+                                             m_pcCodingParameter->getMotionVectorSearchParams().getNumMaxIter(),
+                                             m_pcCodingParameter->getMotionVectorSearchParams().getIterSearchRange(),
+                                             dlambda,
+                                             cost,
+											 true) );
 
+    RNOK( m_pcMbCoder   ->encode          ( *pcMbDataAccess, NULL, SST_RATIO_1,
+                                             ( uiMbAddress == rcSliceHeader.getLastMbInSlice() ) , true ) );
+#else
     RNOK( m_pcMbEncoder ->encodeMacroblock( *pcMbDataAccess,
                                              pcFrame,
                                              rcList0,
@@ -252,10 +288,234 @@ SliceEncoder::encodeSlice( SliceHeader&  rcSliceHeader,
 
     RNOK( m_pcMbCoder   ->encode          ( *pcMbDataAccess, NULL, SST_RATIO_1,
                                              ( uiMbAddress == rcSliceHeader.getLastMbInSlice() ) ) );
+#endif
   }
 
   return Err::m_nOK;
 }
+
+#ifdef LF_INTERLACE
+
+/*
+* lufeng: MbAff Slice encoding
+*/
+ErrVal
+SliceEncoder::encodeSliceMbAff( SliceHeader&  rcSliceHeader,
+                          IntFrame*     pcFrame,
+                          MbDataCtrl*   pcMbDataCtrl,
+                          RefFrameList& rcList0,
+                          RefFrameList& rcList1,
+                          UInt          uiMbInRow,
+                          Double        dlambda )
+{
+    ROF( pcFrame );
+    ROF( pcMbDataCtrl );
+
+
+
+    //===== get co-located picture =====
+    MbDataCtrl* pcMbDataCtrlL1 = NULL;
+    if( rcList1.getActive() && rcList1.getEntry( 0 )->getRecPicBufUnit() )
+    {
+        pcMbDataCtrlL1 = rcList1.getEntry( 0 )->getRecPicBufUnit()->getMbDataCtrl();
+    }
+    ROT( rcSliceHeader.isInterB() && ! pcMbDataCtrlL1 );
+
+    //===== initialization =====
+    RNOK( pcMbDataCtrl  ->initSlice         ( rcSliceHeader, ENCODE_PROCESS, false, pcMbDataCtrlL1 ) );//working...
+    RNOK( m_pcControlMng->initSliceForCoding( rcSliceHeader ) );
+    //JVT-W080
+    if( getPdsEnable() )
+    {
+        m_pcMbEncoder->setPdsEnable( getPdsEnable() );
+        m_pcMbEncoder->setFrameWidthInMbs( rcSliceHeader.getSPS().getFrameWidthInMbs() );
+        m_pcMbEncoder->setPdsBlockSize( getPdsBlockSize() );
+        UInt **ppuiPdsInitialDelayMinus2L0 = getPdsInitialDelayMinus2L0();
+        UInt **ppuiPdsInitialDelayMinus2L1 = getPdsInitialDelayMinus2L1();
+        m_pcMbEncoder->setPdsInitialDelayMinus2L0( ppuiPdsInitialDelayMinus2L0[rcSliceHeader.getViewId()] );
+        m_pcMbEncoder->setPdsInitialDelayMinus2L1( ppuiPdsInitialDelayMinus2L1[rcSliceHeader.getViewId()] );
+    }
+    //~JVT-W080
+
+   RefFrameList acRefFrameList0[2];
+   RefFrameList acRefFrameList1[2];
+
+   IntFrame* apcFrame[4]={NULL, NULL, NULL, NULL};
+
+   //lufeng: save origframe for multipass encoding
+   IntFrame*  pcOrgFrame = new IntFrame( pcFrame->getFullPelYuvBuffer()->getBufferCtrl(), 
+                pcFrame->getHalfPelYuvBuffer()->getBufferCtrl(), 
+                FRAME );
+       XPel* pHPData = 0;
+   pcOrgFrame->getFullPelYuvBuffer()->init(pHPData);
+   pcOrgFrame->getFullPelYuvBuffer()->loadBuffer(pcFrame->getFullPelYuvBuffer());
+//   pcOrigFrame->getHalfPelYuvBuffer()->loadBuffer(pcFrame->getHalfPelYuvBuffer());
+
+   IntFrame* apcOrgFrame[4]={NULL, NULL, NULL, NULL};
+	RNOK( gSetFrameFieldArrays(apcOrgFrame, pcOrgFrame));
+   
+	RNOK( gSetFrameFieldArrays(apcFrame, pcFrame));
+
+   RNOK( gSetFrameFieldLists(acRefFrameList0[0],acRefFrameList0[1],rcList0));
+   RNOK( gSetFrameFieldLists(acRefFrameList1[0],acRefFrameList1[1],rcList1));
+
+   RefFrameList* apcRefFrameList0[4];
+   RefFrameList* apcRefFrameList1[4];
+
+   apcRefFrameList0[0] = ( NULL == &rcList0 ) ? NULL : &acRefFrameList0[0];
+   apcRefFrameList0[1] = ( NULL == &rcList0 ) ? NULL : &acRefFrameList0[1];
+   apcRefFrameList1[0] = ( NULL == &rcList1 ) ? NULL : &acRefFrameList1[0];
+   apcRefFrameList1[1] = ( NULL == &rcList1 ) ? NULL : &acRefFrameList1[1];
+   apcRefFrameList0[2] = apcRefFrameList0[3] = &rcList0;
+   apcRefFrameList1[2] = apcRefFrameList1[3] = &rcList1;
+
+
+   IntYuvMbBuffer acIntYuvMbBuffer[2];
+
+   MbDataBuffer acMbData[2];
+
+   Bool   abSkipModeAllowed[4] = {true,true,true,true};
+
+    //===== loop over macroblocks =====
+    Int eP;
+    //note: no fmo!
+    for( UInt uiMbAddress = rcSliceHeader.getFirstMbInSlice(); uiMbAddress <= rcSliceHeader.getLastMbInSlice(); uiMbAddress+=2 )
+    {
+        Double adCost[2]  = {0,0};
+
+        for( eP = 0; eP < 4; eP++ )
+        {
+            ETRACE_NEWMB( uiMbAddress );
+	
+			if(eP==2)
+			{
+					UInt uiPos;
+					for( uiPos = 0; uiPos < rcList0.getActive(); uiPos++ )
+					  {
+						  IntFrame* pcRefFrame = rcList0.getEntry(uiPos);
+						  pcRefFrame->getFullPelYuvBuffer()->fillMargin();
+						}
+					for( uiPos = 0; uiPos < rcList1.getActive(); uiPos++ )
+					  {
+						  IntFrame* pcRefFrame = rcList1.getEntry(uiPos);
+						  pcRefFrame->getFullPelYuvBuffer()->fillMargin();
+						}
+					//lufeng: bug fixed (frame/field margin for mb in mbaff)
+			}
+			else if(eP==0)
+			{
+					UInt uiPos;
+					for( uiPos = 0; uiPos < rcList0.getActive(); uiPos++ )
+					  {
+						  IntFrame* pcRefFrame = rcList0.getEntry(uiPos);
+						  pcRefFrame->getTopField()->getFullPelYuvBuffer()->fillMargin();
+						  pcRefFrame->getBotField()->getFullPelYuvBuffer()->fillMargin();
+						}
+					for( uiPos = 0; uiPos < rcList1.getActive(); uiPos++ )
+					  {
+						  IntFrame* pcRefFrame = rcList1.getEntry(uiPos);
+						  pcRefFrame->getTopField()->getFullPelYuvBuffer()->fillMargin();
+						  pcRefFrame->getBotField()->getFullPelYuvBuffer()->fillMargin();
+						}
+					//lufeng: bug fixed (frame/field margin for mb in mbaff)
+			}
+
+            MbDataAccess* pcMbDataAccess     = NULL;
+            Double        dCost = 0;
+            UInt          uiMbY, uiMbX;
+
+            const Bool    bField = (eP < 2);
+            const UInt    uiMbAddressMbAff = uiMbAddress+(eP%2);
+            rcSliceHeader.getMbPositionFromAddress( uiMbY, uiMbX, uiMbAddressMbAff );
+
+            //here re-calculate x,y
+            RNOK( pcMbDataCtrl  ->initMb          (  pcMbDataAccess, uiMbY, uiMbX ) );
+            RNOK( m_pcControlMng    ->initMbForCoding ( *pcMbDataAccess,    uiMbY, uiMbX,  true ,bField) );//not set for last 2 params
+
+            //JVT-W080
+            if( getPdsEnable() )
+            {
+                m_pcMbEncoder->setCurrMBX             (  uiMbX );
+                m_pcMbEncoder->setCurrMBY             (  uiMbY );
+            }
+            //~JVT-W080
+
+            if( eP % 2 == 0 )
+            {
+                abSkipModeAllowed[eP] = pcMbDataAccess->getDefaultFieldFlag()&(eP<2); // do not move
+            }
+            else if( eP%2 == 1 )
+            {
+                const MbData&	rcTopMb = pcMbDataAccess->getMbDataComplementary();
+                if (pcMbDataAccess->getDefaultFieldFlag() != rcTopMb.getFieldFlag() )
+                    abSkipModeAllowed[eP] = false;
+            }
+
+
+
+            pcMbDataAccess->setFieldMode( eP < 2 );
+			
+            //===== initialisation =====
+      /*      RNOK( m_pcYuvFullPelBufferCtrl->initMb( uiMbY, uiMbX, true ) );
+            RNOK( m_pcYuvHalfPelBufferCtrl->initMb( uiMbY, uiMbX, true ) );
+            RNOK( m_pcMotionEstimation    ->initMb( uiMbY, uiMbX, *pcMbDataAccess ) );*/
+
+            //encode macroblock
+                    RNOK( m_pcMbEncoder ->encodeMacroblock( *pcMbDataAccess,
+                        apcFrame[eP],
+						apcOrgFrame[eP],
+                        *apcRefFrameList0    [eP],
+                        *apcRefFrameList1    [eP],
+                        m_pcCodingParameter->getMotionVectorSearchParams().getNumMaxIter(),
+                        m_pcCodingParameter->getMotionVectorSearchParams().getIterSearchRange(),
+                        dlambda, 
+                        dCost,
+						abSkipModeAllowed[eP]));
+
+            if( adCost[eP>>1] != DOUBLE_MAX )
+            {
+                adCost [eP>>1] += dCost;
+            }
+            if( bField )
+            {
+                acMbData[eP].copy( pcMbDataAccess->getMbData() );
+                (&acIntYuvMbBuffer[eP])->loadBuffer( apcFrame[eP]->getFullPelYuvBuffer() );
+            }
+        }
+        Bool bFieldMode = adCost[0] < adCost[1];//choose by cost
+		
+#if RANDOM_CHOOSE
+		bFieldMode=(int)rand()%2;//lufeng: random choose
+#endif
+
+        for( eP = 0; eP < 2; eP++ )
+        {
+            MbDataAccess* pcMbDataAccess     = NULL;
+            UInt          uiMbY, uiMbX;
+            const UInt    uiMbAddressMbAff   = uiMbAddress+eP;
+
+            ETRACE_NEWMB(uiMbAddressMbAff);
+
+            rcSliceHeader.getMbPositionFromAddress( uiMbY, uiMbX, uiMbAddressMbAff );
+
+            //here re-calculate x,y
+            RNOK( pcMbDataCtrl  ->initMb          (  pcMbDataAccess, uiMbY, uiMbX ) );
+            RNOK( m_pcControlMng    ->initMbForCoding ( *pcMbDataAccess,    uiMbY, uiMbX,  true ,bFieldMode) );//not set for last 2 params
+       
+            if( bFieldMode )
+            {
+                pcMbDataAccess->getMbData().copy( acMbData[eP] );
+                apcFrame[eP]->getFullPelYuvBuffer()->loadBuffer( &acIntYuvMbBuffer     [eP] );
+            }
+			//printf("MB: %d, ff mode: %d,  mbmode: %d\n",uiMbAddressMbAff,bFieldMode,pcMbDataAccess->getMbPicType());
+
+            RNOK( m_pcMbCoder   ->encode          ( *pcMbDataAccess, NULL, SST_RATIO_1,
+                ( uiMbAddressMbAff == rcSliceHeader.getLastMbInSlice() ), (eP == 1) )  );
+        }
+    }
+    return Err::m_nOK;
+}
+#endif
 
 
 //TMM_WP

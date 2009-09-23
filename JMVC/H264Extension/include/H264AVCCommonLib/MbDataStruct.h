@@ -100,6 +100,9 @@ class H264AVCCOMMONLIB_API MbDataStruct
 public:
   MbDataStruct();
 
+#ifdef LF_INTERLACE
+  Void copy( const MbDataStruct& rcMbDataStruct );
+#endif
   Void reset();
   Void initMbData( UChar ucQp, UInt uiSliceId )                 { m_uiSliceId = uiSliceId;  m_ucQp = ucQp;  }
   Void copyFrom( const MbDataStruct& rcMbDataStruct );
@@ -157,6 +160,10 @@ public:
   UInt getBCBP()                                          const { return m_uiBCBP; }
   Bool getSkipFlag()                                      const { return m_bSkipFlag; }
   Void setSkipFlag( Bool b)                                     { m_bSkipFlag = b; }
+#ifdef LF_INTERLACE
+    Void setMbCbpResidual( UInt uiMbCbpResidual )                 { m_uiMbCbpResidual = uiMbCbpResidual; }//loopfilter
+      Bool is4x4BlkResidual( LumaIdx cLumaIdx )               const { return (0 != ((m_uiMbCbpResidual >> cLumaIdx) & 1)); }//loopfilter
+#endif
 
   UShort  getResidualPredFlags  ()                        const { return   m_usResidualPredFlags; }
   Bool    getResidualPredFlag   ( LumaIdx     cIdx      ) const { return ( m_usResidualPredFlags & ( 1 << cIdx.b4x4() ) ) != 0; }
@@ -209,7 +216,9 @@ public:
                               Par8x8              ePar8x8, Bool bDirect8x8 );
 
   Void    setBLSkipFlag         ( Bool b )  { m_bBLSkipFlag = b; }
+  Void    setBLQRefFlag         ( Bool b )  { m_bBLQRefFlag = b; }
   Bool    getBLSkipFlag         () const    { return m_bBLSkipFlag; }
+  Bool    getBLQRefFlag         () const    { return m_bBLQRefFlag; }
 
   Bool is8x8TrafoFlagPresent()                          const;
   Bool isTransformSize8x8   ()                          const     { return m_bTransformSize8x8; }
@@ -220,9 +229,15 @@ public:
   Bool    getSmoothedRefFlag    () const    { return m_bSmoothedRefFlag;	}
 	//--
 
+#ifdef   LF_INTERLACE
+  Void    setFieldFlag          ( Bool b )  { m_bFieldFlag = b; }
+  Bool    getFieldFlag          () const    { return m_bFieldFlag; }
+#endif //LF_INTERLACE
+
 public:
   UInt    m_uiSliceId;
   Bool    m_bBLSkipFlag;
+  Bool    m_bBLQRefFlag;
   MbMode  m_eMbMode;
   UInt    m_uiMbCbp;
   UInt    m_uiBCBP;
@@ -239,7 +254,11 @@ public:
 
   // TMM_ESS 
   Bool    m_bInCropWindowFlag;  // indicates if the scaled base layer MB is inside the cropping window
+#ifdef   LF_INTERLACE
+  Bool    m_bFieldFlag;
 
+    UInt m_uiMbCbpResidual;//loop filter
+#endif //LF_INTERLACE
 	//-- JVT-R091
 	Bool		m_bSmoothedRefFlag;		// indicates if the smoothed reference mode is used
 	//--

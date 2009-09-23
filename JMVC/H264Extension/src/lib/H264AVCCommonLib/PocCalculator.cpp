@@ -93,7 +93,11 @@ H264AVC_NAMESPACE_BEGIN
 
 
 PocCalculator::PocCalculator()
-  : m_iLastIdrFrameNum    ( 0 )
+#ifdef   LF_INTERLACE
+: m_iLastIdrFieldNum    ( 0 )
+#else //!LF_INTERLACE
+: m_iLastIdrFrameNum    ( 0 )
+#endif //LF_INTERLACE
   , m_iBitsLsb            ( 0 )
   , m_iTop2BotOffset      ( 1 )
   , m_iPrevRefPocMsb      ( 0 )
@@ -122,7 +126,11 @@ ErrVal PocCalculator::copy( PocCalculator*& rpcPocCalculator )
 
   ROT( NULL == rpcPocCalculator );
 
+#ifdef   LF_INTERLACE
+  rpcPocCalculator->m_iLastIdrFieldNum = m_iLastIdrFieldNum;
+#else //!LF_INTERLACE
   rpcPocCalculator->m_iLastIdrFrameNum = m_iLastIdrFrameNum;
+#endif //LF_INTERLACE
   rpcPocCalculator->m_iBitsLsb         = m_iBitsLsb;
   rpcPocCalculator->m_iTop2BotOffset   = m_iTop2BotOffset;
   rpcPocCalculator->m_iPrevRefPocMsb   = m_iPrevRefPocMsb;
@@ -142,6 +150,43 @@ ErrVal PocCalculator::destroy()
   return Err::m_nOK;
 }
 
+#ifdef   LF_INTERLACE
+ErrVal PocCalculator::initSPS( const SequenceParameterSet& rcSequenceParameterSet )
+{
+    switch( rcSequenceParameterSet.getPicOrderCntType() )
+    {
+    case 0:
+        {
+            m_iPrevRefPocMsb  = 0;
+            m_iPrevRefPocLsb  = 0;
+            m_iMaxPocLsb      = ( 1 << rcSequenceParameterSet.getLog2MaxPicOrderCntLsb() );
+        }
+        break;
+    case 1:
+        {
+            m_iFrameNumOffset  = 0;
+            m_iRefOffsetSum    = 0;
+            for( UInt uiIndex = 0; uiIndex < rcSequenceParameterSet.getNumRefFramesInPicOrderCntCycle(); uiIndex++ )
+            {
+                m_iRefOffsetSum += rcSequenceParameterSet.getOffsetForRefFrame( uiIndex );
+            }
+        }
+        break;
+    case 2:
+        {
+            m_iFrameNumOffset  = 0;
+        }
+        break;
+    default:
+        {
+            return Err::m_nERR;
+        }
+        break;
+    }
+
+    return Err::m_nOK;
+}
+#endif //LF_INTERLACE
 
 ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
     {
@@ -179,7 +224,30 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
         m_iPrevRefPocMsb = iCurrPocMsb;
         m_iPrevRefPocLsb = iCurrPocLsb;
       }
-      rcSliceHeader.setPoc( iCurrPocMsb + iCurrPocLsb );
+
+#if JM_MVC_COMPATIBLE
+#define DELTA_POCA  DELTA_POC
+#else
+#define DELTA_POCA  0
+#endif
+
+#ifdef LF_INTERLACE
+      if( rcSliceHeader.getPicType() & TOP_FIELD )
+      {
+          rcSliceHeader.setTopFieldPoc( iCurrPocMsb + iCurrPocLsb+DELTA_POCA );
+
+          if( rcSliceHeader.getPicType() == FRAME )
+          {
+              rcSliceHeader.setBotFieldPoc( rcSliceHeader.getTopFieldPoc() + rcSliceHeader.getDeltaPicOrderCntBottom() +DELTA_POCA);
+          }
+      }
+      else
+      {
+          rcSliceHeader.setBotFieldPoc( iCurrPocMsb + iCurrPocLsb+DELTA_POCA );
+      }
+#else
+      rcSliceHeader.setPoc( iCurrPocMsb + iCurrPocLsb + DELTA_POCA );
+#endif //LF_INTERLACE
     }
     break;
   case 1:
@@ -213,15 +281,36 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
         for( Int iIndex = 0; iIndex <= iFrameNumCycle; iIndex++ )
         {
           iExpectedPoc     += rcSliceHeader.getSPS().getOffsetForRefFrame( iIndex );
+        } 
       }
+      else
+      {
+          iExpectedPoc = 0;
       }
+     
       if( rcSliceHeader.getNalRefIdc() == 0 )
       {
         iExpectedPoc       += rcSliceHeader.getSPS().getOffsetForNonRefPic();
       }
 
       //--- set POC ---
+#ifdef LF_INTERLACE
+      if( rcSliceHeader.getPicType() & TOP_FIELD )
+      {
+          rcSliceHeader.setTopFieldPoc( iExpectedPoc + rcSliceHeader.getDeltaPicOrderCnt( 0 ) );
+
+          if( rcSliceHeader.getPicType() == FRAME )
+          {
+              rcSliceHeader.setBotFieldPoc( rcSliceHeader.getTopFieldPoc() + rcSliceHeader.getDeltaPicOrderCnt( 1 ) + rcSliceHeader.getSPS().getOffsetForTopToBottomField() );
+          }
+      }
+      else
+      {
+          rcSliceHeader.setBotFieldPoc( iExpectedPoc + rcSliceHeader.getDeltaPicOrderCnt( 0 ) + rcSliceHeader.getSPS().getOffsetForTopToBottomField() );
+      }
+#else
       rcSliceHeader.setPoc( iExpectedPoc + rcSliceHeader.getDeltaPicOrderCnt( 0 ) );
+#endif //LF_INTERLACE
     }
     break;
   case 2:
@@ -248,7 +337,23 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
       {
         m_iPrevFrameNum = rcSliceHeader.getFrameNum();
       }
+#ifdef LF_INTERLACE
+      if( rcSliceHeader.getPicType() == FRAME )
+      {
+          rcSliceHeader.setTopFieldPoc( iCurrPoc );
+          rcSliceHeader.setBotFieldPoc( iCurrPoc );
+      }
+      else if ( rcSliceHeader.getPicType() == TOP_FIELD )
+      {
+          rcSliceHeader.setTopFieldPoc( iCurrPoc );
+      }
+      else
+      {
+          rcSliceHeader.setBotFieldPoc( iCurrPoc );
+      }
+#else
       rcSliceHeader.setPoc( iCurrPoc );
+#endif //LF_INTERLACE
     }
     break;
   default:
@@ -299,18 +404,50 @@ ErrVal PocCalculator::setPoc( SliceHeader&  rcSliceHeader,
 {
   ROTRS( iContFrameNumber > ( INT_MAX - 1 ), Err::m_nERR );
 
+#ifdef   LF_INTERLACE
+//  UInt iCurrFieldNum = ( iContFrameNumber/* << 1*/ ) + (m_iTop2BotOffset?1:0) + ( rcSliceHeader.getBottomFieldFlag() ? m_iTop2BotOffset : 0 );//thBug
+UInt iCurrFieldNum=iContFrameNumber;
+
+if( rcSliceHeader.isIdrNalUnit() && !rcSliceHeader.getBottomFieldFlag() )
+  {
+      m_iBitsLsb          = rcSliceHeader.getSPS().getLog2MaxPicOrderCntLsb();
+      m_iLastIdrFieldNum  = iCurrFieldNum;
+  }
+
+  Int iCurrPoc = iCurrFieldNum - m_iLastIdrFieldNum;
+
+  if( rcSliceHeader.getPicType() & TOP_FIELD )
+  {
+      rcSliceHeader.setTopFieldPoc  ( iCurrPoc );
+
+      if( rcSliceHeader.getPicType() == FRAME )
+      {
+          rcSliceHeader.setBotFieldPoc( rcSliceHeader.getTopFieldPoc() + ( rcSliceHeader.getPPS().getPicOrderPresentFlag() ? m_iTop2BotOffset : 0 ) );
+		  if (!rcSliceHeader.getSPS().getFrameMbsOnlyFlag()) // hwsun, fix bitstream byte mismatch in frame coding
+		  {
+			rcSliceHeader.setDeltaPicOrderCntBottom ( rcSliceHeader.getBotFieldPoc() - rcSliceHeader.getTopFieldPoc() );
+		  }
+      }
+  }
+  else
+  {
+      rcSliceHeader.setBotFieldPoc  ( iCurrPoc );
+  }
+#else //!LF_INTERLACE
   if( rcSliceHeader.isIdrNalUnit() )
   {
-    m_iBitsLsb          = rcSliceHeader.getSPS().getLog2MaxPicOrderCntLsb();
+      m_iBitsLsb          = rcSliceHeader.getSPS().getLog2MaxPicOrderCntLsb();
 
-	// JVT-Q065 EIDR
-	//m_iLastIdrFrameNum  = iContFrameNumber; 
+      // JVT-Q065 EIDR
+      //m_iLastIdrFrameNum  = iContFrameNumber; 
 
   }
 
   Int iCurrPoc = iContFrameNumber - m_iLastIdrFrameNum;
 
   rcSliceHeader.setPoc            ( iCurrPoc );
+#endif //LF_INTERLACE
+
   rcSliceHeader.setPicOrderCntLsb ( iCurrPoc & ~ ( -1 << m_iBitsLsb ) );
 
   return Err::m_nOK;

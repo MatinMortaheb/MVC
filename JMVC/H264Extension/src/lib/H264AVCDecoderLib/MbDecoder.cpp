@@ -386,7 +386,11 @@ ErrVal MbDecoder::process( MbDataAccess& rcMbDataAccess,
   RNOK( xScaleTCoeffs( rcMbDataAccess ) );
 
   YuvPicBuffer *pcRecYuvBuffer;
+#ifdef   LF_INTERLACE
+  RNOK( m_pcFrameMng->getRecYuvBuffer( pcRecYuvBuffer, rcMbDataAccess.getMbPicType() ) );
+#else //!LF_INTERLACE
   RNOK( m_pcFrameMng->getRecYuvBuffer( pcRecYuvBuffer ) );
+#endif //LF_INTERLACE
 
   IntYuvMbBuffer  cPredIntYuvMbBuffer;
   IntYuvMbBuffer  cResIntYuvMbBuffer;
@@ -429,7 +433,6 @@ ErrVal MbDecoder::process( MbDataAccess& rcMbDataAccess,
     }
   }
   pcRecYuvBuffer->loadBuffer( &cYuvMbBuffer );
-
 
   return Err::m_nOK;
   

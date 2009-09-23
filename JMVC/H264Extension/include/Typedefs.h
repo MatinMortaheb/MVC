@@ -343,5 +343,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
   typedef MSYS_TYPE_INSTSTATE InstState;
 #endif
 
+#define LF_INTERLACE //lufeng: interlaced tool
+#define JM_MVC_COMPATIBLE 1//lufeng: compatible with JM-MVC encoder
   
 #endif //__TYPEDEFS_H_D64BE9B4_A8DA_11D3_AFE7_005004464B79

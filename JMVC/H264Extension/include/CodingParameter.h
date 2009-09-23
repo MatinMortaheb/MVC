@@ -701,6 +701,8 @@ public:
 		, m_ppuiPdsInitialDelayMinus2L1Anc    ( 0 )
 		, m_ppuiPdsInitialDelayMinus2L0NonAnc ( 0 )
 		, m_ppuiPdsInitialDelayMinus2L1NonAnc ( 0 )
+        ,m_uiMbAff (0)
+        ,m_uiPAff(0)
 //~JVT-W080
 	{
     for( UInt uiLayer = 0; uiLayer < 6; uiLayer++ )
@@ -801,6 +803,11 @@ public:
   UInt                            getMaxRefIdxActiveBL0   ()              const   { return m_uiMaxRefIdxActiveBL0; }
   UInt                            getMaxRefIdxActiveBL1   ()              const   { return m_uiMaxRefIdxActiveBL1; }
   UInt                            getMaxRefIdxActiveP     ()              const   { return m_uiMaxRefIdxActiveP; }
+
+#ifdef LF_INTERLACE
+  UInt                              getMbAff            ( )    const   { return m_uiMbAff; }
+  UInt                              getPAff             ( )    const   { return m_uiPAff; }
+#endif
 //JVT-W080
 	UInt                            getPdsEnable            ()              const   { return m_uiPdsEnable; } 
 	UInt                            getPdsInitialDelayAnc   ()              const   { return m_uiPdsInitialDelayAnc; } 
@@ -846,6 +853,7 @@ public:
                                                                             m_uiQualityLevelList [uiSimplePri] = uiQualityLevel;
                                                                           }
  JVT-S036  */
+
   Void                            setMVCmode              ( UInt    p )   { m_uiMVCmode             = p; }
 
   Void                            setInterPredPicsFirst   ( UInt    p)    { m_uiInterPredPicsFirst  = p; } // JVT-V043 enc
@@ -1247,6 +1255,11 @@ protected:
 
    UInt		***m_uiMantissaRotationParam;
    UInt		**m_uiMantissaTranslationParam;	
+
+
+   ////////////lufeng: modify .cfg
+   UInt                      m_uiMbAff;
+   UInt                      m_uiPAff;
 /**********************/
 
 public:

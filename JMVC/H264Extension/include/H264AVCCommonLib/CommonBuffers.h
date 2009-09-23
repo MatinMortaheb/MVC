@@ -344,7 +344,10 @@ template< class T >
 T* 
 XDataList<T>::getEntry( UInt uiIndex ) const
 {
-  return ( uiIndex < m_uiActive ? m_apT[ uiIndex ] : 0 );
+    //bug-fix shenqiu EIDR{
+    //return ( uiIndex < m_uiActive ? m_apT[ uiIndex ] : 0 );
+    return ( uiIndex < m_uiSize ? m_apT[ uiIndex ] : 0 );
+    //bug-fix shenqiu EIDR}
 }
 
 template< class T >

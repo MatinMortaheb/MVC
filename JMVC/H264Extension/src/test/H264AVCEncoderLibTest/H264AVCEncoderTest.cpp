@@ -393,8 +393,8 @@ H264AVCEncoderTest::go()
   UInt                    auiMbX                  [MAX_LAYERS];
   UInt                    auiMbY                  [MAX_LAYERS];
   UInt                    auiPicSize              [MAX_LAYERS];
-  PicBuffer*              apcOriginalPicBuffer    [MAX_LAYERS];
-  PicBuffer*              apcReconstructPicBuffer [MAX_LAYERS];
+  PicBuffer*              apcOriginalPicBuffer    [MAX_LAYERS];//original pic
+  PicBuffer*              apcReconstructPicBuffer [MAX_LAYERS];//rec pic
   PicBufferList           acPicBufferOutputList   [MAX_LAYERS];
   PicBufferList           acPicBufferUnusedList   [MAX_LAYERS];
   ExtBinDataAccessorList  cOutExtBinDataAccessorList;

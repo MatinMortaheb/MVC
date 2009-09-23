@@ -213,18 +213,43 @@ public:
                                           PicBufferList&              rcUnusedList 
 					  ,MultiviewReferenceDirection = NOT_MULTIVIEW			  
 										  );
+
+#ifdef LF_INTERLACE
+  ErrVal          getRefLists           ( RefFrameList&               rcList0,
+                                          RefFrameList&               rcList1,
+                                          SliceHeader&                rcSliceHeader,
+										  QuarterPelFilter* pcQuarterPelFilter);
+#else
   ErrVal          getRefLists           ( RefFrameList&               rcList0,
                                           RefFrameList&               rcList1,
                                           SliceHeader&                rcSliceHeader );
+#endif
+
+#ifdef LF_INTERLACE
+  ErrVal
+				xFieldList(    SliceHeader&   rcSliceHeader,
+                           RefFrameList&  rcList,
+                           RefFrameList&  rcListTemp );//lufeng
+ErrVal
+                ProcessRef(SliceHeader&   rcSliceHeader, RefFrameList&  rcList ,RefFrameList&  rcListTemp,
+							QuarterPelFilter* pcQuarterPelFilter);//lufeng
+#endif
 
   RecPicBufUnit*  getLastUnit           ();
   RecPicBufUnit*  getCurrUnit           ();
   RecPicBufUnit*  getRecPicBufUnit      ( Int                         iPoc );
 
+
+#ifdef LF_INTERLACE
+  ErrVal AddMultiviewRef (RecPicBufUnitList& recPicBufUnitList,
+			                    RefFrameList& rcList, const int maxListSize,
+			                    const MultiviewReferenceDirection refDirection, SliceHeader&   rcSliceHeader
+								,QuarterPelFilter* pcQuarterPelFilter); //JVT-W056  Samsung
+#else
   ErrVal AddMultiviewRef (RecPicBufUnitList& recPicBufUnitList,
 			                    RefFrameList& rcList, const int maxListSize,
 			                    const MultiviewReferenceDirection refDirection, SliceHeader&   rcSliceHeader); //JVT-W056  Samsung
-
+#endif
 
   void RemoveMultiviewRef(RecPicBufUnit* pcRecPicBufUnitToRemove);
 
@@ -265,10 +290,19 @@ private:
 
   //===== reference picture lists =====
 
+#ifdef LF_INTERLACE
+  ErrVal          xInitRefListPSlice    ( RefFrameList&               rcList,
+											PicType        ePicType,
+											Bool bRef);
+  ErrVal          xInitRefListsBSlice   ( RefFrameList&               rcList0,
+                                          RefFrameList&               rcList1,
+											PicType        ePicType,
+											Bool bRef);
+#else
   ErrVal          xInitRefListPSlice    ( RefFrameList&               rcList  );
   ErrVal          xInitRefListsBSlice   ( RefFrameList&               rcList0,
                                           RefFrameList&               rcList1 );
-
+#endif
 
   ErrVal          xRefListRemapping     ( RefFrameList&               rcList,
                                           ListIdx                     eListIdx,

@@ -145,6 +145,8 @@ protected:
   //JVT-V054
   Bool getFileInitDone() {return m_bFileInitDone;}
 
+  ErrVal setCrop(UInt *uiCrop);
+
 protected:
   LargeFile m_cFile;
   LargeFile *m_cFileMVC;
@@ -156,6 +158,8 @@ protected:
 
 //JVT-V054
   Bool  m_bFileInitDone;
+
+  UInt m_uiCrop[4];
 };
 
 #if defined( WIN32 )

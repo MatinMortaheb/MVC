@@ -128,9 +128,15 @@ protected:
 public:
   static ErrVal create( YuvBufferCtrl*& rpcYuvBufferCtrl );
   ErrVal destroy();
+#ifdef   LF_INTERLACE
+  const YuvBufferParameter& getBufferParameter( PicType ePicType ) const { return m_acBufferParam[ePicType]; }
+  ErrVal initMb( UInt uiMbY, UInt uiMbX, Bool bMbAff = false );
+  ErrVal initMb() { return initMb( 0, 0, false ); }
+#else //!LF_INTERLACE
   const YuvBufferParameter& getBufferParameter() const { return m_cBufferParam; }
   ErrVal initMb( UInt uiMbY, UInt uiMbX );
   ErrVal initMb() { return initMb( 0, 0 ); }
+#endif //LF_INTERLACE
   ErrVal initSlice( UInt uiYFrameSize, UInt uiXFrameSize, UInt uiYMarginSize = 0, UInt uiXMarginSize = 0, UInt uiResolution = 0 );
   ErrVal initSPS( UInt uiYFrameSize, UInt uiXFrameSize, UInt uiYMarginSize = 0, UInt uiXMarginSize = 0, UInt uiResolution = 0 );
   ErrVal uninit();
@@ -140,12 +146,23 @@ public:
   const Int getXMargin()  const { return m_uiXMargin; }
   const Int getYMargin()  const { return m_uiYMargin; }
 
+#ifdef   LF_INTERLACE
+  UInt getLumOrigin ( PicType ePicType ) const { return m_uiLumBaseOffset + (( ePicType == BOT_FIELD) ? m_acBufferParam[FRAME].m_iStride   : 0); }
+  UInt getCbOrigin  ( PicType ePicType ) const { return m_uiCbBaseOffset  + (( ePicType == BOT_FIELD) ? m_acBufferParam[FRAME].m_iStride/2 : 0); }
+  UInt getCrOrigin  ( PicType ePicType ) const { return m_uiCbBaseOffset  
+      + m_uiChromaSize + (( ePicType == BOT_FIELD) ? m_acBufferParam[FRAME].m_iStride/2 : 0); }
+#else //!LF_INTERLACE
   UInt getLumOrigin ()    const { return m_uiLumBaseOffset; }
   UInt getCbOrigin  ()    const { return m_uiCbBaseOffset; }
   UInt getCrOrigin  ()    const { return m_uiCbBaseOffset + m_uiChromaSize; }
+#endif //LF_INTERLACE
 
 protected:
-  YuvBufferParameter m_cBufferParam;
+#ifdef   LF_INTERLACE
+    YuvBufferParameter m_acBufferParam[ MAX_FRAME_TYPE ];
+#else //!LF_INTERLACE
+    YuvBufferParameter m_cBufferParam;
+#endif //LF_INTERLACE
   UInt  m_uiLumBaseOffset;
   UInt  m_uiCbBaseOffset;
   UInt  m_uiChromaSize;

@@ -104,15 +104,15 @@ NalUnitParser::NalUnitParser()
 , m_bCheckAllNALUs      ( false ) //JVT-P031
 , m_uiDecodedLayer      ( 0 ) //JVT-P031
 , m_bDiscardableFlag    ( false ) 
-, m_svc_mvc_flag        (false)
+, m_svc_mvc_flag                      (false)
 
-, m_anchor_pic_flag     (false)
-, m_view_id             (0) 
-, m_AvcViewId           (0) 
-, m_bNonIDRFlag         (true)
-, m_reserved_zero_bits  (0)
+, m_anchor_pic_flag                   (false)
+, m_view_id                           (0) 
+, m_AvcViewId                           (0) 
+, m_bNonIDRFlag                       (true)
+, m_reserved_zero_bits                (0)
 , m_reserved_one_bit    (1) // bug fix: prefix NAL (NTT)
-, m_inter_view_flag (false) //JVT-W056
+, m_inter_view_flag                 (false) //JVT-W056
 
 {
   /*for ( UInt uiLoop = 0; uiLoop < (1 << PRI_ID_BITS); uiLoop++ )
@@ -241,7 +241,7 @@ NalUnitParser::xTrace( Bool bDDIPresent )
   DTRACE_COUNT( 1 );
   DTRACE_N;
   
-  DTRACE_TH   ( "NALU HEADER: non_idr_flag" );//BUG_FIX @20090218
+  DTRACE_TH   ( "NALU HEADER: non_idr_flag" );
   DTRACE_TY   ( " u(1)" );
   DTRACE_POS;
   DTRACE_CODE (m_bNonIDRFlag );//IDR, Nov 2008
@@ -293,8 +293,8 @@ NalUnitParser::xTrace( Bool bDDIPresent )
   DTRACE_TH   ( "NALU HEADER: reserved_zero_bits" );
   DTRACE_TY   ( " u(1)" );
   DTRACE_POS;
-  DTRACE_CODE (m_reserved_one_bit );    // bug fix: prefix NAL (NTT)
-  DTRACE_BITS (m_reserved_one_bit, 1 ); // bug fix: prefix NAL (NTT)
+  DTRACE_CODE (m_reserved_one_bits );
+  DTRACE_BITS (m_reserved_one_bits, 1 );
   DTRACE_COUNT( 1 );
   DTRACE_N;
   
@@ -423,7 +423,7 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 		if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_SCALABLE ||
 				m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE ||
 				m_eNalUnitType == NAL_UNIT_CODED_SLICE_PREFIX )// JVT-W035
-
+				
 		{
 			ROF( pcBinDataAccessor->size() > 1 );
 
@@ -437,26 +437,27 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 				m_uiTemporalLevel   = ( ucByte >> 5 );
 				m_uiLayerId         = ( ucByte >> 2 ) & 0x07;
 				m_uiQualityLevel    = ( ucByte      ) & 0x03;
-
+			    
 				uiHeaderLength    +=  3;
 			} 
       else
 			{
+//ying Oct. 22, 2008
 			                                                     // 1 bit
         m_bNonIDRFlag           = ( ucByte >> 6)  & 0x01;     // 1 bit 
         m_uiSimplePriorityId = ( ucByte     ) & 0x3f ;    // 6
         // view_id
-        ucByte                = pcBinDataAccessor->data()[2];
-        m_view_id             = ( ucByte     ) & 0xff ;     // 8 bit first
-        m_view_id           <<= 2;
-        ucByte                = pcBinDataAccessor->data()[3];
-        m_view_id            += ( ucByte >>6  ) & 0x03;     // 2 bit more
+        ucByte               = pcBinDataAccessor->data()[2];
+        m_view_id            = ( ucByte     ) & 0xff ;    // 8 bit first
+        m_view_id          <<=2;
+        ucByte               = pcBinDataAccessor->data()[3];
+        m_view_id           += ( ucByte >>6  ) & 0x03;     // 2 bit more
 
         m_uiTemporalLevel    = ( ucByte >>3 )  & 0x07;     // 3 bit 
-        m_anchor_pic_flag    = ( ucByte >>2 )  & 0x01;     // 1 bit
-		m_inter_view_flag	   = ( ucByte >>1	)	 & 0x01;     // 1 bit  
+				m_anchor_pic_flag    = ( ucByte >>2 )  & 0x01;     // 1 bit
+				m_inter_view_flag	   = ( ucByte >>1	)	 & 0x01;     // 1 bit  
 
-		m_reserved_one_bit    = ( ucByte     )  & 0x01;     // 1 bit // bug fix: prefix NAL (NTT)
+        m_reserved_one_bit    = ( ucByte     )  & 0x01;     // 1 bit // bug fix: prefix NAL (NTT)
 				
         //For trace
         m_AvcViewId = (m_eNalUnitType == NAL_UNIT_CODED_SLICE_PREFIX) ? m_view_id : m_AvcViewId;
@@ -502,6 +503,7 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
          NAL_UNIT_END_OF_SEQUENCE     == m_eNalUnitType ||
          NAL_UNIT_CODED_SLICE_PREFIX  == m_eNalUnitType,    Err::m_nOK ); // bug fix: no trailing bit for prefix NAL (NTT)
 
+
   uiNumBytesRemoved = uiPacketLength;//FIX_FRAG_CAVLC
 	if ( !bCheckGap)
 	{
@@ -531,6 +533,7 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 
   if(!m_bDiscardableFlag || (m_bDiscardableFlag && m_uiDecodedLayer == m_uiLayerId) || m_bCheckAllNALUs) //JVT-P031
   {
+	  if(uiBitsInPacket<1)return Err::m_nOK;//lufeng: empty packet
       RNOK( m_pcBitReadBuffer->initPacket( (ULong*)(m_pucBuffer), uiBitsInPacket) );
   }
   return Err::m_nOK;

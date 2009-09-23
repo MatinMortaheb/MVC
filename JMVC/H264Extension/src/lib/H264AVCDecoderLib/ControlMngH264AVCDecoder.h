@@ -152,8 +152,18 @@ public:
   ErrVal destroy();
 
   ErrVal initMbForParsing     ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
-  ErrVal initMbForDecoding    ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
-  ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
+#ifdef LF_INTERLACE
+  ErrVal initMbForDecoding    (MbDataAccess*& rpcMbDataAccess,UInt uiMbY, UInt uiMbX, Bool bMbAFF  );
+    ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMbX, Bool bMbAFF );
+    ErrVal initMbForFiltering   ( UInt uiMbY, UInt uiMbX, Bool bMbAFF );
+#else
+    ErrVal initMbForDecoding    ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
+    ErrVal initMbForDecoding    ( UInt uiMbIndex );
+      ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
+        ErrVal initMbForFiltering   ( UInt uiMbIndex );
+#endif
+
+
 
 //  ErrVal initSlice0           (SliceHeader *rcSH);
   ErrVal initSlice0           (SliceHeader *rcSH, UInt NumOfViewsInTheStream);
@@ -174,9 +184,12 @@ public:
   ErrVal initSliceForDecoding ( const SliceHeader& rcSH );
   ErrVal initSliceForFiltering( const SliceHeader& rcSH );
 
-  ErrVal initMbForCoding      ( MbDataAccess& rcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
-  ErrVal initMbForDecoding    ( UInt uiMbIndex );
-  ErrVal initMbForFiltering   ( UInt uiMbIndex );
+  //ErrVal initMbForCoding      ( MbDataAccess& rcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
+#ifdef LF_INTERLACE
+  ErrVal initMbForCoding( MbDataAccess& rcMbDataAccess, UInt uiMbY, UInt uiMbX, Bool bMbAFF, Bool bFieldFlag ){ return Err::m_nERR; }
+#else
+  ErrVal initMbForCoding      ( MbDataAccess& rcMbDataAccess, UInt uiMbIndex ){ return Err::m_nERR; }
+#endif
 
   UvlcReader*  getUvlcReader()  { return m_pcUvlcReader;  };
   CabacReader* getCabacReader() { return m_pcCabacReader; };
@@ -221,6 +234,12 @@ protected:
   Bool                    m_uiInitilized_MultiView            [MAX_LAYERS];
   ResizeParameters        m_ResizeParameter[MAX_LAYERS]; // TMM_ESS
   ResizeParameters        m_ResizeParameterCGSSNR[MAX_LAYERS][MAX_FGS_LAYERS]; // JVT-T054
+#ifdef   LF_INTERLACE
+  Bool                    m_bMbAff; //for future use
+#endif //LF_INTERLACE
+#ifdef LF_INTERLACE
+  const SliceHeader* m_pcSliceHeader;
+#endif
 };
 
 H264AVC_NAMESPACE_END

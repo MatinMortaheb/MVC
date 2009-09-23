@@ -94,6 +94,10 @@ WriteYuvToFile::WriteYuvToFile()
 , m_bInitDone       ( false )
 , m_bFileInitDone   (false)
 {
+	m_uiCrop[0]=0;
+	m_uiCrop[1]=0;
+	m_uiCrop[2]=0;
+	m_uiCrop[3]=0;
 }
 
 
@@ -146,6 +150,13 @@ ErrVal WriteYuvToFile::destroy()
   return Err::m_nOK;
 }
 
+ErrVal WriteYuvToFile::setCrop(UInt *uiCrop)
+{
+	int i;
+	for(i=0;i<4;i++)
+		m_uiCrop[i]=*(uiCrop+i);
+	return Err::m_nOK;
+}
 
 ErrVal WriteYuvToFile::writeFrame( const UChar *pLum,
                              const UChar *pCb,
@@ -156,6 +167,16 @@ ErrVal WriteYuvToFile::writeFrame( const UChar *pLum,
 {
   m_uiWidth  = uiLumWidth;
   m_uiHeight = uiLumHeight;
+
+  //frame crop
+  pLum+=m_uiCrop[2]*uiLumStride;
+  pLum+=m_uiCrop[0];
+  pCb+=m_uiCrop[2]*uiLumStride/4;
+  pCb+=m_uiCrop[0]/2;
+  pCr+=m_uiCrop[2]*uiLumStride/4;
+  pCr+=m_uiCrop[0]/2;
+  uiLumHeight-=m_uiCrop[2]+m_uiCrop[3];
+  uiLumWidth-=m_uiCrop[0]+m_uiCrop[1];
 
   RNOKS( xWriteFrame( pLum, pCb, pCr, uiLumHeight, uiLumWidth, uiLumStride ) );
 
@@ -284,6 +305,15 @@ ErrVal WriteYuvToFile::writeFrame( const UChar *pLum,
   m_uiWidth  = uiLumWidth;
   m_uiHeight = uiLumHeight;
 
+  //frame crop
+  pLum+=m_uiCrop[2]*uiLumStride;
+  pLum+=m_uiCrop[0];
+  pCb+=m_uiCrop[2]*uiLumStride/4;
+  pCb+=m_uiCrop[0]/2;
+  pCr+=m_uiCrop[2]*uiLumStride/4;
+  pCr+=m_uiCrop[0]/2;
+  uiLumHeight-=m_uiCrop[2]+m_uiCrop[3];
+  uiLumWidth-=m_uiCrop[0]+m_uiCrop[1];
   
   RNOKS( xWriteFrame( pLum, pCb, pCr, uiLumHeight, uiLumWidth, uiLumStride, ViewCnt ) );
 

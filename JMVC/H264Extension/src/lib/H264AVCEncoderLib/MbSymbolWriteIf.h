@@ -155,6 +155,9 @@ public:
 
   virtual ErrVal  terminatingBit      ( UInt uiIsLast ) = 0;
   virtual UInt    getNumberOfWrittenBits() = 0;
+#ifdef   LF_INTERLACE
+  virtual ErrVal  fieldFlag           ( MbDataAccess& rcMbDataAccess ) = 0;
+#endif //LF_INTERLACE
 
   virtual ErrVal  startSlice          ( const SliceHeader& rcSliceHeader ) = 0;
   virtual ErrVal  startFragment       () = 0; //JVT-P031

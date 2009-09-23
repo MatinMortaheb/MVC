@@ -457,8 +457,11 @@ MotionEstimation::estimateBlockWithStart( const MbDataAccess&  rcMbDataAccess,
 
 ErrVal MotionEstimation::initMb( UInt uiMbPosY, UInt uiMbPosX, MbDataAccess& rcMbDataAccess )
 {
+#ifdef LF_INTERLACE
+  RNOK( MotionCompensation::initMb( uiMbPosY, uiMbPosX,rcMbDataAccess) );
+#else
   RNOK( MotionCompensation::initMb( uiMbPosY, uiMbPosX) );
-
+#endif
   return Err::m_nOK;
 }
 

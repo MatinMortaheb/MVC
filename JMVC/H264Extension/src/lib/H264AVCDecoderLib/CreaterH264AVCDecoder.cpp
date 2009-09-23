@@ -300,6 +300,15 @@ CreaterH264AVCDecoder::RoiDecodeInit()
 	m_pcH264AVCDecoder->RoiDecodeInit();
 }
 
+//frame crop
+Void    
+CreaterH264AVCDecoder::setCrop(UInt* uiCrop)
+{
+	int i;
+	for(i=0;i<4;i++)
+		*(uiCrop+i)=m_pcH264AVCDecoder->getCrop(i);
+}
+
 //JVT-V054
 UInt*
 CreaterH264AVCDecoder::getViewCodingOrder()
@@ -307,6 +316,14 @@ CreaterH264AVCDecoder::getViewCodingOrder()
   return m_pcH264AVCDecoder->getViewOrder();
 // Dec. 1 fix 
 }
+
+#ifdef LF_INTERLACE//lufeng: add vieworder
+void
+CreaterH264AVCDecoder::addViewCodingOrder()
+{
+	m_pcH264AVCDecoder->addViewOrder();
+}
+#endif
 
 ErrVal CreaterH264AVCDecoder::create( CreaterH264AVCDecoder*& rpcCreaterH264AVCDecoder )
 {
@@ -948,7 +965,8 @@ H264AVCPacketAnalyzer::isMVCProfile ( BinData*				pcBinData, Bool& b )// fix Nov
 
   RNOK( pcSPS->read( m_pcUvlcReader, eNalUnitType ) );
 
-  b= (MULTI_VIEW_PROFILE == pcSPS->getProfileIdc());
+  b= (MULTI_VIEW_PROFILE == pcSPS->getProfileIdc()
+	  || STEREO_HIGH_PROFILE == pcSPS->getProfileIdc());
   
   pcSPS->destroy();
   

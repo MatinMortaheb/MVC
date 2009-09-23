@@ -126,6 +126,8 @@ public:
 
   virtual Bool getFileInitDone() = 0;
 
+  virtual ErrVal setCrop(UInt *uiCrop) = 0;
+
 #endif //if 1
 
 };

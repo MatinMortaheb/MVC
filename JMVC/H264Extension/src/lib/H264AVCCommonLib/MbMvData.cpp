@@ -173,6 +173,9 @@ Void  MbMotionData::copyFrom( const MbMotionData& rcMbMotionData, const ParIdx8x
 Void MbMvData::copyFrom( const MbMvData& rcMbMvData )
 { 
   ::memcpy( m_acMv, rcMbMvData.m_acMv, sizeof(m_acMv) );
+#ifdef LF_INTERLACE
+    m_bFieldFlag  = rcMbMvData.m_bFieldFlag; //th060201
+#endif
 }
 
 Void  MbMotionData::copyFrom( const MbMotionData& rcMbMotionData )
@@ -195,6 +198,10 @@ MbMvData::upsampleMotion( const MbMvData& rcMbMvData, Par8x8 ePar8x8 )
   m_acMv[ 8] = m_acMv[ 9] = m_acMv[12] = m_acMv[13] = ( pacMvSrc[4] << 1 );
   m_acMv[10] = m_acMv[11] = m_acMv[14] = m_acMv[15] = ( pacMvSrc[5] << 1 );
 
+#ifdef LF_INTERLACE
+      m_bFieldFlag = rcMbMvData.m_bFieldFlag; //th060227
+#endif
+
   return Err::m_nOK;
 }
 
@@ -209,6 +216,7 @@ MbMotionData::upsampleMotion( const MbMotionData& rcMbMotionData, Par8x8 ePar8x8
   m_acRefPic [3].setFrame( NULL );
 
   RNOK( MbMvData::upsampleMotion( rcMbMotionData, ePar8x8 ) );
+
 
   return Err::m_nOK;
 }

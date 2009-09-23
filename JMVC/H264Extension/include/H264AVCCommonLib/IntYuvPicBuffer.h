@@ -109,7 +109,11 @@ class MbDataCtrl;
 class H264AVCCOMMONLIB_API IntYuvPicBuffer
 {
 public:
+#ifdef   LF_INTERLACE
+  IntYuvPicBuffer         ( YuvBufferCtrl& rcYuvBufferCtrl, PicType ePicType );
+#else //!LF_INTERLACE
   IntYuvPicBuffer         ( YuvBufferCtrl& rcYuvBufferCtrl );
+#endif //LF_INTERLACE
 	virtual ~IntYuvPicBuffer();
 
   const Int     getLStride    ()                const { return m_iStride;   }
@@ -151,9 +155,15 @@ public:
 
   Bool          isValid       ()                      { return NULL != m_pucYuvBuffer; }
 
+#ifdef   LF_INTERLACE
+  XPel*         getLumOrigin  ()                const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getLumOrigin( m_ePicType ); }
+  XPel*         getCbOrigin   ()                const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getCbOrigin ( m_ePicType ); }
+  XPel*         getCrOrigin   ()                const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getCrOrigin ( m_ePicType ); }
+#else //!LF_INTERLACE
   XPel*         getLumOrigin  ()                const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getLumOrigin(); }
   XPel*         getCbOrigin   ()                const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getCbOrigin (); }
   XPel*         getCrOrigin   ()                const { return m_pucYuvBuffer + m_rcYuvBufferCtrl.getCrOrigin (); }
+#endif //LF_INTERLACE
 
   
   ErrVal        loadFromPicBuffer       ( PicBuffer*        pcPicBuffer );
@@ -210,7 +220,19 @@ public:
 	// JVT-R057 LA-RDO{
 	YuvBufferCtrl& getYuvBufferCtrl(){ return m_rcYuvBufferCtrl;}
 	// JVT-R057 LA-RDO} 
+
+#ifdef LF_INTERLACE
+    YuvBufferCtrl& getBufferCtrl()  { return m_rcYuvBufferCtrl; }//th dirty hack
+    XPel* getBuffer()               { return m_pucYuvBuffer; }//th dirty hack II
+
+    ErrVal loadBufferAndFillMargin( IntYuvPicBuffer *pcSrcYuvPicBuffer );
+    ErrVal loadBuffer( IntYuvPicBuffer *pcSrcYuvPicBuffer );
+#endif
 protected:
+#ifdef LF_INTERLACE
+    Void xCopyFillPlaneMargin( XPel *pucSrc, XPel *pucDest, Int iHeight, Int iWidth, Int iStride, Int iXMargin, Int iYMargin );//th
+    Void xCopyPlane( XPel *pucSrc, XPel *pucDest, Int iHeight, Int iWidth, Int iStride );
+#endif
   Void xFillPlaneMargin     ( XPel *pucDest, Int iHeight, Int iWidth, Int iStride, Int iXMargin, Int iYMargin );
 
 protected:
@@ -224,6 +246,9 @@ protected:
   
   XPel*           m_pucYuvBuffer;
   XPel*           m_pucOwnYuvBuffer;
+#ifdef   LF_INTERLACE
+  PicType         m_ePicType;
+#endif //LF_INTERLACE
 };
 
 

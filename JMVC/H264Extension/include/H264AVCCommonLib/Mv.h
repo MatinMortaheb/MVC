@@ -171,6 +171,19 @@ public:
     return (m_sHor==rcMv.m_sHor && m_sVer==rcMv.m_sVer);
   }
 
+#ifdef   LF_INTERLACE
+  const Mv& setFrameToFieldPredictor()
+  {
+      m_sVer /= 2;
+      return *this;
+  }
+  const Mv& setFieldToFramePredictor()
+  {
+      m_sVer *= 2;
+      return *this;
+  }
+#endif //LF_INTERLACE
+
   Void limitComponents( const Mv& rcMvMin, const Mv& rcMvMax )
   {
     m_sHor = min( rcMvMax.m_sHor, max( rcMvMin.m_sHor, m_sHor ) );
@@ -227,6 +240,29 @@ public:
   Void  setMv( const Mv& rcMv )                     { Mv::operator= ( rcMv); }
   Void  set( Short sHor, Short sVer, SChar scRef )  { Mv::set( sHor, sVer); m_scRef = scRef; }
   Void  set( const Mv& rcMv, SChar scRef )          { Mv::operator= ( rcMv ); m_scRef = scRef; }
+
+#ifdef   LF_INTERLACE
+  const Mv3D& setFrameToFieldPredictor()
+  {
+    Mv::setFrameToFieldPredictor();
+    if( m_scRef > BLOCK_NOT_AVAILABLE)
+    {
+//      m_scRef = m_scRef << 1;
+      m_scRef = ((m_scRef-1)<<1)+1;//th fix
+    }
+    return *this;
+  }
+  const Mv3D& setFieldToFramePredictor()
+  {
+    Mv::setFieldToFramePredictor();
+    if( m_scRef > BLOCK_NOT_AVAILABLE)
+    {
+//      m_scRef = m_scRef >> 1;
+      m_scRef = ((m_scRef-1)>>1)+1;//th fix
+    }
+    return *this;
+  }
+#endif //LF_INTERLACE
 
   Mv3D& minRefIdx( Mv3D& rcMv3D )  { return (((UChar)(rcMv3D.getRef()-1)) < ((UChar)(getRef()-1)) ? rcMv3D : *this); }
   Bool operator== ( const RefIdxValues eRefIdxValues )  { return ( eRefIdxValues == m_scRef ); }
