@@ -367,6 +367,17 @@ ErrVal H264AVCDecoder::uninit()
     //m_apcMCTFDecoder[uiLayer] = NULL;
   }
 
+  for( UInt uiOp = 0; uiOp <= m_uiNumOpMinus1; uiOp++ )
+		if (m_OpViewId[uiOp])
+			delete [] m_OpViewId[uiOp] ;
+	
+	
+  if (m_uiActiveViewId)
+		delete [] m_uiActiveViewId;
+
+   if (m_puiViewOrder_SubStream)
+		delete [] m_puiViewOrder_SubStream;
+
   m_bInitDone = false;
   
   return Err::m_nOK;
@@ -1302,6 +1313,19 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
         m_pcVeryFirstSPS->SpsMVC->setNumViewsMinus1 ( pcSPS->getSpsMVC()->getNumViewMinus1() );      
         m_puiViewOrder = pcSPS->getSpsMVC()->getViewCodingOrder(); // Dec. 1
 		m_pcVeryFirstSPS->SpsMVC->m_uiViewCodingOrder = pcSPS->getSpsMVC()->getViewCodingOrder();
+		
+		m_puiViewOrder_SubStream = new UInt[pcSPS->getSpsMVC()->getNumViewMinus1()+1];
+		UInt j,cnt=0;
+		for (int i=cnt; i< pcSPS->getSpsMVC()->getNumViewMinus1()+1; i++) {				
+			for (j=0; j < m_uiNumActiveViews; j++)
+				if (m_puiViewOrder[i] ==  m_uiActiveViewId[j])
+					break;
+			if (j< m_uiNumActiveViews)
+				m_puiViewOrder_SubStream[cnt++]= m_puiViewOrder[i];
+		}
+
+		
+
       }
 
 		for ( UInt i=0; i<m_uiNumLayers; i++)
@@ -1630,12 +1654,31 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 				  else if( pcSEIMessage->getMessageType() == SEI::VIEW_SCALABILITY_INFO_SEI )
 				  {
 					m_uiNumOpMinus1 = ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getNumOperationPointsMinus1();
+					m_uiNumActiveViews=0;
+					UInt TotNumView=0;	
+					for( UInt i = 0; i <= m_uiNumOpMinus1; i++ )
+					  TotNumView += ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getNumTargetOutputViewsMinus1(i)+1;
+					TotNumView *=3;
+					
+					m_uiActiveViewId = new UInt[TotNumView];
 					for( UInt uiOp = 0; uiOp <= m_uiNumOpMinus1; uiOp++ )
 					{
 					  m_uiNumViews[uiOp] = ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getNumTargetOutputViewsMinus1(uiOp)+1;//SEI JJ
 					  m_OpViewId[uiOp] = (UInt*)malloc(m_uiNumViews[uiOp]*sizeof(UInt));
 					  for(UInt uiView = 0; uiView < m_uiNumViews[uiOp]; uiView++ )
 						  m_OpViewId[uiOp][uiView] = ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getViewId(uiOp, uiView);
+					  UInt curr;
+					  for(UInt uiView = 0; uiView < m_uiNumViews[uiOp]; uiView++ ) {
+						  for( curr = 0; curr < m_uiNumActiveViews; curr++ )
+							  if (m_uiActiveViewId[curr] == m_OpViewId[uiOp][uiView])
+								  break;
+						  if (curr == m_uiNumActiveViews)
+						  {
+							m_uiActiveViewId[m_uiNumActiveViews] = m_OpViewId[uiOp][uiView];
+							m_uiNumActiveViews++;
+						  }
+					  }
+					 
 					}
 					printf("\n View Scalability Info SEI message received. \n");
 			

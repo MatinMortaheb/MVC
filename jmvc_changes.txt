@@ -1,3 +1,10 @@
+JMVC_6_0_1 -> JMVC_6_0_2
+Date            : Oct. 16, 2009
+Authors         : MERL
+Contribution    : SW improvement
+Changes:
+- Now supports the bitstream extractor (currently based upon ViewScalSei Msg).
+
 JMVC_6_0 -> JMVC_6_0_1
 Date            : Oct. 15, 2009
 Authors         : Panasonic

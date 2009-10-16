@@ -319,6 +319,13 @@ CreaterH264AVCDecoder::getViewCodingOrder()
 // Dec. 1 fix 
 }
 
+UInt*
+CreaterH264AVCDecoder::getViewCodingOrder_SubStream()
+{
+  return m_pcH264AVCDecoder->getViewOrder_SubStream();
+// Dec. 1 fix 
+}
+
 #ifdef LF_INTERLACE//lufeng: add vieworder
 void
 CreaterH264AVCDecoder::addViewCodingOrder()

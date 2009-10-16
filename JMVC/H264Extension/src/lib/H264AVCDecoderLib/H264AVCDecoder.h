@@ -169,6 +169,7 @@ public:
                         ); 
 //Dec. 1 fix view order for base view {{                        
   UInt*   getViewOrder  () { return m_puiViewOrder; } 
+  UInt*   getViewOrder_SubStream  () { return m_puiViewOrder_SubStream; } 
 #ifdef LF_INTERLACE
   void addViewOrder()
   {
@@ -350,6 +351,7 @@ protected:
 
 //Dec. 1 fix view order for base view {{                        
   UInt*                         m_puiViewOrder;
+  UInt*                         m_puiViewOrder_SubStream;
 //}}          
 
 //SEI {
@@ -366,6 +368,7 @@ protected:
   Bool							m_bOpPresentFlag;
   UInt						    m_uiOperationPointId;
   UInt							m_uiNumActiveViews;
+  UInt*							m_uiActiveViewId;					
   UInt							m_uiNumDecodeViews;
   UInt							m_uiNumOpMinus1;
   UInt							m_uiNumViews[MAX_OPERATION_POINTS];

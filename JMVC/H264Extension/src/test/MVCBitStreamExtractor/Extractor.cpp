@@ -248,7 +248,7 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 //now operation_point_id[i] = i
 //get the operation point ids that need to be preserved
 	UInt m_uiOpId = uiOpId;
-  UInt uiOps = uiNumOps;
+	UInt uiOps = uiNumOps;
 	uiOperationPointId[uiNumOps] = m_uiOpId;
 	uiNumOps++;
 	Bool bMoreOps = true;
@@ -273,13 +273,21 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 	    bMoreOps = false;
 	}
 //get the views that should be preserved
+	UInt TotNumView=0;	
+	for( UInt i = 0; i < uiNumOps; i++ )
+	{	 
+	  m_uiOpId = uiOperationPointId[i];
+	  TotNumView += pcOldViewScalSei->getNumTargetOutputViewsMinus1( m_uiOpId ) + 1;//SEI JJ  	 
+	}
+	TotNumView *= 3; // to be conservative
+	 uiViewId = new UInt[TotNumView];
+	  ::memset( uiViewId, 0x00, TotNumView*sizeof(UInt) );
+
 	uiNumViews = 0;
 	for( UInt i = 0; i < uiNumOps; i++ )
 	{
-	  m_uiOpId = uiOperationPointId[i];
+	  m_uiOpId = uiOperationPointId[i];	  
 	  UInt NumView = pcOldViewScalSei->getNumTargetOutputViewsMinus1( m_uiOpId ) + 1;//SEI JJ
-  	  uiViewId = new UInt[NumView];
-	  ::memset( uiViewId, 0x00, NumView*sizeof(UInt) );
 
 	  for( UInt j = 0; j < NumView; j++ )
 	  {
@@ -498,11 +506,15 @@ Extractor::xExtractOperationPoints()
 
 	RNOK( m_pcH264AVCPacketAnalyzer->init() );
 
+	
+
 	while( ! bEOS )
 	{
 	  //========== get packet ==============
 	  BinData * pcBinData;
 	  Bool bWriteBinData = true;
+
+	 
 
 	  RNOK( m_pcReadBitstream->extractPacket( pcBinData, bEOS ) );
 	  if( bEOS )

@@ -62,7 +62,7 @@ public:
 
 protected:
   ErrVal        xAnalyse            () ;
-  ErrVal        xPreAnalyse         () ;
+  
   ErrVal        xWriteViewScalSEIToBuffer( h264::SEI::ViewScalabilityInfoSei* pcScalableSei, BinData* pcBinData ); //SEI LSJ
 protected:
   ReadBitstreamIf**             m_ppcReadBitstream;

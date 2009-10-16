@@ -141,6 +141,7 @@ public:
 
   //JVT-V054
   UInt* getViewCodingOrder();
+  UInt* getViewCodingOrder_SubStream();
 
 #ifdef LF_INTERLACE
     void addViewCodingOrder();

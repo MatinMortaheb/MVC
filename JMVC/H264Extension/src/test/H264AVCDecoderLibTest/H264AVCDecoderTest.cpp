@@ -435,13 +435,15 @@ ErrVal H264AVCDecoderTest::go()
 //JVT-V054    
       if(!m_pcWriteYuv->getFileInitDone() )
       {
-		  UInt *vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
+		  //UInt *vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
+		  UInt *vcOrder = m_pcH264AVCDecoder->getViewCodingOrder_SubStream();
 #ifdef LF_INTERLACE
 		  if(vcOrder == NULL)//lufeng: in order to output non-MVC seq
           {
 			  UInt order=0;
 			  m_pcH264AVCDecoder->addViewCodingOrder();
-			  vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
+			  //vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
+			  vcOrder = m_pcH264AVCDecoder->getViewCodingOrder_SubStream();
 		  }
 #endif
        		m_pcWriteYuv->xInitMVC(m_pcParameter->cYuvFile, vcOrder, m_pcParameter->getNumOfViews()); // JVT-AB024 modified remove active view info SEI  			
@@ -469,9 +471,13 @@ ErrVal H264AVCDecoderTest::go()
           if(m_pcParameter->getNumOfViews() > 0)
           {
 			  UInt view_cnt;
-			  for (view_cnt=0; view_cnt < m_pcParameter->getNumOfViews(); view_cnt++)
-				if ((UInt)pcPicBufferTmp->getViewId() == m_pcH264AVCDecoder->getViewCodingOrder()[view_cnt])
+			  
+			  for (view_cnt=0; view_cnt < m_pcParameter->getNumOfViews(); view_cnt++){
+				//UInt tmp_order=m_pcH264AVCDecoder->getViewCodingOrder()[view_cnt];
+				  UInt tmp_order=m_pcH264AVCDecoder->getViewCodingOrder_SubStream()[view_cnt];
+				if ((UInt)pcPicBufferTmp->getViewId() == tmp_order)
 					break;
+			  }
 
 			  RNOK( m_pcWriteYuv->writeFrame( *pcPicBufferTmp + uiLumOffset, 
                                               *pcPicBufferTmp + uiCbOffset, 

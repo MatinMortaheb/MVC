@@ -114,50 +114,6 @@ Assembler::destroy()
   return Err::m_nOK;
 }
 
-ErrVal
-Assembler::xPreAnalyse ()
-{
-  UInt uiNumVCLUnits=0;
-  BinData*                pcBinData     = 0;
-  for (UInt i=0; i< m_uiNumViews; i++)
-  {
-    Bool bEOS = false;
-    printf("view %d\n",i);
-    while( ! bEOS )
-    {
-    
-    //===== get packet =====
-    RNOK( m_ppcReadBitstream[i]->extractPacket( pcBinData, bEOS ) );
-    if( bEOS )
-    {
-      RNOK( m_ppcReadBitstream[i]->releasePacket( pcBinData ) );
-      pcBinData = NULL;
-      continue;
-    }
-
-    //===== get NAL Unit type only =====
-    //----------------------------assembling ----------------------------------------------
-    UChar       ucByte        = (pcBinData->data())[0];
-    NalUnitType eNalUnitType  = NalUnitType ( ucByte  & 0x1F );
-    
-    if ( NAL_UNIT_CODED_SLICE == eNalUnitType          || NAL_UNIT_CODED_SLICE_IDR == eNalUnitType 
-       ||NAL_UNIT_CODED_SLICE_SCALABLE == eNalUnitType || NAL_UNIT_CODED_SLICE_IDR_SCALABLE  == eNalUnitType )
-    {
-      uiNumVCLUnits++;
-      printf("%d\n", eNalUnitType);
-    }
-    if(pcBinData)
-    {
-      RNOK( m_ppcReadBitstream[i]->releasePacket( pcBinData ) );
-      pcBinData = NULL;
-    }
-   }
-  }
-  printf("Number of total VCL NAL Units: %d\n", uiNumVCLUnits);
-  
-  return Err::m_nOK;
-}
-
 //SEI {
 ErrVal 
 Assembler::xWriteViewScalSEIToBuffer(h264::SEI::ViewScalabilityInfoSei *pcViewScalSei, BinData *pcBinData)
@@ -396,7 +352,11 @@ Assembler::xAnalyse()
     {
       Bool isMVCProfile = false;
       uiNumVCLUnits--;
-      if(bNewAUStart){ bKeep = true; uiNumOtherNalU++;}
+      if(bNewAUStart)
+	  { 
+		  bKeep = true; 
+		  uiNumOtherNalU++;
+	  }
     
     
 	  if (NAL_UNIT_SPS == eNalUnitType || NAL_UNIT_SUBSET_SPS == eNalUnitType ) 
