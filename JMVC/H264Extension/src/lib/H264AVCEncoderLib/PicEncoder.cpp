@@ -366,6 +366,7 @@ PicEncoder::writeAndInitParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor,
 
   return Err::m_nOK;
 } 
+ 
 // ying {{ new configuration file
 ErrVal
 PicEncoder::xInitFrameSpecSpecial() // for 12 and 15 only
@@ -814,7 +815,7 @@ PicEncoder::process( PicBuffer*               pcInputPicBuffer,
             }
             //~JVT-W080    
 
-      
+			//----- encoding -----
             RNOK( xEncodePicture( rcExtBinDataAccessorList, *pcRecPicBufUnit, *pcSliceHeader, dLambda, uiPictureBits ) );
             m_uiWrittenBytes += ( uiPictureBits >> 3 );
 
@@ -938,6 +939,7 @@ PicEncoder::process( PicBuffer*               pcInputPicBuffer,
 
   return Err::m_nOK;
 }
+
 #endif
 
 ErrVal
@@ -1024,6 +1026,7 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   UInt  uiOutFreq   = (UInt)ceil( m_pcCodingParameter->getMaximumFrameRate() );
   UInt  uiMvRange   = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange();
 
+ 
   //===== create parameter sets =====
   RNOK( SequenceParameterSet::create( rpcSPS ) );
  if( !bAVCSPS)  
@@ -1087,7 +1090,8 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   ROT(m_pcCodingParameter->getPicOrderCntType()==2 && m_pcCodingParameter->getGOPSize()>1);//Poc type 2 supported when GOPSize =1
   rpcSPS->setPicOrderCntType                       ( m_pcCodingParameter->getPicOrderCntType() );
   rpcSPS->setLog2MaxPicOrderCntLsb                 ( m_pcCodingParameter->getLog2MaxPocLsb() );
-  // rpcSPS->setNumRefFrames                          ( min (16, m_pcCodingParameter->getDPBSize()/mvcScaleFactor) ); 
+  //rpcSPS->setNumRefFrames                          ( min (16, m_pcCodingParameter->getDPBSize()/mvcScaleFactor) ); 
+  
   rpcSPS->setRequiredFrameNumUpdateBehaviourFlag   ( true );
   rpcSPS->setFrameWidthInMbs                       ( uiMbX );
   rpcSPS->setFrameHeightInMbs                      ( uiMbY );
@@ -1106,10 +1110,12 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   rpcSPS->setCurrentViewId(m_pcCodingParameter->getCurentViewId());
   
   UInt uiMaxFramesInDPB = rpcSPS->getMaxDPBSize();
+ 
   uiMaxFramesInDPB = min ( mvcScaleFactor*uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16) );
 
 #ifdef LF_INTERLACE
   if( (m_pcCodingParameter->getMbAff() != 0 || m_pcCodingParameter->getPAff() != 0 ))
+
 	  rpcSPS->setNumRefFrames ( min (16, uiMaxFramesInDPB/mvcScaleFactor) -  m_uiGOPSize/2); //Need to consider non-ref frames cslim 130909
   else
 #endif
@@ -1117,7 +1123,7 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   printf("bAVCSPS=%d NumViews=%d Max_NumRefFrames=%d encDPBsize=%d decDPBSize=%d LevelIdc=%d\n",bAVCSPS,NumViews, rpcSPS->getNumRefFrames(), uiDPBSize, uiMaxFramesInDPB, uiLevelIdc);
 
 
-  
+    
 
   return Err::m_nOK;
 }
@@ -1728,8 +1734,12 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
   rpcSliceHeader->setLastFragmentFlag                   ( true );
   rpcSliceHeader->setBaseLayerUsesConstrainedIntraPred  ( false );
   rpcSliceHeader->setFgsComponentSep                    ( false );
-    // ying, April 03 2009
+
+#ifdef LF_INTERLACE //cs, fix a bug (add #if)
+  rpcSliceHeader->setAnchorPicFlag                      ( rcFrameSpec.isAnchor() && ePicType != BOT_FIELD);
+#else
   rpcSliceHeader->setAnchorPicFlag                      ( rcFrameSpec.isAnchor());
+#endif
 
 
   //===== set deblocking filter parameters =====
@@ -1746,8 +1756,7 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
   //===== reference picture list ===== (init with default data, later updated)
 
 #ifdef LF_INTERLACE
-  SliceType eSliceType;
-#endif
+  // SliceType eSliceType;
   //if(rcFrameSpec.isIdrNalUnit())
   //{
 	 // if(ePicType==BOT_FIELD)
@@ -1765,6 +1774,7 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
   //        rpcSliceHeader->setNonIDRFlag( (rpcSliceHeader->getNalUnitType () == NAL_UNIT_CODED_SLICE_IDR ) ? false : true ); // JVT-W035
 	 // }
   //}
+#endif
   //if( !rcFrameSpec.isIdrNalUnit())
   {
     //--- prediction ---
@@ -1859,6 +1869,7 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
     }
 #ifdef LF_INTERLACE
 	}
+
 #endif
   }
 
@@ -1866,7 +1877,9 @@ PicEncoder::xInitSliceHeader( SliceHeader*&     rpcSliceHeader,
   RNOK( m_pcPocCalculator->setPoc( *rpcSliceHeader, rcFrameSpec.getContFrameNumber()
 	  * (rpcSliceHeader->getSPS().getFrameMbsOnlyFlag()?1:2)+(ePicType==BOT_FIELD?1:0)) );//lufeng
 #else
+  //===== set picture order count =====
   RNOK( m_pcPocCalculator->setPoc( *rpcSliceHeader, rcFrameSpec.getContFrameNumber() ) );
+
 #endif
   
 #if 0
@@ -1976,7 +1989,7 @@ PicEncoder::xEncodePicture( ExtBinDataAccessorList& rcExtBinDataAccessorList,
                             RecPicBufUnit&          rcRecPicBufUnit,
                             SliceHeader&            rcSliceHeader,
                             Double                  dLambda,
-                            UInt&                   ruiBits)
+                            UInt&                   ruiBits  )
 {
   UInt  uiBits = 0;
 #ifdef LF_INTERLACE
@@ -1993,11 +2006,12 @@ PicEncoder::xEncodePicture( ExtBinDataAccessorList& rcExtBinDataAccessorList,
 #else
   m_pcRecPicBuffer->SetCodeAsVFrameFlag(TimeForVFrameP
 					(rcSliceHeader.getPoc()));
+
 #endif
   rcSliceHeader.setSvcMvcFlag(this->getSvcMvcFlag());
   rcSliceHeader.setAVCFlag( this->getAVCFlag()!=0);  //JVT-W035
   rcSliceHeader.setViewId(this->getViewId());
-  rcSliceHeader.setAnchorPicFlag(TimeForVFrameP(rcSliceHeader.getPoc()));//lufeng: getPoc should be getContFrameNumber for field coding
+  rcSliceHeader.setAnchorPicFlag(TimeForVFrameP(rcSliceHeader.getPoc()));
   rcSliceHeader.setReservedOneBit(1); // bug fix: prefix NAL (NTT)
   rcSliceHeader.setInterViewFalg(this->derivation_Inter_View_Flag(this->getViewId(), rcSliceHeader)); // JVT-W056 Samsung
 
@@ -2011,7 +2025,7 @@ PicEncoder::xEncodePicture( ExtBinDataAccessorList& rcExtBinDataAccessorList,
 
   //===== start picture =====
   RefFrameList  cList0, cList1;
-  RNOK( xStartPicture( rcRecPicBufUnit, rcSliceHeader, cList0, cList1 ) );//treat ref_list
+  RNOK( xStartPicture( rcRecPicBufUnit, rcSliceHeader, cList0, cList1 ) );
 //  bug fix for TD March 19
   xSetRefPictures(rcSliceHeader, cList0, cList1);
 //TMM_WP
@@ -2112,7 +2126,7 @@ PicEncoder::xEncodePicture( ExtBinDataAccessorList& rcExtBinDataAccessorList,
   }
 
   //===== finish =====
-  RNOK( xFinishPicture( rcRecPicBufUnit, rcSliceHeader, cList0, cList1, uiBits ) );//deblocking, psnr
+  RNOK( xFinishPicture( rcRecPicBufUnit, rcSliceHeader, cList0, cList1, uiBits ) );
   ruiBits += uiBits;
 
   return Err::m_nOK;
@@ -2160,7 +2174,7 @@ PicEncoder::xWritePrefixUnit( ExtBinDataAccessorList& rcExtBinDataAccessorList, 
 ErrVal          
 PicEncoder::xSetRefPictures(SliceHeader&                rcSliceHeader,
                             RefFrameList&               rcList0,
-                            RefFrameList&               rcList1)
+                            RefFrameList&               rcList1 )
 {
   ROTRS( rcSliceHeader.isIntra(), Err::m_nOK );
 
@@ -2235,8 +2249,11 @@ PicEncoder::xStartPicture( RecPicBufUnit& rcRecPicBufUnit,
   //RefFrameList rcListTemp0, rcListTemp1;
 //===== initialize reference picture lists and update slice header =====
 #ifdef LF_INTERLACE
+
+#if 0 // hwsun, fix a bug (disable)
   ROTRS( rcSliceHeader.isIntra(), Err::m_nOK );
-  
+#endif
+
   RNOK( m_pcRecPicBuffer->getRefLists( rcList0, rcList1, rcSliceHeader,m_pcQuarterPelFilter ) );//deal with the ref_list
   
 #else  
@@ -2281,6 +2298,7 @@ PicEncoder::xStartPicture( RecPicBufUnit& rcRecPicBufUnit,
 #else
   RNOK( rcRecPicBufUnit.getMbDataCtrl()->reset() );
   RNOK( rcRecPicBufUnit.getMbDataCtrl()->clear() );
+
 #endif
   return Err::m_nOK;
 }
@@ -2426,7 +2444,7 @@ PicEncoder::xGetPSNR( RecPicBufUnit&  rcRecPicBufUnit,
 #ifdef LF_INTERLACE
 const YuvBufferCtrl::YuvBufferParameter&  cBufferParam  = m_pcYuvBufferCtrlFullPel->getBufferParameter(FRAME);
 #else
-const YuvBufferCtrl::YuvBufferParameter&  cBufferParam  = m_pcYuvBufferCtrlFullPel->getBufferParameter();
+  const YuvBufferCtrl::YuvBufferParameter&  cBufferParam  = m_pcYuvBufferCtrlFullPel->getBufferParameter();
 #endif  
   IntFrame*                                 pcFrame       = rcRecPicBufUnit.getRecFrame  ();
   PicBuffer*                                pcPicBuffer   = rcRecPicBufUnit.getPicBuffer ();

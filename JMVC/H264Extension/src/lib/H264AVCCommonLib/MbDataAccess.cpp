@@ -2,7 +2,7 @@
 ********************************************************************************
 
 NOTE - One of the two copyright statements below may be chosen
-that applies for the software.
+       that applies for the software.
 
 ********************************************************************************
 
@@ -49,12 +49,12 @@ Copyright 2005, International Telecommunications Union, Geneva
 
 The Fraunhofer HHI hereby donate this source code to the ITU, with the following
 understanding:
-1. Fraunhofer HHI retain the right to do whatever they wish with the
-contributed source code, without limit.
-2. Fraunhofer HHI retain full patent rights (if any exist) in the technical
-content of techniques and algorithms herein.
-3. The ITU shall make this code available to anyone, free of license or
-royalty fees.
+    1. Fraunhofer HHI retain the right to do whatever they wish with the
+       contributed source code, without limit.
+    2. Fraunhofer HHI retain full patent rights (if any exist) in the technical
+       content of techniques and algorithms herein.
+    3. The ITU shall make this code available to anyone, free of license or
+       royalty fees.
 
 DISCLAIMER OF WARRANTY
 
@@ -431,8 +431,6 @@ Void MbDataAccess::setAvailableMask()
     B4x4Idx   cIdx3(3);
     B4x4Idx   cIdx8(8);
 
-    // potential speed up
-
     //===== get availability for upper half of the macroblock =====
     UInt  bAvailable0 = 0;
     if( ! xIsAvailableIntra( xGetBlockLeft( ( cIdx = cIdx0 ) ) ) )
@@ -453,8 +451,6 @@ Void MbDataAccess::setAvailableMask()
     }
 
     //===== get availability for lower half of the macroblock =====
-    //  UInt  bAvailable8 = bAvailable0 & 0xE;
-    //  UInt  bAvailable8 = bAvailable0 & 0xA;
     UInt  bAvailable8 = NO_ABOVERIGHT_REF;
     if( ! xIsAvailableIntra( xGetBlockLeft( ( cIdx = cIdx8 ) ) ) )
     {
@@ -486,8 +482,6 @@ Void MbDataAccess::setAvailableMask()
 #endif //LF_INTERLACE
 
     m_uiAvailable = bAvailable0 + ( bAvailable8 << 4 );
-    return;
-
 }
 
 
@@ -714,8 +708,6 @@ Void MbDataAccess::xSpatialDirectMode( ParIdx8x8 eParIdx, Bool b8x8 )
     //===== check co-located =====
     if( ! bAllColNonZero )
     {
-        Bool b = false; 
-
             SChar   scRefIdxCol;
             Mv      acMvCol[4];
 
@@ -792,7 +784,7 @@ Void MbDataAccess::xSpatialDirectMode( ParIdx8x8 eParIdx, Bool b8x8 )
 #ifdef   LF_INTERLACE
         if( m_rcSliceHeader.getRefPicList( getMbPicType(), eListIdx ).size() )
 #else //!LF_INTERLACE
-        if( m_rcSliceHeader.getRefPicList( eListIdx ).size() )
+    if( m_rcSliceHeader.getRefPicList( eListIdx).size() )
 #endif //LF_INTERLACE
         {
 #ifdef   LF_INTERLACE
@@ -832,6 +824,7 @@ Bool MbDataAccess::xTemporalDirectModeMvRef( Mv acMv[], SChar ascRefIdx[], LumaI
             ascRefIdx[LIST_0] = getSH().getRefPicList( LIST_0 ).find( cRefPic );
 
             SChar sMaxRefIdx  = getSH().getNumRefIdxActive(LIST_0);
+
 #endif //LF_INTERLACE       
             if(ascRefIdx[LIST_0] < 1 || ascRefIdx[LIST_0] > sMaxRefIdx)
             {
@@ -958,6 +951,7 @@ Bool MbDataAccess::xTemporalDirectModeMvsRefNonInterlaced( Mv aacMv[][4], SChar 
             ROFRS( bFaultTolerant, false ); // not allowed
         }
     }
+
 #ifdef   LF_INTERLACE_FIX
     bool bMvValid = true;
 #endif //LF_INTERLACE_FIX
@@ -972,7 +966,7 @@ Bool MbDataAccess::xTemporalDirectModeMvsRefNonInterlaced( Mv aacMv[][4], SChar 
 #ifdef   LF_INTERLACE
         iScale = m_rcSliceHeader.getDistScaleFactor( getMbPicType(), ascRefIdx[LIST_0], ascRefIdx[LIST_1] );
 #else //!LF_INTERLACE
-        iScale = m_rcSliceHeader.getDistScaleFactor( ascRefIdx[LIST_0], ascRefIdx[LIST_1] );
+    iScale = m_rcSliceHeader.getDistScaleFactor     ( ascRefIdx[LIST_0], ascRefIdx[LIST_1] );
 #endif //LF_INTERLACE
     }
     else
@@ -1032,7 +1026,7 @@ Bool MbDataAccess::xTemporalDirectMode( ParIdx8x8 eParIdx, Bool b8x8, Bool bFaul
             if( m_rcSliceHeader.getRefPicList( getMbPicType(), eListIdx ).size() )
                 //th fix			if( m_rcSliceHeader.getRefPicList( getMbPicType(), LIST_1 ).size() )
 #else //!LF_INTERLACE
-            if( m_rcSliceHeader.getRefPicList( LIST_1 ).size() )
+      if( m_rcSliceHeader.getRefPicList( LIST_1).size() )
 #endif //LF_INTERLACE
             {
 #ifdef   LF_INTERLACE
@@ -1060,7 +1054,7 @@ Bool MbDataAccess::xTemporalDirectMode( ParIdx8x8 eParIdx, Bool b8x8, Bool bFaul
             // th fix     if( m_rcSliceHeader.getRefPicList( getMbPicType(), LIST_1 ).size() )
             if( m_rcSliceHeader.getRefPicList( getMbPicType(), eListIdx ).size() )
 #else //!LF_INTERLACE
-            if( m_rcSliceHeader.getRefPicList( LIST_1 ).size() )
+      if( m_rcSliceHeader.getRefPicList( LIST_1).size() )
 #endif //LF_INTERLACE
             {
 #ifdef   LF_INTERLACE
@@ -1129,7 +1123,7 @@ Bool MbDataAccess::xTemporalDirectModeVirtual( ParIdx8x8 eParIdx, Bool b8x8, Boo
 #ifdef   LF_INTERLACE
             if( m_rcSliceHeader.getRefPicList( getMbPicType(), eListIdx ).size() )
 #else //!LF_INTERLACE
-            if( m_rcSliceHeader.getRefPicList( LIST_1 ).size() )
+      if( m_rcSliceHeader.getRefPicList( LIST_1).size() )
 #endif //LF_INTERLACE
             {
 #ifdef   LF_INTERLACE

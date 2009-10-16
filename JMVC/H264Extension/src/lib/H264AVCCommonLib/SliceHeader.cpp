@@ -162,6 +162,8 @@ Void SliceHeader::getMbPositionFromAddress( UInt& ruiMbY, UInt& ruiMbX, const UI
     }
 }
 
+
+
 Void SliceHeader::getMbPositionFromAddress( UInt& ruiMbY, UInt& ruiMbX, UInt& ruiMbIndex, const UInt uiMbAddress ) const 
 {
     const UInt uiMbsInRow = getSPS().getFrameWidthInMbs();
@@ -178,7 +180,6 @@ Void SliceHeader::getMbPositionFromAddress( UInt& ruiMbY, UInt& ruiMbX, UInt& ru
         ruiMbIndex = uiMbAddress;
     }
 }
-
 UInt SliceHeader::getMbIndexFromAddress( UInt uiMbAddress ) const
 {
     if( isMbAff() )
@@ -195,6 +196,7 @@ UInt SliceHeader::getMbIndexFromAddress( UInt uiMbAddress ) const
 SliceHeader::~SliceHeader()
 {
 }
+
 
 
 #ifdef   LF_INTERLACE
@@ -229,9 +231,10 @@ SliceHeader::compare( const SliceHeader* pcSH,
     ROTRS( getFrameNum() != pcSH->getFrameNum(),              Err::m_nOK );
     ROTRS( getNalRefIdc() == 0 && pcSH->getNalRefIdc() != 0,  Err::m_nOK );
     ROTRS( getNalRefIdc() != 0 && pcSH->getNalRefIdc() == 0,  Err::m_nOK );
+	ROTRS( getPicOrderCntLsb() != pcSH->getPicOrderCntLsb(),  Err::m_nOK );
 #endif //LF_INTERLACE
 
-    ROTRS( getViewId() != pcSH->getViewId(),                  Err::m_nOK );
+	ROTRS( getViewId() != pcSH->getViewId(),                  Err::m_nOK );
 
 #ifdef   LF_INTERLACE
     ROTRS( getFieldPicFlag() != pcSH->getFieldPicFlag(),      Err::m_nOK );
@@ -250,14 +253,11 @@ SliceHeader::compare( const SliceHeader* pcSH,
         ROTRS( getDeltaPicOrderCnt( 0 ) != pcSH->getDeltaPicOrderCnt( 0 ), Err::m_nOK );
         ROTRS( ! getFieldPicFlag() && (getDeltaPicOrderCnt( 1 ) != pcSH->getDeltaPicOrderCnt( 1 )), Err::m_nOK );
     }
-#else //!LF_INTERLACE
-    ROTRS( getPicOrderCntLsb() != pcSH->getPicOrderCntLsb(),  Err::m_nOK );
-#endif //LF_INTERLACE
+#endif
 
 #ifdef   LF_INTERLACE
     ROTRS( ! getFieldPicFlag() && (getDeltaPicOrderCntBottom() != pcSH->getDeltaPicOrderCntBottom()), Err::m_nOK );
-#endif //LF_INTERLACE
-
+#endif
 
     rbNewFrame = false;
 
@@ -274,12 +274,15 @@ SliceHeader::compare( const SliceHeader* pcSH,
     return Err::m_nOK;
 }
 
+
 #ifdef   LF_INTERLACE
+
 Int
 SliceHeader::getDistScaleFactor( PicType eMbPicType,
                                 SChar sL0RefIdx,
                                 SChar sL1RefIdx ) const
 #else //!LF_INTERLACE
+
 Int
 SliceHeader::getDistScaleFactor( SChar sL0RefIdx,
                                 SChar sL1RefIdx ) const
@@ -306,7 +309,7 @@ SliceHeader::getDistScaleFactor( SChar sL0RefIdx,
 #endif //LF_INTERLACE
         Int iTDB      = gClipMinMax( iDiffPocB, -128, 127 );
         Int iTDD      = gClipMinMax( iDiffPocD, -128, 127 );
-        Int iX        = (0x4000 + abs(iTDD/2)) / iTDD; //th fix
+    Int iX        = (0x4000 + abs(iTDD/2)) / iTDD;
         Int iScale    = gClipMinMax( (iTDB * iX + 32) >> 6, -1024, 1023 );
         return iScale;
     }
@@ -386,15 +389,10 @@ SliceHeader::getDistScaleFactorScal( SChar sL0RefIdx,
     }
     else
     {
-#ifdef   LF_INTERLACE
         Int iDiffPocB = getPoc() - pcFrameL0->getPOC();
-#else //!LF_INTERLACE
-        Int iDiffPocB = getPoc() - pcFrameL0->getPOC();
-#endif //LF_INTERLACE
         Int iTDB      = gClipMinMax( iDiffPocB, -128, 127 );
         Int iTDD      = gClipMinMax( iDiffPocD, -128, 127 );
-        //    Int iX        = (0x4000 + (iTDD>>1)) / iTDD; 
-        Int iX        = (0x4000 + abs(iTDD/2)) / iTDD; //th fix
+		Int iX        = (0x4000 + abs(iTDD/2)) / iTDD;
         Int iScale    = gClipMinMax( (iTDB * iX + 32) >> 6, -1024, 1023 );
         return iScale;
     }

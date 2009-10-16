@@ -167,16 +167,16 @@ ErrVal SliceDecoder::processVirtual(const SliceHeader& rcSH, Bool bReconstructAl
   for( ; uiMbRead; uiMbAddress++ )
   {
     MbDataAccess* pcMbDataAccess;
-	UInt uiMbY, uiMbX, uiMbIndex;
 #ifdef LF_INTERLACE
+	UInt uiMbY, uiMbX, uiMbIndex;
     rcSH.getMbPositionFromAddress( uiMbY, uiMbX, uiMbIndex, uiMbAddress );
-		RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbY, uiMbX , rcSH.isMbAff()) );
+	RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbY, uiMbX , rcSH.isMbAff()) );
 #else
-			RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbAddress ) );
+	RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbAddress ) );
 #endif
 
-	  pcMbDataAccess->getMbData().setMbMode(MODE_SKIP);
-	  pcMbDataAccess->getMbData().deactivateMotionRefinement();
+	pcMbDataAccess->getMbData().setMbMode(MODE_SKIP);
+	pcMbDataAccess->getMbData().deactivateMotionRefinement();
 
   	RNOK( m_pcMbDecoder->process( *pcMbDataAccess, bReconstructAll ) );
     uiMbRead--;
@@ -211,6 +211,7 @@ SliceDecoder::process( const SliceHeader& rcSH, Bool bReconstructAll, UInt uiMbR
     //RNOK( pcMbDataCtrl  ->initMb            (  pcMbDataAccess, uiMbY, uiMbX ) ); //--TM problem
     RNOK( m_pcControlMng->initMbForDecoding(  pcMbDataAccess, uiMbAddress ) );
 #endif
+
 
     RNOK( m_pcMbDecoder ->process( *pcMbDataAccess, bReconstructAll ) );
     //--ICU/ETRI FMO Implementation

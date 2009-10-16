@@ -158,6 +158,7 @@ public:
 #ifdef LF_INTERLACE
   Void copy( const MbData& rcMbData );
 #endif
+
   ErrVal  loadAll( FILE* pFile );
   ErrVal  saveAll( FILE* pFile );
 
@@ -249,6 +250,7 @@ protected:
                           Int  aaiPartInfo[4]);
 };
 
+#ifdef LF_INTERLACE
 class MbDataBuffer : public MbData
 {
 public :
@@ -262,6 +264,7 @@ public :
     MbMvData          m_acMbMvData[2];
     MbMotionData      m_acMbMotionData[2];
 };
+#endif
 
 H264AVC_NAMESPACE_END
 

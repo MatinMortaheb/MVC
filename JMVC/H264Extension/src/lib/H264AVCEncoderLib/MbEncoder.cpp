@@ -5708,7 +5708,6 @@ MbEncoder::xEstimateSubMb8x8( Par8x8            ePar8x8,
                                                         eParIdx8x8+SPART_8x8, BLK_8x8, bQPel, 0,
                                                         &rpcMbTempData->getMbDataAccess().getSH().getPredWeight( LIST_1, iRefIdxTest ) ) );
 #endif
-
     if( uiCostTest < uiCost[1] )
     {
       bBLPred [1] = false;
@@ -6378,7 +6377,7 @@ MbEncoder::xEstimateSubMb8x4( Par8x8            ePar8x8,
       uiCost[1] = MSYS_UINT_MAX;
     }
   }
-} // bug fix: H.10.2 q) Level Constraint (NTT)
+  } // bug fix: H.10.2 q) Level Constraint (NTT)
 
 
 
@@ -6640,7 +6639,6 @@ MbEncoder::xEstimateSubMb4x8( Par8x8            ePar8x8,
                                                             eParIdx8x8+eSubParIdx, BLK_4x8, bQPelRefinementOnly, 0,
                                                             &rpcMbTempData->getMbDataAccess().getSH().getPredWeight( LIST_0, iRefIdxTest ) ) );
 #endif
-
         rpcMbTempData->getMbMotionData( LIST_0 ).setAllMv ( cBLMvLastEst[0][uiBlk], eParIdx8x8, eSubParIdx );
         uiBitsTest  += uiTmpBits;
         uiCostTest  += uiTmpCost;
@@ -6696,7 +6694,6 @@ MbEncoder::xEstimateSubMb4x8( Par8x8            ePar8x8,
                                                           eParIdx8x8+eSubParIdx, BLK_4x8, bQPel, 0,
                                                           &rpcMbTempData->getMbDataAccess().getSH().getPredWeight( LIST_1, iRefIdxTest ) ) );
 #endif
-
       RNOK( m_pcMotionEstimation->compensateBlock       ( &cTmpYuvMbBuffer,
                                                           eParIdx8x8+eSubParIdx, BLK_4x8 ) );
       rpcMbTempData->getMbMotionData( LIST_1 ).setAllMv ( cMvLastEst[1][iRefIdxTest][uiBlk], eParIdx8x8, eSubParIdx );
@@ -7136,7 +7133,6 @@ MbEncoder::xEstimateSubMb4x4( Par8x8            ePar8x8,
                                                           eParIdx8x8+eSubParIdx, BLK_4x4, bQPel, 0,
                                                           &rpcMbTempData->getMbDataAccess().getSH().getPredWeight( LIST_0, iRefIdxTest ) ) );
 #endif
-
       rpcMbTempData->getMbMotionData( LIST_0 ).setAllMv ( cMvLastEst[0][iRefIdxTest][uiBlk], eParIdx8x8, eSubParIdx );
 
       uiBitsTest  += uiTmpBits;
@@ -7183,7 +7179,6 @@ MbEncoder::xEstimateSubMb4x4( Par8x8            ePar8x8,
                                                             eParIdx8x8+eSubParIdx, BLK_4x4, bQPelRefinementOnly, 0,
                                                             &rpcMbTempData->getMbDataAccess().getSH().getPredWeight( LIST_0, iRefIdxTest ) ) );
 #endif
-
         rpcMbTempData->getMbMotionData( LIST_0 ).setAllMv ( cBLMvLastEst[0][uiBlk], eParIdx8x8, eSubParIdx );
         uiBitsTest  += uiTmpBits;
         uiCostTest  += uiTmpCost;

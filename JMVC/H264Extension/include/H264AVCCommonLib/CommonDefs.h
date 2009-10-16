@@ -92,7 +92,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 
 #define _JSVM_VERSION_ "6.5" //added by jerome.vieron@thomson.net
 #define _JMVM_VERSION_ "7.0" //added by purvin.pandit@thomson.net
-#define _JMVC_VERSION_ "6.0" //added by ying.chen@tut.fi
+#define _JMVC_VERSION_ "6.0.1" //added by ying.chen@tut.fi
 
 #define MB_BUFFER_WIDTH 24
 #define MB_BASE_WIDTH   16
@@ -309,7 +309,12 @@ H264AVC_NAMESPACE_END
 #define MAX_FRAME_NUM_LOG2  9
 
 #define YUV_X_MARGIN        32
+
+#ifdef   LF_INTERLACE
 #define YUV_Y_MARGIN        128
+#else
+#define YUV_Y_MARGIN        64
+#endif
 
 #define MAX_LAYERS          8
 #define MAX_TEMP_LEVELS     8

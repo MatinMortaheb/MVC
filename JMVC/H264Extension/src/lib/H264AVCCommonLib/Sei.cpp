@@ -1078,7 +1078,7 @@ SEI::ReservedSei::write( HeaderSymbolWriteIf* pcWriteIf )
 ErrVal
 SEI::ReservedSei::read( HeaderSymbolReadIf* pcReadIf )
 {
-  AF()
+  AF();
   return Err::m_nOK;
 }
 

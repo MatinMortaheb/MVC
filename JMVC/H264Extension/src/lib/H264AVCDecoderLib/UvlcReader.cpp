@@ -591,7 +591,7 @@ ErrVal UvlcReader::startSlice( const SliceHeader& rcSliceHeader )
 
 ErrVal UvlcReader::refFrame( MbDataAccess& rcMbDataAccess, ListIdx eLstIdx )
 {
-    UInt uiRefFrame;
+  UInt uiRefFrame = 0;
 #ifdef   LF_INTERLACE
     RNOK( xGetRefFrame( 2 == rcMbDataAccess.getNumActiveRef( eLstIdx ), uiRefFrame, eLstIdx ) );
 #else //!LF_INTERLACE
@@ -603,7 +603,7 @@ ErrVal UvlcReader::refFrame( MbDataAccess& rcMbDataAccess, ListIdx eLstIdx )
 
 ErrVal UvlcReader::refFrame( MbDataAccess& rcMbDataAccess, ListIdx eLstIdx, ParIdx16x8 eParIdx  )
 {
-    UInt uiRefFrame;
+    UInt uiRefFrame = 0;
 #ifdef   LF_INTERLACE
     RNOK( xGetRefFrame( 2 == rcMbDataAccess.getNumActiveRef( eLstIdx ), uiRefFrame, eLstIdx ) );
 #else //!LF_INTERLACE
@@ -615,7 +615,7 @@ ErrVal UvlcReader::refFrame( MbDataAccess& rcMbDataAccess, ListIdx eLstIdx, ParI
 
 ErrVal UvlcReader::refFrame( MbDataAccess& rcMbDataAccess, ListIdx eLstIdx, ParIdx8x16 eParIdx  )
 {
-    UInt uiRefFrame;
+    UInt uiRefFrame = 0;
 #ifdef   LF_INTERLACE
     RNOK( xGetRefFrame( 2 == rcMbDataAccess.getNumActiveRef( eLstIdx ), uiRefFrame, eLstIdx ) );
 #else //!LF_INTERLACE
@@ -627,7 +627,7 @@ ErrVal UvlcReader::refFrame( MbDataAccess& rcMbDataAccess, ListIdx eLstIdx, ParI
 
 ErrVal UvlcReader::refFrame( MbDataAccess& rcMbDataAccess, ListIdx eLstIdx, ParIdx8x8 eParIdx  )
 {
-    UInt uiRefFrame;
+  UInt uiRefFrame = 0;
 #ifdef   LF_INTERLACE
     RNOK( xGetRefFrame( 2 == rcMbDataAccess.getNumActiveRef( eLstIdx ), uiRefFrame, eLstIdx ) );
 #else //!LF_INTERLACE
@@ -2024,7 +2024,7 @@ UvlcReader::RQdecodeNewTCoeff_Luma ( MbDataAccess&   rcMbDataAccess,
   const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
   const UChar*  pucScan = (bFrame) ? g_aucFrameScan64 : g_aucFieldScan64;
 #else //!LF_INTERLACE
-  const UChar*  pucScan = g_aucFrameScan64;
+  const UChar*  pucScan     = g_aucFrameScan;
 #endif //LF_INTERLACE
 
   UInt          uiStart     = 0;
@@ -2056,7 +2056,7 @@ UvlcReader::RQdecodeTCoeffRef_Luma ( MbDataAccess&   rcMbDataAccess,
   const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
   const UChar*  pucScan = (bFrame) ? g_aucFrameScan64 : g_aucFieldScan64;
 #else //!LF_INTERLACE
-  const UChar*  pucScan = g_aucFrameScan64;
+  const UChar*  pucScan     = g_aucFrameScan;
 #endif //LF_INTERLACE
 
   DTRACE_T( "LUMA_4x4_REF" );

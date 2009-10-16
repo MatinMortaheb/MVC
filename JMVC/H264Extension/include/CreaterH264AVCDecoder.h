@@ -164,9 +164,9 @@ public:
                       UInt&             ruiStartPos,
                       UInt&             ruiEndPos,
                       Bool&              bFragmented,
-                      Bool&              bDiscardable
+                      Bool&              bDiscardable,
                       //~JVT-P031
-					  ,UInt NumOfViewInTheStream
+					  UInt NumOfViewInTheStream
                       
                       ); 
 
@@ -206,7 +206,9 @@ public:
 
   Void	  RoiDecodeInit();
 
+#ifdef LF_INTERLACE
   Void    setCrop(UInt *uiCrop);
+#endif
 
 protected:
   ErrVal xCreateDecoder();

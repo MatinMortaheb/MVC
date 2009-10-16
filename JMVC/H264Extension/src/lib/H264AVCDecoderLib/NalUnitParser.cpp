@@ -241,7 +241,7 @@ NalUnitParser::xTrace( Bool bDDIPresent )
   DTRACE_COUNT( 1 );
   DTRACE_N;
   
-  DTRACE_TH   ( "NALU HEADER: non_idr_flag" );
+  DTRACE_TH   ( "NALU HEADER: non_idr_flag" );//BUG_FIX @20090218
   DTRACE_TY   ( " u(1)" );
   DTRACE_POS;
   DTRACE_CODE (m_bNonIDRFlag );//IDR, Nov 2008
@@ -293,8 +293,8 @@ NalUnitParser::xTrace( Bool bDDIPresent )
   DTRACE_TH   ( "NALU HEADER: reserved_zero_bits" );
   DTRACE_TY   ( " u(1)" );
   DTRACE_POS;
-  DTRACE_CODE (m_reserved_one_bits );
-  DTRACE_BITS (m_reserved_one_bits, 1 );
+  DTRACE_CODE (m_reserved_one_bit );    // bug fix: prefix NAL (NTT)
+  DTRACE_BITS (m_reserved_one_bit, 1 ); // bug fix: prefix NAL (NTT)
   DTRACE_COUNT( 1 );
   DTRACE_N;
   
@@ -442,14 +442,13 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 			} 
       else
 			{
-//ying Oct. 22, 2008
 			                                                     // 1 bit
         m_bNonIDRFlag           = ( ucByte >> 6)  & 0x01;     // 1 bit 
         m_uiSimplePriorityId = ( ucByte     ) & 0x3f ;    // 6
         // view_id
         ucByte               = pcBinDataAccessor->data()[2];
         m_view_id            = ( ucByte     ) & 0xff ;    // 8 bit first
-        m_view_id          <<=2;
+        m_view_id           <<= 2;
         ucByte               = pcBinDataAccessor->data()[3];
         m_view_id           += ( ucByte >>6  ) & 0x03;     // 2 bit more
 
@@ -533,7 +532,10 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 
   if(!m_bDiscardableFlag || (m_bDiscardableFlag && m_uiDecodedLayer == m_uiLayerId) || m_bCheckAllNALUs) //JVT-P031
   {
+#ifdef   LF_INTERLACE
 	  if(uiBitsInPacket<1)return Err::m_nOK;//lufeng: empty packet
+#endif
+
       RNOK( m_pcBitReadBuffer->initPacket( (ULong*)(m_pucBuffer), uiBitsInPacket) );
   }
   return Err::m_nOK;

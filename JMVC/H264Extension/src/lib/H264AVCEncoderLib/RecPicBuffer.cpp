@@ -154,11 +154,7 @@ ErrVal
 RecPicBufUnit::init( SliceHeader* pcSliceHeader,
                      PicBuffer*   pcPicBuffer )
 {
-#ifdef LF_INTERLACE
     m_iPoc                = pcSliceHeader->getPoc();
-#else
-  m_iPoc                  = pcSliceHeader->getPoc();
-#endif //LF_INTERLACE
   m_uiFrameNum            = pcSliceHeader->getFrameNum();
   m_bExisting             = true;
   m_bNeededForReference   = pcSliceHeader->getNalRefIdc() != NAL_REF_IDC_PRIORITY_LOWEST;
@@ -168,6 +164,7 @@ RecPicBufUnit::init( SliceHeader* pcSliceHeader,
 #ifdef LF_INTERLACE
   m_pcReconstructedFrame->setPoc( *pcSliceHeader );
 #else
+
   m_pcReconstructedFrame->setPOC( m_iPoc );
 #endif
 
@@ -532,7 +529,9 @@ RecPicBuffer::getRefLists( RefFrameList&  rcList0,
 #endif
 {
   //===== clear lists =====
+#ifdef LF_INTERLACE
 	RefFrameList rcListTemp0, rcListTemp1;
+#endif
   rcList0.reset();
   rcList1.reset();
   ROTRS( rcSliceHeader.isIntra(), Err::m_nOK );
@@ -543,8 +542,7 @@ RecPicBuffer::getRefLists( RefFrameList&  rcList0,
   if( rcSliceHeader.isInterP() )
   {
 #ifdef LF_INTERLACE
-	  RNOK( xInitRefListPSlice  ( rcListTemp0 , ePicType, rcSliceHeader.getNalRefIdc()>0) );
-    
+    RNOK( xInitRefListPSlice  ( rcListTemp0 , ePicType, rcSliceHeader.getNalRefIdc()>0) );
 	ProcessRef(rcSliceHeader,rcList0,rcListTemp0,pcQuarterPelFilter);//lufeng
 #else
     RNOK( xInitRefListPSlice  ( rcList0 ) );
@@ -1130,6 +1128,7 @@ RecPicBuffer::xInitRefListPSlice( RefFrameList& rcList , PicType ePicType , Bool
 #else
 ErrVal
 RecPicBuffer::xInitRefListPSlice( RefFrameList& rcList)
+
 #endif
 {
   //----- get current frame num -----
@@ -1166,7 +1165,11 @@ RecPicBuffer::xInitRefListPSlice( RefFrameList& rcList)
           (*iter)->getPicNum( uiCurrFrameNum, m_uiMaxFrameNum ) < iMaxPicNum &&
          ( ! pNext ||
           (*iter)->getPicNum( uiCurrFrameNum, m_uiMaxFrameNum ) > pNext->getPicNum( uiCurrFrameNum, m_uiMaxFrameNum ) )
+#ifdef LF_INTERLACE
           && (*iter)->getViewId()==m_pcCurrRecPicBufUnit->getViewId())
+#else
+		  )
+#endif
       {
         pNext = (*iter);
       }
@@ -1239,7 +1242,11 @@ RecPicBuffer::xInitRefListsBSlice( RefFrameList&  rcList0,
         (*iter)->getPoc() < iMaxPoc &&
         ( ! pNext ||
         (*iter)->getPoc() > pNext->getPoc() ) 
+#ifdef LF_INTERLACE
         && (*iter)->getViewId()==m_pcCurrRecPicBufUnit->getViewId())
+#else
+		  )
+#endif
       {
         pNext = (*iter);
       }
@@ -1271,7 +1278,12 @@ RecPicBuffer::xInitRefListsBSlice( RefFrameList&  rcList0,
         (*iter)->getPoc() > iMinPoc &&
         ( ! pNext ||
         (*iter)->getPoc() < pNext->getPoc() ) 
+#ifdef LF_INTERLACE
         && (*iter)->getViewId()==m_pcCurrRecPicBufUnit->getViewId())
+#else
+		  )
+#endif
+
       {
         pNext = (*iter);
       }
@@ -1516,7 +1528,7 @@ ErrVal
 RecPicBuffer::xDumpRefList( RefFrameList& rcList,
                             ListIdx       eListIdx  )
 {
-#if 0 // NO_DEBUG
+#if 1 // NO_DEBUG
   return Err::m_nOK;
 #endif
 

@@ -128,6 +128,7 @@ public:
   Bool isPicDone( const SliceHeader& rcSH );
   Bool isFrameDone( const SliceHeader& rcSH );
   Bool isInitDone() {return m_bInitDone;}
+
   UInt  getSize() { return m_uiSize; }
 
   const MbData& getMbData( UInt uiIndex )   const { AOT_DBG( uiIndex >= m_uiSize );  return m_pcMbData[ uiIndex ]; }
@@ -251,6 +252,9 @@ public:
   ErrVal        init                ( SliceHeader*  pcSliceHeader );
 
   Double        getLambda           ()  { return  m_dLambda;            }
+#ifndef LF_INTERLACE
+  SliceHeader*  getSliceHeader      ()  { return  m_pcSliceHeader;      }
+#endif
   MbDataCtrl*   getMbDataCtrl       ()  { return  m_pcMbDataCtrl;       }
   Bool          isInitialized       ()  { return  m_pcMbDataCtrl != 0;  }
 
@@ -277,7 +281,6 @@ public:
         return Err::m_nOK;
     }
 #else
-  SliceHeader*  getSliceHeader      ()  { return  m_pcSliceHeader;      }
   ErrVal        setSliceHeader      ( SliceHeader* pcSliceHeader )
   {
       m_pcSliceHeader = pcSliceHeader;

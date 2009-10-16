@@ -159,8 +159,16 @@ void MultiviewReferencePictureManager::AddViewFileToUseAsReference
   ReadYuvFile::create(newYUVReader);
   newYUVReader->init(paramsForMultiviewReference._fileName,
 		     paramsForMultiviewReference._height, 
-		     paramsForMultiviewReference._width, 0, 
-		     paramsForMultiviewReference._width, 
+		     paramsForMultiviewReference._width, 0,
+#ifdef   LF_INTERLACE
+#if 0 // hwsun, seems not a bug (disable)
+		     paramsForMultiviewReference._height, //paramsForMultiviewReference._width //lufeng: terrible bug fix
+#else
+			 paramsForMultiviewReference._width,
+#endif
+#else
+			 paramsForMultiviewReference._width,
+#endif
 		     ReadYuvFile::FILL_FRAME);
 
 

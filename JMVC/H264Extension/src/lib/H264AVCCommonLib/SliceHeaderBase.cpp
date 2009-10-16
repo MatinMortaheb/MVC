@@ -389,7 +389,7 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
 		RNOK (  pcWriteIf->writeCode( m_uiTemporalLevel,                  3,                              "NALU HEADER: temporal_id"));
 		RNOK  ( pcWriteIf->writeCode( this->getAnchorPicFlag(),           1,                              "NALU HEADER: anchor_pic_flag" ) );
 		RNOK  ( pcWriteIf->writeCode( this->getInterViewFlag(),		    		1,														  "NALU HEADER: inter_view_flag") ); 
-    RNOK  ( pcWriteIf->writeCode( this->getReservedOneBit(),        1,                              "NALU HEADER: reserved_zero_one_bit" ) );
+    RNOK  ( pcWriteIf->writeCode( this->getReservedOneBit(),          1,                              "NALU HEADER: reserved_one_bit" ) ); // bug fix: prefix NAL (NTT)
 	
 		return Err::m_nOK;
 
@@ -462,8 +462,12 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
 	}
 #endif
 
-//	if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE )
+#ifdef   LF_INTERLACE
+	//if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE ) // fix Ying @QCT
 	if(!getNonIDRFlag())//lufeng
+#else
+	if  ( this->getNonIDRFlag() == false )
+#endif
 	{
 		RNOK(   pcWriteIf->writeUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
 	}
@@ -475,7 +479,7 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
 #ifdef   LF_INTERLACE
 	if( getPPS().getPicOrderPresentFlag() &&  m_bFieldPicFlag  )
 #else
-	if( getPPS().getPicOrderPresentFlag())
+		if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
 #endif
 	{
 		RNOK( pcWriteIf->writeSvlc( m_iDeltaPicOrderCntBottom,                    "SH: delta_pic_order_cnt_bottom" ) );
@@ -489,7 +493,7 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
 #ifdef   LF_INTERLACE		
 		if( getPPS().getPicOrderPresentFlag() &&   ! m_bFieldPicFlag )
 #else
-		if( getPPS().getPicOrderPresentFlag())
+		if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
 #endif
 		{
 		RNOK( pcWriteIf->writeSvlc( m_aiDeltaPicOrderCnt[1],                      "SH: delta_pic_order_cnt[1]" ) );
@@ -708,7 +712,7 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
 		RNOK (  pcWriteIf->writeCode( m_uiTemporalLevel,                  3,                              "NALU HEADER: temporal_id"));
 		RNOK  ( pcWriteIf->writeCode( this->getAnchorPicFlag(),           1,                              "NALU HEADER: anchor_pic_flag" ) );
 		RNOK  ( pcWriteIf->writeCode( this->getInterViewFlag(),		    		1,														  "NALU HEADER: inter_view_flag") ); 
-    RNOK  ( pcWriteIf->writeCode( this->getReservedOneBit(),        1,                              "NALU HEADER: reserved_zero_one_bit" ) );
+    RNOK  ( pcWriteIf->writeCode( this->getReservedOneBit(),          1,                              "NALU HEADER: reserved_one_bit" ) ); // bug fix: prefix NAL (NTT)
 		
 	}
 	
@@ -728,9 +732,11 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
 		if(m_bFieldPicFlag)
 			RNOK(   pcWriteIf->writeFlag( m_bBottomFieldFlag,                                 "SH: bottom_field_flag" ) );
 	}
-#endif
   //if( NNalUnitType == NAL_UNIT_CODED_SLICE_IDR )
   if(!this->getNonIDRFlag())//lufeng
+#else
+  if( isIdrNalUnit()  ) // bug fix Ying @ QCT
+#endif
   {
     RNOK(   pcWriteIf->writeUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
   }
@@ -742,7 +748,7 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
 #ifdef   LF_INTERLACE
     if( getPPS().getPicOrderPresentFlag() &&  ! m_bFieldPicFlag  )
 #else
-  if( getPPS().getPicOrderPresentFlag())
+    if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
 #endif
     {
       RNOK( pcWriteIf->writeSvlc( m_iDeltaPicOrderCntBottom,                    "SH: delta_pic_order_cnt_bottom" ) );
@@ -754,7 +760,7 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
 #ifdef   LF_INTERLACE
 	if( getPPS().getPicOrderPresentFlag() && ! m_bFieldPicFlag )
 #else
-	if( getPPS().getPicOrderPresentFlag())
+    if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
 #endif
     {
       RNOK( pcWriteIf->writeSvlc( m_aiDeltaPicOrderCnt[1],                      "SH: delta_pic_order_cnt[1]" ) );
@@ -910,7 +916,7 @@ SliceHeaderBase::xReadScalable( HeaderSymbolReadIf* pcReadIf )
 #ifdef   LF_INTERLACE
   if( getPPS().getPicOrderPresentFlag() &&  ! m_bFieldPicFlag )
 #else
-  if( getPPS().getPicOrderPresentFlag())
+    if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
 #endif
     {
       RNOK( pcReadIf->getSvlc( m_iDeltaPicOrderCntBottom,                    "SH: delta_pic_order_cnt_bottom" ) );
@@ -923,7 +929,7 @@ SliceHeaderBase::xReadScalable( HeaderSymbolReadIf* pcReadIf )
 #ifdef   LF_INTERLACE
 	if( getPPS().getPicOrderPresentFlag() &&  ! m_bFieldPicFlag  )
 #else
-	if( getPPS().getPicOrderPresentFlag())
+    if( getPPS().getPicOrderPresentFlag() /*&& true ! field_pic_flag */ )
 #endif
     {
       RNOK( pcReadIf->getSvlc( m_aiDeltaPicOrderCnt[1],                      "SH: delta_pic_order_cnt[1]" ) );
@@ -1160,7 +1166,7 @@ SliceHeaderBase::xReadH264AVCCompatible( HeaderSymbolReadIf* pcReadIf )
 #ifdef   LF_INTERLACE  
   if( getPPS().getPicOrderPresentFlag() &&! m_bFieldPicFlag )
 #else
-   if( getPPS().getPicOrderPresentFlag())
+    if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
 #endif
     {
       RNOK( pcReadIf->getSvlc( m_iDeltaPicOrderCntBottom,                    "SH: delta_pic_order_cnt_bottom" ) );
@@ -1172,7 +1178,7 @@ SliceHeaderBase::xReadH264AVCCompatible( HeaderSymbolReadIf* pcReadIf )
 #ifdef   LF_INTERLACE  
 	if( getPPS().getPicOrderPresentFlag() &&  ! m_bFieldPicFlag )
 #else
-	if( getPPS().getPicOrderPresentFlag())
+    if( getPPS().getPicOrderPresentFlag() /*&& true ! field_pic_flag */ )
 #endif
   {
       RNOK( pcReadIf->getSvlc( m_aiDeltaPicOrderCnt[1],                      "SH: delta_pic_order_cnt[1]" ) );
@@ -1339,7 +1345,7 @@ SliceHeaderBase::FMOInit()
 #ifdef   LF_INTERLACE
 	m_pcFMO->img_.field_pic_flag = getFieldPicFlag();
 #else
-	m_pcFMO->img_.field_pic_flag = false;
+	m_pcFMO->img_.field_pic_flag = false;  //interlaced TODO
 #endif
 
 	m_pcFMO->pps_.num_slice_groups_minus1 = pcPPS->getNumSliceGroupsMinus1();
@@ -1513,8 +1519,12 @@ SliceHeaderBase::xReadMVCCompatible( HeaderSymbolReadIf* pcReadIf )
 			RNOK(   pcReadIf->getFlag( m_bBottomFieldFlag,                                 "SH: bottom_field_flag" ) );
 	}
 #endif
+#ifdef   LF_INTERLACE
 //  if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR) // JVT-W035 
   if(!getNonIDRFlag())//lufeng
+#else
+  if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR || !getNonIDRFlag() ) // JVT-W035 ying @ QCT, the first condition might be useless
+#endif
   {
     RNOK(   pcReadIf->getUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
   }

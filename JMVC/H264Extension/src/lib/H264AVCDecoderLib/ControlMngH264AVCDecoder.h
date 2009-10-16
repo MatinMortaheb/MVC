@@ -158,9 +158,7 @@ public:
     ErrVal initMbForFiltering   ( UInt uiMbY, UInt uiMbX, Bool bMbAFF );
 #else
     ErrVal initMbForDecoding    ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
-    ErrVal initMbForDecoding    ( UInt uiMbIndex );
-      ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
-        ErrVal initMbForFiltering   ( UInt uiMbIndex );
+    ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
 #endif
 
 
@@ -188,7 +186,9 @@ public:
 #ifdef LF_INTERLACE
   ErrVal initMbForCoding( MbDataAccess& rcMbDataAccess, UInt uiMbY, UInt uiMbX, Bool bMbAFF, Bool bFieldFlag ){ return Err::m_nERR; }
 #else
-  ErrVal initMbForCoding      ( MbDataAccess& rcMbDataAccess, UInt uiMbIndex ){ return Err::m_nERR; }
+  ErrVal initMbForCoding      ( MbDataAccess& rcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
+  ErrVal initMbForDecoding    ( UInt uiMbIndex );
+  ErrVal initMbForFiltering   ( UInt uiMbIndex );
 #endif
 
   UvlcReader*  getUvlcReader()  { return m_pcUvlcReader;  };

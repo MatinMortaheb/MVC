@@ -1,3 +1,13 @@
+JMVC_6_0 -> JMVC_6_0_1
+Date            : Oct. 15, 2009
+Authors         : Panasonic
+Contribution    : SW improvement
+Changes:
+- Bug fix for reset of MbDataCtrl in xStartPicture()
+- Bug fix for setting AnchorPicFlag in xInitSliceHeader()
+- Various changes to fix compatibility with JMVC_5_2 with LF_INTERLACE macro turned off.
+
+
 JMVC_5_2 -> JMVC_6_0
 Date            : September 22, 2009
 Authors         : Panasonic

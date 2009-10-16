@@ -93,8 +93,6 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 #include "BitReadBuffer.h"
 #include "DecError.h"
 
-//#include "H264AVCCommonLib/FGSCoder.h" ying
-
 // h264 namepace begin
 H264AVC_NAMESPACE_BEGIN
 
@@ -485,16 +483,21 @@ Bool CabacReader::isMbSkipped( MbDataAccess& rcMbDataAccess )
 
   if( rcMbDataAccess.getSH().isInterB() )
   {
+#ifdef   LF_INTERLACE
  //   CabaDecoder::getSymbol( uiSymbol, m_cMbTypeCCModel.get( 2, 7 + rcMbDataAccess.getCtxDirectMbWoCoeff() ) );
 	 CabaDecoder::getSymbol( uiSymbol, m_cMbTypeCCModel.get( 2, 7 + rcMbDataAccess.getCtxMbSkipped() ) );//lufeng: follow jsvm
-   
+#else
+	 CabaDecoder::getSymbol( uiSymbol, m_cMbTypeCCModel.get( 2, 7 + rcMbDataAccess.getCtxDirectMbWoCoeff() ) );
+#endif
 	  rcMbDataAccess.getMbData().setSkipFlag(0!=uiSymbol);
   }
   else
   {
     CabaDecoder::getSymbol( uiSymbol, m_cMbTypeCCModel.get( 1, rcMbDataAccess.getCtxMbSkipped() ) );
   }
+#ifdef   LF_INTERLACE
   rcMbDataAccess.getMbData().setSkipFlag(0!=uiSymbol);
+#endif
 
   ROTRS( 0 == uiSymbol, false );
   m_uiLastDQpNonZero = 0; // no DeltaQP for Skipped Macroblock

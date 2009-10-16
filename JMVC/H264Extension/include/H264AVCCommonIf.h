@@ -213,7 +213,6 @@ public:
     operator Pel*()            { return m_pcBuffer; }
     Void* getMediaPacket()     { return m_pcMediaPacket; }
     UInt64& getCts()           { return m_ui64Cts; }
-    Void setCts( UInt64 ui64 ) { m_ui64Cts = ui64; } // HS: decoder robustness
 
 #ifdef   LF_INTERLACE
     Void setPicStruct     ( PicStruct e  ) { m_ePicStruct  = e;  }
@@ -230,6 +229,7 @@ public:
     Int  getBotPOC        () const  { return m_iBotPoc; }
     Int  getFramePOC      () const  { return m_iFramePoc; }
 #endif //LF_INTERLACE
+    Void setCts( UInt64 ui64 ) { m_ui64Cts = ui64; } // HS: decoder robustness
 
     UInt          getViewId       ()  const { return m_uiViewId; }
     Void          setViewId       (UInt v_id)  { m_uiViewId = v_id; }
@@ -239,6 +239,7 @@ private:
     Pel*   m_pcBuffer;
     Int    m_iInUseCout;
     UInt64 m_ui64Cts;
+
 #ifdef   LF_INTERLACE
     PicStruct m_ePicStruct;
     Int       m_iTopPoc;

@@ -2,7 +2,7 @@
 ********************************************************************************
 
 NOTE - One of the two copyright statements below may be chosen
-that applies for the software.
+       that applies for the software.
 
 ********************************************************************************
 
@@ -49,12 +49,12 @@ Copyright 2005, International Telecommunications Union, Geneva
 
 The Fraunhofer HHI hereby donate this source code to the ITU, with the following
 understanding:
-1. Fraunhofer HHI retain the right to do whatever they wish with the
-contributed source code, without limit.
-2. Fraunhofer HHI retain full patent rights (if any exist) in the technical
-content of techniques and algorithms herein.
-3. The ITU shall make this code available to anyone, free of license or
-royalty fees.
+    1. Fraunhofer HHI retain the right to do whatever they wish with the
+       contributed source code, without limit.
+    2. Fraunhofer HHI retain full patent rights (if any exist) in the technical
+       content of techniques and algorithms herein.
+    3. The ITU shall make this code available to anyone, free of license or
+       royalty fees.
 
 DISCLAIMER OF WARRANTY
 
@@ -94,8 +94,8 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 #include "H264AVCCommonLib/LoopFilter.h"
 #include "H264AVCCommonLib/ReconstructionBypass.h"
 #include "H264AVCCommonLib/IntYuvMbBuffer.h"
-#include "H264AVCCommonLib/CFMO.h"
 
+#include "H264AVCCommonLib/CFMO.h"
 
 
 H264AVC_NAMESPACE_BEGIN
@@ -111,8 +111,6 @@ const UChar LoopFilter::g_aucBetaTab[52]  =
     13, 13, 14, 14, 15, 15, 16, 16, 17, 17,
     18, 18
 };
-
-
 
 const LoopFilter::AlphaClip LoopFilter::g_acAlphaClip[52] =
 {
@@ -175,24 +173,17 @@ const LoopFilter::AlphaClip LoopFilter::g_acAlphaClip[52] =
     { 255, { 0,13,17,25,25} }
 } ;
 
-
-
-
 LoopFilter::LoopFilter() :
 m_pcControlMngIf( NULL ),
-//  m_pcIntYuvBuffer(NULL),
 m_pcRecFrameUnit( NULL )
 {
     m_eLFMode  = LFM_DEFAULT_FILTER;
     m_apcIntYuvBuffer[0] = m_apcIntYuvBuffer[1] = m_apcIntYuvBuffer[2] = m_apcIntYuvBuffer[3] = NULL;
 }
 
-
-
 LoopFilter::~LoopFilter()
 {
 }
-
 
 ErrVal LoopFilter::create( LoopFilter*& rpcLoopFilter )
 {
@@ -203,14 +194,12 @@ ErrVal LoopFilter::create( LoopFilter*& rpcLoopFilter )
     return Err::m_nOK;
 }
 
-
 ErrVal LoopFilter::destroy()
 {
     delete this;
 
     return Err::m_nOK;
 }
-
 
 ErrVal LoopFilter::init(  ControlMngIf* pcControlMngIf
                         ,ReconstructionBypass*       pcReconstructionBypass
@@ -226,15 +215,11 @@ ErrVal LoopFilter::init(  ControlMngIf* pcControlMngIf
     return Err::m_nOK;
 }
 
-
-
 ErrVal LoopFilter::uninit()
 {
     m_pcControlMngIf = NULL;
     return Err::m_nOK;
 }
-
-
 
 ErrVal LoopFilter::process( SliceHeader& rcSH, IntFrame* pcIntFrame )
 {
@@ -259,13 +244,9 @@ ErrVal LoopFilter::process( SliceHeader& rcSH, IntFrame* pcIntFrame )
 
 
     RNOK( m_pcControlMngIf->initSlice( rcSH, POST_PROCESS ) );
-#ifdef LF_INTERLACE
     m_bVerMixedMode = false;
     m_bHorMixedMode = false;
-#endif
-#ifdef   LF_INTERLACE
     const Bool bLF_INTERLACE = rcSH.isMbAff();
-#endif //LF_INTERLACE
 
     //===== loop over macroblocks use raster scan =====
     for( UInt uiMbAddress = 0; uiMbAddress < uiMaxMbAddress; uiMbAddress++ )
@@ -275,7 +256,6 @@ ErrVal LoopFilter::process( SliceHeader& rcSH, IntFrame* pcIntFrame )
         rcSH.getMbPositionFromAddress( uiMbY, uiMbX, uiMbIndex, uiMbAddress );
         RNOK( m_pcControlMngIf->initMbForFiltering( pcMbDataAccess, uiMbY, uiMbX, bLF_INTERLACE ) );
 
-#ifdef   LF_INTERLACE
         if ( ! bLF_INTERLACE )
         {
             RNOK( xFilterMbFast( *pcMbDataAccess ) );
@@ -284,16 +264,12 @@ ErrVal LoopFilter::process( SliceHeader& rcSH, IntFrame* pcIntFrame )
         {
             RNOK( xFilterMb( *pcMbDataAccess ) );
         }
-#else //!LF_INTERLACE
-        RNOK( xFilterMb( *pcMbDataAccess ) );
-#endif //LF_INTERLACE
     }
 
     m_apcIntYuvBuffer[TOP_FIELD] = m_apcIntYuvBuffer[BOT_FIELD] = m_apcIntYuvBuffer[FRAME] = NULL;
     return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 __inline 
 ErrVal LoopFilter::xFilterMbFast( const MbDataAccess& rcMbDataAccess )
 {
@@ -323,6 +299,7 @@ ErrVal LoopFilter::xFilterMbFast( const MbDataAccess& rcMbDataAccess )
 
     return Err::m_nOK;
 }
+
 ErrVal LoopFilter::xGetFilterStrengthFast( const MbDataAccess& rcMbDataAccess, const Int iFilterIdc )
 {
     const MbData& rcMbData = rcMbDataAccess.getMbData();
@@ -379,9 +356,7 @@ ErrVal LoopFilter::xGetFilterStrengthFast( const MbDataAccess& rcMbDataAccess, c
             }
             break;
         case MODE_8x8:
-#ifdef   LF_INTERLACE
         case MODE_8x8ref0:
-#endif //LF_INTERLACE
             break;
         default:
             {
@@ -547,8 +522,6 @@ UInt LoopFilter::xGetHorFilterStrengthFast( const MbData& rcMbDataCurr,
     return xCheckMvDataB  ( rcMbDataCurr, cIdx, rcMbDataAbove, cIdx + ABOVE_MB_ABOVE_NEIGHBOUR, 4, sVerMvThr );
 }
 
-#endif //LF_INTERLACE
-
 __inline ErrVal LoopFilter::xFilterMb( const MbDataAccess& rcMbDataAccess )
 {
     const DFP& rcDFP      = rcMbDataAccess.getDeblockingFilterParameter();
@@ -560,7 +533,6 @@ __inline ErrVal LoopFilter::xFilterMb( const MbDataAccess& rcMbDataAccess )
 
     Bool b8x8 = rcMbDataAccess.getMbData().isTransformSize8x8();
 
-#ifdef LF_INTERLACE
     Bool bFieldFlag  = rcMbDataAccess.getMbData().getFieldFlag();
     m_bVerMixedMode  = (bFieldFlag != rcMbDataAccess.getMbDataLeft().getFieldFlag());
     m_bHorMixedMode  = (bFieldFlag?(bFieldFlag != rcMbDataAccess.getMbDataAboveAbove().getFieldFlag()):
@@ -584,8 +556,6 @@ __inline ErrVal LoopFilter::xFilterMb( const MbDataAccess& rcMbDataAccess )
     }
     m_bAddEdge = false;
 
-#endif
-
     for( B4x4Idx cIdx; cIdx.isLegal(); cIdx++ )
     {
         if( !b8x8 || ( ( cIdx.x() & 1 ) == 0 ) )
@@ -605,11 +575,7 @@ __inline ErrVal LoopFilter::xFilterMb( const MbDataAccess& rcMbDataAccess )
             m_aaaucBs[HOR][cIdx.x()][cIdx.y()]  = 0;
         }
     }
-
-#ifdef LF_INTERLACE
     m_bHorMixedMode  = m_bHorMixedMode && bCurrFrame;
-#endif
-
     if( m_apcIntYuvBuffer[FRAME] )
     {
         PicType ePicType = rcMbDataAccess.getMbPicType();
@@ -619,14 +585,9 @@ __inline ErrVal LoopFilter::xFilterMb( const MbDataAccess& rcMbDataAccess )
         RNOK( xChromaHorFiltering( rcMbDataAccess, rcDFP, m_apcIntYuvBuffer[ePicType] ) );
         return Err::m_nOK;
     }
-#ifndef LF_INTERLACE
-    YuvPicBuffer* pcYuvBuffer = m_pcRecFrameUnit->getFrame().getFullPelYuvBuffer();
-#endif
-#ifdef LF_INTERLACE
     const SliceHeader& rcSH = rcMbDataAccess.getSH();
     PicType ePicType = ( rcSH.getFieldPicFlag() ) ? rcSH.getPicType() : rcMbDataAccess.getMbPicType();
     YuvPicBuffer* pcYuvBuffer = m_pcRecFrameUnit->getPic( ePicType ).getFullPelYuvBuffer();
-#endif
     RNOK( xLumaVerFiltering(   rcMbDataAccess, rcDFP, pcYuvBuffer ) );
     RNOK( xLumaHorFiltering(   rcMbDataAccess, rcDFP, pcYuvBuffer ) );
     RNOK( xChromaVerFiltering( rcMbDataAccess, rcDFP, pcYuvBuffer ) );
@@ -634,8 +595,6 @@ __inline ErrVal LoopFilter::xFilterMb( const MbDataAccess& rcMbDataAccess )
 
     return Err::m_nOK;
 }
-
-
 
 __inline Void LoopFilter::xFilter( Pel* pFlt, const Int& iOffset, const Int& iIndexA, const Int& iIndexB, const UChar& ucBs, const Bool& bLum )
 {
@@ -729,16 +688,12 @@ __inline Void LoopFilter::xFilter( Pel* pFlt, const Int& iOffset, const Int& iIn
     }
 }
 
-
-
-
 __inline ErrVal LoopFilter::xLumaVerFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, YuvPicBuffer* pcYuvBuffer )
 {
     Int   iCurrQp = rcMbDataAccess.getMbDataCurr().getQpLF();
     Int   iStride = pcYuvBuffer->getLStride();
     Pel*  pPelLum = pcYuvBuffer->getMbLumAddr();
 
-#ifdef LF_INTERLACE
     //===== filtering of left macroblock edge =====
     if( ! m_bVerMixedMode )
     {
@@ -833,35 +788,8 @@ __inline ErrVal LoopFilter::xLumaVerFiltering( const MbDataAccess& rcMbDataAcces
     }
 
     pPelLum -= 16*iStride-4;
-
-#endif
-#ifndef LF_INTERLACE
-    //===== filtering of left macroblock edge =====
-    {
-        Int iLeftQp = rcMbDataAccess.getMbDataLeft().getQpLF();
-        Int iQp     = ( iLeftQp + iCurrQp + 1) >> 1;
-        Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int yBlk = 0; yBlk < 4; yBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[VER][0][yBlk];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelLum,           1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+  iStride, 1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+2*iStride, 1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+3*iStride, 1, iIndexA, iIndexB, ucBs, true );
-            }
-            pPelLum += 4*iStride;
-        }
-        pPelLum -= 16*iStride-4;
-    }
-#endif
-
     Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
     Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iCurrQp, 0, 51);
-
     for( Int xBlk = 1; xBlk < 4; xBlk++)
     {
         for( Int yBlk = 0; yBlk < 4; yBlk++)
@@ -882,16 +810,12 @@ __inline ErrVal LoopFilter::xLumaVerFiltering( const MbDataAccess& rcMbDataAcces
     return Err::m_nOK;
 }
 
-
-
-
 __inline ErrVal LoopFilter::xLumaHorFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, YuvPicBuffer* pcYuvBuffer )
 {
     Int   iCurrQp = rcMbDataAccess.getMbDataCurr().getQpLF();
     Int   iStride = pcYuvBuffer->getLStride();
     Pel*  pPelLum = pcYuvBuffer->getMbLumAddr();
 
-#ifdef LF_INTERLACE
     //===== filtering of upper macroblock edge =====
     if( ! m_bHorMixedMode )
     {
@@ -972,33 +896,6 @@ __inline ErrVal LoopFilter::xLumaHorFiltering( const MbDataAccess& rcMbDataAcces
     }
 
     pPelLum += 4*iStride;
-#endif
-#ifndef LF_INTERLACE
-    //===== filtering of upper macroblock edge =====
-    {
-        //-----  any other combination than curr = FRM, above = FLD  -----
-        Int iAboveQp  = rcMbDataAccess.getMbDataAbove().getQpLF();
-        Int iQp       = ( iAboveQp + iCurrQp + 1) >> 1;
-        Int iIndexA   = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB   = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int xBlk = 0; xBlk < 4; xBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[HOR][xBlk][0];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelLum,   iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+1, iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+2, iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+3, iStride, iIndexA, iIndexB, ucBs, true );
-            }
-            pPelLum += 4;
-        }
-        pPelLum -= 16;
-    }
-
-    pPelLum += 4*iStride;
-#endif
     Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
     Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iCurrQp, 0, 51);
 
@@ -1022,9 +919,6 @@ __inline ErrVal LoopFilter::xLumaHorFiltering( const MbDataAccess& rcMbDataAcces
     return Err::m_nOK;
 }
 
-
-
-
 __inline ErrVal LoopFilter::xChromaHorFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, YuvPicBuffer* pcYuvBuffer )
 {
     Int   iCurrQp = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataCurr().getQpLF() );
@@ -1032,7 +926,6 @@ __inline ErrVal LoopFilter::xChromaHorFiltering( const MbDataAccess& rcMbDataAcc
     Pel*  pPelCb  = pcYuvBuffer->getMbCbAddr();
     Pel*  pPelCr  = pcYuvBuffer->getMbCrAddr();
 
-#ifdef LF_INTERLACE
     if( ! m_bHorMixedMode )
     {
         //-----  any other combination than curr = FRM, above = FLD  -----
@@ -1127,36 +1020,6 @@ __inline ErrVal LoopFilter::xChromaHorFiltering( const MbDataAccess& rcMbDataAcc
     }
     pPelCb += 4*iStride;
     pPelCr += 4*iStride;
-#endif
-#ifndef LF_INTERLACE
-    //===== filtering of upper macroblock edge =====
-    {
-        //-----  any other combination than curr = FRM, above = FLD  -----
-        Int iAboveQp  = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataAbove().getQpLF() );
-        Int iQp       = ( iAboveQp + iCurrQp + 1) >> 1;
-        Int iIndexA   = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB   = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int xBlk = 0; xBlk < 4; xBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[HOR][xBlk][0];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelCb,   iStride, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCb+1, iStride, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr,   iStride, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr+1, iStride, iIndexA, iIndexB, ucBs, false );
-            }
-            pPelCb += 2;
-            pPelCr += 2;
-        }
-        pPelCb -= 8;
-        pPelCr -= 8;
-    }
-
-    pPelCb += 4*iStride;
-    pPelCr += 4*iStride;
-#endif
 
     // now we filter the remaining edge
     Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
@@ -1179,17 +1042,12 @@ __inline ErrVal LoopFilter::xChromaHorFiltering( const MbDataAccess& rcMbDataAcc
     return Err::m_nOK;
 }
 
-
-
 __inline ErrVal LoopFilter::xChromaVerFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, YuvPicBuffer* pcYuvBuffer )
 {
     Int   iCurrQp = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataCurr().getQpLF() );
     Int   iStride = pcYuvBuffer->getCStride();
     Pel*  pPelCb  = pcYuvBuffer->getMbCbAddr();
     Pel*  pPelCr  = pcYuvBuffer->getMbCrAddr();
-
-
-#ifdef LF_INTERLACE
 
     //===== filtering of left macroblock edge =====
     if( ! m_bVerMixedMode )
@@ -1289,37 +1147,7 @@ __inline ErrVal LoopFilter::xChromaVerFiltering( const MbDataAccess& rcMbDataAcc
     }
     pPelCb -= 8*iStride-4;
     pPelCr -= 8*iStride-4;
-#endif
 
-#ifndef LF_INTERLACE
-
-    //===== filtering of left macroblock edge =====
-    {
-        //-----  curr == FRM && left == FRM  or  curr == FLD && left == FLD  -----
-        Int iLeftQp = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataLeft().getQpLF() );
-        Int iQp     = ( iLeftQp + iCurrQp + 1) >> 1;
-        Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int yBlk = 0; yBlk < 4; yBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[VER][0][yBlk];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelCb,         1, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCb+iStride, 1, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr,         1, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr+iStride, 1, iIndexA, iIndexB, ucBs, false );
-            }
-            pPelCb += 2*iStride;
-            pPelCr += 2*iStride;
-        }
-    }
-
-    pPelCb -= 8*iStride-4;
-    pPelCr -= 8*iStride-4;
-
-#endif
     Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
     Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iCurrQp, 0, 51);
     for( Int yBlk = 0; yBlk < 4; yBlk++)
@@ -1481,13 +1309,7 @@ __inline UInt LoopFilter::xGetVerFilterStrength( const MbDataAccess&  rcMbDataAc
 {
     const MbData& rcMbDataCurr  = rcMbDataAccess.getMbDataCurr();
     Short         sHorMvThr     = 4;
-#ifndef LF_INTERLACE
-    Short         sVerMvThr     = 4;
-#endif
-#ifdef LF_INTERLACE
     Short         sVerMvThr     = ( FRAME == rcMbDataAccess.getMbPicType() ? 4 : 2 );
-#endif
-
     if( cIdx.x() )
     {
         // this is a edge inside of a macroblock
@@ -1508,25 +1330,6 @@ __inline UInt LoopFilter::xGetVerFilterStrength( const MbDataAccess&  rcMbDataAc
     ROTRS( iFilterIdc == 2 && ! rcMbDataAccess.isAvailableLeft(), 0 );
     ROTRS( ! rcMbDataAccess.isLeftMbExisting(),                   0 );
 
-
-#ifndef LF_INTERLACE
-    const MbData& rcMbDataLeft = rcMbDataAccess.getMbDataLeft();
-
-    ROTRS( LFM_DEFAULT_FILTER != m_eLFMode && rcMbDataCurr.isIntra() ^ rcMbDataLeft.isIntra(), 0 );
-
-    ROTRS( rcMbDataCurr.isIntra(), 4 );
-    ROTRS( rcMbDataLeft.isIntra(), 4 );
-
-    ROTRS( rcMbDataCurr.is4x4BlkCoded( cIdx                          ), 2 );
-    ROTRS( rcMbDataLeft.is4x4BlkCoded( cIdx + LEFT_MB_LEFT_NEIGHBOUR ), 2 );
-
-    if( rcMbDataCurr.isInterPMb() && rcMbDataLeft.isInterPMb())
-    {
-        return xCheckMvDataP( rcMbDataCurr, cIdx, rcMbDataLeft, cIdx + LEFT_MB_LEFT_NEIGHBOUR, sHorMvThr, sVerMvThr );
-    }
-    return xCheckMvDataB  ( rcMbDataCurr, cIdx, rcMbDataLeft, cIdx + LEFT_MB_LEFT_NEIGHBOUR, sHorMvThr, sVerMvThr );
-#endif
-#ifdef LF_INTERLACE
     if( ! m_bVerMixedMode )
     {
         const MbData& rcMbDataLeft = rcMbDataAccess.getMbDataLeft();
@@ -1578,10 +1381,7 @@ __inline UInt LoopFilter::xGetVerFilterStrength( const MbDataAccess&  rcMbDataAc
     ROTRS( rcMbDataLeft.is4x4BlkCoded( cIdxLeft ), 2 );
 
     return 1;
-#endif
 }
-
-
 
 __inline UInt LoopFilter::xGetHorFilterStrength( const MbDataAccess&  rcMbDataAccess,
                                                 LumaIdx              cIdx,
@@ -1589,13 +1389,7 @@ __inline UInt LoopFilter::xGetHorFilterStrength( const MbDataAccess&  rcMbDataAc
 {
     const MbData& rcMbDataCurr  = rcMbDataAccess.getMbDataCurr();
     Short         sHorMvThr     = 4;
-#ifndef LF_INTERLACE
-    Short         sVerMvThr     = 4;
-#endif
-#ifdef LF_INTERLACE
     Short         sVerMvThr     = ( FRAME == rcMbDataAccess.getMbPicType() ? 4 : 2 );
-#endif
-
     if( cIdx.y() )
     {
         // internal edge
@@ -1614,26 +1408,6 @@ __inline UInt LoopFilter::xGetHorFilterStrength( const MbDataAccess&  rcMbDataAc
     // if we get here we are on a macroblock edge
     ROTRS( iFilterIdc == 2 && ! rcMbDataAccess.isAvailableAbove(),  0 );
     ROTRS( ! rcMbDataAccess.isAboveMbExisting(),                    0 );
-
-
-#ifndef LF_INTERLACE
-    const MbData& rcMbDataAbove = rcMbDataAccess.getMbDataAbove();
-
-    ROTRS( LFM_DEFAULT_FILTER != m_eLFMode && rcMbDataCurr.isIntra() ^ rcMbDataAbove.isIntra(), 0 );
-    ROTRS( rcMbDataCurr. isIntra(), 4 );
-    ROTRS( rcMbDataAbove.isIntra(), 4 );
-
-    ROTRS( rcMbDataCurr. is4x4BlkCoded( cIdx                            ), 2 );
-    ROTRS( rcMbDataAbove.is4x4BlkCoded( cIdx + ABOVE_MB_ABOVE_NEIGHBOUR ), 2 );
-
-    if( rcMbDataCurr.isInterPMb() && rcMbDataAbove.isInterPMb())
-    {
-        return xCheckMvDataP( rcMbDataCurr, cIdx, rcMbDataAbove, cIdx + ABOVE_MB_ABOVE_NEIGHBOUR, sHorMvThr, sVerMvThr );
-    }
-    return xCheckMvDataB  ( rcMbDataCurr, cIdx, rcMbDataAbove, cIdx + ABOVE_MB_ABOVE_NEIGHBOUR, sHorMvThr, sVerMvThr );
-#endif
-
-#ifdef LF_INTERLACE
     if( ! m_bHorMixedMode )
     {
         const MbData& rcMbDataAbove = (rcMbDataCurr.getFieldFlag()? rcMbDataAccess.getMbDataAboveAbove():
@@ -1658,7 +1432,6 @@ __inline UInt LoopFilter::xGetHorFilterStrength( const MbDataAccess&  rcMbDataAc
         return xCheckMvDataB  ( rcMbDataCurr, cIdx, rcMbDataAbove, cIdx + ABOVE_MB_ABOVE_NEIGHBOUR, sHorMvThr, sVerMvThr );
     }
 
-
     if( FRAME == rcMbDataAccess.getMbPicType() )
     {
         // mixed mode, current macroblock is a frame macroblock
@@ -1676,7 +1449,6 @@ __inline UInt LoopFilter::xGetHorFilterStrength( const MbDataAccess&  rcMbDataAc
         return 1;
     }
 
-
     // mixed mode, current macroblock is field macroblock
     const MbData& rcMbDataAbove = ( rcMbDataAccess.isTopMb() ? rcMbDataAccess.getMbDataAbove() : rcMbDataAccess.getMbDataAboveAbove() );
 
@@ -1691,16 +1463,7 @@ __inline UInt LoopFilter::xGetHorFilterStrength( const MbDataAccess&  rcMbDataAc
     ROTRS( rcMbDataAbove.is4x4BlkCoded( cIdx + ABOVE_MB_ABOVE_NEIGHBOUR ), 2 );
 
     return 1;
-#endif
 }
-
-
-
-
-
-
-
-
 
 ErrVal LoopFilter::process( SliceHeader&  rcSH,
                            IntFrame*     pcFrame,
@@ -1721,20 +1484,14 @@ ErrVal LoopFilter::process( SliceHeader&  rcSH,
     {
         RNOK( pcMbDataCtrlMot ->initSlice             ( rcSH, POST_PROCESS, false, NULL ) );
     }
-
-#ifdef LF_INTERLACE
     m_bVerMixedMode = false;
     m_bHorMixedMode = false;
-#endif
-
     RefFrameList acRefFrameList0[2];
     RefFrameList acRefFrameList1[2];
-
     RefFrameList* apcRefFrameList0[4]= {0,0,0,0};
     RefFrameList* apcRefFrameList1[4]= {0,0,0,0};
     IntFrame* apcFrame[4] = {0,0,0,0};
     IntFrame* apcHighpassFrame[4] = {0,0,0,0};
-
     if( pcFrame != NULL )
     {
         pcFrame   ->addFrameFieldBuffer();
@@ -1900,8 +1657,6 @@ __inline ErrVal LoopFilter::xFilterMb( MbDataAccess*  pcMbDataAccessMot,
     {
         pcMbDataAccessRes->getMbData().setMbCbpResidual( 0 );
     }
-
-#ifdef LF_INTERLACE
     Bool bFieldFlag = false;
     Bool bCurrFrame = false;
     const MbDataAccess* pcMbDataAccessFF = pcMbDataAccessMot ? pcMbDataAccessMot : pcMbDataAccessRes;
@@ -1942,9 +1697,6 @@ __inline ErrVal LoopFilter::xFilterMb( MbDataAccess*  pcMbDataAccessMot,
         }
     }
     m_bAddEdge = false;
-
-#endif
-
     for( B4x4Idx cIdx; cIdx.isLegal(); cIdx++ )
     {
         if( !b8x8 || ( ( cIdx.x() & 1 ) == 0 ) )
@@ -1976,11 +1728,7 @@ __inline ErrVal LoopFilter::xFilterMb( MbDataAccess*  pcMbDataAccessMot,
             m_aaaucBs[HOR][cIdx.x()][cIdx.y()]  = 0;
         }
     }
-
-#ifdef LF_INTERLACE
     m_bHorMixedMode  = m_bHorMixedMode && bCurrFrame;
-#endif
-
     RNOK( xLumaVerFiltering(   *pcMbDataAccessRes, rcDFP, pcYuvBuffer ) );
     RNOK( xLumaHorFiltering(   *pcMbDataAccessRes, rcDFP, pcYuvBuffer ) );
     RNOK( xChromaVerFiltering( *pcMbDataAccessRes, rcDFP, pcYuvBuffer ) );
@@ -1988,9 +1736,6 @@ __inline ErrVal LoopFilter::xFilterMb( MbDataAccess*  pcMbDataAccessMot,
 
     return Err::m_nOK;
 }
-
-
-
 
 __inline UInt LoopFilter::xGetVerFilterStrength_RefIdx( const MbDataAccess* pcMbDataAccessMot,
                                                        const MbDataAccess* pcMbDataAccessRes,
@@ -2084,28 +1829,14 @@ __inline UInt LoopFilter::xGetVerFilterStrength_RefIdx( const MbDataAccess* pcMb
         }
         //--
     }
-
-#ifndef LF_INTERLACE
-    ROFRS( pcMbDataAccessMot, cIdx.x() ? 3 : ((iFilterIdc==2 && !pcMbDataAccessRes->isAvailableLeft())|| !pcMbDataAccessRes->isLeftMbExisting()) ? 0 : 4 );
-#endif
-
-#ifdef LF_INTERLACE
     if( NULL == pcMbDataAccessMot )
     {
         pcMbDataAccessMot = pcMbDataAccessRes;
     }
-#endif
-
     const MbData& rcMbDataCurrMot = pcMbDataAccessMot->getMbDataCurr();
     const MbData& rcMbDataCurrRes = pcMbDataAccessRes->getMbDataCurr();
     Short         sHorMvThr       = 4;
-#ifndef LF_INTERLACE
-    Short         sVerMvThr     = 4;
-#endif
-#ifdef LF_INTERLACE
     Short         sVerMvThr     = ( FRAME == pcMbDataAccessMot->getMbPicType() ? 4 : 2 );
-#endif
-
     if( cIdx.x() )
     {
         // this is a edge inside of a macroblock
@@ -2139,43 +1870,6 @@ __inline UInt LoopFilter::xGetVerFilterStrength_RefIdx( const MbDataAccess* pcMb
     // if we get here we are on a macroblock edge
     ROTRS( iFilterIdc == 2 && ! pcMbDataAccessMot->isAvailableLeft(), 0 );
     ROTRS( ! pcMbDataAccessMot->isLeftMbExisting(),                   0 );
-
-#ifndef LF_INTERLACE
-
-    const MbData& rcMbDataLeftMot = pcMbDataAccessMot->getMbDataLeft();
-    const MbData& rcMbDataLeftRes = pcMbDataAccessRes->getMbDataLeft();
-
-    ROTRS( LFM_DEFAULT_FILTER != m_eLFMode && rcMbDataCurrMot.isIntra() ^ rcMbDataLeftMot.isIntra(), 0 );
-
-    ROTRS( rcMbDataCurrMot.isIntra(), 4 );
-    ROTRS( rcMbDataLeftMot.isIntra(), 4 );
-
-    //th
-    ROTRS( rcMbDatCurr.    is4x4BlkResidual( cIdx ), 2 );
-    ROTRS( rcMbDataLeftRes.is4x4BlkResidual( cIdx + LEFT_MB_LEFT_NEIGHBOUR), 2 ); 
-    /*
-    if( m_pcHighpassYuvBuffer ) 
-    {
-    ROTRS( m_pcHighpassYuvBuffer->isCurr4x4BlkNotZero ( cIdx                          ), 2 );
-    ROTRS( m_pcHighpassYuvBuffer->isLeft4x4BlkNotZero ( cIdx + LEFT_MB_LEFT_NEIGHBOUR ), 2 );
-    }
-    */
-    ROTRS( rcMbDataCurrRes.is4x4BlkCoded( cIdx                          ), 2 );
-    ROTRS( rcMbDataLeftRes.is4x4BlkCoded( cIdx + LEFT_MB_LEFT_NEIGHBOUR ), 2 );
-
-    if( rcMbDataCurrMot.isInterPMb() && rcMbDataLeftMot.isInterPMb())
-    {
-        return xCheckMvDataP_RefIdx( rcMbDataCurrMot, cIdx, rcMbDataLeftMot, cIdx + LEFT_MB_LEFT_NEIGHBOUR,
-            sHorMvThr, sVerMvThr,
-            *pcRefFrameList0, *pcRefFrameList1 );
-    }
-    return   xCheckMvDataB_RefIdx( rcMbDataCurrMot, cIdx, rcMbDataLeftMot, cIdx + LEFT_MB_LEFT_NEIGHBOUR,
-        sHorMvThr, sVerMvThr,
-        *pcRefFrameList0, *pcRefFrameList1 );
-
-#endif
-
-#ifdef LF_INTERLACE
     if( ! m_bVerMixedMode )
     {
         const MbData& rcMbDataLeftMot = pcMbDataAccessMot->getMbDataLeft();
@@ -2271,11 +1965,7 @@ __inline UInt LoopFilter::xGetVerFilterStrength_RefIdx( const MbDataAccess* pcMb
     ROTRS( rcMbDataLeftRes.is4x4BlkCoded( cIdxLeft ), 2 );
 
     return 1;
-#endif
-
 }
-
-
 
 __inline UInt LoopFilter::xGetHorFilterStrength_RefIdx( const MbDataAccess* pcMbDataAccessMot,
                                                        const MbDataAccess* pcMbDataAccessRes,
@@ -2369,29 +2059,14 @@ __inline UInt LoopFilter::xGetHorFilterStrength_RefIdx( const MbDataAccess* pcMb
         }
         //--
     }
-
-#ifndef LF_INTERLACE
-    AOT(1); //th
-    // ROFRS( pcMbDataAccessMot, cIdx.x() ? 3 : ((iFilterIdc==2 && !pcMbDataAccessRes->isAvailableAbove())|| !pcMbDataAccessRes->isLeftMbExisting()) ? 0 : 4 );
-#endif
-
-#ifdef LF_INTERLACE
     if( NULL == pcMbDataAccessMot )
     {
         pcMbDataAccessMot = pcMbDataAccessRes;
     }
-#endif
-
     const MbData& rcMbDataCurrMot = pcMbDataAccessMot->getMbDataCurr();
     const MbData& rcMbDataCurrRes = pcMbDataAccessRes->getMbDataCurr();
     Short         sHorMvThr       = 4;
-#ifndef LF_INTERLACE
-    Short         sVerMvThr     = 4;
-#endif
-#ifdef LF_INTERLACE
     Short         sVerMvThr     = ( FRAME == pcMbDataAccessMot->getMbPicType() ? 4 : 2 );
-#endif
-
     if( cIdx.y() )
     {
         // internal edge
@@ -2425,42 +2100,6 @@ __inline UInt LoopFilter::xGetHorFilterStrength_RefIdx( const MbDataAccess* pcMb
     // if we get here we are on a macroblock edge
     ROTRS( iFilterIdc == 2 && ! pcMbDataAccessMot->isAvailableAbove(),  0 );
     ROTRS( ! pcMbDataAccessMot->isAboveMbExisting(),                    0 );
-
-#ifndef LF_INTERLACE
-    const MbData& rcMbDataAboveMot = pcMbDataAccessMot->getMbDataAbove();
-    const MbData& rcMbDataAboveRes = pcMbDataAccessRes->getMbDataAbove();
-
-    ROTRS( LFM_DEFAULT_FILTER != m_eLFMode && rcMbDataCurrMot.isIntra() ^ rcMbDataAboveMot.isIntra(), 0 );
-
-    ROTRS( rcMbDataCurrMot. isIntra(), 4 );
-    ROTRS( rcMbDataAboveMot.isIntra(), 4 );
-
-    //th
-    ROTRS( rcMbDataCurrRes. is4x4BlkResidual( cIdx                            ), 2 );
-    ROTRS( rcMbDataAboveRes.is4x4BlkResidual( cIdx + ABOVE_MB_ABOVE_NEIGHBOUR ), 2 ); 
-    /*
-    if( m_pcHighpassYuvBuffer ) 
-    {
-    ROTRS( m_pcHighpassYuvBuffer->isCurr4x4BlkNotZero  ( cIdx                            ), 2 );
-    ROTRS( m_pcHighpassYuvBuffer->isAbove4x4BlkNotZero ( cIdx + ABOVE_MB_ABOVE_NEIGHBOUR ), 2 );
-    }
-    */
-    ROTRS( rcMbDataCurrRes. is4x4BlkCoded( cIdx                            ), 2 );
-    ROTRS( rcMbDataAboveRes.is4x4BlkCoded( cIdx + ABOVE_MB_ABOVE_NEIGHBOUR ), 2 );
-
-    if( rcMbDataCurrMot.isInterPMb() && rcMbDataAboveMot.isInterPMb())
-    {
-        return xCheckMvDataP_RefIdx( rcMbDataCurrMot, cIdx, rcMbDataAboveMot, cIdx + ABOVE_MB_ABOVE_NEIGHBOUR,
-            sHorMvThr, sVerMvThr,
-            *pcRefFrameList0, *pcRefFrameList1 );
-    }
-    return   xCheckMvDataB_RefIdx( rcMbDataCurrMot, cIdx, rcMbDataAboveMot, cIdx + ABOVE_MB_ABOVE_NEIGHBOUR,
-        sHorMvThr, sVerMvThr,
-        *pcRefFrameList0, *pcRefFrameList1 );
-
-#endif
-
-#ifdef LF_INTERLACE
     if( ! m_bHorMixedMode )
     {
         const MbData& rcMbDataAboveMot = (rcMbDataCurrMot.getFieldFlag()? pcMbDataAccessMot->getMbDataAboveAbove():pcMbDataAccessMot->getMbDataAbove());
@@ -2503,7 +2142,6 @@ __inline UInt LoopFilter::xGetHorFilterStrength_RefIdx( const MbDataAccess* pcMb
             *pcRefFrameList0, *pcRefFrameList1 );
     }
 
-
     if( FRAME == pcMbDataAccessMot->getMbPicType() )
     {
         // mixed mode, current macroblock is a frame macroblock
@@ -2532,7 +2170,6 @@ __inline UInt LoopFilter::xGetHorFilterStrength_RefIdx( const MbDataAccess* pcMb
         return 1;
     }
 
-
     // mixed mode, current macroblock is field macroblock
     const MbData& rcMbDataAboveMot = ( pcMbDataAccessMot->isTopMb() ? pcMbDataAccessMot->getMbDataAbove() : pcMbDataAccessMot->getMbDataAboveAbove() );
     const MbData& rcMbDataAboveRes = ( pcMbDataAccessRes->isTopMb() ? pcMbDataAccessRes->getMbDataAbove() : pcMbDataAccessRes->getMbDataAboveAbove() );
@@ -2558,17 +2195,7 @@ __inline UInt LoopFilter::xGetHorFilterStrength_RefIdx( const MbDataAccess* pcMb
     ROTRS( rcMbDataAboveRes.is4x4BlkCoded( cIdx + ABOVE_MB_ABOVE_NEIGHBOUR ), 2 );
 
     return 1;
-#endif
-
 }
-
-
-
-
-
-
-
-
 
 UChar LoopFilter::xCheckMvDataP_RefIdx( const MbData& rcQMbData,
                                        const LumaIdx cQIdx,
@@ -2597,10 +2224,6 @@ UChar LoopFilter::xCheckMvDataP_RefIdx( const MbData& rcQMbData,
 
     return 0;
 }
-
-
-
-
 
 UChar LoopFilter::xCheckMvDataB_RefIdx( const MbData& rcQMbData,
                                        const LumaIdx cQIdx,
@@ -2647,8 +2270,6 @@ UChar LoopFilter::xCheckMvDataB_RefIdx( const MbData& rcQMbData,
 
         return 0;
     }
-
-
     // both ref pic are used for both blocks
     if( pcRefPicL1P != pcRefPicL0P )
     {
@@ -2716,9 +2337,6 @@ UChar LoopFilter::xCheckMvDataB_RefIdx( const MbData& rcQMbData,
     return 0;
 }
 
-
-
-
 __inline Void LoopFilter::xFilter( XPel* pFlt, const Int& iOffset, const Int& iIndexA, const Int& iIndexB, const UChar& ucBs, const Bool& bLum )
 {
     const Int iAlpha = g_acAlphaClip[ iIndexA ].ucAlpha;
@@ -2772,7 +2390,6 @@ __inline Void LoopFilter::xFilter( XPel* pFlt, const Int& iOffset, const Int& iI
         return;
     }
 
-
     if( ! bLum )
     {
         pFlt[         0] = ((Q1 << 1) + Q0 + P1 + 2) >> 2;
@@ -2811,252 +2428,11 @@ __inline Void LoopFilter::xFilter( XPel* pFlt, const Int& iOffset, const Int& iI
     }
 }
 
-
-
-
-
-
-
-
-#ifndef LF_INTERLACE
-
-__inline ErrVal LoopFilter::xLumaVerFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, IntYuvPicBuffer* pcYuvBuffer )
-{
-    Int   iStride = pcYuvBuffer->getLStride();
-    XPel* pPelLum = pcYuvBuffer->getMbLumAddr();
-    Int   iCurrQp = rcMbDataAccess.getMbData().getQpLF();
-
-    //===== filtering of left macroblock edge =====
-    {
-        Int iLeftQp = rcMbDataAccess.getMbDataLeft().getQpLF();
-        Int iQp     = ( iLeftQp + iCurrQp + 1) >> 1;
-
-        //-----  curr == FRM && left == FRM  or  curr == FLD && left == FLD  -----
-        Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int yBlk = 0; yBlk < 4; yBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[VER][0][yBlk];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelLum,           1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+  iStride, 1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+2*iStride, 1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+3*iStride, 1, iIndexA, iIndexB, ucBs, true );
-            }
-            pPelLum += 4*iStride;
-        }
-    }
-
-    pPelLum -= 16*iStride-4;
-
-    Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
-    Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iCurrQp, 0, 51);
-
-    for( Int xBlk = 1; xBlk < 4; xBlk++)
-    {
-        for( Int yBlk = 0; yBlk < 4; yBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[VER][xBlk][yBlk];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelLum,           1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+  iStride, 1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+2*iStride, 1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+3*iStride, 1, iIndexA, iIndexB, ucBs, true );
-            }
-            pPelLum += 4*iStride;
-        }
-        pPelLum -= 16*iStride-4;
-    }
-
-    return Err::m_nOK;
-}
-
-
-
-
-__inline ErrVal LoopFilter::xLumaHorFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, IntYuvPicBuffer* pcYuvBuffer )
-{
-    Int   iStride = pcYuvBuffer->getLStride();
-    XPel* pPelLum = pcYuvBuffer->getMbLumAddr();
-    Int   iCurrQp = rcMbDataAccess.getMbData().getQpLF();
-
-    //===== filtering of upper macroblock edge =====
-    {
-        //-----  any other combination than curr = FRM, above = FLD  -----
-        Int iAboveQp  = rcMbDataAccess.getMbDataAbove().getQpLF();
-        Int iQp       = ( iAboveQp + iCurrQp + 1 ) >> 1;
-
-        Int iIndexA   = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB   = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int xBlk = 0; xBlk < 4; xBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[HOR][xBlk][0];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelLum,   iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+1, iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+2, iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+3, iStride, iIndexA, iIndexB, ucBs, true );
-            }
-            pPelLum += 4;
-        }
-        pPelLum -= 16;
-    }
-
-    pPelLum += 4*iStride;
-    Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
-    Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iCurrQp, 0, 51);
-
-    for( Int yBlk = 1; yBlk < 4; yBlk++)
-    {
-        for( Int xBlk = 0; xBlk < 4; xBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[HOR][xBlk][yBlk];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelLum,   iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+1, iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+2, iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+3, iStride, iIndexA, iIndexB, ucBs, true );
-            }
-            pPelLum += 4;
-        }
-        pPelLum += 4*iStride - 16;
-    }
-
-    return Err::m_nOK;
-}
-
-
-
-
-
-__inline ErrVal LoopFilter::xChromaHorFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, IntYuvPicBuffer* pcYuvBuffer )
-{
-    Int   iStride = pcYuvBuffer->getCStride();
-    XPel* pPelCb  = pcYuvBuffer->getMbCbAddr();
-    XPel* pPelCr  = pcYuvBuffer->getMbCrAddr();
-    Int   iCurrQp = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataCurr().getQpLF() );
-
-    //===== filtering of upper macroblock edge =====
-    {
-        //-----  any other combination than curr = FRM, above = FLD  -----
-        Int iAboveQp  = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataAbove().getQpLF() );
-        Int iQp       = ( iCurrQp + iAboveQp + 1 ) >> 1;
-
-        Int iIndexA   = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB   = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int xBlk = 0; xBlk < 4; xBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[HOR][xBlk][0];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelCb,   iStride, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCb+1, iStride, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr,   iStride, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr+1, iStride, iIndexA, iIndexB, ucBs, false );
-            }
-            pPelCb += 2;
-            pPelCr += 2;
-        }
-        pPelCb -= 8;
-        pPelCr -= 8;
-    }
-
-    pPelCb += 4*iStride;
-    pPelCr += 4*iStride;
-
-    // now we filter the remaining edge
-    Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
-    Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iCurrQp, 0, 51);
-
-    for( Int xBlk = 0; xBlk < 4; xBlk++)
-    {
-        const UChar ucBs = m_aaaucBs[HOR][xBlk][2];
-        if( 0 != ucBs )
-        {
-            xFilter( pPelCb,   iStride, iIndexA, iIndexB, ucBs, false );
-            xFilter( pPelCb+1, iStride, iIndexA, iIndexB, ucBs, false );
-            xFilter( pPelCr,   iStride, iIndexA, iIndexB, ucBs, false );
-            xFilter( pPelCr+1, iStride, iIndexA, iIndexB, ucBs, false );
-        }
-        pPelCb += 2;
-        pPelCr += 2;
-    }
-
-    return Err::m_nOK;
-}
-
-
-
-__inline ErrVal LoopFilter::xChromaVerFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, IntYuvPicBuffer* pcYuvBuffer )
-{
-    Int   iStride = pcYuvBuffer->getCStride();
-    XPel* pPelCb  = pcYuvBuffer->getMbCbAddr();
-    XPel* pPelCr  = pcYuvBuffer->getMbCrAddr();
-    Int   iCurrQp = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataCurr().getQpLF() );
-
-    //===== filtering of left macroblock edge =====
-    {
-        //-----  curr == FRM && left == FRM  or  curr == FLD && left == FLD  -----
-        Int iLeftQp = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataLeft().getQpLF() );
-        Int iQp     = ( iCurrQp + iLeftQp + 1 ) >> 1;
-
-        Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int yBlk = 0; yBlk < 4; yBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[VER][0][yBlk];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelCb,         1, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCb+iStride, 1, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr,         1, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr+iStride, 1, iIndexA, iIndexB, ucBs, false );
-            }
-            pPelCb += 2*iStride;
-            pPelCr += 2*iStride;
-        }
-    }
-
-    pPelCb -= 8*iStride-4;
-    pPelCr -= 8*iStride-4;
-
-    Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
-    Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iCurrQp, 0, 51);
-    for( Int yBlk = 0; yBlk < 4; yBlk++)
-    {
-        const UChar ucBs = m_aaaucBs[VER][2][yBlk];
-        if( 0 != ucBs )
-        {
-            xFilter( pPelCb,         1, iIndexA, iIndexB, ucBs, false );
-            xFilter( pPelCb+iStride, 1, iIndexA, iIndexB, ucBs, false );
-            xFilter( pPelCr,         1, iIndexA, iIndexB, ucBs, false );
-            xFilter( pPelCr+iStride, 1, iIndexA, iIndexB, ucBs, false );
-        }
-        pPelCb += 2*iStride;
-        pPelCr += 2*iStride;
-    }
-
-    return Err::m_nOK;
-}
-#endif
-
-#ifdef LF_INTERLACE
-
 __inline ErrVal LoopFilter::xLumaVerFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, IntYuvPicBuffer* pcYuvBuffer )
 {
     Int   iCurrQp = rcMbDataAccess.getMbDataCurr().getQpLF();
     Int   iStride = pcYuvBuffer->getLStride();
     XPel*  pPelLum = pcYuvBuffer->getMbLumAddr();
-
-#ifdef LF_INTERLACE
     //===== filtering of left macroblock edge =====
     if( ! m_bVerMixedMode )
     {
@@ -3149,34 +2525,7 @@ __inline ErrVal LoopFilter::xLumaVerFiltering( const MbDataAccess& rcMbDataAcces
             }
         }
     }
-
     pPelLum -= 16*iStride-4;
-
-#endif
-#ifndef LF_INTERLACE
-    //===== filtering of left macroblock edge =====
-    {
-        Int iLeftQp = rcMbDataAccess.getMbDataLeft().getQpLF();
-        Int iQp     = ( iLeftQp + iCurrQp + 1) >> 1;
-        Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int yBlk = 0; yBlk < 4; yBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[VER][0][yBlk];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelLum,           1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+  iStride, 1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+2*iStride, 1, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+3*iStride, 1, iIndexA, iIndexB, ucBs, true );
-            }
-            pPelLum += 4*iStride;
-        }
-        pPelLum -= 16*iStride-4;
-    }
-#endif
-
     Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
     Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iCurrQp, 0, 51);
 
@@ -3200,16 +2549,11 @@ __inline ErrVal LoopFilter::xLumaVerFiltering( const MbDataAccess& rcMbDataAcces
     return Err::m_nOK;
 }
 
-
-
-
 __inline ErrVal LoopFilter::xLumaHorFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, IntYuvPicBuffer* pcYuvBuffer )
 {
     Int   iCurrQp = rcMbDataAccess.getMbDataCurr().getQpLF();
     Int   iStride = pcYuvBuffer->getLStride();
     XPel*  pPelLum = pcYuvBuffer->getMbLumAddr();
-
-#ifdef LF_INTERLACE
     //===== filtering of upper macroblock edge =====
     if( ! m_bHorMixedMode )
     {
@@ -3290,33 +2634,6 @@ __inline ErrVal LoopFilter::xLumaHorFiltering( const MbDataAccess& rcMbDataAcces
     }
 
     pPelLum += 4*iStride;
-#endif
-#ifndef LF_INTERLACE
-    //===== filtering of upper macroblock edge =====
-    {
-        //-----  any other combination than curr = FRM, above = FLD  -----
-        Int iAboveQp  = rcMbDataAccess.getMbDataAbove().getQpLF();
-        Int iQp       = ( iAboveQp + iCurrQp + 1) >> 1;
-        Int iIndexA   = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB   = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int xBlk = 0; xBlk < 4; xBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[HOR][xBlk][0];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelLum,   iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+1, iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+2, iStride, iIndexA, iIndexB, ucBs, true );
-                xFilter( pPelLum+3, iStride, iIndexA, iIndexB, ucBs, true );
-            }
-            pPelLum += 4;
-        }
-        pPelLum -= 16;
-    }
-
-    pPelLum += 4*iStride;
-#endif
     Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
     Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iCurrQp, 0, 51);
 
@@ -3340,17 +2657,12 @@ __inline ErrVal LoopFilter::xLumaHorFiltering( const MbDataAccess& rcMbDataAcces
     return Err::m_nOK;
 }
 
-
-
-
 __inline ErrVal LoopFilter::xChromaHorFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, IntYuvPicBuffer* pcYuvBuffer )
 {
     Int   iCurrQp = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataCurr().getQpLF() );
     Int   iStride = pcYuvBuffer->getCStride();
     XPel*  pPelCb  = pcYuvBuffer->getMbCbAddr();
     XPel*  pPelCr  = pcYuvBuffer->getMbCrAddr();
-
-#ifdef LF_INTERLACE
     if( ! m_bHorMixedMode )
     {
         //-----  any other combination than curr = FRM, above = FLD  -----
@@ -3445,36 +2757,6 @@ __inline ErrVal LoopFilter::xChromaHorFiltering( const MbDataAccess& rcMbDataAcc
     }
     pPelCb += 4*iStride;
     pPelCr += 4*iStride;
-#endif
-#ifndef LF_INTERLACE
-    //===== filtering of upper macroblock edge =====
-    {
-        //-----  any other combination than curr = FRM, above = FLD  -----
-        Int iAboveQp  = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataAbove().getQpLF() );
-        Int iQp       = ( iAboveQp + iCurrQp + 1) >> 1;
-        Int iIndexA   = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB   = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int xBlk = 0; xBlk < 4; xBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[HOR][xBlk][0];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelCb,   iStride, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCb+1, iStride, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr,   iStride, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr+1, iStride, iIndexA, iIndexB, ucBs, false );
-            }
-            pPelCb += 2;
-            pPelCr += 2;
-        }
-        pPelCb -= 8;
-        pPelCr -= 8;
-    }
-
-    pPelCb += 4*iStride;
-    pPelCr += 4*iStride;
-#endif
 
     // now we filter the remaining edge
     Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
@@ -3497,18 +2779,12 @@ __inline ErrVal LoopFilter::xChromaHorFiltering( const MbDataAccess& rcMbDataAcc
     return Err::m_nOK;
 }
 
-
-
 __inline ErrVal LoopFilter::xChromaVerFiltering( const MbDataAccess& rcMbDataAccess, const DFP& rcDFP, IntYuvPicBuffer* pcYuvBuffer )
 {
     Int   iCurrQp = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataCurr().getQpLF() );
     Int   iStride = pcYuvBuffer->getCStride();
     XPel*  pPelCb  = pcYuvBuffer->getMbCbAddr();
     XPel*  pPelCr  = pcYuvBuffer->getMbCrAddr();
-
-
-#ifdef LF_INTERLACE
-
     //===== filtering of left macroblock edge =====
     if( ! m_bVerMixedMode )
     {
@@ -3607,37 +2883,6 @@ __inline ErrVal LoopFilter::xChromaVerFiltering( const MbDataAccess& rcMbDataAcc
     }
     pPelCb -= 8*iStride-4;
     pPelCr -= 8*iStride-4;
-#endif
-
-#ifndef LF_INTERLACE
-
-    //===== filtering of left macroblock edge =====
-    {
-        //-----  curr == FRM && left == FRM  or  curr == FLD && left == FLD  -----
-        Int iLeftQp = rcMbDataAccess.getSH().getChromaQp( rcMbDataAccess.getMbDataLeft().getQpLF() );
-        Int iQp     = ( iLeftQp + iCurrQp + 1) >> 1;
-        Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iQp, 0, 51);
-        Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iQp, 0, 51);
-
-        for( Int yBlk = 0; yBlk < 4; yBlk++)
-        {
-            const UChar ucBs = m_aaaucBs[VER][0][yBlk];
-            if( 0 != ucBs )
-            {
-                xFilter( pPelCb,         1, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCb+iStride, 1, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr,         1, iIndexA, iIndexB, ucBs, false );
-                xFilter( pPelCr+iStride, 1, iIndexA, iIndexB, ucBs, false );
-            }
-            pPelCb += 2*iStride;
-            pPelCr += 2*iStride;
-        }
-    }
-
-    pPelCb -= 8*iStride-4;
-    pPelCr -= 8*iStride-4;
-
-#endif
     Int iIndexA = gClipMinMax( rcDFP.getSliceAlphaC0Offset() + iCurrQp, 0, 51);
     Int iIndexB = gClipMinMax( rcDFP.getSliceBetaOffset()    + iCurrQp, 0, 51);
     for( Int yBlk = 0; yBlk < 4; yBlk++)
@@ -3653,12 +2898,8 @@ __inline ErrVal LoopFilter::xChromaVerFiltering( const MbDataAccess& rcMbDataAcc
         pPelCb += 2*iStride;
         pPelCr += 2*iStride;
     }
-
     return Err::m_nOK;
 }
-
-#endif
-
 #else //!LF_INTERLACE
 const UChar LoopFilter::g_aucBetaTab[52]  =
 {
@@ -3737,9 +2978,9 @@ const LoopFilter::AlphaClip LoopFilter::g_acAlphaClip[52] =
 
 
 LoopFilter::LoopFilter() :
-m_pcControlMngIf( NULL ),
-m_pcIntYuvBuffer(NULL),
-m_pcRecFrameUnit( NULL )
+  m_pcControlMngIf( NULL ),
+  m_pcIntYuvBuffer(NULL),
+  m_pcRecFrameUnit( NULL )
 {
     m_eLFMode  = LFM_DEFAULT_FILTER;
 }

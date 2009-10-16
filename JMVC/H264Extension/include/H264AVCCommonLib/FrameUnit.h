@@ -2,7 +2,7 @@
 ********************************************************************************
 
 NOTE - One of the two copyright statements below may be chosen
-that applies for the software.
+       that applies for the software.
 
 ********************************************************************************
 
@@ -49,12 +49,12 @@ Copyright 2005, International Telecommunications Union, Geneva
 
 The Fraunhofer HHI hereby donate this source code to the ITU, with the following
 understanding:
-1. Fraunhofer HHI retain the right to do whatever they wish with the
-contributed source code, without limit.
-2. Fraunhofer HHI retain full patent rights (if any exist) in the technical
-content of techniques and algorithms herein.
-3. The ITU shall make this code available to anyone, free of license or
-royalty fees.
+    1. Fraunhofer HHI retain the right to do whatever they wish with the
+       contributed source code, without limit.
+    2. Fraunhofer HHI retain full patent rights (if any exist) in the technical
+       content of techniques and algorithms herein.
+    3. The ITU shall make this code available to anyone, free of license or
+       royalty fees.
 
 DISCLAIMER OF WARRANTY
 
@@ -121,9 +121,7 @@ class H264AVCCOMMONLIB_API FrameUnit
     };
 
 protected:
-    FrameUnit( YuvBufferCtrl& rcYuvFullPelBufferCtrl, YuvBufferCtrl& rcYuvHalfPelBufferCtrl, Bool 
-
-        bOriginal );
+    FrameUnit( YuvBufferCtrl& rcYuvFullPelBufferCtrl, YuvBufferCtrl& rcYuvHalfPelBufferCtrl, Bool bOriginal );
     virtual ~FrameUnit();
 
 public:
@@ -131,7 +129,6 @@ public:
     ErrVal init( const SliceHeader& rcSH, FrameUnit& rcFrameUnit ); // HS: decoder robustness
     ErrVal copyBase( const SliceHeader& rcSH, FrameUnit& rcFrameUnit ); //JVT-S036 lsj
     ErrVal uninit();
-    ErrVal uninitBase();
 
     static ErrVal create( FrameUnit*& rpcFrameUnit, YuvBufferCtrl& rcYuvFullPelBufferCtrl, YuvBufferCtrl& rcYuvHalfPelBufferCtrl, Bool bOriginal = false );
     ErrVal destroy ();
@@ -156,17 +153,15 @@ public:
         == BOT_FIELD ) ? m_cBotField : m_cTopField; }
 #endif //LF_INTERLACE
 
-    Void  setFrameNumber( UInt  uiFN )            { m_uiFrameNumber = uiFN; }
-    UInt  getFrameNumber()                  const { return m_uiFrameNumber; }
+  Void  setFrameNumber( UInt  uiFN  )           { m_uiFrameNumber = uiFN; }
+  UInt  getFrameNumber()                  const { return m_uiFrameNumber; }
 
-    Void  setBaseRep    ( Bool  bFlag )			{ m_BaseRepresentation = bFlag; } //JVT-S036 
-    UInt  getBaseRep	  ()				  const { return m_BaseRepresentation;  } //JVT-S036 
-    UChar getStatus	  ()				  const { return m_uiStatus;}
+  Void  setBaseRep    ( Bool  bFlag )			{ m_BaseRepresentation = bFlag; } //JVT-S036 
+  UInt  getBaseRep	  ()				  const { return m_BaseRepresentation;  } //JVT-S036 
+  UChar getStatus	  ()				  const { return m_uiStatus;			} //JVT-S036 
 
-    Void  setOutputDone ()                        { m_uiStatus |= IS_OUTPUTTED; }
-    Bool  isOutputDone  ()                  const { return ( m_uiStatus & IS_OUTPUTTED ? true : false ); 
-
-    }
+  Void  setOutputDone ()                        { m_uiStatus |= IS_OUTPUTTED; }
+  Bool  isOutputDone  ()                  const { return ( m_uiStatus & IS_OUTPUTTED ? true : false ); }
 
 #ifdef   LF_INTERLACE
     Bool  isRefPic      ()                  const { return ( m_uiStatus & 0xf ? true : false ); }
@@ -189,6 +184,7 @@ public:
     Void  setUsed       ()                        { m_uiStatus |= REFERENCE; }
     Void  setUnused     ();
 #endif //LF_INTERLACE
+
     Int   getMaxPOC     ()                  const { return m_iMaxPOC; }
 #ifdef   LF_INTERLACE
     Void  setTopFieldPoc( Int iPoc );
@@ -202,6 +198,7 @@ public:
     Void setPoc( Int iPoc );
 #endif //LF_INTERLACE
 
+
     PicBuffer*  getPicBuffer  ()            const { return m_pcPicBuffer; }
     const MbDataCtrl* getMbDataCtrl()       const { return &m_cMbDataCtrl; }
     MbDataCtrl* getMbDataCtrl()                   { return &m_cMbDataCtrl;  }
@@ -209,6 +206,10 @@ public:
     const IntFrame* getResidual()           const { return &m_cResidual; }
     IntFrame* getResidual()                       { return &m_cResidual; }
 #endif
+
+
+	ErrVal uninitBase(); //JVT-S036
+
 private:
     Frame         m_cFrame;
 #ifdef   LF_INTERLACE
@@ -226,17 +227,17 @@ private:
     Int           m_iMaxPOC;
     Bool          m_bOriginal;
     Bool          m_bInitDone;
-   // IntFrame      m_cResidual;
     Bool			m_BaseRepresentation; //JVT-S036
     Bool          m_bConstrainedIntraPred;
 
     UInt          m_uiFGSReconCount;
     //MultiviewReferenceDirection     m_multiviewRefDirection;
-    };
+
+};
 
 
 
-    H264AVC_NAMESPACE_END
+H264AVC_NAMESPACE_END
 
 
 #endif // !defined(AFX_FRAMEUNIT_H__F112E873_18DC_48C6_9E5E_A46FF23388E3__INCLUDED_)

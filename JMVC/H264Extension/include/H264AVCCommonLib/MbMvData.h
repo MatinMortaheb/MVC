@@ -177,7 +177,11 @@ private:
 
 public:
   Mv  m_acMv[16];
+
+#ifdef   LF_INTERLACE
   Bool m_bFieldFlag;
+#endif
+
 };
 
 

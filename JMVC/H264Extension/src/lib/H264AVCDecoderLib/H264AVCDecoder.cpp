@@ -259,7 +259,8 @@ ErrVal H264AVCDecoder::destroy()
 
 
 
-ErrVal H264AVCDecoder::init( SliceReader*        pcSliceReader,
+ErrVal H264AVCDecoder::init( 
+                             SliceReader*        pcSliceReader,
                              SliceDecoder*       pcSliceDecoder,
                              FrameMng*           pcFrameMng,
                              NalUnitParser*      pcNalUnitParser,
@@ -304,6 +305,7 @@ ErrVal H264AVCDecoder::init( SliceReader*        pcSliceReader,
 
   for( UInt uiLayer = 0; uiLayer < MAX_LAYERS; uiLayer++ )
   {
+  
     m_uiNumberOfFragment[uiLayer] = 0;//JVT-P031
   }
 
@@ -1157,8 +1159,7 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 														Bool&             bDiscardable
                             //~JVT-P031
 														 ,Bool&			  UnitAVCFlag    //JVT-S036 
-														 ,UInt NumOfViewsInTheStream  
-)
+														 ,UInt NumOfViewsInTheStream                            )
 {
   ROF( m_bInitDone );
   UInt uiLayerId;
@@ -2260,6 +2261,7 @@ H264AVCDecoder::process( PicBuffer*       pcPicBuffer,
 
       }
 //TMM_EC }}
+     
         RNOK( m_pcNalUnitParser                 ->closeNalUnit() );
 
       }
@@ -2500,12 +2502,14 @@ H264AVCDecoder::xZeroIntraMacroblocks( IntFrame*    pcFrame,
   {
     MbDataAccess* pcMbDataAccess  = 0;
 
+#ifdef LF_INTERLACE
 	UInt          uiMbY           = uiMbIndex / uiFrameWidthInMB;
     UInt          uiMbX           = uiMbIndex % uiFrameWidthInMB;
-#ifdef LF_INTERLACE
 	RNOK( m_pcControlMng->initMbForFiltering(  pcMbDataAccess,uiMbY, uiMbX, pcSliceHeaderV->isMbAff() ) );
 #else
 	RNOK( m_pcControlMng->initMbForFiltering(  uiMbIndex ) );
+	UInt          uiMbY           = uiMbIndex / uiFrameWidthInMB;
+    UInt          uiMbX           = uiMbIndex % uiFrameWidthInMB;
 #endif
 
     RNOK( pcMbDataCtrl->initMb( pcMbDataAccess, uiMbY, uiMbX ) );
@@ -2557,7 +2561,6 @@ H264AVCDecoder::xProcessSliceVirtual( SliceHeader&    rcSH,
     rcSH.getSliceType              () == P_SLICE ? 'P' : 'I',
     rcSH.getPicQp                  () );
 
-
   //===== check if new pictures and initialization =====
 #ifdef   LF_INTERLACE
   rcSH.compare( pcPrevSH, bNewPic, bNewFrame );
@@ -2569,7 +2572,6 @@ H264AVCDecoder::xProcessSliceVirtual( SliceHeader&    rcSH,
   {
 //	  printf("NULL of previous slice header %d\n",rcSH.getPoc());
   }
-
 
   if( bNewFrame || m_bFrameDone )
   {
@@ -2650,7 +2652,6 @@ H264AVCDecoder::xProcessSliceVirtual( SliceHeader&    rcSH,
 
     //===== deblocking of base representation =====
   
-
     RNOK( m_pcFrameMng->storePicture( rcSH ) );
 
     //===== init FGS decoder =====
@@ -2721,23 +2722,23 @@ H264AVCDecoder::xProcessSlice( SliceHeader& rcSH,
 #define DELTA_POCA  0
 #endif
 
-  #ifdef   LF_INTERLACE
+#ifdef   LF_INTERLACE
 	PicType ePictype = rcSH.getPicType();
 	printf("(%2d)  Slice POC %4d ( LId 0, TL X, QL 0, %s-%c, BId-1, AP 0, QP%3d, %s )\n",
 		rcSH.getViewId                 (),
 		rcSH.getPoc                () - DELTA_POCA,
 		rcSH.isH264AVCCompatible () == 1 ? "AVC" : "MVC",
 		rcSH.getSliceType              () == B_SLICE ? 'B' : 
-	rcSH.getSliceType              () == P_SLICE ? 'P' : 'I',
+		rcSH.getSliceType              () == P_SLICE ? 'P' : 'I',
 		rcSH.getPicQp                  (),
 		(ePictype == FRAME) ?  "FRAME" : ( (ePictype == TOP_FIELD) ? "TOP_FIELD" : "BOT_FIELD") );
 #else //!LF_INTERLACE
 	printf("(%2d)  Frame %4d ( LId 0, TL X, QL 0, %s-%c, BId-1, AP 0, QP%3d )\n",
 		rcSH.getViewId                 (),
-		rcSH.getPoc                    () - DELTA_POCA,
+		rcSH.getPoc                    (),
 		rcSH.isH264AVCCompatible () == 1 ? "AVC" : "MVC",
 		rcSH.getSliceType              () == B_SLICE ? 'B' : 
-	rcSH.getSliceType              () == P_SLICE ? 'P' : 'I',
+		rcSH.getSliceType              () == P_SLICE ? 'P' : 'I',
 		rcSH.getPicQp                  () );
 #endif //LF_INTERLACE
 
@@ -2750,14 +2751,14 @@ H264AVCDecoder::xProcessSlice( SliceHeader& rcSH,
   bNewPic = bNewFrame;
 #endif //LF_INTERLACE
 
-  #ifdef   LF_INTERLACE
+#ifdef   LF_INTERLACE
   if(!bNewFrame)
   {
 	  if(rcSH.getFieldPicFlag())
 	  {
 		  if(pcPrevSH->getFrameUnit()&&pcPrevSH->getFrameUnit()->getMbDataCtrl()->isFrameDone(*pcPrevSH))
 			  bNewFrame=true;//lufeng: field for new frame
-	  }
+	  } 
   }
 
   if( bNewFrame )//|| m_bFrameDone )
@@ -2819,13 +2820,15 @@ H264AVCDecoder::xProcessSlice( SliceHeader& rcSH,
   {
     
     RNOK( m_pcControlMng->initSlice( rcSH, POST_PROCESS));
+    
     //===== deblocking of base representation =====
     RNOK( m_pcLoopFilter->process( rcSH ) );
     
 	RNOK( m_pcFrameMng->storePicture( rcSH ) );
-
     
     //===== init FGS decoder =====
+    
+ 
   }
 
   if( m_bFrameDone )

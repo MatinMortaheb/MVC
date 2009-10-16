@@ -2,7 +2,7 @@
 ********************************************************************************
 
 NOTE - One of the two copyright statements below may be chosen
-that applies for the software.
+       that applies for the software.
 
 ********************************************************************************
 
@@ -49,12 +49,12 @@ Copyright 2005, International Telecommunications Union, Geneva
 
 The Fraunhofer HHI hereby donate this source code to the ITU, with the following
 understanding:
-1. Fraunhofer HHI retain the right to do whatever they wish with the
-contributed source code, without limit.
-2. Fraunhofer HHI retain full patent rights (if any exist) in the technical
-content of techniques and algorithms herein.
-3. The ITU shall make this code available to anyone, free of license or
-royalty fees.
+    1. Fraunhofer HHI retain the right to do whatever they wish with the
+       contributed source code, without limit.
+    2. Fraunhofer HHI retain full patent rights (if any exist) in the technical
+       content of techniques and algorithms herein.
+    3. The ITU shall make this code available to anyone, free of license or
+       royalty fees.
 
 DISCLAIMER OF WARRANTY
 
@@ -89,6 +89,7 @@ THIS IS NOT A GRANT OF PATENT RIGHTS - SEE THE ITU-T PATENT POLICY.
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
+
 
 H264AVC_NAMESPACE_BEGIN
 
@@ -171,7 +172,6 @@ private:
     UChar xCheckMvDataP( const MbData& rcQMbData, const LumaIdx cQIdx, const MbData& rcPMbData, const LumaIdx cPIdx, const Short sHorMvThr, const Short sVerMvThr );
 
     __inline ErrVal xFilterMb( const MbDataAccess& rcMbDataAccess );
-#ifdef   LF_INTERLACE
     __inline ErrVal xFilterMbFast( const MbDataAccess& rcMbDataAccess );
     ErrVal xGetFilterStrengthFast( const MbDataAccess& rcMbDataAccess, const Int iFilterIdc );
     __inline UInt xGetHorFilterStrengthFast( const MbData& rcMbDataCurr,
@@ -189,7 +189,6 @@ private:
         Bool          bCheckMv,
         Bool          bCoded,
         const Short   sVerMvThr);
-#endif //LF_INTERLACE
 
     __inline Void xFilter( Pel* pFlt, const Int& iOffset, const Int& iIndexA, const Int& iIndexB, const UChar& ucBs, const Bool& bLum );
 
@@ -271,14 +270,11 @@ protected:
     IntYuvPicBuffer* m_apcIntYuvBuffer[4];
     LFMode           m_eLFMode;
     ReconstructionBypass*         m_pcReconstructionBypass;
-
-#ifdef LF_INTERLACE
     UChar           m_aucBsHorTop[4];
     UChar           m_aucBsVerBot[4];
     Bool            m_bVerMixedMode;
     Bool            m_bHorMixedMode;
     Bool            m_bAddEdge;
-#endif
 
 protected:
 
@@ -629,6 +625,9 @@ protected:
 
 };
 #endif //LF_INTERLACE
+
+
+
 
 H264AVC_NAMESPACE_END
 

@@ -162,6 +162,7 @@ ErrVal H264AVCDecoderTest::destroy()
     RNOK( m_pcReadBitstream->destroy() );  
   }
 */
+
 //  AOF( m_cActivePicBufferList.empty() );
   
   //===== delete picture buffer =====
@@ -364,6 +365,7 @@ ErrVal H264AVCDecoderTest::go()
 					bStart, auiStartPos[uiFragNb+1], auiEndPos[uiFragNb+1], 
 //                    bFragmented, bDiscardable) );
                     bFragmented, bDiscardable,this->m_pcParameter->getNumOfViews()) );
+                    
               }
               else
                   m_pcH264AVCDecoder->initPacket( &cBinDataAccessor );
@@ -422,7 +424,9 @@ ErrVal H264AVCDecoderTest::go()
 	// ROI DECODE ICU/ETRI
 	m_pcH264AVCDecoder->RoiDecodeInit();
 
+#ifdef   LF_INTERLACE
 	setCrop();//lufeng: support frame cropping
+#endif
 
     // picture output
     while( ! cPicBufferOutputList.empty() )
@@ -441,7 +445,6 @@ ErrVal H264AVCDecoderTest::go()
 		  }
 #endif
        		m_pcWriteYuv->xInitMVC(m_pcParameter->cYuvFile, vcOrder, m_pcParameter->getNumOfViews()); // JVT-AB024 modified remove active view info SEI  			
-		/*  }*/
       }
 
         PicBuffer* pcPicBufferTmp = cPicBufferOutputList.front();
@@ -463,7 +466,7 @@ ErrVal H264AVCDecoderTest::go()
         }
 
 		  
-          if(m_pcParameter->getNumOfViews() > 0)// && m_pcH264AVCDecoder->getViewCodingOrder()!=NULL)// lufeng: to write non-MVC seq	 
+          if(m_pcParameter->getNumOfViews() > 0)
           {
 			  UInt view_cnt;
 			  for (view_cnt=0; view_cnt < m_pcParameter->getNumOfViews(); view_cnt++)
@@ -515,11 +518,16 @@ ErrVal H264AVCDecoderTest::go()
   return Err::m_nOK;
 }
 
+
+
+
+
+#ifdef   LF_INTERLACE
 ErrVal H264AVCDecoderTest::setCrop()
 {
 	UInt uiCrop[4];
 	m_pcH264AVCDecoder->setCrop(uiCrop);
 	m_pcWriteYuv->setCrop(uiCrop);
-
 	return Err::m_nOK;
 }
+#endif

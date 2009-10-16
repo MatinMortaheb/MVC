@@ -163,6 +163,7 @@ public:
 //  ErrVal initSlice0       (SliceHeader *rcSH)                     { return Err::m_nERR; }
   ErrVal initSlice0       (SliceHeader *rcSH,UInt NumOfViewsInTheStream)                     { return Err::m_nERR; }
  
+ 
   // TMM_ESS
   ErrVal initSPS          ( SequenceParameterSet&       rcSPS, UInt  uiLayer   ) { return Err::m_nERR; }  
 
@@ -170,16 +171,26 @@ public:
                             const PictureParameterSet&  rcPPSLP,
                             const PictureParameterSet&  rcPPSHP );
 
+#ifndef LF_INTERLACE
+  ErrVal initMbForFiltering( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
+#endif
+
   ErrVal initSlice( SliceHeader& rcSH, ProcessingState eProcessingState );
   ErrVal finishSlice( const SliceHeader& rcSH, Bool& rbPicDone, Bool& rbFrameDone );
 
   ErrVal initMbForParsing( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
+#ifndef LF_INTERLACE
+    ErrVal initMbForDecoding( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
+#endif
 
   ErrVal initSliceForCoding   ( const SliceHeader& rcSH );
   ErrVal initSliceForReading  ( const SliceHeader& rcSH ) { return Err::m_nERR; }
   ErrVal initSliceForDecoding ( const SliceHeader& rcSH ) { return Err::m_nERR; }
   ErrVal initSliceForFiltering( const SliceHeader& rcSH );
 
+#ifndef LF_INTERLACE
+  ErrVal initMbForCoding      ( MbDataAccess& rcMbDataAccess, UInt uiMbIndex );
+#endif
   ErrVal initMbForDecoding    ( UInt uiMbIndex ) { return Err::m_nERR; };
 //  ErrVal initMbForFiltering   ( UInt uiMbIndex );
 
@@ -189,10 +200,7 @@ public:
   ErrVal initMbForFiltering   ( UInt uiMbY, UInt uiMbX, Bool bMbAFF ){ return Err::m_nERR; };
   ErrVal initMbForDecoding    (MbDataAccess*& rpcMbDataAccess,UInt uiMbY, UInt uiMbX, Bool bMbAFF  ){ return Err::m_nERR; }
 #else
-  ErrVal initMbForDecoding( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
-  ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
   ErrVal initMbForFiltering   ( UInt uiMbIndex );
-    ErrVal initMbForCoding      ( MbDataAccess& rcMbDataAccess, UInt uiMbIndex );
 #endif
 
 

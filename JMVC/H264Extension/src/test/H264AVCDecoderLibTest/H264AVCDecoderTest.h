@@ -109,7 +109,10 @@ public:
   ErrVal go();
   ErrVal destroy();
   ErrVal setec( UInt uiErrorConceal);//TMM_EC
+
+#ifdef   LF_INTERLACE
   ErrVal setCrop();
+#endif
 
 protected:
   ErrVal xGetNewPicBuffer ( PicBuffer*& rpcPicBuffer, UInt uiSize );

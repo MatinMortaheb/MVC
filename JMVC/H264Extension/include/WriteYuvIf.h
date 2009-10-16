@@ -126,7 +126,9 @@ public:
 
   virtual Bool getFileInitDone() = 0;
 
+#ifdef   LF_INTERLACE
   virtual ErrVal setCrop(UInt *uiCrop) = 0;
+#endif
 
 #endif //if 1
 

@@ -188,13 +188,14 @@ public:
       AOT_DBG( eLstIdx > 2 );
       return m_acRefPicList[eLstIdx].get( uiFrameId );
   }
-  Void  setRefFrameList ( RefFrameList* pc,
-      ListIdx       e  )  { m_apcRefFrameList[e]  = pc; }
-  Void  setPoc          ( Int           i  )  { m_iPoc                = i; }
-#endif //LF_INTERLACE
+#endif
 
+
+  Void  setPoc          ( Int           i  )  { m_iPoc                = i; }
   Void  setLastMbInSlice( UInt          ui )  { m_uiLastMbInSlice     = ui; }
   Void  setFrameUnit    ( FrameUnit*    pc )  { m_pcFrameUnit         = pc; }
+  Void  setRefFrameList ( RefFrameList* pc,
+                          ListIdx       e  )  { m_apcRefFrameList[e]  = pc; }
 
 #ifdef   LF_INTERLACE
   Int             getTopFieldPoc        ()                    const { return m_iTopFieldPoc; }
@@ -210,14 +211,14 @@ public:
                     }
   RefFrameList*   getRefFrameList       ( PicType ePicType,
       ListIdx eLstIdx )   const { return m_aapcRefFrameList[ePicType-1][eLstIdx]; }
-#else //!LF_INTERLACE
-  RefFrameList*   getRefFrameList       ( ListIdx eLstIdx )   const { return m_apcRefFrameList[eLstIdx]; }
+#else
     Int             getPoc                ()                    const { return m_iPoc; }
-#endif //LF_INTERLACE
-  
+#endif
+
   UInt            getLastMbInSlice      ()                    const { return m_uiLastMbInSlice; }
   FrameUnit*      getFrameUnit          ()                    const { return m_pcFrameUnit; }
   FrameUnit*      getFrameUnit          ()                          { return m_pcFrameUnit; }
+  RefFrameList*   getRefFrameList       ( ListIdx eLstIdx )   const { return m_apcRefFrameList[eLstIdx]; }
   CostData&       getCostData           ()                          { return *this; }
   const CostData& getCostData           ()                    const { return *this; }
   UChar           getChromaQp           ( UChar   ucLumaQp )  const { return g_aucChromaScale[ gClipMinMax( ucLumaQp + getPPS().getChomaQpIndexOffset(), 0, 51 ) ];}
@@ -231,6 +232,7 @@ public:
   Int             getDistScaleFactorScal( PicType eMbPicType,
       SChar   sL0RefIdx,
       SChar   sL1RefIdx ) const;
+
   //	TMM_EC {{
   Int             getDistScaleFactorVirtual( PicType eMbPicType,
       SChar   sL0RefIdx,
@@ -241,16 +243,15 @@ public:
 #else //!LF_INTERLACE
   Int             getDistScaleFactor    ( SChar   sL0RefIdx,
       SChar   sL1RefIdx ) const;
-  Int             getDistScaleFactorScal( SChar   sL0RefIdx,
-      SChar   sL1RefIdx ) const;
-  //	TMM_EC {{
+//	TMM_EC {{
   Int             getDistScaleFactorVirtual( SChar   sL0RefIdx,
       SChar   sL1RefIdx,
       RefFrameList& rcRefFrameListL0, 
       RefFrameList& rcRefFrameListL1 ) const;
-  //  TMM_EC }}
+//  TMM_EC }}
+  Int             getDistScaleFactorScal( SChar   sL0RefIdx,
+                                          SChar   sL1RefIdx ) const;
 #endif //LF_INTERLACE
-  
 
   Int             getDistScaleFactorWP  ( const Frame*    pcFrameL0, const Frame*     pcFrameL1 )  const;
   Int             getDistScaleFactorWP  ( const IntFrame* pcFrameL0, const IntFrame*  pcFrameL1 )  const;
@@ -271,14 +272,13 @@ protected:
     RefFrameList*           m_aapcRefFrameList[3][2];
     Int                     m_iTopFieldPoc;
     Int                     m_iBotFieldPoc;
-#else //!LF_INTERLACE
+#endif
     RefPicList<RefPic>      m_acRefPicList[2];
-    RefFrameList*           m_apcRefFrameList[2];
     Int                     m_iPoc;
-#endif //LF_INTERLACE
   UInt                    m_uiLastMbInSlice;
   FrameUnit*              m_pcFrameUnit;
   StatBuf<const UChar*,8> m_acScalingMatrix;
+  RefFrameList*           m_apcRefFrameList[2];
   Bool                    m_bFGSCodingMode;
   UInt                    m_uiGroupingSize;
   UInt                    m_uiPosVect[16];

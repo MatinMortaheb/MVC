@@ -186,6 +186,7 @@ public:
   Void    initNumberOfFragment();
   //~JVT-P031
 
+#ifdef   LF_INTERLACE
   UInt    getCrop(UInt ui)
   {
 	  if(ui<4) 
@@ -193,6 +194,7 @@ public:
 	  else
 		  return 0;
   };
+#endif
 
   ErrVal  process   ( PicBuffer*        pcPicBuffer,
                       PicBufferList&    rcPicBufferOutputList,
@@ -403,7 +405,10 @@ protected:
   SliceHeader*                  m_pcSliceHeaderStored;
   Int                           m_iPrevPoc;
   //~JVT-P031
+
+#ifdef   LF_INTERLACE
   UInt                    m_uiCropOffset[4];//lufeng
+#endif
 
   SliceHeader::PredWeightTable  m_acLastPredWeightTable[2];
 

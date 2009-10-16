@@ -372,10 +372,11 @@ ErrVal ControlMngH264AVCEncoder::initSlice( SliceHeader& rcSH, ProcessingState e
 
 #ifdef LF_INTERLACE
 ErrVal ControlMngH264AVCEncoder::initMbForCoding( MbDataAccess& rcMbDataAccess, UInt uiMbY, UInt uiMbX, Bool bMbAff, Bool bFieldFlag )
+{
 #else
 ErrVal ControlMngH264AVCEncoder::initMbForCoding( MbDataAccess& rcMbDataAccess, UInt uiMbIndex )
-#endif
 {
+#endif
     ROF( m_uiCurrLayer < MAX_LAYERS );
 #ifdef LF_INTERLACE
     if( bMbAff )
@@ -394,6 +395,7 @@ ErrVal ControlMngH264AVCEncoder::initMbForCoding( MbDataAccess& rcMbDataAccess, 
 
     RNOK( m_pcMotionEstimation->initMb( uiMbY, uiMbX, rcMbDataAccess ) );
 #else
+
   ROF( m_uiCurrLayer < MAX_LAYERS );
 
   UInt  uiMbY = uiMbIndex         / m_auiMbXinFrame[ m_uiCurrLayer ];
@@ -450,6 +452,7 @@ ErrVal ControlMngH264AVCEncoder::initMbForFiltering( UInt uiMbIndex )
   return Err::m_nOK;
 }
 #endif
+
 //TMM_WP
 ErrVal ControlMngH264AVCEncoder::initSliceForWeighting ( const SliceHeader& rcSH)
 {

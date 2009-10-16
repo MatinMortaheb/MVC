@@ -480,14 +480,19 @@ ErrVal CabacWriter::skipFlag( MbDataAccess& rcMbDataAccess, Bool bNotAllowed )
 
   if( m_pcSliceHeader->isInterB() )
   {
+#ifdef   LF_INTERLACE
 //    RNOK( CabaEncoder::writeSymbol( uiSymbol, m_cMbTypeCCModel.get( 2, 7 + rcMbDataAccess.getCtxDirectMbWoCoeff() ) ) );
         CabaEncoder::writeSymbol( uiSymbol, m_cMbTypeCCModel.get( 2, 7 + rcMbDataAccess.getCtxMbSkipped() ) );//lufeng: follow jsvm
-  
+#else
+      RNOK( CabaEncoder::writeSymbol( uiSymbol, m_cMbTypeCCModel.get( 2, 7 + rcMbDataAccess.getCtxDirectMbWoCoeff() ) ) );
+#endif
+
 	  rcMbDataAccess.getMbData().setSkipFlag(uiSymbol!=0);
   }
   else
   {
     RNOK( CabaEncoder::writeSymbol( uiSymbol, m_cMbTypeCCModel.get( 1, rcMbDataAccess.getCtxMbSkipped() ) ) );
+
 	rcMbDataAccess.getMbData().setSkipFlag(0!=uiSymbol);
   }
 
@@ -1025,7 +1030,7 @@ ErrVal CabacWriter::residualBlock( MbDataAccess&  rcMbDataAccess,
 #ifdef LF_INTERLACE
     RNOK( xWriteCoeff( uiNumSig, piCoeff, eResidualMode, pucScan , !bFrame ) );
 #else
-      RNOK( xWriteCoeff( uiNumSig, piCoeff, eResidualMode, pucScan) );
+    RNOK( xWriteCoeff( uiNumSig, piCoeff, eResidualMode, pucScan ) );
 #endif
   }
   return Err::m_nOK;
@@ -1080,7 +1085,7 @@ ErrVal CabacWriter::residualBlock( MbDataAccess&  rcMbDataAccess,
 #ifdef LF_INTERLACE
     RNOK( xWriteCoeff( uiNumSig, piCoeff, eResidualMode, pucScan, !bFrame  ) );
 #else
-      RNOK( xWriteCoeff( uiNumSig, piCoeff, eResidualMode, pucScan) );
+    RNOK( xWriteCoeff( uiNumSig, piCoeff, eResidualMode, pucScan ) );
 #endif
   }
 
@@ -1178,7 +1183,7 @@ ErrVal CabacWriter::xWriteCoeff( UInt         uiNumSig,
                                  const UChar* pucScan )
 #endif //LF_INTERLACE
 {
-  #ifdef   LF_INTERLACE
+#ifdef   LF_INTERLACE
   CabacContextModel2DBuffer&  rcMapCCModel  = ( bFieldModel ? m_cFldMapCCModel  : m_cMapCCModel  );
   CabacContextModel2DBuffer&  rcLastCCModel = ( bFieldModel ? m_cFldLastCCModel : m_cLastCCModel );
 #else //!LF_INTERLACE

@@ -129,9 +129,8 @@ class H264AVCCOMMONLIB_API FrameMng
 #ifdef LF_INTERLACE
         if( (*iter)->isUsed(FRAME) && (*iter)->getPicBuffer() && rcSH.getViewId() == (*iter)->getFrame().getViewId() ) 
 #else
-        if( (*iter)->isUsed() && (*iter)->getPicBuffer() && rcSH.getViewId() == (*iter)->getFrame().getViewId() ) 
+      if( (*iter)->isUsed() && (*iter)->getPicBuffer() && rcSH.getViewId() == (*iter)->getFrame().getViewId() ) 
 #endif
-      
 	    {
 		    rcRefPicList.next().setFrame( &( (*iter)->getFrame() ) );
 	    }
@@ -158,7 +157,7 @@ class H264AVCCOMMONLIB_API FrameMng
 #ifdef LF_INTERLACE
         if( (*iter)->isUsed(FRAME) && (*iter)->getPicBuffer() && rcSH.getViewId() == (*iter)->getFrame().getViewId() ) 
 #else
-        if( (*iter)->isUsed() && (*iter)->getPicBuffer() && rcSH.getViewId() == (*iter)->getFrame().getViewId() ) 
+      if( (*iter)->isUsed() && (*iter)->getPicBuffer()&& rcSH.getViewId() == (*iter)->getFrame().getViewId() )  
 #endif  
       {
          rcRefFrameList.add( &( (*iter)->getFrame() ) );
@@ -166,7 +165,11 @@ class H264AVCCOMMONLIB_API FrameMng
     }
   }
 
+#ifdef LF_INTERLACE
     Void setRefFrameUnitList( RefPicList<FrameUnit*>& rcRefFrameUnitList, SliceHeader& rcSH )
+#else
+    Void setRefFrameUnitList( RefPicList<FrameUnit*>& rcRefFrameUnitList )
+#endif
     {
       for( iterator iter = begin(); iter != end(); iter++ )
       {
@@ -174,7 +177,7 @@ class H264AVCCOMMONLIB_API FrameMng
 		  FrameUnit* pcFU = (*iter);
           if( pcFU->isUsed(FRAME) && (*iter)->getPicBuffer() && rcSH.getViewId() == (*iter)->getFrame().getViewId() ) 
 #else
-          if( (*iter)->isUsed()) 
+          if( (*iter)->isUsed() ) 
 #endif
         {
             rcRefFrameUnitList.add( *iter );
@@ -370,6 +373,7 @@ public:
 
 //          ErrVal initSlice( SliceHeader *rcSH );
           ErrVal initSlice( SliceHeader *rcSH , UInt NumOfViewsInTheStream);
+          
           ErrVal initSPS( const SequenceParameterSet& rcSPS );
 
 
@@ -428,11 +432,13 @@ protected:
   ErrVal            xMmcoMarkShortTermAsUnused  ( const PicType eCurrPicType, const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums );
   ErrVal            xMmcoMarkShortTermAsUnusedBase( const PicType eCurrPicType, const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums ); //JVT-S036 
 #else //!LF_INTERLACE
-  ErrVal            xMmcoMarkShortTermAsUnused  ( const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums );
+  ErrVal            xMmcoMarkShortTermAsUnused( const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums );
   ErrVal            xMmcoMarkShortTermAsUnusedBase( const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums ); //JVT-S036 
 #endif //LF_INTERLACE
 
+#ifdef   LF_INTERLACE
           ErrVal            xSetOutputListMVC              ( FrameUnit* pcFrameUnit, UInt uiNumOfViews );
+#endif
 	      ErrVal            xSetOutputListMVC              ( FrameUnit* pcFrameUnit, const SliceHeader& rcSH );		
 
           private:
@@ -462,8 +468,7 @@ protected:
           ErrVal            xMmcoMarkShortTermAsUnusedMVC( const PicType eCurrPicType, const FrameUnit* pcCurrFrameUnit, 
               UInt uiDiffOfPicNums, UInt uiCurrViewId );
 #else //!LF_INTERLACE
-          ErrVal            xMmcoMarkShortTermAsUnusedMVC( const FrameUnit* pcCurrFrameUnit, 
-              UInt uiDiffOfPicNums, UInt uiCurrViewId );
+          ErrVal            xMmcoMarkShortTermAsUnusedMVC( const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums, UInt uiCurrViewId );
 #endif //LF_INTERLACE
           ErrVal            xDumpRefList( ListIdx eListIdx, SliceHeader& rcSH );
           ErrVal            xSetBFrameListMVC ( SliceHeader& rcSH); 
@@ -477,7 +482,9 @@ private:
   PicBufferList     m_cPicBufferUnusedList;
   FrameUnit*        m_pcOriginalFrameUnit;
   FrameUnit*        m_pcCurrentFrameUnit;
+#ifdef   LF_INTERLACE
   FrameUnit*        m_pcCurrentViewFrameUnit[8];//lufeng: temp buf for undone frame of every view in field decoding
+#endif
   FrameUnit*		m_pcCurrentFrameUnitBase; //JVT-S036 
 
 #ifdef   LF_INTERLACE

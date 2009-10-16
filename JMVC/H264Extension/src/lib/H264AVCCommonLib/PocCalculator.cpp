@@ -96,7 +96,7 @@ PocCalculator::PocCalculator()
 #ifdef   LF_INTERLACE
 : m_iLastIdrFieldNum    ( 0 )
 #else //!LF_INTERLACE
-: m_iLastIdrFrameNum    ( 0 )
+  : m_iLastIdrFrameNum    ( 0 )
 #endif //LF_INTERLACE
   , m_iBitsLsb            ( 0 )
   , m_iTop2BotOffset      ( 1 )
@@ -245,8 +245,9 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
       {
           rcSliceHeader.setBotFieldPoc( iCurrPocMsb + iCurrPocLsb+DELTA_POCA );
       }
-#else
       rcSliceHeader.setPoc( iCurrPocMsb + iCurrPocLsb + DELTA_POCA );
+#else
+	  rcSliceHeader.setPoc( iCurrPocMsb + iCurrPocLsb );	
 #endif //LF_INTERLACE
     }
     break;
@@ -287,7 +288,7 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
       {
           iExpectedPoc = 0;
       }
-     
+
       if( rcSliceHeader.getNalRefIdc() == 0 )
       {
         iExpectedPoc       += rcSliceHeader.getSPS().getOffsetForNonRefPic();
@@ -423,7 +424,7 @@ if( rcSliceHeader.isIdrNalUnit() && !rcSliceHeader.getBottomFieldFlag() )
       if( rcSliceHeader.getPicType() == FRAME )
       {
           rcSliceHeader.setBotFieldPoc( rcSliceHeader.getTopFieldPoc() + ( rcSliceHeader.getPPS().getPicOrderPresentFlag() ? m_iTop2BotOffset : 0 ) );
-		  if (!rcSliceHeader.getSPS().getFrameMbsOnlyFlag()) // hwsun, fix bitstream byte mismatch in frame coding
+		  if (!rcSliceHeader.getSPS().getFrameMbsOnlyFlag()) // hwsun, fix a bug (add if)
 		  {
 			rcSliceHeader.setDeltaPicOrderCntBottom ( rcSliceHeader.getBotFieldPoc() - rcSliceHeader.getTopFieldPoc() );
 		  }

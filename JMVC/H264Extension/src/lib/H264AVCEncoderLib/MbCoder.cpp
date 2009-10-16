@@ -306,9 +306,10 @@ ErrVal MbCoder::encode( MbDataAccess& rcMbDataAccess,
 
 #ifdef LF_INTERLACE
   ROTRS( ! bSendTerminateSlice, Err::m_nOK );
+#endif
+
   //--- write terminating bit ---
   RNOK( m_pcMbSymbolWriteIf->terminatingBit ( bTerminateSlice ? 1:0 ) );
-#endif
 
   if( bTerminateSlice )
   {

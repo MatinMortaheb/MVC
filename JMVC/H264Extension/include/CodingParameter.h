@@ -701,8 +701,12 @@ public:
 		, m_ppuiPdsInitialDelayMinus2L1Anc    ( 0 )
 		, m_ppuiPdsInitialDelayMinus2L0NonAnc ( 0 )
 		, m_ppuiPdsInitialDelayMinus2L1NonAnc ( 0 )
+
+#ifdef   LF_INTERLACE
         ,m_uiMbAff (0)
         ,m_uiPAff(0)
+#endif
+
 //~JVT-W080
 	{
     for( UInt uiLayer = 0; uiLayer < 6; uiLayer++ )
@@ -1257,10 +1261,12 @@ protected:
    UInt		**m_uiMantissaTranslationParam;	
 
 
+#ifdef   LF_INTERLACE
    ////////////lufeng: modify .cfg
    UInt                      m_uiMbAff;
    UInt                      m_uiPAff;
 /**********************/
+#endif
 
 public:
 	std::vector<YUVFileParams> m_MultiviewReferenceFileParams;

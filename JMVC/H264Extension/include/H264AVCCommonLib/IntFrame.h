@@ -386,11 +386,17 @@ public:
 // JVT-Q065 EIDR}
 
   Bool  isHalfPel()   { return m_bHalfPel; }
+
+#ifdef   LF_INTERLACE
   Void  setHalfPel(Bool b)   { m_bHalfPel=b; }//lufeng
+#endif
 
   Bool  isExtended () { return m_bExtended; }
   Void  clearExtended() { m_bExtended = false; }
+
+#ifdef   LF_INTERLACE
   Void  setExtended  ()                  { m_bExtended = true; }
+#endif
 
 #ifdef LF_INTERLACE
   Bool  isPocAvailable()           const { return m_bPocIsSet; }
@@ -494,7 +500,7 @@ protected:
   Bool            m_bHalfPel;
   Bool            m_bExtended;
 
-  DPBUnit*        m_pcDPBUnit; //ying
+  DPBUnit*        m_pcDPBUnit;
 
 #ifdef   LF_INTERLACE
   	Bool            m_bPocIsSet;

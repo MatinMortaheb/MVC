@@ -216,8 +216,8 @@ public:
                               Par8x8              ePar8x8, Bool bDirect8x8 );
 
   Void    setBLSkipFlag         ( Bool b )  { m_bBLSkipFlag = b; }
-  Void    setBLQRefFlag         ( Bool b )  { m_bBLQRefFlag = b; }
   Bool    getBLSkipFlag         () const    { return m_bBLSkipFlag; }
+  Void    setBLQRefFlag         ( Bool b )  { m_bBLQRefFlag = b; }
   Bool    getBLQRefFlag         () const    { return m_bBLQRefFlag; }
 
   Bool is8x8TrafoFlagPresent()                          const;
@@ -254,9 +254,9 @@ public:
 
   // TMM_ESS 
   Bool    m_bInCropWindowFlag;  // indicates if the scaled base layer MB is inside the cropping window
+
 #ifdef   LF_INTERLACE
   Bool    m_bFieldFlag;
-
     UInt m_uiMbCbpResidual;//loop filter
 #endif //LF_INTERLACE
 	//-- JVT-R091

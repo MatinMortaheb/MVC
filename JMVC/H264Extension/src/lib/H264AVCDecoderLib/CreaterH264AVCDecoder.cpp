@@ -300,6 +300,7 @@ CreaterH264AVCDecoder::RoiDecodeInit()
 	m_pcH264AVCDecoder->RoiDecodeInit();
 }
 
+#ifdef   LF_INTERLACE
 //frame crop
 Void    
 CreaterH264AVCDecoder::setCrop(UInt* uiCrop)
@@ -308,6 +309,7 @@ CreaterH264AVCDecoder::setCrop(UInt* uiCrop)
 	for(i=0;i<4;i++)
 		*(uiCrop+i)=m_pcH264AVCDecoder->getCrop(i);
 }
+#endif
 
 //JVT-V054
 UInt*

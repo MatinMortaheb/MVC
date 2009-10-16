@@ -196,11 +196,12 @@ SequenceParameterSet::SequenceParameterSet  ()
 
   ::memset( m_aiOffsetForRefFrame, 0x00, 64*sizeof(Int) );
   ::memset( m_uiPosVect,           0x00, 16*sizeof(UInt));
-
+#ifdef   LF_INTERLACE
   m_frame_crop_offset[0] =0;
   m_frame_crop_offset[1] =0;
   m_frame_crop_offset[2] =0;
   m_frame_crop_offset[3] =0;
+#endif
 }
 
 SequenceParameterSet::~SequenceParameterSet()
@@ -226,9 +227,8 @@ SequenceParameterSet::destroy()
 	if ( m_eProfileIdc == MULTI_VIEW_PROFILE || m_eProfileIdc == STEREO_HIGH_PROFILE ) // 
 	{
 		SpsMVC->releaseViewSPSMemory_num_refs_for_lists();
-		//if (SpsMVC->getNumViewMinus1()>0) // this is necessary due to JVT-Y061
-		//	SpsMVC->releaseViewSPSMemory_ref_for_lists();
-		SpsMVC->releaseViewSPSMemory_ref_for_lists();
+		if (SpsMVC->getNumViewMinus1()>0) // this is necessary due to JVT-Y061
+			SpsMVC->releaseViewSPSMemory_ref_for_lists();
 		SpsMVC->releaseViewSPSMemory_num_level_related_memory_2D();
 		SpsMVC->releaseViewSPSMemory_num_level_related_memory_3D();
 		SpsMVC->releaseViewSPSMemory_num_level_related_memory();
@@ -309,6 +309,7 @@ UInt
 SequenceParameterSet::getLevelIdc( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic, int Num_Views  )
 {
 
+ 
   UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;	
   UInt uiFrameSize = uiMbY * uiMbX;
   UInt uiMbPerSec  = uiFrameSize * uiOutFreq * Num_Views;
@@ -536,21 +537,22 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
   setLog2MaxFrameNum( uiTmp + 4 );
 
   RNOK  ( pcReadIf->getUvlc( m_uiPicOrderCntType,                         "SPS: pic_order_cnt_type" ) );
-  if( 0 == m_uiPicOrderCntType )
+  if( m_uiPicOrderCntType == 0 )
   {
       UInt uiTmp;
       RNOK( pcReadIf->getUvlc( uiTmp, "SPS: log2_max_pic_order_cnt_lsb_minus4" ));
       setLog2MaxPicOrderCntLsb( 4+uiTmp );
   }
-  else if( 1 == m_uiPicOrderCntType )
+  else if( getPicOrderCntType() == 1 )
   {
-      RNOK( pcReadIf->getFlag( m_bDeltaPicOrderAlwaysZeroFlag,     "SPS: delta_pic_order_always_zero_flag" ));
-      RNOK( pcReadIf->getSvlc( m_iOffsetForNonRefPic,              "SPS: offset_for_non_ref_pic" ));
-      RNOK( pcReadIf->getSvlc( m_iOffsetForTopToBottomField,       "SPS: offset_for_top_to_bottom_field" ));
-      RNOK( pcReadIf->getUvlc( m_uiNumRefFramesInPicOrderCntCycle, "SPS: num_ref_frames_in_pic_order_cnt_cycle" ));
+    RNOK( pcReadIf->getFlag( m_bDeltaPicOrderAlwaysZeroFlag,              "SPS: delta_pic_order_always_zero_flag" ) );
+    RNOK( pcReadIf->getSvlc( m_iOffsetForNonRefPic,                       "SPS: offset_for_non_ref_pic" ) );
+    RNOK( pcReadIf->getSvlc( m_iOffsetForTopToBottomField,                "SPS: offset_for_top_to_bottom_field" ) );
+    RNOK( pcReadIf->getUvlc( m_uiNumRefFramesInPicOrderCntCycle,          "SPS: num_ref_frames_in_pic_order_cnt_cycle" ) );
 #ifdef LF_INTERLACE
       RNOK( initOffsetForRefFrame( m_uiNumRefFramesInPicOrderCntCycle ) );
-#endif     
+#endif  
+   
             for( UInt i = 0; i < m_uiNumRefFramesInPicOrderCntCycle; i++)
       {
           Int  iTmp;
@@ -588,6 +590,8 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
   RNOK( pcReadIf->getFlag( m_bDirect8x8InferenceFlag,                     "SPS: direct_8x8_inference_flag" ) );
   RNOK( pcReadIf->getFlag( bTmp,                                          "SPS: frame_cropping_flag" ) );
 //  ROT ( bTmp ); // always set to 0 in jmvc
+
+#ifdef   LF_INTERLACE
   if(bTmp)//lufeng: support frame cropping
   {
 	  RNOK( pcReadIf->getUvlc( m_frame_crop_offset[0],                                         "SPS: frame_crop_left_offset" ) );
@@ -595,7 +599,8 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
       RNOK( pcReadIf->getUvlc( m_frame_crop_offset[2],                                         "SPS: frame_crop_top_offset" ) );
 	  RNOK( pcReadIf->getUvlc( m_frame_crop_offset[3],                                         "SPS: frame_crop_bottom_offset" ) );
   }
-  
+#endif
+
   RNOK( pcReadIf->getFlag( bTmp,                                          "SPS: vui_parameters_present_flag" ) );
   ROT ( bTmp ); // always set to 0 in jmvc
 
@@ -680,6 +685,8 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 	
 	RNOK  ( pcReadIf->getFlag( bTmp,                      "SUBSET SPS: mvc_vui_parameters_present_flag" ) );
 //	ROT ( bTmp ); // always shoule be set to 0 
+
+#ifdef   LF_INTERLACE
 	if(bTmp)//lufeng: support uvi syntax element
 	{
 		UInt uiTemp;
@@ -695,6 +702,7 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 		RNOK  ( pcReadIf->getFlag(bTmp,"SPS: vui_mvc_pic_struct_present_flag[ 0 ]"));
 		ROT ( bTmp ); // always shoule be set to 0
 	}
+#endif
 
 	RNOK  ( pcReadIf->getFlag( bTmp,                      "SUBSET SPS: Additional_extension2_flag" ) );
 //	ROT ( bTmp ); // always shoule be set to 0 

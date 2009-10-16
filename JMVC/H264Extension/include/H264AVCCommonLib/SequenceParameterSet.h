@@ -516,6 +516,8 @@ public:
   SequenceParameterSet& operator = ( const SequenceParameterSet& rcSPS );
 #endif //LF_INTERLACE
 
+
+
 //  static UInt   getLevelIdc               ( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic );
   static UInt   getLevelIdc               ( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic, int Num_Views );
   
@@ -549,7 +551,10 @@ public:
   Bool                  getDirect8x8InferenceFlag             ()          const { return m_bDirect8x8InferenceFlag;}
   UInt                  getMbInFrame                          ()          const { return m_uiFrameWidthInMbs * m_uiFrameHeightInMbs;}
   Bool                  getInitState                          ()          const { return m_bInitDone; }
+
+#ifdef   LF_INTERLACE
   UInt                  getCropOffset                         (UInt idx)  const { return m_frame_crop_offset[idx];}
+#endif
 
   Bool getFGSCodingMode                       ()                          const { return m_bFGSCodingMode;   }
   UInt getGroupingSize                        ()                          const { return m_uiGroupingSize;   }
@@ -575,11 +580,12 @@ public:
   Void  setOffsetForTopToBottomField          ( Int         i  )          { m_iOffsetForTopToBottomField            = i;  }
   Void  setNumRefFramesInPicOrderCntCycle     ( UInt        ui )          { m_uiNumRefFramesInPicOrderCntCycle      = ui; }
   Void  setOffsetForRefFrame                  ( UInt        ui, 
-                                                Int         i  )          { m_aiOffsetForRefFrame[ui]               = i;  
+                                                Int         i  )          { m_aiOffsetForRefFrame[ui]               = i;
 #ifdef LF_INTERLACE//I dont know which to use now
                                                                             m_piOffsetForRefFrame.set(ui,i);
 #endif
-                                                                          }
+  }
+
   Void  setNumRefFrames                       ( UInt        ui )          { m_uiNumRefFrames                        = ui; }
   Void  setRequiredFrameNumUpdateBehaviourFlag( Bool        b  )          { m_bRequiredFrameNumUpdateBehaviourFlag  = b;  }
   Void  setFrameWidthInMbs                    ( UInt        ui )          { m_uiFrameWidthInMbs                     = ui; }
@@ -692,9 +698,9 @@ protected:
   //  Bool          m_bFieldFlagCoded;
   Bool          m_bFrameMbsOnlyFlag;
   Bool          m_bMbAdaptiveFrameFieldFlag;
+  UInt         m_frame_crop_offset[4];//lufeng: frame cropping
 #endif //LF_INTERLACE
 
-  UInt         m_frame_crop_offset[4];//lufeng: frame cropping
 private:
   static const LevelLimit m_aLevelLimit[52];
 };
