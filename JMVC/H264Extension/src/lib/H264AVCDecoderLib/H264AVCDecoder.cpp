@@ -1316,12 +1316,20 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 		
 		m_puiViewOrder_SubStream = new UInt[pcSPS->getSpsMVC()->getNumViewMinus1()+1];
 		UInt j,cnt=0;
-		for (int i=cnt; i< pcSPS->getSpsMVC()->getNumViewMinus1()+1; i++) {				
-			for (j=0; j < m_uiNumActiveViews; j++)
-				if (m_puiViewOrder[i] ==  m_uiActiveViewId[j])
-					break;
-			if (j< m_uiNumActiveViews)
-				m_puiViewOrder_SubStream[cnt++]= m_puiViewOrder[i];
+		if (m_uiNumActiveViews > 0)
+			for (int i=cnt; i< pcSPS->getSpsMVC()->getNumViewMinus1()+1; i++) {				
+				for (j=0; j < m_uiNumActiveViews; j++)
+					if (m_puiViewOrder[i] ==  m_uiActiveViewId[j])
+						break;
+				if (j< m_uiNumActiveViews)
+					m_puiViewOrder_SubStream[cnt++]= m_puiViewOrder[i];
+			}
+		else // when ViewScalSEI not present
+		{
+			m_uiNumActiveViews = pcSPS->getSpsMVC()->getNumViewMinus1()+1;
+			for (UInt i=0; i< m_uiNumActiveViews; i++)
+				m_puiViewOrder_SubStream[i]= m_puiViewOrder[i];
+
 		}
 
 		
