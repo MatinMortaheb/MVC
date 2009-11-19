@@ -521,7 +521,7 @@ public:
 //  static UInt   getLevelIdc               ( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic );
   static UInt   getLevelIdc               ( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt uiMvRange, UInt uiNumRefPic, int Num_Views );
   
-  UInt          getMaxDPBSize             () const;
+  UInt          getMaxDPBSize             (UInt mvcScaleFactor) const;
 
   NalUnitType           getNalUnitType                        ()          const { return m_eNalUnitType; }
   UInt                  getLayerId                            ()          const { return m_uiLayerId; }

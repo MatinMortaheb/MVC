@@ -286,12 +286,12 @@ SequenceParameterSet& SequenceParameterSet::operator = ( const SequenceParameter
 #endif //LF_INTERLACE
 
 UInt
-SequenceParameterSet::getMaxDPBSize() const
+SequenceParameterSet::getMaxDPBSize(UInt mvcScaleFactor) const
 {
   const LevelLimit* pcLevelLimit = 0;
   UInt              uiFrameSize = 384*getMbInFrame();
   ANOK( xGetLevelLimit( pcLevelLimit, getLevelIdc() ) );
-  return pcLevelLimit->uiMaxDPBSizeX2 / ( 2*uiFrameSize );
+  return mvcScaleFactor*pcLevelLimit->uiMaxDPBSizeX2 / ( 2*uiFrameSize );
 }
 
 

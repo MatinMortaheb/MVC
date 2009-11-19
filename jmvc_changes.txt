@@ -1,3 +1,10 @@
+JMVC_6_0_3 -> JMVC_6_0_4
+Date            : Nov. 19, 2009
+Authors         : MERL
+Contribution    : SW improvement
+Changes:
+- Bug fix for MaxDpbFrames calculation (reported by NEC)
+
 JMVC_6_0_2 -> JMVC_6_0_3
 Date            : Oct. 19, 2009
 Authors         : MERL

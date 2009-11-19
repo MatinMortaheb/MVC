@@ -426,8 +426,10 @@ ErrVal FrameMng::initSlice( SliceHeader *rcSH , UInt NumOfViewsInTheStream)
 	  Num_Views = rcSH->getSPS().SpsMVC->getNumViewMinus1()+1;
   UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;
 
-  m_iMaxEntriesinDPB = rcSH->getSPS().getMaxDPBSize();
-  m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+  m_iMaxEntriesinDPB = rcSH->getSPS().getMaxDPBSize(mvcScaleFactor);
+  //m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+  m_iMaxEntriesinDPB = min ( m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+  
   printf("MaxNumRefFrames=%d NumViews=%d dec DPB-size=%d\n",m_uiNumRefFrames,Num_Views,	m_iMaxEntriesinDPB);
 
   if( ! m_iMaxEntriesinDPB )
@@ -468,14 +470,15 @@ ErrVal FrameMng::initSPS( const SequenceParameterSet& rcSPS )
 	  Num_Views = rcSPS.SpsMVC->getNumViewMinus1()+1;
 	UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;
 
-	m_iMaxEntriesinDPB = rcSPS.getMaxDPBSize();
-	m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+	m_iMaxEntriesinDPB = rcSPS.getMaxDPBSize(mvcScaleFactor);
+	//m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+	m_iMaxEntriesinDPB = min ( m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
 	
 
   }
   else
   {
-    m_iMaxEntriesinDPB= min( 48, rcSPS.getMaxDPBSize() + 3 );
+    m_iMaxEntriesinDPB= min( 48, rcSPS.getMaxDPBSize(1) + 3 );
   }
 
   if( ! m_iMaxEntriesinDPB )

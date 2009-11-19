@@ -1109,9 +1109,10 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
 
   rpcSPS->setCurrentViewId(m_pcCodingParameter->getCurentViewId());
   
-  UInt uiMaxFramesInDPB = rpcSPS->getMaxDPBSize();
+  UInt uiMaxFramesInDPB = rpcSPS->getMaxDPBSize(mvcScaleFactor);
  
-  uiMaxFramesInDPB = min ( mvcScaleFactor*uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16) );
+  //uiMaxFramesInDPB = min ( mvcScaleFactor*uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16) );
+  uiMaxFramesInDPB = min ( uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16) );
 
 #ifdef LF_INTERLACE
   if( (m_pcCodingParameter->getMbAff() != 0 || m_pcCodingParameter->getPAff() != 0 ))

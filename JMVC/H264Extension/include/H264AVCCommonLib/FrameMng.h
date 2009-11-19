@@ -493,8 +493,8 @@ private:
 
   RefPicList<Frame*>     m_cPocOrderedFrameList;
 
-  Int               m_iEntriesInDPB;
-  Int               m_iMaxEntriesinDPB;
+  UInt               m_iEntriesInDPB;
+  UInt               m_iMaxEntriesinDPB;
 
   UInt              m_uiNumRefFrames;
   UInt              m_uiMaxFrameNumCurr;
