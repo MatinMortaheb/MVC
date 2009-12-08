@@ -701,7 +701,7 @@ public:
 		, m_ppuiPdsInitialDelayMinus2L1Anc    ( 0 )
 		, m_ppuiPdsInitialDelayMinus2L0NonAnc ( 0 )
 		, m_ppuiPdsInitialDelayMinus2L1NonAnc ( 0 )
-
+		, m_uiDPBConformanceCheck (1)
 #ifdef   LF_INTERLACE
         ,m_uiMbAff (0)
         ,m_uiPAff(0)
@@ -807,7 +807,7 @@ public:
   UInt                            getMaxRefIdxActiveBL0   ()              const   { return m_uiMaxRefIdxActiveBL0; }
   UInt                            getMaxRefIdxActiveBL1   ()              const   { return m_uiMaxRefIdxActiveBL1; }
   UInt                            getMaxRefIdxActiveP     ()              const   { return m_uiMaxRefIdxActiveP; }
-
+  UInt                            getDPBConformanceCheck              ()              const   { return m_uiDPBConformanceCheck; }
 #ifdef LF_INTERLACE
   UInt                              getMbAff            ( )    const   { return m_uiMbAff; }
   UInt                              getPAff             ( )    const   { return m_uiPAff; }
@@ -1267,7 +1267,7 @@ protected:
    UInt                      m_uiPAff;
 /**********************/
 #endif
-
+   UInt		m_uiDPBConformanceCheck;
 public:
 	std::vector<YUVFileParams> m_MultiviewReferenceFileParams;
 

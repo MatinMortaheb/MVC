@@ -1776,7 +1776,8 @@ H264AVCEncoder::xInitParameterSets()
     UInt              uiMbY               = rcLayerParameters.getFrameHeight() / 16;
     UInt              uiMbX               = rcLayerParameters.getFrameWidth () / 16;
     UInt              uiOutFreq           = (UInt)ceil( rcLayerParameters.getOutputFrameRate() );
-    UInt              uiMvRange           = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange() / 4;
+    //UInt              uiMvRange           = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange() / 4;
+	UInt              uiMvRange           = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange()*4 ;    
     UInt              uiDPBSize           = ( 1 << max( 1, rcLayerParameters.getDecompositionStages() ) );
     UInt              uiNumRefPic         = uiDPBSize; 
 	UInt              uiLevelIdc          = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, uiDPBSize, 1 );
@@ -1935,7 +1936,8 @@ H264AVCEncoder::xInitParameterSets()
     UInt              uiMbY               = rcLayerParameters.getFrameHeight() / 16;
     UInt              uiMbX               = rcLayerParameters.getFrameWidth () / 16;
     UInt              uiOutFreq           = (UInt)ceil( rcLayerParameters.getOutputFrameRate() );
-    UInt              uiMvRange           = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange() / 4;
+    //UInt              uiMvRange           = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange() / 4;
+	UInt              uiMvRange           = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange()*4 ;    
     UInt              uiDPBSize           = ( 1 << max( 1, rcLayerParameters.getDecompositionStages() ) );
     UInt              uiNumRefPic         = uiDPBSize; 
 	UInt              uiLevelIdc          = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, uiDPBSize, 1 );

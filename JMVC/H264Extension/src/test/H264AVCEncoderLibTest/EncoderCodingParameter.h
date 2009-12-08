@@ -768,6 +768,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
     m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("PAff",   &m_uiPAff,                            0 );
 #endif
 //~JVT-W080
+    m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("DPBConformanceCheck",             &m_uiDPBConformanceCheck,                                       1);
   m_CurrentViewId = uiViewId; 
   m_bAVCFlag      = false;
   if ( uiViewId == m_uiBaseViewId ) m_bAVCFlag = true;

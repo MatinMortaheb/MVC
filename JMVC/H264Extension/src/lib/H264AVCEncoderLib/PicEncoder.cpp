@@ -1024,7 +1024,7 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   UInt  uiMbX       = m_pcCodingParameter->getFrameWidth () >> 4;
   UInt  uiMbY       = m_pcCodingParameter->getFrameHeight() >> 4;
   UInt  uiOutFreq   = (UInt)ceil( m_pcCodingParameter->getMaximumFrameRate() );
-  UInt  uiMvRange   = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange();
+  UInt  uiMvRange   = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange()*4;
 
  
   //===== create parameter sets =====
@@ -1054,10 +1054,19 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   if (NumViews>1)
 	  decDPBSize +=2;// time-first & hierarchical-B decoding
   uiLevelIdc  = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, decDPBSize, NumViews ) ; 
-  if (uiLevelIdc== MSYS_UINT_MAX) {
-	  printf("With hierarchical-B & time-first decoding, the current configuration for full-view decoding requires %d DPB-frames.",decDPBSize);
-	  printf("However, it exceeds the limit of MaxDpbFrames as specified in H.10.2.\nEncoder terminates.\n");
-	  exit(1);	
+  if (uiLevelIdc== MSYS_UINT_MAX ) {
+	  printf("Warning: With hierarchical-B & time-first decoding, the current configuration for full-view decoding requires %d DPB-frames.",decDPBSize);
+	  printf("However, it exceeds the limit of MaxDpbFrames as specified in H.10.2.\n");
+	  if (m_pcCodingParameter->getDPBConformanceCheck())
+	  {
+		  printf("Encoder terminates.\n");
+	  	  exit(1);	
+	  } else
+	  {
+		  printf("Assigning an arbitrary level_idc = 51\n\n");
+		  uiLevelIdc = 51;
+	  }
+
   } 
 
   //===== set SPS parameters =====

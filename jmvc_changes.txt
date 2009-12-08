@@ -1,3 +1,11 @@
+JMVC_6_0_4 -> JMVC_6_1
+Date            : Dec. 8, 2009
+Authors         : MERL
+Contribution    : SW improvement
+Changes:
+- A bug fix for the encoder SW related to MaxVmvR in Table A-1 (level limits). 
+- Implemented a flag ('DPBConformanceCheck') in the encoder cfg file which enables/disables(1/0) the level conformance checking of the DPB size. When 'DPBConformanceCheck'is not present in the cfg file, it is set to 1 by default.
+
 JMVC_6_0_3 -> JMVC_6_0_4
 Date            : Nov. 19, 2009
 Authors         : MERL
