@@ -1,3 +1,11 @@
+JMVC_6_1 -> JMVC_7_0
+Date            : Dec. 14, 2009
+Authors         : Qualcomm
+Contribution    : SW improvement
+Changes:
+- Update the software manual and re-tag
+
+
 JMVC_6_0_4 -> JMVC_6_1
 Date            : Dec. 8, 2009
 Authors         : MERL
