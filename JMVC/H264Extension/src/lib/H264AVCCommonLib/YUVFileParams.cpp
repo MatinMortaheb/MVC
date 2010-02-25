@@ -3,22 +3,6 @@
 #include "H264AVCCommonLib/CommonDefs.h"
 #include <iostream>
 
-// ----------------------------------------------------------------------
-//
-// FUNCTION:	YUVFileParams::YUVFileParams
-//
-// INPUTS:	fileName:	Name of file to read from.
-//		height, width:  Frame height and width.
-//
-// PURPOSE:	This constructor derives the parameters required to
-//		read a frame into a PicBuffer object from the frame
-//		height and width.
-//
-// MODIFIED:	Tue Mar 14, 2006
-//
-// ----------------------------------------------------------------------
-
-
 
 YUVFileParams::YUVFileParams(const std::string& fileName, const int view_id,
 			     const int height, const int width)

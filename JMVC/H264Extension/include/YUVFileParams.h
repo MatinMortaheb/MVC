@@ -4,22 +4,6 @@
 
 #include <string>
 
-// ----------------------------------------------------------------------
-//
-// CLASS:	YUVFileParams
-//
-// PURPOSE:	This class is designed to hold the parameters required to
-//		read a YUV video file.  Such parameters include things
-//		like the frame height and width, but they also include
-//		things like the buffer offsets required to properly
-//		read an image into a PicBuffer object as the JSVM code
-//		seems to expect.
-//
-// MODIFIED:	Tue Mar 14, 2006 (EM) Created initial version.
-//
-// ----------------------------------------------------------------------
-
-
 struct YUVFileParams {
   YUVFileParams():_height(0), _width(0) {}
 

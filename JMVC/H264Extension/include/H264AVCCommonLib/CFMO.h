@@ -1,21 +1,3 @@
-
-/*!
- ***************************************************************************
- *
- * \file CFMO.h
- *
- * \brief
- *    Support for Flexilble Macroblock Ordering (FMO)
- *
- * \date
- *    10 May, 2005
- *
- * \author
- *    Tae Meon Bae	heartles@icu.ac.kr
- *
- **************************************************************************/
-
-
 #if !defined(AFX_CFMO_H__CBFE313E_2382_4ECC_9D41_416668E3507D__INCLUDED_)
 #define AFX_CFMO_H__CBFE313E_2382_4ECC_9D41_416668E3507D__INCLUDED_
 

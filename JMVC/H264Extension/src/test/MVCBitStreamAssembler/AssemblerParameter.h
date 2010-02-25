@@ -1,18 +1,3 @@
-/*
-********************************************************************************
-********************************************************************************
-
-This software module was originally developed by
-
-CHEN Ying (ying.chen@tut.fi, Nokia & Tempere University of Technology )
-
-********************************************************************************
-********************************************************************************
-*/
-
-
-
-
 #if !defined(AFX_ASSEMBLERPARAMETER_H__79149AEA_06A8_49CE_AB0A_7FC9ED7C05B4__INCLUDED_)
 #define AFX_ASSEMBLERPARAMETER_H__79149AEA_06A8_49CE_AB0A_7FC9ED7C05B4__INCLUDED_
 

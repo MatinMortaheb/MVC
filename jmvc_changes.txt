@@ -1,3 +1,10 @@
+JMVC_7_0 -> JMVC_7_1
+Date            : Feb. 25, 2009
+Authors         : HHI
+Contribution    : SW improvement
+Changes:
+- Copyright header removed
+
 JMVC_6_1 -> JMVC_7_0
 Date            : Dec. 14, 2009
 Authors         : Qualcomm

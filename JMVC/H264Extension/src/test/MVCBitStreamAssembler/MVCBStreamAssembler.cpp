@@ -1,17 +1,3 @@
-/*
-********************************************************************************
-********************************************************************************
-
-This software module was originally developed by
-
-CHEN Ying (ying.chen@tut.fi, Nokia & Tempere University of Technology )
-
-********************************************************************************
-********************************************************************************
-*/
-
-
-
 #include "MVCBStreamAssembler.h"
 #include "AssemblerParameter.h"
 #include "Assembler.h"
