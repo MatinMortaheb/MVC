@@ -28,7 +28,7 @@ public:
   ErrVal init() { return Err::m_nOK; }
   ErrVal uninit() { return Err::m_nOK; }
 
-  ErrVal initPacket( ULong* puiBits, UInt uiBitsInPacket);
+  ErrVal initPacket( UInt32* puiBits, UInt uiBitsInPacket);
 
   ErrVal get  ( UInt& ruiBits, UInt uiNumberOfBits );
   ErrVal get  ( UInt& ruiBits);
@@ -48,18 +48,18 @@ public:
 private:
   __inline Void xReadNextWord();
 
-  ULong  xSwap( ULong ul )
+  UInt32 xSwap( UInt32 ul )
   {
     // heiko.schwarz@hhi.fhg.de: support for BSD systems as proposed by Steffen Kamp [kamp@ient.rwth-aachen.de]
 #ifdef MSYS_BIG_ENDIAN
     return ul;
 #else
-    ULong ul2;
+    UInt32 ul2;
 
-    ul2  = ul>>24;
+    ul2  = (ul>>24)& 0x000000ff;
     ul2 |= (ul>>8) & 0x0000ff00;
     ul2 |= (ul<<8) & 0x00ff0000;
-    ul2 |= ul<<24;
+    ul2 |= (ul<<24)& 0xff000000;
 
     return ul2;
 #endif
@@ -69,9 +69,9 @@ protected:
   UInt   m_uiDWordsLeft;
   UInt   m_uiBitsLeft;
   Int    m_iValidBits;
-  ULong  m_ulCurrentBits;
+  UInt32 m_ulCurrentBits;    // Dong: Use 32-bit fixed length
   UInt   m_uiNextBits;
-  ULong* m_pulStreamPacket;
+  UInt32* m_pulStreamPacket; // Dong: Use 32-bit fixed length
 };
 
 

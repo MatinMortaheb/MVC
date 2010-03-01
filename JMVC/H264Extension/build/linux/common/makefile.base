@@ -52,7 +52,7 @@ CPPFLAGS          = -fPIC $(DEFS) -I$(CURDIR)/$(INC_DIR) $(USER_INC_DIRS) -DMERL
 # to address 64-bit build issues force a 32-bit build
 CPU_ARCH := $(shell uname -m)
 ifeq ($(CPU_ARCH),x86_64)
-DEBUG_CPPFLAGS    = -g -D_DEBUG -m32
+DEBUG_CPPFLAGS    = -g -D_DEBUG # -m32
 else
 DEBUG_CPPFLAGS    = -g -D_DEBUG
 endif
@@ -60,7 +60,7 @@ endif
 #
 # release cpp
 ifeq ($(CPU_ARCH),x86_64)
-RELEASE_CPPFLAGS  =  -O3 -ffloat-store -DNDEBUG -Wuninitialized -m32
+RELEASE_CPPFLAGS  =  -O3 -ffloat-store -DNDEBUG -Wuninitialized # -m32
 else
 RELEASE_CPPFLAGS  =  -O3 -ffloat-store -DNDEBUG -Wuninitialized
 endif
@@ -86,7 +86,7 @@ RELEASE_ASMFLAGS  =
 
 # linker flags for all
 ifeq ($(CPU_ARCH),x86_64)
-ALL_LDFLAGS       = -Wall -m32
+ALL_LDFLAGS       = -Wall # -m32
 else
 ALL_LDFLAGS       = -Wall
 endif

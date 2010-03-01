@@ -579,7 +579,7 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
   }
   else if( eNalUnitType == NAL_UNIT_SEI )
   {
-    ULong*  pulData = (ULong*)( pcBinData->data() + 1 );
+    UInt32* pulData = (UInt32*)( pcBinData->data() + 1 );
     UInt    uiSize  =     8 * ( pcBinData->size() - 1 ) - 1;
     RNOK( m_pcBitReadBuffer->initPacket( pulData, uiSize ) );
 
@@ -739,7 +739,7 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
 
   if( eNalUnitType != NAL_UNIT_SEI )
   {
-    ULong*  pulData = (ULong*)( pcBinData->data() + 1 );
+    UInt32*  pulData = (UInt32*)( pcBinData->data() + 1 );
     UInt    uiSize  =     8 * ( pcBinData->size() - 1 ) - 1;
     RNOK( m_pcBitReadBuffer->initPacket( pulData, uiSize ) );
 
@@ -870,7 +870,7 @@ H264AVCPacketAnalyzer::isMVCProfile ( BinData*				pcBinData, Bool& b )// fix Nov
   if ( eNalUnitType != NAL_UNIT_SPS && eNalUnitType != NAL_UNIT_SUBSET_SPS )
 	return Err::m_nERR; 
 
-  ULong*  pulData = (ULong*)( pcBinData->data() + 1 );
+  UInt32*  pulData = (UInt32*)( pcBinData->data() + 1 );
   UInt    uiSize  =     8 * ( pcBinData->size() - 1 ) - 1;
   RNOK( m_pcBitReadBuffer->initPacket( pulData, uiSize ) );
 
@@ -909,7 +909,7 @@ H264AVCPacketAnalyzer::processSEIAndMVC( BinData*				pcBinData,
 
   if( eNalUnitType == NAL_UNIT_SEI )
   {
-    ULong*  pulData = (ULong*)( pcBinData->data() + 1 );
+    UInt32*  pulData = (UInt32*)( pcBinData->data() + 1 );
     UInt    uiSize  =     8 * ( pcBinData->size() - 1 ) - 1;
     RNOK( m_pcBitReadBuffer->initPacket( pulData, uiSize ) );
 
@@ -949,7 +949,7 @@ H264AVCPacketAnalyzer::processSEIAndMVC( BinData*				pcBinData,
   //else if( eNalUnitType == NAL_UNIT_SPS && pcSEIMessage )
   else if( eNalUnitType == NAL_UNIT_SUBSET_SPS && pcSEIMessage )
   {
-    ULong*  pulData = (ULong*)( pcBinData->data() + 1 );
+    UInt32*  pulData = (UInt32*)( pcBinData->data() + 1 );
     UInt    uiSize  =     8 * ( pcBinData->size() - 1 ) - 1;
     RNOK( m_pcBitReadBuffer->initPacket( pulData, uiSize ) );
 

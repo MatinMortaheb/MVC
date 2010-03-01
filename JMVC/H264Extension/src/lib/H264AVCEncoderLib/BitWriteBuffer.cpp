@@ -56,7 +56,7 @@ ErrVal BitWriteBuffer::destroy()
 }
 
 
-ErrVal BitWriteBuffer::initPacket( ULong* pulBits, UInt uiPacketLength )
+ErrVal BitWriteBuffer::initPacket( UInt32* pulBits, UInt uiPacketLength )
 {
   // invalidate all members if something is wrong
   uninit();

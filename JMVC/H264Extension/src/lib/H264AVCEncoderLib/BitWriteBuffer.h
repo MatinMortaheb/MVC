@@ -23,7 +23,7 @@ public:
   ErrVal init();
   ErrVal uninit() { return init(); }
 
-  ErrVal initPacket( ULong* pulBits, UInt uiPacketLength );
+  ErrVal initPacket( UInt32* pulBits, UInt uiPacketLength );
 
   ErrVal write( UInt uiBits, UInt uiNumberOfBits = 1);
 
@@ -40,13 +40,13 @@ public:
   ErrVal getLastByte(UChar &uiLastByte, UInt &uiLastBitPos);//FIX_FRAG_CAVLC
 
 protected:
-  ULong  xSwap( ULong ul )
+  UInt32  xSwap( UInt32 ul )
   {
     // heiko.schwarz@hhi.fhg.de: support for BSD systems as proposed by Steffen Kamp [kamp@ient.rwth-aachen.de]
 #ifdef MSYS_BIG_ENDIAN
     return ul;
 #else
-    UInt ul2;
+    UInt32 ul2;
 
     ul2  = ul>>24;
     ul2 |= (ul>>8) & 0x0000ff00;
@@ -61,8 +61,8 @@ protected:
   UInt   m_uiDWordsLeft;
   UInt   m_uiBitsWritten;
   Int    m_iValidBits;
-  ULong  m_ulCurrentBits;
-  ULong* m_pulStreamPacket;
+  UInt32 m_ulCurrentBits;      // Dong: Use 32-bit fixed length
+  UInt32*  m_pulStreamPacket;  // Dong: Use 32-bit fixed length
 };
 
 

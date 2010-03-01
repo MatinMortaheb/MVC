@@ -43,7 +43,7 @@ ErrVal BitReadBuffer::destroy()
 
 
 
-ErrVal BitReadBuffer::initPacket( ULong* puiBits, UInt uiBitsInPacket )
+ErrVal BitReadBuffer::initPacket( UInt32* puiBits, UInt uiBitsInPacket )
 {
   // invalidate all members if something is wrong
   m_pulStreamPacket    = NULL;
@@ -198,7 +198,7 @@ ErrVal BitReadBuffer::get( UInt& ruiBits, UInt uiNumberOfBits  )
 
     ruiBits >>= 32 - uiNumberOfBits;
 
-    m_uiNextBits <<=  -m_iValidBits;
+    m_uiNextBits <<=  (0-m_iValidBits);
   }
 
   // check the current word for beeing empty

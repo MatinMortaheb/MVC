@@ -293,7 +293,7 @@ NalUnitParser::initSODBNalUnit( BinDataAccessor* pcBinDataAccessor )
   UInt uiBits;
   xConvertRBSPToSODB(uiPacketLength, uiBits);
 
-  RNOK( m_pcBitReadBuffer->initPacket( (ULong*)(m_pucBuffer), uiBits) );
+  RNOK( m_pcBitReadBuffer->initPacket( (UInt32*)(m_pucBuffer), uiBits) );
   return Err::m_nOK;
 }
 
@@ -451,7 +451,7 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 	  if(uiBitsInPacket<1)return Err::m_nOK;//lufeng: empty packet
 #endif
 
-      RNOK( m_pcBitReadBuffer->initPacket( (ULong*)(m_pucBuffer), uiBitsInPacket) );
+      RNOK( m_pcBitReadBuffer->initPacket( (UInt32*)(m_pucBuffer), uiBitsInPacket) );
   }
   return Err::m_nOK;
 }

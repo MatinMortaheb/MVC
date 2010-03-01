@@ -103,7 +103,7 @@ NalUnitEncoder::initNalUnit( BinDataAccessor* pcBinDataAccessor )
     ROF( m_pucTempBuffer );
   }
 
-  RNOK( m_pcBitWriteBuffer->initPacket( (ULong*)(m_pucTempBuffer), m_uiPacketLength-1 ) );
+  RNOK( m_pcBitWriteBuffer->initPacket( (UInt32*)(m_pucTempBuffer), m_uiPacketLength-1 ) );
 
   return Err::m_nOK;
 }
