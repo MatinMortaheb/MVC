@@ -119,7 +119,6 @@ SliceDecoder::process( const SliceHeader& rcSH, Bool bReconstructAll, UInt uiMbR
 #ifdef LF_INTERLACE
 	UInt uiMbY, uiMbX, uiMbIndex;
 
-//	printf("\n\nMB: %d\n\n",uiMbAddress);
 
     rcSH.getMbPositionFromAddress( uiMbY, uiMbX, uiMbIndex, uiMbAddress );
 		RNOK( m_pcControlMng->initMbForDecoding( pcMbDataAccess, uiMbY, uiMbX , rcSH.isMbAff()) );

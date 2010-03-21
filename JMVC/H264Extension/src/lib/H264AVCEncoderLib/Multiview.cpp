@@ -86,8 +86,8 @@ PicBuffer* ReadMultiviewReferencePictureFromStreamIntoPicBuffer
 (ReadYuvFile* reader, const YUVFileParams& fileParams, 
  const int pictureOrderCount, const bool verbose) {
 
-  if (verbose) 
-    cout << "Going to read frame "<< pictureOrderCount <<" for multivew ref\n";
+//  if (verbose) 
+ //   cout << "Going to read frame "<< pictureOrderCount <<" for multivew ref\n";
 
   UChar* buffer = new UChar[ fileParams._bufSize ];
   PicBuffer* newPicture = new PicBuffer(buffer);
@@ -246,7 +246,7 @@ void MultiviewReferencePictureManager::AddMultiviewReferencesPicturesToBuffer
 
   UInt i,kk;
 
-  if (_verbose) cout << endl << "Preparing to add multiview refs" << endl;
+//  if (_verbose) cout << endl << "Preparing to add multiview refs" << endl;
 
   for (i=0; i < _references.size(); i++) {
 
@@ -310,7 +310,7 @@ void MultiviewReferencePictureManager::AddMultiviewReferencesPicturesToBuffer
 
     _references[i]->_referencePicsToRemove.push_back(newRecPicBufUnit);
     
-    if (_verbose) ShowFrameInfo(cout,"Added frame", newRecPicBufUnit);
+//    if (_verbose) ShowFrameInfo(cout,"Added frame", newRecPicBufUnit);
     
 	delete [] newPic->getBuffer();
 	delete newPic;
@@ -345,14 +345,14 @@ int MultiviewReferencePictureManager::CountNumMultiviewReferenceStreams()const
 
 void MultiviewReferencePictureManager::RemoveMultiviewReferencesPicturesFromBuffer(RecPicBuffer* pcRecPicBuffer) {
 
-  if (_verbose) cout << endl << "Preparing to remove multiview refs" << endl;
+//  if (_verbose) cout << endl << "Preparing to remove multiview refs" << endl;
 
   for (UInt i=0; i < _references.size(); i++) {
     while (! _references[i]->_referencePicsToRemove.empty()) {
       RecPicBufUnit* unitToRemove = 
 	_references[i]->_referencePicsToRemove.back();
 
-      if (_verbose) ShowFrameInfo(cout,"going to remove frame",unitToRemove);
+//      if (_verbose) ShowFrameInfo(cout,"going to remove frame",unitToRemove);
 
       assert( unitToRemove->isNeededForRef() );
       assert( unitToRemove->IsMultiviewReference() );

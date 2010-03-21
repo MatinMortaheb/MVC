@@ -14,7 +14,8 @@ SliceHeader::SliceHeader( const SequenceParameterSet& rcSPS,
                           const PictureParameterSet&  rcPPS )
 : SliceHeaderBase   ( rcSPS, rcPPS ),
   m_uiLastMbInSlice ( 0 ), //--ICU/ETRI FMO Implementation
-  m_pcFrameUnit     ( 0 )
+  m_pcFrameUnit     ( 0 ),
+  m_bList1ShortTerm (true)
 {
   m_auiNumRefIdxActive[LIST_0] = m_rcPPS.getNumRefIdxActive( LIST_0 );
   m_auiNumRefIdxActive[LIST_1] = m_rcPPS.getNumRefIdxActive( LIST_1 );

@@ -7,7 +7,7 @@
 
 #define _JSVM_VERSION_ "6.5" //added by jerome.vieron@thomson.net
 #define _JMVM_VERSION_ "7.0" //added by purvin.pandit@thomson.net
-#define _JMVC_VERSION_ "7.2" //added by ying.chen@tut.fi
+#define _JMVC_VERSION_ "8.0" //added by ying.chen@tut.fi
 
 #define MB_BUFFER_WIDTH 24
 #define MB_BASE_WIDTH   16

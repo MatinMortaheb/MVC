@@ -82,6 +82,15 @@ public:
   { 
 	  m_aapcRefFrameList[ePicType-1][eListIdx]  = pc; 
   }
+// ying spatial direct, march 17th 
+  Void  setList1FirstShortTerm ( Bool b )
+  {
+    m_bList1ShortTerm =     b;
+  }
+  Bool getList1FirstShortTerm ( )
+  {
+    return m_bList1ShortTerm;
+  }
 
   Void  setTopFieldPoc  ( Int           i  )  { m_iTopFieldPoc        = i;  }
   Void  setBotFieldPoc  ( Int           i  )  { m_iBotFieldPoc        = i;  }
@@ -198,6 +207,8 @@ protected:
   Bool                    m_bFGSCodingMode;
   UInt                    m_uiGroupingSize;
   UInt                    m_uiPosVect[16];
+//  ying Spatial Direct
+  Bool                    m_bList1ShortTerm;
 };
 
 

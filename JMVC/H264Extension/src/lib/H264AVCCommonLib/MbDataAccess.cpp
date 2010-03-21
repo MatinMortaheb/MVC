@@ -621,6 +621,15 @@ Void MbDataAccess::xSpatialDirectMode( ParIdx8x8 eParIdx, Bool b8x8 )
     }
 
     //===== check co-located =====
+    // spatial direct fix {{
+    if( ! bAllColNonZero )
+    {
+        bAllColNonZero = ! m_rcSliceHeader.getList1FirstShortTerm();
+
+
+    }
+  
+    // }} spatial direct fix:  suggested by Heiko, an inter-view (only) view component is not considered as short-term reference picture -Ying
     if( ! bAllColNonZero )
     {
             SChar   scRefIdxCol;

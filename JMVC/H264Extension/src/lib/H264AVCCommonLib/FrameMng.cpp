@@ -1909,7 +1909,7 @@ FrameMng::xDumpRefList( ListIdx       eListIdx,
 #define DELTA_POCA  0
 #endif
 
-  printf("List %d: ", eListIdx );
+//  printf("List %d: ", eListIdx );
   //for( UInt uiIndex = 0; uiIndex < rcList.size(); uiIndex++ )
   for( UInt uiIndex = 0; uiIndex < rcSH.getNumRefIdxActive(eListIdx); uiIndex++ )
   {

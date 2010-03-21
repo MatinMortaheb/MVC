@@ -2123,6 +2123,8 @@ PicEncoder::xSetRefPictures(SliceHeader&                rcSliceHeader,
       rcSliceHeader.setRefFrameList(&rcList0, LIST_0);
           rcSliceHeader.setRefFrameList(&rcList1, LIST_1);
 #endif
+// spatial direct Ying March 17 2010  
+   rcSliceHeader.setList1FirstShortTerm ( rcList1.getEntry(0)->getViewId()== rcSliceHeader.getViewId()) ;
 
   }
   return Err::m_nOK;

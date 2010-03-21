@@ -410,16 +410,7 @@ MbEncoder::encodeMacroblock( MbDataAccess&  rcMbDataAccess,
   {
     RNOK( xEstimateMbSkip     ( m_pcIntMbTempData,  m_pcIntMbBestData,  rcList0,  rcList1 ) );
   }
-  if( rcMbDataAccess.getSH().isInterB()
-#ifdef LF_INTERLACE
-	  &&  rcMbDataAccess.getSH().getRefFrameList(rcMbDataAccess.getSH().getPicType(),LIST_0)->getEntry(0)->getViewId() == rcMbDataAccess.getSH().getViewId() 
-    &&  rcMbDataAccess.getSH().getRefFrameList(rcMbDataAccess.getSH().getPicType(),LIST_1)->getEntry(0)->getViewId() == rcMbDataAccess.getSH().getViewId() 
-#else
-    &&  rcMbDataAccess.getSH().getRefFrameList(LIST_0)->getEntry(0)->getViewId() == rcMbDataAccess.getSH().getViewId() 
-    &&  rcMbDataAccess.getSH().getRefFrameList(LIST_1)->getEntry(0)->getViewId() == rcMbDataAccess.getSH().getViewId() 
-#endif
-
-    ) //encoder constraint
+  if( rcMbDataAccess.getSH().isInterB()) 
   {
     RNOK( xEstimateMbDirect   ( m_pcIntMbTempData,  m_pcIntMbBestData,  rcList0,  rcList1,                                                    NULL, false ) );
 
@@ -494,9 +485,7 @@ MbEncoder::encodeMacroblock( MbDataAccess&  rcMbDataAccess,
   {
     RNOK( xEstimateMbSkip     ( m_pcIntMbTempData,  m_pcIntMbBestData,  rcList0,  rcList1 ) );
   }
-  if( rcMbDataAccess.getSH().isInterB()
-	  &&  rcMbDataAccess.getSH().getRefFrameList(rcMbDataAccess.getSH().getPicType(),LIST_0)->getEntry(0)->getViewId() == rcMbDataAccess.getSH().getViewId() 
-    &&  rcMbDataAccess.getSH().getRefFrameList(rcMbDataAccess.getSH().getPicType(),LIST_1)->getEntry(0)->getViewId() == rcMbDataAccess.getSH().getViewId() )
+  if( rcMbDataAccess.getSH().isInterB() )
   {
     RNOK( xEstimateMbDirect   ( m_pcIntMbTempData,  m_pcIntMbBestData,  rcList0,  rcList1,                                                    NULL, false,bSkipModeAllowed ) );
 
@@ -5173,13 +5162,7 @@ MbEncoder::xEstimateMb8x8 ( IntMbTempData*&   rpcMbTempData,
     ParIdx8x8 eParIdx8x8      = aeParIdx8x8[ ePar8x8 ];
 
     m_pcIntMbBest8x8Data->clear ();
-	//S051{
 	if(m_bUseBDir)
-    if ( rpcMbTempData->getMbDataAccess().getSH().isInterB()
-     &&  rcRefFrameList0[1]->getViewId() == rpcMbTempData->getMbDataAccess().getSH().getViewId() // this structure starts with 1, ying
-     &&  rcRefFrameList1[1]->getViewId() == rpcMbTempData->getMbDataAccess().getSH().getViewId() )
-
-	//S051}
     RNOK( xEstimateSubMbDirect  ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1, false,                                               uiBits,                      pcMbDataAccessBase ) );
     RNOK( xEstimateSubMb8x8     ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1, false, bBiPredOnly, uiNumMaxIter, uiIterSearchRange, uiBits, bQPelRefinementOnly, pcMbDataAccessBase ) );
     RNOK( xEstimateSubMb8x4     ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1,        bBiPredOnly, uiNumMaxIter, uiIterSearchRange, uiBits, bQPelRefinementOnly, pcMbDataAccessBase ) );
@@ -5281,14 +5264,8 @@ MbEncoder::xEstimateMb8x8Frext( IntMbTempData*&   rpcMbTempData,
     ParIdx8x8 eParIdx8x8      = aeParIdx8x8[ ePar8x8 ];
 
     m_pcIntMbBest8x8Data->clear ();
-	//S051{
-	if(m_bUseBDir)
-	if ( 
-        rpcMbTempData->getMbDataAccess().getSH().isInterB()
-     &&  rcRefFrameList0[1]->getViewId() == rpcMbTempData->getMbDataAccess().getSH().getViewId() // this structure starts with 1, ying
-     &&  rcRefFrameList1[1]->getViewId() == rpcMbTempData->getMbDataAccess().getSH().getViewId() )
-
-	//S051}
+	
+  	if(m_bUseBDir)
     RNOK( xEstimateSubMbDirect  ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1, true,                                               uiBits,                      pcMbDataAccessBase ) );
     RNOK( xEstimateSubMb8x8     ( ePar8x8, m_pcIntMbTemp8x8Data, m_pcIntMbBest8x8Data, rcRefFrameList0, rcRefFrameList1, true, bBiPredOnly, uiNumMaxIter, uiIterSearchRange, uiBits, bQPelRefinementOnly, pcMbDataAccessBase ) );
 

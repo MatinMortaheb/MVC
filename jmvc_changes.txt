@@ -1,3 +1,10 @@
+JMVC_7_2 -> JMVC_8_0
+Date            : Mar. 21, 2010
+Authors         : Qualcomm
+Contribution    : Bug fix
+Changes:
+- Bug fix for spatial direct mode
+
 JMVC_7_1 -> JMVC_7_2
 Date            : Mar. 01, 2010
 Authors         : Technicolor

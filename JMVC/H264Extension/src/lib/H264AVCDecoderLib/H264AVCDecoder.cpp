@@ -2760,6 +2760,15 @@ H264AVCDecoder::xProcessSlice( SliceHeader& rcSH,
 
   //===== set reference lists =====
   RNOK( m_pcFrameMng->setRefPicLists( rcSH, false ) );
+// Spatial direct fix: a inter-view (only) view component as a reference is not considered as short term ref. -Ying
+  if ( rcSH.isInterB() )
+  {
+    RefPicList<RefPic>& rcList = rcSH.getRefPicList( rcSH.getPicType(),LIST_1);
+    ROTRS( 0 == rcList.bufSize(), Err::m_nOK );
+    Bool bList1ShortTerm = ( rcList.get(0).getFrame()->getViewId() == rcSH.getViewId() ? true : false ) ;
+  
+    rcSH.setList1FirstShortTerm ( bList1ShortTerm );
+  }
 
   //===== parse slice =====
   RNOK( m_pcControlMng  ->initSlice ( rcSH, PARSE_PROCESS ) );
