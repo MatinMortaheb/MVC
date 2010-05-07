@@ -234,10 +234,6 @@ public:
   UInt                            getFGSMode                        () const {return m_uiFGSMode; }
   const std::string&              getFGSFilename                    () const {return m_cFGSRateFilename; }
   Double                          getFGSRate                        () const {return m_dFGSRate; }
-  UInt                            getFrameWidthInMbs                () const {return ( m_uiFrameWidth + 15 ) >> 4; }
-  UInt                            getFrameHeightInMbs               () const {return ( m_uiFrameHeight + 15 ) >> 4; }
-  UInt                            getHorPadding                     () const {return 16*getFrameWidthInMbs () - getFrameWidth (); }
-  UInt                            getVerPadding                     () const {return 16*getFrameHeightInMbs() - getFrameHeight(); }
   
   UInt                            getDecompositionStages            () const {return m_uiDecompositionStages; }
   UInt                            getNotCodedMCTFStages             () const {return m_uiNotCodedMCTFStages; }

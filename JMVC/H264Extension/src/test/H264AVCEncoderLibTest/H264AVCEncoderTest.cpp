@@ -17,7 +17,6 @@ H264AVCEncoderTest::H264AVCEncoderTest() :
   ::memset( m_auiHeight,    0x00, MAX_LAYERS*sizeof(UInt) );
   ::memset( m_auiWidth,     0x00, MAX_LAYERS*sizeof(UInt) );
   ::memset( m_auiStride,    0x00, MAX_LAYERS*sizeof(UInt) );
-  ::memset( m_aauiCropping, 0x00, MAX_LAYERS*sizeof(UInt)*4);
 }
 
 
