@@ -255,10 +255,10 @@ ErrVal CodingParameter::check()
   {
 
     //===== coder is operated in MVC mode =====
-    ROTREPORT( getFrameWidth        () <= 0 ||
-               getFrameWidth        ()  % 16,             "Frame Width  must be greater than 0 and a multiple of 16" );
-    ROTREPORT( getFrameHeight       () <= 0 ||
-               getFrameHeight       ()  % 16,             "Frame Height must be greater than 0 and a multiple of 16" );
+    //ROTREPORT( getFrameWidth        () <= 0 ||
+    //           getFrameWidth        ()  % 16,             "Frame Width  must be greater than 0 and a multiple of 16" );
+    //ROTREPORT( getFrameHeight       () <= 0 ||
+    //           getFrameHeight       ()  % 16,             "Frame Height must be greater than 0 and a multiple of 16" );
     ROTREPORT( getMaximumFrameRate  () <= 0.0,            "Frame rate not supported" );
     ROTREPORT( getTotalFrames       () == 0,              "Total Number Of Frames must be greater than 0" );
     ROTREPORT( getSymbolMode        ()  > 1,              "Symbol mode not supported" );

@@ -73,6 +73,7 @@ protected:
   UInt                          m_auiHeight             [MAX_LAYERS];
   UInt                          m_auiWidth              [MAX_LAYERS];
   UInt                          m_auiStride             [MAX_LAYERS];
+  UInt                          m_aauiCropping          [MAX_LAYERS][4];
 
   UChar                         m_aucStartCodeBuffer[5];
   BinData                       m_cBinDataStartCode;

@@ -802,7 +802,9 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 		}
 		if (i==	m_MultiviewReferenceFileParams.size())	
 		m_MultiviewReferenceFileParams.push_back
-				(YUVFileParams(cFileNameStringTemp,view_id,m_uiFrameHeight,m_uiFrameWidth));
+				(YUVFileParams(cFileNameStringTemp,view_id,
+				m_uiFrameHeight, CodingParameter::getVerPadding(), 
+				m_uiFrameWidth, CodingParameter::getHorPadding()));
        
       }
     }
@@ -825,7 +827,9 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
 		if (i==	m_MultiviewReferenceFileParams.size())	
 			m_MultiviewReferenceFileParams.push_back
-			(YUVFileParams(cFileNameStringTemp,view_id,m_uiFrameHeight,m_uiFrameWidth));
+			(YUVFileParams(cFileNameStringTemp,view_id,m_uiFrameHeight, 
+			CodingParameter::getVerPadding(), 
+			m_uiFrameWidth, CodingParameter::getHorPadding()));
       }
     }
 	
@@ -847,7 +851,9 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
 		if (i==	m_MultiviewReferenceFileParams.size())	
 			m_MultiviewReferenceFileParams.push_back
-			(YUVFileParams(cFileNameStringTemp,view_id,m_uiFrameHeight,m_uiFrameWidth));
+			(YUVFileParams(cFileNameStringTemp,view_id,
+			m_uiFrameHeight, CodingParameter::getVerPadding(), 
+			m_uiFrameWidth, CodingParameter::getHorPadding()));
       }	
     }
 
@@ -868,7 +874,9 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
 		if (i==	m_MultiviewReferenceFileParams.size())	
 			m_MultiviewReferenceFileParams.push_back
-			(YUVFileParams(cFileNameStringTemp,view_id,m_uiFrameHeight,m_uiFrameWidth));
+			(YUVFileParams(cFileNameStringTemp,view_id,
+			m_uiFrameHeight, CodingParameter::getVerPadding(), 
+			m_uiFrameWidth, CodingParameter::getHorPadding()));
       }
 
     }

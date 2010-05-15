@@ -234,6 +234,10 @@ public:
   UInt                            getFGSMode                        () const {return m_uiFGSMode; }
   const std::string&              getFGSFilename                    () const {return m_cFGSRateFilename; }
   Double                          getFGSRate                        () const {return m_dFGSRate; }
+  UInt                            getFrameWidthInMbs                () const {return ( m_uiFrameWidth + 15 ) >> 4; }
+  UInt                            getFrameHeightInMbs               () const {return ( m_uiFrameHeight + 15 ) >> 4; }
+  UInt                            getHorPadding                     () const {return 16*getFrameWidthInMbs () - getFrameWidth (); }
+  UInt                            getVerPadding                     () const {return 16*getFrameHeightInMbs() - getFrameHeight(); }
   
   UInt                            getDecompositionStages            () const {return m_uiDecompositionStages; }
   UInt                            getNotCodedMCTFStages             () const {return m_uiNotCodedMCTFStages; }
@@ -728,6 +732,7 @@ public:
 #ifdef LF_INTERLACE
   UInt                              getMbAff            ( )    const   { return m_uiMbAff; }
   UInt                              getPAff             ( )    const   { return m_uiPAff; }
+  Bool                              isInterlaced        ( )    const   { return ( m_uiMbAff != 0 || m_uiPAff != 0 ); }
 #endif
 //JVT-W080
 	UInt                            getPdsEnable            ()              const   { return m_uiPdsEnable; } 
@@ -743,6 +748,12 @@ public:
 	UInt                            getMultiviewSceneInfoEnable            ()              const   { return m_uiMultiviewSceneInfoSEIEnable; } // SEI JVT-W060
 	UInt							getMaxDisparity () const { return m_uiMaxDisparity;} // SEI JVT-W060
 	UInt							getMultiviewAcquisitionInfoEnable            ()              const   { return m_uiMultiviewAcquisitionInfoSEIEnable; } // SEI JVT-W060
+  UInt                            getFrameWidthInMbs                () const {return ( m_uiFrameWidth + 15 ) >> 4; }
+  UInt                            getFrameHeightInMbs               () const {return ( m_uiFrameHeight + 15 ) >> 4; }
+    UInt                            getHorPadding                     () const {return 16*getFrameWidthInMbs () - getFrameWidth (); }
+    UInt                            getVerPadding                     () const {return 16*getFrameHeightInMbs() - getFrameHeight(); }
+
+
   Void                            setInputFile            ( Char*   p )   { m_cInputFile            = p; }
 
   UInt                            getLARDOEnable          ()              const   { return m_uiLARDOEnable;} //JVT-R057 LA-RDO

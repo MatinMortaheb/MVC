@@ -1695,6 +1695,10 @@ H264AVCEncoder::xInitParameterSets()
     UInt              uiDPBSize           = ( 1 << max( 1, rcLayerParameters.getDecompositionStages() ) );
     UInt              uiNumRefPic         = uiDPBSize; 
 	UInt              uiLevelIdc          = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, uiDPBSize, 1 );
+    UInt              uiCropLeft          = 0;
+    UInt              uiCropTop           = 0;
+    UInt              uiCropRight         = rcLayerParameters.getHorPadding() / 2;                                            // chroma_format_idc is always equal to 1
+    UInt              uiCropBottom        = rcLayerParameters.getVerPadding() / ( m_pcCodingParameter->isInterlaced() ? 4 : 2 ); // chroma_format_idc is always equal to 1
     
     ROT( bH264AVCCompatible && uiDPBSize > 16 );
     ROT( uiLevelIdc == MSYS_UINT_MAX );
@@ -1753,6 +1757,7 @@ H264AVCEncoder::xInitParameterSets()
     pcSPS->setDirect8x8InferenceFlag              ( true  );
     // TMM_ESS 
     pcSPS->setResizeParameters                    (rcLayerParameters.getResizeParameters());
+    pcSPS->setCropOffset(uiCropLeft, uiCropRight, uiCropTop, uiCropBottom);
 
     if(rcLayerParameters.getFGSCodingMode() == 0)
     {

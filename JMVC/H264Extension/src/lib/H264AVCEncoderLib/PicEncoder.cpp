@@ -929,6 +929,10 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   UInt uiDPBSize;
   UInt mvcScaleFactor=1;
   UInt NumViews=1;
+  UInt              uiCropLeft          = 0;
+  UInt              uiCropTop           = 0;
+  UInt              uiCropRight         = m_pcCodingParameter->getHorPadding() / 2;                                            // chroma_format_idc is always equal to 1
+  UInt              uiCropBottom        = m_pcCodingParameter->getVerPadding() / ( m_pcCodingParameter->isInterlaced() ? 4 : 2 ); // chroma_format_idc is always equal to 1
 
   if (bAVCSPS)
 	  printf("\nInitilizating parameters for NAL_UNIT_SPS...\n");
@@ -939,8 +943,9 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   ROT( rpcSPS );
   //===== determine parameters =====
   UInt  uiSPSId     = bAVCSPS ? 0 : 1 ;
-  UInt  uiMbX       = m_pcCodingParameter->getFrameWidth () >> 4;
-  UInt  uiMbY       = m_pcCodingParameter->getFrameHeight() >> 4;
+  UInt  uiMbX       = (m_pcCodingParameter->getFrameWidth () + 15) >> 4;
+  UInt uiMbY		= m_pcCodingParameter->isInterlaced() ? ( ( m_pcCodingParameter->getFrameHeight() + 31 ) >> 5 ) << 1 : ( m_pcCodingParameter->getFrameHeight() + 15 ) >> 4 ; 
+  //UInt  uiMbY       = m_pcCodingParameter->getFrameHeight() >> 4;
   UInt  uiOutFreq   = (UInt)ceil( m_pcCodingParameter->getMaximumFrameRate() );
   UInt  uiMvRange   = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange()*4;
 
@@ -1023,6 +1028,7 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   rpcSPS->setFrameWidthInMbs                       ( uiMbX );
   rpcSPS->setFrameHeightInMbs                      ( uiMbY );
   rpcSPS->setDirect8x8InferenceFlag                ( true );
+  rpcSPS->setCropOffset(uiCropLeft, uiCropRight, uiCropTop, uiCropBottom);
 
 #ifdef LF_INTERLACE
   rpcSPS->setMbAdaptiveFrameFieldFlag( (m_pcCodingParameter->getMbAff()?true:false) ); //th test

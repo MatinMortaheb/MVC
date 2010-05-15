@@ -329,7 +329,20 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
 
 
   RNOK  ( pcWriteIf->writeFlag( getDirect8x8InferenceFlag(),              "SPS: direct_8x8_inference_flag" ) );
-  RNOK  ( pcWriteIf->writeFlag( false,                                    "SPS: frame_cropping_flag" ) );
+
+  if( m_frame_crop_offset[0] || m_frame_crop_offset[1] || m_frame_crop_offset[2] || m_frame_crop_offset[3] )
+  {
+    RNOK( pcWriteIf->writeFlag( true,                                     "SPS: frame_cropping_flag"      ) );
+    RNOK( pcWriteIf->writeUvlc( m_frame_crop_offset[0],                  "SPS: frame_crop_left_offset"   ) );
+    RNOK( pcWriteIf->writeUvlc( m_frame_crop_offset[1],                 "SPS: frame_crop_right_offset"  ) );
+    RNOK( pcWriteIf->writeUvlc( m_frame_crop_offset[2],                   "SPS: frame_crop_top_offset"    ) );
+    RNOK( pcWriteIf->writeUvlc( m_frame_crop_offset[3],                "SPS: frame_crop_bottom_offset" ) );
+  }
+  else
+  {
+    RNOK( pcWriteIf->writeFlag( false,                                    "SPS: frame_cropping_flag" ) );
+  }
+
 
   RNOK  ( pcWriteIf->writeFlag( false,                                  "SPS: vui_parameters_present_flag" ) );
 

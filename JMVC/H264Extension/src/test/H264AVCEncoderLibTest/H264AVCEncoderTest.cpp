@@ -17,6 +17,7 @@ H264AVCEncoderTest::H264AVCEncoderTest() :
   ::memset( m_auiHeight,    0x00, MAX_LAYERS*sizeof(UInt) );
   ::memset( m_auiWidth,     0x00, MAX_LAYERS*sizeof(UInt) );
   ::memset( m_auiStride,    0x00, MAX_LAYERS*sizeof(UInt) );
+  ::memset( m_aauiCropping, 0x00, MAX_LAYERS*sizeof(UInt)*4);
 }
 
 
@@ -466,8 +467,16 @@ H264AVCEncoderTest::go()
   //===== determine parameters for required frame buffers =====
   for( uiLayer = 0; uiLayer < uiNumLayers; uiLayer++ )
   {
-    auiMbX        [uiLayer] = m_pcEncoderCodingParameter->getLayerParameters( uiLayer ).getFrameWidth () >> 4;
-    auiMbY        [uiLayer] = m_pcEncoderCodingParameter->getLayerParameters( uiLayer ).getFrameHeight() >> 4;
+    //auiMbX        [uiLayer] = m_pcEncoderCodingParameter->getLayerParameters( uiLayer ).getFrameWidth () >> 4;
+    //auiMbY        [uiLayer] = m_pcEncoderCodingParameter->getLayerParameters( uiLayer ).getFrameHeight() >> 4;
+    auiMbX        [uiLayer] = m_pcEncoderCodingParameter->getLayerParameters( uiLayer ).getFrameWidthInMbs();
+    auiMbY        [uiLayer] = m_pcEncoderCodingParameter->getLayerParameters( uiLayer ).getFrameHeightInMbs();
+    m_aauiCropping[uiLayer][0]     = 0;
+    m_aauiCropping[uiLayer][1]     = m_pcEncoderCodingParameter->getLayerParameters( uiLayer ).getHorPadding      ();
+    m_aauiCropping[uiLayer][2]     = 0;
+    m_aauiCropping[uiLayer][3]     = m_pcEncoderCodingParameter->getLayerParameters( uiLayer ).getVerPadding      ();
+    m_apcWriteYuv[uiLayer]->setCrop(m_aauiCropping[uiLayer]);
+
     UInt  uiSize            = ((auiMbY[uiLayer]<<4)+2*YUV_Y_MARGIN)*((auiMbX[uiLayer]<<4)+2*YUV_X_MARGIN);
     auiPicSize    [uiLayer] = ((auiMbX[uiLayer]<<4)+2*YUV_X_MARGIN)*((auiMbY[uiLayer]<<4)+2*YUV_Y_MARGIN)*3/2;
     m_auiLumOffset[uiLayer] = ((auiMbX[uiLayer]<<4)+2*YUV_X_MARGIN)* YUV_Y_MARGIN   + YUV_X_MARGIN;  

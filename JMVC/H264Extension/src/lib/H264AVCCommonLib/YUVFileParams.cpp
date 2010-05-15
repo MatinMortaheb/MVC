@@ -5,16 +5,17 @@
 
 
 YUVFileParams::YUVFileParams(const std::string& fileName, const int view_id,
-			     const int height, const int width)
+			     const int height, const int vertPadding, 
+				 const int width, const int horPadding)
 	:_fileName(fileName),_view_id(view_id), _height(height), _width(width), 
-     _lumaSize( (_height + 2*YUV_Y_MARGIN)*(_width + 2*YUV_X_MARGIN) ),
+     _lumaSize( (_height + vertPadding + 2*YUV_Y_MARGIN)*(_width + horPadding + 2*YUV_X_MARGIN) ),
      _bufSize( 3 * _lumaSize / 2 ),
-     _lumaOffset( (_width + 2*YUV_X_MARGIN) * YUV_Y_MARGIN + YUV_X_MARGIN ),
-     _cbOffset( ((_width/2) + YUV_X_MARGIN) * YUV_Y_MARGIN/2 + YUV_X_MARGIN/2 
+     _lumaOffset( (_width + horPadding + 2*YUV_X_MARGIN) * YUV_Y_MARGIN + YUV_X_MARGIN ),
+     _cbOffset( (((_width+horPadding)/2) + YUV_X_MARGIN) * YUV_Y_MARGIN/2 + YUV_X_MARGIN/2 
 		+ _lumaSize ),
-     _crOffset( ((_width/2) + YUV_X_MARGIN) * YUV_Y_MARGIN/2 
+     _crOffset( (((_width+horPadding)/2) + YUV_X_MARGIN) * YUV_Y_MARGIN/2 
 		+ YUV_X_MARGIN/2 + 5*_lumaSize/4 ),
-     _stride( _width + 2*YUV_X_MARGIN ) {
+     _stride( (_width+horPadding) + 2*YUV_X_MARGIN ) {
   if (0 == height || 0 == width) {
     std::cerr 
       << "Attempted to construct a YUVFileParams object with " << std::endl

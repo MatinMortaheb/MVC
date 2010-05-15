@@ -470,6 +470,13 @@ public:
 
 #ifdef   LF_INTERLACE
   UInt                  getCropOffset                         (UInt idx)  const { return m_frame_crop_offset[idx];}
+  Void                  setCropOffset                         (UInt left, UInt right, UInt top, UInt bottom) 
+  {  
+      m_frame_crop_offset[0] = left;
+      m_frame_crop_offset[1] = right;
+      m_frame_crop_offset[2] = top;
+      m_frame_crop_offset[3] = bottom;
+  }
 #endif
 
   Bool getFGSCodingMode                       ()                          const { return m_bFGSCodingMode;   }

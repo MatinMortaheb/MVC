@@ -10,7 +10,8 @@ struct YUVFileParams {
   //YUVFileParams(const std::string& fileName, 
   //		const int height, const int width);
   YUVFileParams(const std::string& fileName, const int view_id, 
-		const int height, const int width);
+		const int height, const int vertPadding, 
+		const int width, const int horPadding);
   YUVFileParams( const YUVFileParams& other); //copy constructor
 
   std::string     _fileName;  // name of file to read from
