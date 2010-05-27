@@ -25,9 +25,7 @@ MbDataCtrl::MbDataCtrl():
   m_uiSize          ( 0 ),
   m_uiMbProcessed   ( 0 ),
   m_uiSliceId       ( 0 ),
-#ifdef   LF_INTERLACE
   m_iColocatedOffset( 0 ),
-#endif //LF_INTERLACE
   m_eProcessingState( PRE_PROCESS),
   m_pcMbDataCtrl0L1 ( NULL ),
   m_bUseTopField    ( false ),
@@ -392,39 +390,28 @@ ErrVal MbDataCtrl::initSlice( SliceHeader& rcSH, ProcessingState eProcessingStat
   m_eProcessingState  = eProcessingState;
   m_pcMbDataCtrl0L1   = NULL;
 
-#ifdef   LF_INTERLACE
   m_iColocatedOffset  = 0;
   m_bUseTopField      = false;
   m_bPicCodedField    = rcSH.getFieldPicFlag();
-#endif //LF_INTERLACE
 
   if( rcSH.isInterB() )
   {
     if( ((rcSH.getNalUnitType() != NAL_UNIT_CODED_SLICE_IDR_SCALABLE &&
           rcSH.getNalUnitType() != NAL_UNIT_CODED_SLICE_SCALABLE) || (!rcSH.getSvcMvcFlag()) ) && bDecoder
-#ifdef   LF_INTERLACE
           && rcSH.getRefListSize( LIST_1 )
-#endif //LF_INTERLACE
 		  )
     {
-#ifdef   LF_INTERLACE
         const RefPic& rcRefPic0L1 = rcSH.getRefPic( 1, rcSH.getPicType(), LIST_1 );
-#else //!LF_INTERLACE
-        const RefPic& rcRefPic0L1 = rcSH.getRefPic( 1, LIST_1 );
-#endif //LF_INTERLACE
       AOF_DBG( rcRefPic0L1.isAvailable() );
       const FrameUnit* pcFU = rcRefPic0L1.getPic().getFrameUnit();
-#ifdef   LF_INTERLACE
       Int iCurrPoc    = rcSH.getPoc();
       Int iTopDiffPOC = iCurrPoc - pcFU->getTopField().getPOC();
       Int iBotDiffPOC = iCurrPoc - pcFU->getBotField().getPOC();
 
       m_bUseTopField    = (abs( iTopDiffPOC ) < abs( iBotDiffPOC ) );
-#endif //LF_INTERLACE
 
       m_pcMbDataCtrl0L1 = pcFU->getMbDataCtrl();
 
-#ifdef   LF_INTERLACE
       if( FRAME != rcSH.getPicType() )
       {
           if( rcRefPic0L1.getFrame()->getPicType() != rcSH.getPicType() && m_pcMbDataCtrl0L1->isPicCodedField() )
@@ -433,7 +420,6 @@ ErrVal MbDataCtrl::initSlice( SliceHeader& rcSH, ProcessingState eProcessingStat
           }
       }
 	 
-#endif //LF_INTERLACE
 
     }
 
@@ -442,12 +428,10 @@ ErrVal MbDataCtrl::initSlice( SliceHeader& rcSH, ProcessingState eProcessingStat
       m_pcMbDataCtrl0L1 = pcMbDataCtrl;
     }
 
-#ifdef   LF_INTERLACE
 	if(!bDecoder)
 	{
 		m_bUseTopField=true;//lufeng: default
 	}
-#endif
   }
 
   if( PARSE_PROCESS == m_eProcessingState || ENCODE_PROCESS == m_eProcessingState )
@@ -471,15 +455,9 @@ ErrVal MbDataCtrl::initSlice( SliceHeader& rcSH, ProcessingState eProcessingStat
   Int iMbPerColumn  = rcSH.getSPS().getFrameHeightInMbs ();
   m_iMbPerLine      = rcSH.getSPS().getFrameWidthInMbs  ();
 
-#ifdef   LF_INTERLACE
   m_uiMbOffset      = rcSH.getBottomFieldFlag() ? 1 * m_iMbPerLine : 0;
   m_uiMbStride      = rcSH.getFieldPicFlag()    ? 2 * m_iMbPerLine : m_iMbPerLine;
   m_iMbPerColumn    = rcSH.getFieldPicFlag()    ? iMbPerColumn/2 : iMbPerColumn;
-#else //!LF_INTERLACE
-  m_uiMbOffset      = 0;
-  m_uiMbStride      = m_iMbPerLine;
-  m_iMbPerColumn    = iMbPerColumn;
-#endif //LF_INTERLACE
 
   m_ucLastMbQp      = rcSH.getPicQp();
 
@@ -502,11 +480,7 @@ const MbData& MbDataCtrl::xGetRefMbData( UInt uiSliceId, Int uiCurrSliceID, Int 
   ROTRS( iMbY >= m_iMbPerColumn, xGetOutMbData() );
 
   //--ICU/ETRI FMO Implementation
-#ifdef   LF_INTERLACE
   ROTRS( uiCurrSliceID != getSliceGroupIDofMb(iMbY * (m_uiMbStride>>(UInt)m_pcSliceHeader->getFieldPicFlag()) + iMbX/* + m_uiMbOffset*/ ) , xGetOutMbData() );
-#else
-  ROTRS( uiCurrSliceID != getSliceGroupIDofMb(iMbY * m_uiMbStride + iMbX + m_uiMbOffset ) , xGetOutMbData() );
-#endif
 
   // get the ref mb data
   const MbData& rcMbData = getMbData( iMbY * m_uiMbStride + iMbX + m_uiMbOffset );
@@ -515,7 +489,6 @@ const MbData& MbDataCtrl::xGetRefMbData( UInt uiSliceId, Int uiCurrSliceID, Int 
 }
 
 
-#ifdef   LF_INTERLACE
 ErrVal MbDataCtrl::initMb( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMbX, const Bool bFieldFlag, const Int iForceQp )
 {
     UInt     uiCurrIdx    = uiMbY        * m_uiMbStride + uiMbX + m_uiMbOffset;
@@ -524,7 +497,6 @@ ErrVal MbDataCtrl::initMb( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMb
 
     return initMb( rpcMbDataAccess, uiMbY, uiMbX, iForceQp );
 }
-#endif //LF_INTERLACE
 
 ErrVal MbDataCtrl::initMb( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMbX, const Int iForceQp )
 {
@@ -533,19 +505,14 @@ ErrVal MbDataCtrl::initMb( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMb
     AOT_DBG( uiMbY * m_uiMbStride + uiMbX + m_uiMbOffset >= m_uiSize );
 
     Bool     bLf          = (m_eProcessingState == POST_PROCESS);
-#ifdef   LF_INTERLACE
     Bool     bMbaff       = m_pcSliceHeader->isMbAff();
     Bool     bTopMb       = ((bMbaff && (uiMbY % 2)) ? false : true);
     UInt     uiMbYComp    = ( bMbaff ? ( bTopMb ? uiMbY+1 : uiMbY-1 ) : uiMbY );
-#endif //LF_INTERLACE
     UInt     uiCurrIdx    = uiMbY * m_uiMbStride + uiMbX + m_uiMbOffset;
-#ifdef   LF_INTERLACE
     UInt     uiCompIdx    = uiMbYComp    * m_uiMbStride + uiMbX + m_uiMbOffset;
     ROT( uiCompIdx >= m_uiSize );
     ROT( uiCurrIdx >= m_uiSize );
-#endif //LF_INTERLACE
     MbData&  rcMbDataCurr = m_pcMbData[ uiCurrIdx ];
-#ifdef   LF_INTERLACE
     MbData&  rcMbDataComp = m_pcMbData[ uiCompIdx ];
 
     //----- get co-located MbIndex -----
@@ -572,7 +539,6 @@ ErrVal MbDataCtrl::initMb( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMb
         uiIdxColBot       = uiCurrIdx   - m_iColocatedOffset;
         uiIdxColTop       = uiIdxColBot + m_iColocatedOffset - m_iMbPerLine;
     }
-#endif //LF_INTERLACE
 
     if( m_pcMbDataAccess )
     {
@@ -609,8 +575,6 @@ ErrVal MbDataCtrl::initMb( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMb
     }
 
 
-#ifdef   LF_INTERLACE
-
   Int icurrSliceGroupID = getSliceGroupIDofMb(uiMbY * (m_uiMbStride>>(UInt)m_pcSliceHeader->getFieldPicFlag()) + uiMbX ); 
         Bool bColocatedField = ( m_pcMbDataCtrl0L1 == NULL) ? true : m_pcMbDataCtrl0L1->isPicCodedField();
     m_pcMbDataAccess = new (m_pcMbDataAccess) MbDataAccess(
@@ -635,25 +599,6 @@ ErrVal MbDataCtrl::initMb( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMb
         m_bUseTopField,
         bColocatedField,
         m_ucLastMbQp );
-#else //!LF_INTERLACE
-
-	  Int icurrSliceGroupID = getSliceGroupIDofMb(uiMbY * m_uiMbStride + uiMbX + m_uiMbOffset);
-
-    m_pcMbDataAccess = new (m_pcMbDataAccess) MbDataAccess(
-        rcMbDataCurr,                                      // current
-                                       xGetRefMbData( uiSliceId, icurrSliceGroupID, uiMbY,   uiMbX-1, bLf ), // left        //--ICU/ETRI FMO Implementation
-                                       xGetRefMbData( uiSliceId, icurrSliceGroupID, uiMbY-1, uiMbX  , bLf ), // above       //--ICU/ETRI FMO Implementation
-                                       xGetRefMbData( uiSliceId, icurrSliceGroupID, uiMbY-1, uiMbX-1, bLf ), // above left  //--ICU/ETRI FMO Implementation
-                                       xGetRefMbData( uiSliceId, icurrSliceGroupID, uiMbY-1, uiMbX+1, bLf ), // above right //--ICU/ETRI FMO Implementation
-        xGetOutMbData(),                                   // unvalid
-        xGetColMbData( uiCurrIdx ),
-        *m_pcSliceHeader,
-        *m_cpDFPBuffer.get( uiSliceId ),
-        uiMbX,
-        uiMbY,
-        m_ucLastMbQp );
-
-#endif //LF_INTERLACE
 
     ROT( NULL == m_pcMbDataAccess );
 
@@ -670,19 +615,14 @@ ErrVal MbDataCtrl::initMbTDEnhance( MbDataAccess*& rpcMbDataAccess, MbDataCtrl *
     AOT_DBG( uiMbY * m_uiMbStride + uiMbX + m_uiMbOffset >= m_uiSize );
 
     Bool     bLf          = (m_eProcessingState == POST_PROCESS);
-#ifdef   LF_INTERLACE
     Bool     bMbaff       = m_pcSliceHeader->isMbAff();
     Bool     bTopMb       = ((bMbaff && (uiMbY % 2)) ? false : true);
     UInt     uiMbYComp    = ( bMbaff ? ( bTopMb ? uiMbY+1 : uiMbY-1 ) : uiMbY );
-#endif //LF_INTERLACE
     UInt     uiCurrIdx    = uiMbY * m_uiMbStride + uiMbX + m_uiMbOffset;
-#ifdef   LF_INTERLACE
     UInt     uiCompIdx    = uiMbYComp    * m_uiMbStride + uiMbX + m_uiMbOffset;
     ROT( uiCompIdx >= m_uiSize );
     ROT( uiCurrIdx >= m_uiSize );
-#endif //LF_INTERLACE
     MbData&  rcMbDataCurr = m_pcMbData[ uiCurrIdx ];
-#ifdef   LF_INTERLACE
     MbData&  rcMbDataComp = m_pcMbData[ uiCompIdx ];
 
     //----- get co-located MbIndex -----
@@ -709,7 +649,6 @@ ErrVal MbDataCtrl::initMbTDEnhance( MbDataAccess*& rpcMbDataAccess, MbDataCtrl *
         uiIdxColBot       = uiCurrIdx   - m_iColocatedOffset;
         uiIdxColTop       = uiIdxColBot + m_iColocatedOffset - m_iMbPerLine;
     }
-#endif //LF_INTERLACE
 
     if( m_pcMbDataAccess )
     {
@@ -746,7 +685,6 @@ ErrVal MbDataCtrl::initMbTDEnhance( MbDataAccess*& rpcMbDataAccess, MbDataCtrl *
 
     Int icurrSliceGroupID = getSliceGroupIDofMb(uiMbY * m_uiMbStride + uiMbX + m_uiMbOffset);
 
-#ifdef   LF_INTERLACE
     Bool bColocatedField = ( m_pcMbDataCtrl0L1 == NULL) ? true : m_pcMbDataCtrl0L1->isPicCodedField();
     m_pcMbDataAccess = new (m_pcMbDataAccess) MbDataAccess(
         rcMbDataCurr,                                      // current
@@ -770,22 +708,6 @@ ErrVal MbDataCtrl::initMbTDEnhance( MbDataAccess*& rpcMbDataAccess, MbDataCtrl *
         m_bUseTopField,
         bColocatedField,
         m_ucLastMbQp );
-#else //!LF_INTERLACE
-    m_pcMbDataAccess = new (m_pcMbDataAccess) MbDataAccess(
-        rcMbDataCurr,                                      // current
-                                       xGetRefMbData( uiSliceId, icurrSliceGroupID, uiMbY,   uiMbX-1, bLf ), // left
-                                       xGetRefMbData( uiSliceId, icurrSliceGroupID, uiMbY-1, uiMbX  , bLf ), // above
-                                       xGetRefMbData( uiSliceId, icurrSliceGroupID, uiMbY-1, uiMbX-1, bLf ), // above left
-                                       xGetRefMbData( uiSliceId, icurrSliceGroupID, uiMbY-1, uiMbX+1, bLf ), // above right
-                                       xGetOutMbData(),                                   // unvalid
-        pcMbDataCtrlRef->getMbData( uiMbX, uiMbY),
-        *m_pcSliceHeader,
-        *m_cpDFPBuffer.get( uiSliceId ),
-        uiMbX,
-        uiMbY,
-        m_ucLastMbQp );
-
-#endif //LF_INTERLACE
 
     ROT( NULL == m_pcMbDataAccess );
 
@@ -879,9 +801,7 @@ MbDataCtrl::uninitFgsBQData()
 ControlData::ControlData()
 : m_pcMbDataCtrl        ( 0   )
 , m_pcSliceHeader       ( 0   )
-#ifdef LF_INTERLACE
 , m_pcSliceHeaderBot     ( 0 )
-#endif
 , m_dLambda             ( 0   )
 , m_pcBaseLayerRec      ( 0   )
 , m_pcBaseLayerSbb      ( 0   )

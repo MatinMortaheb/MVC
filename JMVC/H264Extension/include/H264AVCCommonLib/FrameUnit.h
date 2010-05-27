@@ -19,7 +19,6 @@ class H264AVCCOMMONLIB_API FrameUnit
 {
     enum
     {
-#ifdef   LF_INTERLACE
         TOP_FLD_SHORT = 0x01,
         BOT_FLD_SHORT = 0x02,
         FRAME_SHORT   = 0x03,
@@ -30,10 +29,6 @@ class H264AVCCOMMONLIB_API FrameUnit
         BOT_FLD_REF   = 0x0a,
         FRAME_REF     = 0x0f,
         IS_OUTPUTTED  = 0x10,
-#else //!LF_INTERLACE
-        REFERENCE     = 0x01,
-        IS_OUTPUTTED  = 0x02,
-#endif //LF_INTERLACE
     };
 
 protected:
@@ -50,12 +45,9 @@ public:
     ErrVal destroy ();
 
     Frame& getFrame()                             { return m_cFrame;    }
-#ifdef   LF_INTERLACE
     Frame& getTopField()                          { return m_cTopField; }
     Frame& getBotField()                          { return m_cBotField; }
-#endif //LF_INTERLACE
     const Frame& getFrame()                 const { return m_cFrame;    }
-#ifdef   LF_INTERLACE
     const Frame& getTopField()              const { return m_cTopField; }
     const Frame& getBotField()              const { return m_cBotField; }
 	const Frame& getFrame(PicType ePicType) const { return ePicType==FRAME?m_cFrame:(ePicType==TOP_FIELD?m_cTopField:m_cBotField);}
@@ -67,7 +59,6 @@ public:
     const Frame& getPic( PicType ePicType ) const { return ( ePicType == FRAME ) ? m_cFrame : ( ePicType 
 
         == BOT_FIELD ) ? m_cBotField : m_cTopField; }
-#endif //LF_INTERLACE
 
   Void  setFrameNumber( UInt  uiFN  )           { m_uiFrameNumber = uiFN; }
   UInt  getFrameNumber()                  const { return m_uiFrameNumber; }
@@ -79,7 +70,6 @@ public:
   Void  setOutputDone ()                        { m_uiStatus |= IS_OUTPUTTED; }
   Bool  isOutputDone  ()                  const { return ( m_uiStatus & IS_OUTPUTTED ? true : false ); }
 
-#ifdef   LF_INTERLACE
     Bool  isRefPic      ()                  const { return ( m_uiStatus & 0xf ? true : false ); }
     Bool  isShortTerm   ( PicType ePicType )const { return ePicType == (m_uiStatus &  ePicType); }
     Bool  isUsed        ( PicType ePicType )const { return ( m_uiStatus & ( ePicType + ( ePicType 
@@ -95,14 +85,8 @@ public:
         return (((m_uiStatus & ucPicType) == ucPicType) || ( ((m_uiStatus>>2) & ucPicType) == ucPicType) );
     }
     Void  setUnused     ( PicType ePicType );
-#else //!LF_INTERLACE
-    Bool  isUsed        ()                  const { return ( m_uiStatus & REFERENCE ? true : false ); }
-    Void  setUsed       ()                        { m_uiStatus |= REFERENCE; }
-    Void  setUnused     ();
-#endif //LF_INTERLACE
 
     Int   getMaxPOC     ()                  const { return m_iMaxPOC; }
-#ifdef   LF_INTERLACE
     Void  setTopFieldPoc( Int iPoc );
     Void  setBotFieldPoc( Int iPoc );
     PicType getAvailableStatus()            const { return m_eAvailable; }
@@ -110,32 +94,25 @@ public:
     PicStruct getPicStruct()                const { return m_ePicStruct; }
     Bool isFieldCoded()                     const { return m_bFieldCoded; }
     Void addPic( PicType ePicType, Bool bFieldCoded = false, UInt uiIdrPicId = 0 );
-#else //!LF_INTERLACE
-    Void setPoc( Int iPoc );
-#endif //LF_INTERLACE
 
 
     PicBuffer*  getPicBuffer  ()            const { return m_pcPicBuffer; }
     const MbDataCtrl* getMbDataCtrl()       const { return &m_cMbDataCtrl; }
     MbDataCtrl* getMbDataCtrl()                   { return &m_cMbDataCtrl;  }
-#ifdef   LF_INTERLACE
     const IntFrame* getResidual()           const { return &m_cResidual; }
     IntFrame* getResidual()                       { return &m_cResidual; }
-#endif
 
 
 	ErrVal uninitBase(); //JVT-S036
 
 private:
     Frame         m_cFrame;
-#ifdef   LF_INTERLACE
     Frame         m_cTopField;
     Frame         m_cBotField;
     PicType       m_eAvailable;
     PicStruct     m_ePicStruct;
     Bool          m_bFieldCoded;
 	IntFrame      m_cResidual;
-#endif //LF_INTERLACE
     MbDataCtrl    m_cMbDataCtrl;
     PicBuffer*    m_pcPicBuffer;
     UInt          m_uiFrameNumber;

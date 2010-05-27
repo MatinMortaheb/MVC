@@ -109,14 +109,9 @@ typedef MyList<DPBUnit*>  DPBUnitList;
 class H264AVCCOMMONLIB_API IntFrame
 {
 public:
-#ifdef   LF_INTERLACE
     IntFrame                ( YuvBufferCtrl&    rcYuvFullPelBufferCtrl,
         YuvBufferCtrl&    rcYuvHalfPelBufferCtrl,
         PicType ePicType = FRAME);
-#else //!LF_INTERLACE
-    IntFrame                ( YuvBufferCtrl&    rcYuvFullPelBufferCtrl,
-        YuvBufferCtrl&    rcYuvHalfPelBufferCtrl );
-#endif //LF_INTERLACE
 	virtual ~IntFrame       ();
 
   ErrVal  init            ( Bool              bHalfPel = false );
@@ -126,9 +121,7 @@ public:
 
   ErrVal  load            ( PicBuffer*        pcPicBuffer );
   ErrVal  store           ( PicBuffer*        pcPicBuffer );
-#ifdef LF_INTERLACE
   ErrVal extendFrame( QuarterPelFilter* pcQuarterPelFilter, PicType ePicType, Bool bFrameMbsOnlyFlag );
-#endif
   ErrVal  extendFrame     ( QuarterPelFilter* pcQuarterPelFilter );
 
   Void      setDPBUnit      ( DPBUnit*  pcDPBUnit ) { m_pcDPBUnit = pcDPBUnit; }
@@ -196,10 +189,8 @@ public:
 	  }
 // JVT-Q065 EIDR}
     m_iPOC        = pcSrcFrame->m_iPOC;
-#ifdef LF_INTERLACE
     m_iTopFieldPoc  = pcSrcFrame->m_iTopFieldPoc;
     m_iBotFieldPoc  = pcSrcFrame->m_iBotFieldPoc;
-#endif
     RNOK( m_cFullPelYuvBuffer.copy( &pcSrcFrame->m_cFullPelYuvBuffer ) );
   
     return Err::m_nOK;
@@ -303,18 +294,13 @@ public:
 
   Bool  isHalfPel()   { return m_bHalfPel; }
 
-#ifdef   LF_INTERLACE
   Void  setHalfPel(Bool b)   { m_bHalfPel=b; }//lufeng
-#endif
 
   Bool  isExtended () { return m_bExtended; }
   Void  clearExtended() { m_bExtended = false; }
 
-#ifdef   LF_INTERLACE
   Void  setExtended  ()                  { m_bExtended = true; }
-#endif
 
-#ifdef LF_INTERLACE
   Bool  isPocAvailable()           const { return m_bPocIsSet; }
   Int   getPoc        ()           const { return m_iPOC; }
   Int   getTopFieldPoc()           const { return m_iTopFieldPoc; }
@@ -385,7 +371,6 @@ public:
 	  else if(m_ePicStat==FRAME)return true;
 	  return (m_ePicStat==ePicType);
   }
-#endif//LF_INTERLACE
 
   UInt  getViewId()      const   { return m_uiViewId; }
   Void  setViewId( UInt uiViewId ) { m_uiViewId = uiViewId; }
@@ -403,10 +388,8 @@ public:
   Void   setChannelDistortion(IntFrame*p1) { if(p1) m_piChannelDistortion=p1->m_piChannelDistortion; else m_piChannelDistortion=NULL;}
   // JVT-R057 LA-RDO}  
 
-#ifdef   LF_INTERLACE
 	PicType getPicType()              const { return m_ePicType; }
 	Void setPicType(PicType e)       { m_ePicType = e; }
-#endif //LF_INTERLACE
 
 protected:
   IntYuvPicBuffer m_cFullPelYuvBuffer;
@@ -418,7 +401,6 @@ protected:
 
   DPBUnit*        m_pcDPBUnit;
 
-#ifdef   LF_INTERLACE
   	Bool            m_bPocIsSet;
     Int             m_iTopFieldPoc;
     Int             m_iBotFieldPoc;
@@ -428,7 +410,6 @@ protected:
   IntFrame* m_pcIntFrameBotField;//th
 
   PicType       m_ePicStat;//lufeng
-#endif //LF_INTERLACE
 
   Bool			  m_bUnusedForRef; // JVT-Q065 EIDR
   // JVT-R057 LA-RDO{
@@ -441,7 +422,6 @@ protected:
 };
 
 
-#ifdef LF_INTERLACE
 H264AVCCOMMONLIB_API extern __inline ErrVal gSetFrameFieldLists ( RefFrameList& rcTopFieldList, RefFrameList& rcBotFieldList, RefFrameList& rcRefFrameList )
 {
     ROTRS( NULL == &rcRefFrameList, Err::m_nOK );
@@ -484,7 +464,6 @@ H264AVCCOMMONLIB_API extern __inline ErrVal gSetFrameFieldArrays( IntFrame* apcF
     }
     return Err::m_nOK;
 }
-#endif
 
 
 H264AVC_NAMESPACE_END

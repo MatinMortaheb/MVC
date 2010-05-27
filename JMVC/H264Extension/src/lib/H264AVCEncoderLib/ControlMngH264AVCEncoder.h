@@ -87,37 +87,23 @@ public:
                             const PictureParameterSet&  rcPPSLP,
                             const PictureParameterSet&  rcPPSHP );
 
-#ifndef LF_INTERLACE
-  ErrVal initMbForFiltering( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex );
-#endif
-
   ErrVal initSlice( SliceHeader& rcSH, ProcessingState eProcessingState );
   ErrVal finishSlice( const SliceHeader& rcSH, Bool& rbPicDone, Bool& rbFrameDone );
 
   ErrVal initMbForParsing( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
-#ifndef LF_INTERLACE
-    ErrVal initMbForDecoding( MbDataAccess*& rpcMbDataAccess, UInt uiMbIndex ) { return Err::m_nERR; }
-#endif
 
   ErrVal initSliceForCoding   ( const SliceHeader& rcSH );
   ErrVal initSliceForReading  ( const SliceHeader& rcSH ) { return Err::m_nERR; }
   ErrVal initSliceForDecoding ( const SliceHeader& rcSH ) { return Err::m_nERR; }
   ErrVal initSliceForFiltering( const SliceHeader& rcSH );
 
-#ifndef LF_INTERLACE
-  ErrVal initMbForCoding      ( MbDataAccess& rcMbDataAccess, UInt uiMbIndex );
-#endif
   ErrVal initMbForDecoding    ( UInt uiMbIndex ) { return Err::m_nERR; };
 //  ErrVal initMbForFiltering   ( UInt uiMbIndex );
 
-#ifdef LF_INTERLACE
   ErrVal initMbForCoding( MbDataAccess& rcMbDataAccess, UInt uiMbY, UInt uiMbX, Bool bMbAFF, Bool bFieldFlag );
   ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMbX, Bool bMbAFF );
   ErrVal initMbForFiltering   ( UInt uiMbY, UInt uiMbX, Bool bMbAFF ){ return Err::m_nERR; };
   ErrVal initMbForDecoding    (MbDataAccess*& rpcMbDataAccess,UInt uiMbY, UInt uiMbX, Bool bMbAFF  ){ return Err::m_nERR; }
-#else
-  ErrVal initMbForFiltering   ( UInt uiMbIndex );
-#endif
 
 
   UvlcWriter*  getUvlcWriter()  { return m_pcUvlcWriter;  };

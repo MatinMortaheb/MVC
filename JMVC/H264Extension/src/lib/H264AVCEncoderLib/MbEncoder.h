@@ -90,7 +90,6 @@ public:
                                  IntFrame*       pcPrdFrame);
 
 
-#ifdef LF_INTERLACE
   ErrVal  encodeMacroblock    ( MbDataAccess&  rcMbDataAccess,
 	  IntFrame*      pcFrame,
 	  IntFrame*      pcOrigFrame,
@@ -101,17 +100,7 @@ public:
 	  Double         dLambda, 
       Double&       rdCost
       );
-#else
-  ErrVal  encodeMacroblock    ( MbDataAccess&  rcMbDataAccess,
-	  IntFrame*      pcFrame,
-	  RefFrameList&  rcList0,
-	  RefFrameList&  rcList1,
-	  UInt           uiNumMaxIter,
-	  UInt           uiIterSearchRange,
-	  Double         dLambda );
-#endif
 
-#ifdef LF_INTERLACE
     ErrVal  encodeMacroblock    ( MbDataAccess&  rcMbDataAccess,
 	  IntFrame*      pcFrame,
 	  IntFrame*      pcOrigFrame,
@@ -123,7 +112,6 @@ public:
       Double&       rdCost,
 	  Bool            bSkipModeAllowed
       );
-#endif
 //TMM_WP
   ErrVal getPredWeights( SliceHeader& rcSH, ListIdx eLstIdx, 
                          Double(*pafWeight)[3], IntFrame* pOrgFrame,
@@ -352,7 +340,6 @@ protected:
                                   RefFrameList&     rcRefFrameList1,
                                   MbDataAccess*     pcMbDataAccessBaseMotion,
                                   Bool              bResidualPred );
-#ifdef LF_INTERLACE
   ErrVal xEstimateMbDirect( IntMbTempData*&  rpcMbTempData,
                               IntMbTempData*&  rpcMbBestData,
                               RefFrameList&    rcRefFrameList0,
@@ -360,7 +347,6 @@ protected:
                               MbDataAccess*    pcMbDataAccessBaseMotion,
                               Bool             bResidualPred,
 							  Bool             bSkipModeAllowed);
-#endif
   ErrVal  xEstimateMb16x16      ( IntMbTempData*&   rpcMbTempData,
                                   IntMbTempData*&   rpcMbBestData,
                                   RefFrameList&     rcRefFrameList0,
@@ -511,9 +497,7 @@ protected:
 
   IntYuvMbBuffer  *m_pcIntOrgMbPelData;
   IntYuvPicBuffer *m_pcIntPicBuffer;
-#ifdef LF_INTERLACE
 	  IntYuvPicBuffer *m_pcIntPicBufferOrig;
-#endif
   IntYuvPicBuffer *m_pcIntraPredPicBuffer;
 
   UInt m_uiMaxRefFrames[2];

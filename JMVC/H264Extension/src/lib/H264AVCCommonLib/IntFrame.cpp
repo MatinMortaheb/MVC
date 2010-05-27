@@ -191,7 +191,6 @@ DPBUnit::markOutputted()
 
 
 
-#ifdef   LF_INTERLACE
 IntFrame::IntFrame( YuvBufferCtrl& rcYuvFullPelBufferCtrl,
                    YuvBufferCtrl& rcYuvHalfPelBufferCtrl,
                    PicType ePicType )
@@ -200,12 +199,6 @@ IntFrame::IntFrame( YuvBufferCtrl& rcYuvFullPelBufferCtrl,
                    m_ePicType              ( ePicType ),
                    m_pcIntFrameTopField( NULL ),//th
                    m_pcIntFrameBotField( NULL ),//th
-#else //!LF_INTERLACE
-IntFrame::IntFrame( YuvBufferCtrl& rcYuvFullPelBufferCtrl,
-                   YuvBufferCtrl& rcYuvHalfPelBufferCtrl )
-                   : m_cFullPelYuvBuffer     ( rcYuvFullPelBufferCtrl ),
-                   m_cHalfPelYuvBuffer     ( rcYuvHalfPelBufferCtrl ),
-#endif //LF_INTERLACE
   m_bHalfPel              ( false ),
   m_bExtended             ( false ),
   m_pcDPBUnit             ( 0 )
@@ -213,9 +206,7 @@ IntFrame::IntFrame( YuvBufferCtrl& rcYuvFullPelBufferCtrl,
   ,m_piChannelDistortion   ( 0 )     // JVT-R057 LA-RDO
 {
   m_uiViewId = 0;
-#ifdef   LF_INTERLACE
   m_ePicStat = NOT_SPECIFIED;
-#endif
 }
 
 IntFrame::~IntFrame()
@@ -243,9 +234,7 @@ ErrVal IntFrame::init( Bool bHalfPel )
 ErrVal IntFrame::initHalfPel()
 {
   XPel* pHPData = 0;
-#ifdef   LF_INTERLACE
   if(m_cHalfPelYuvBuffer.getBuffer()!=NULL)m_cHalfPelYuvBuffer.uninit();
-#endif
   RNOK( m_cHalfPelYuvBuffer.init( pHPData ) );
   m_bExtended = false;
   m_bHalfPel  = true;
@@ -256,7 +245,6 @@ ErrVal IntFrame::initHalfPel()
 
 ErrVal IntFrame::uninit()
 {
-#ifdef LF_INTERLACE
     if( m_pcIntFrameTopField )
     {
         RNOK( m_pcIntFrameTopField->uninit() );
@@ -271,7 +259,6 @@ ErrVal IntFrame::uninit()
         m_pcIntFrameBotField = NULL;
     }
   m_bPocIsSet = false;
-#endif
 
   RNOK( m_cFullPelYuvBuffer.uninit() );
   RNOK( m_cHalfPelYuvBuffer.uninit() );
@@ -287,7 +274,6 @@ ErrVal IntFrame::uninitHalfPel()
   m_bExtended = false;
   m_bHalfPel  = false;
 
-#ifdef LF_INTERLACE
   if( m_ePicType==FRAME && NULL != m_pcIntFrameTopField )
   {
       RNOK( m_pcIntFrameTopField->uninitHalfPel() );
@@ -296,7 +282,6 @@ ErrVal IntFrame::uninitHalfPel()
   {
       RNOK( m_pcIntFrameBotField->uninitHalfPel() );
   }
-#endif
   return Err::m_nOK;
 }
 
@@ -313,8 +298,6 @@ ErrVal IntFrame::store( PicBuffer* pcPicBuffer )
   RNOK( m_cFullPelYuvBuffer.storeToPicBuffer( pcPicBuffer ) );
   return Err::m_nOK;
 }
-
-#ifdef LF_INTERLACE
 
 IntFrame* IntFrame::getPic( PicType ePicType)//th
 {
@@ -494,8 +477,6 @@ ErrVal IntFrame::addFrameFieldBuffer()//th
 
     return Err::m_nOK;
 }
-#endif//LF_INTERLACE
-
 
 ErrVal IntFrame::extendFrame( QuarterPelFilter* pcQuarterPelFilter )
 {
@@ -514,7 +495,6 @@ ErrVal IntFrame::extendFrame( QuarterPelFilter* pcQuarterPelFilter )
   return Err::m_nOK;
 }
 
-#ifdef LF_INTERLACE
 ErrVal IntFrame::extendFrame( QuarterPelFilter* pcQuarterPelFilter, PicType ePicType, Bool bFrameMbsOnlyFlag )
 {
     ASSERT( m_ePicType==FRAME );
@@ -595,7 +575,6 @@ ErrVal IntFrame::extendFrame( QuarterPelFilter* pcQuarterPelFilter, PicType ePic
 
     return Err::m_nOK;
 }
-#endif//LF_INTERLACE
 
 // JVT-R057 LA-RDO}
 Void IntFrame::initChannelDistortion()

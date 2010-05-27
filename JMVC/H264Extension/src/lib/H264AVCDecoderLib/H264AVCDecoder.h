@@ -85,13 +85,11 @@ public:
 //Dec. 1 fix view order for base view {{                        
   UInt*   getViewOrder  () { return m_puiViewOrder; } 
   UInt*   getViewOrder_SubStream  () { return m_puiViewOrder_SubStream; } 
-#ifdef LF_INTERLACE
   void addViewOrder()
   {
 	  	m_puiViewOrder=new UInt[1];
 		m_puiViewOrder[0]=0;
   }
-#endif
 //}}           
   //JVT-P031
   ErrVal  initPacket( BinDataAccessor*  pcBinDataAccessor);
@@ -102,7 +100,6 @@ public:
   Void    initNumberOfFragment();
   //~JVT-P031
 
-#ifdef   LF_INTERLACE
   UInt    getCrop(UInt ui)
   {
 	  if(ui<4) 
@@ -110,7 +107,6 @@ public:
 	  else
 		  return 0;
   };
-#endif
 
   ErrVal  process   ( PicBuffer*        pcPicBuffer,
                       PicBufferList&    rcPicBufferOutputList,
@@ -324,9 +320,7 @@ protected:
   Int                           m_iPrevPoc;
   //~JVT-P031
 
-#ifdef   LF_INTERLACE
   UInt                    m_uiCropOffset[4];//lufeng
-#endif
 
   SliceHeader::PredWeightTable  m_acLastPredWeightTable[2];
 

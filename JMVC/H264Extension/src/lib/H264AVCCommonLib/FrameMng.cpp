@@ -91,19 +91,17 @@ FrameMng::FrameMng()
   m_pcRefinementIntFrame    = 0;
   m_pcRefinementIntFrameSpatial = 0;
   m_pcPredictionIntFrame    = 0;
-#ifdef   LF_INTERLACE
   for (UInt i=0;i<8;i++)
   {  
       m_pcCurrentViewFrameUnit[i]=NULL;
 }
-
-#endif
 }
 
 FrameMng::~FrameMng()
 {
 }
 
+Int FrameMng::getMaxEntriesinDPB() { return m_iMaxEntriesinDPB;} // hwsun, fix meomory for field coding
 
 ErrVal FrameMng::create( FrameMng*& rpcFrameMng )
 {
@@ -165,11 +163,7 @@ __inline ErrVal FrameMng::xAddToFreeList( FUList& rcFUList )
 
 __inline ErrVal FrameMng::xRemove( FrameUnit* pcFrameUnit )
 {
-#ifdef   LF_INTERLACE
     pcFrameUnit->setUnused( FRAME );
-#else //!LF_INTERLACE
-    pcFrameUnit->setUnused();
-#endif //LF_INTERLACE
 
     if( pcFrameUnit->isOutputDone() )
     {
@@ -421,7 +415,6 @@ ErrVal FrameMng::initPic( SliceHeader& rcSH )
 {
     rcSH.setFrameUnit( m_pcCurrentFrameUnit );
 
-#ifdef   LF_INTERLACE
     PicType eCurrPicType = rcSH.getPicType();
 
     if( NOT_SPECIFIED == m_pcCurrentFrameUnit->getAvailableStatus() )
@@ -437,9 +430,6 @@ ErrVal FrameMng::initPic( SliceHeader& rcSH )
     {
         m_pcCurrentFrameUnit->setBotFieldPoc( rcSH.getBotFieldPoc() );
     }
-#else //!LF_INTERLACE
-    m_pcCurrentFrameUnit->setPoc( rcSH.getPoc() );
-#endif //LF_INTERLACE
 
     return Err::m_nOK;
 }
@@ -457,7 +447,6 @@ ErrVal FrameMng::initFrame( SliceHeader& rcSH, PicBuffer* pcPicBuffer )
     RNOK( xCheckMissingFrameNums( rcSH ) );
   }
 
-#ifdef   LF_INTERLACE
   if ( !m_pcCurrentViewFrameUnit[rcSH.getViewId()] 
         || m_pcCurrentViewFrameUnit[rcSH.getViewId()] ->getMbDataCtrl()->isFrameDone( rcSH )//lufeng: alloc new buf for new frame
 			|| !m_pcCurrentViewFrameUnit[rcSH.getViewId()] ->getMbDataCtrl()->isInitDone()
@@ -479,22 +468,10 @@ ErrVal FrameMng::initFrame( SliceHeader& rcSH, PicBuffer* pcPicBuffer )
   {
       m_pcCurrentFrameUnit = m_pcCurrentViewFrameUnit[rcSH.getViewId()];//lufeng: continue last incomplete view
   }
-#else
-  RNOK( m_cFrameUnitBuffer.getFrameUnit( m_pcCurrentFrameUnit ) );
-  RNOK( m_pcCurrentFrameUnit->init( rcSH, pcPicBuffer ) );
-
-
-  m_pcCurrentFrameUnit->getFrame().setViewId( rcSH.getViewId() );
-
-  m_pcCurrentFrameUnit->getFrame().setInterViewFlag(rcSH.getInterViewFlag()); //JVT-W056	
-
-  rcSH.setFrameUnit( m_pcCurrentFrameUnit );
-#endif
 
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 ErrVal FrameMng::xStoreInOrderedPocList( FrameUnit* pcFrameUnit )
 {
     //===== store reference in ordered POC List =====
@@ -574,7 +551,6 @@ Void FrameMng::xSetIdentifier( UInt& uiNum, PicType& rePicType, const PicType eC
         uiNum /= 2;
     }
 }
-#endif //LF_INTERLACE
 
 
 ErrVal FrameMng::xCheckMissingFrameNums( SliceHeader& rcSH )
@@ -690,25 +666,12 @@ ErrVal FrameMng::storePicture( const SliceHeader& rcSH )
 }
 
 
-#ifdef   LF_INTERLACE
 UInt FrameMng::xSortPocOrderedList( RefPicList<Frame*,64>& rcRefPicFrameList, Int iCurrPoc )
-#else //!LF_INTERLACE
-UInt FrameMng::xSortPocOrderedList()
-#endif //LF_INTERLACE
 {
     UInt  uiFirstPosWithGreaterPoc;
-#ifdef   LF_INTERLACE
-#else //!LF_INTERLACE
-    Int   iCurrPoc = m_pcCurrentFrameUnit->getFrame().getPOC();
-#endif //LF_INTERLACE
 
-#ifdef   LF_INTERLACE
     std::sort( rcRefPicFrameList.begin(), rcRefPicFrameList.end(), Frame::PocOrder() );
     for( uiFirstPosWithGreaterPoc = 0; uiFirstPosWithGreaterPoc < rcRefPicFrameList.size(); uiFirstPosWithGreaterPoc++ )
-#else //!LF_INTERLACE
-    std::sort( m_cPocOrderedFrameList.begin(), m_cPocOrderedFrameList.end(), PocOrder() );
-    for( uiFirstPosWithGreaterPoc = 0; uiFirstPosWithGreaterPoc < m_cPocOrderedFrameList.size(); uiFirstPosWithGreaterPoc++ )
-#endif //LF_INTERLACE
     {
         if( m_cPocOrderedFrameList.get( uiFirstPosWithGreaterPoc )->getPOC() > iCurrPoc )
         {
@@ -720,16 +683,7 @@ UInt FrameMng::xSortPocOrderedList()
 
 ErrVal FrameMng::xSetInitialReferenceListPFrame( SliceHeader& rcSH )
 {
-#ifdef   LF_INTERLACE
     RefPicList<RefPic>& rcList = rcSH.getRefPicList( FRAME, LIST_0 );
-#else //!LF_INTERLACE
-    RefPicList<RefPic>& rcList = rcSH.getRefPicList( LIST_0 );
-#endif //LF_INTERLACE
-  /*
-  if( ! rcSH.getKeyPictureFlag() ) 
-    m_cShortTermList.setRefPicListFGS( rcList, rcSH );
-  else
-  */
     m_cShortTermList.setRefPicList( rcList, rcSH);
   return Err::m_nOK;
 }
@@ -738,31 +692,17 @@ ErrVal FrameMng::xSetInitialReferenceListPFrame( SliceHeader& rcSH )
 
 ErrVal FrameMng::xSetInitialReferenceListBFrame( SliceHeader& rcSH )
 {
-#ifdef   LF_INTERLACE
   RefPicList<RefPic>& rcList0 = rcSH.getRefPicList( FRAME, LIST_0 );
   RefPicList<RefPic>& rcList1 = rcSH.getRefPicList( FRAME, LIST_1 );
-#else //!LF_INTERLACE
-  RefPicList<RefPic>& rcList0 = rcSH.getRefPicList( LIST_0 );
-  RefPicList<RefPic>& rcList1 = rcSH.getRefPicList( LIST_1 );
-#endif //LF_INTERLACE
   UInt                uiFirstPosWithGreaterPoc, uiPos;
   FUIter              iter;
 
   //====== set Poc ordered short-term list and get index with smallest Poc greater than current ======
   m_cPocOrderedFrameList.reset();
-  /*
-  if( ! rcSH.getKeyPictureFlag() )
-    m_cShortTermList.setRefFrameListFGS( m_cPocOrderedFrameList, rcSH );
-  else
-  */
   m_cShortTermList.setRefFrameList( m_cPocOrderedFrameList , rcSH);
 
-#ifdef   LF_INTERLACE
   PicType eCurrPicType = rcSH.getPicType();
   uiFirstPosWithGreaterPoc = xSortPocOrderedList( m_cPocOrderedFrameList, m_pcCurrentFrameUnit->getPic( eCurrPicType ).getPOC() );
-#else //!LF_INTERLACE
-  uiFirstPosWithGreaterPoc = xSortPocOrderedList();
-#endif //LF_INTERLACE
 
   //===== set short term reference frames =====
   for( uiPos = uiFirstPosWithGreaterPoc - 1; uiPos != MSYS_UINT_MAX; uiPos-- )
@@ -782,7 +722,6 @@ ErrVal FrameMng::xSetInitialReferenceListBFrame( SliceHeader& rcSH )
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 ErrVal FrameMng::xSetInitialReferenceListPFields( SliceHeader& rcSH )
 {
     //----- initial frame list for short term pictures -----
@@ -912,7 +851,6 @@ ErrVal FrameMng::xSetMbaffFieldLists( SliceHeader& rcSH, ListIdx eListIdx )
     }
     return Err::m_nOK;
 }
-#endif //LF_INTERLACE
 
 ErrVal FrameMng::setRefPicLists( SliceHeader& rcSH, Bool bDoNotRemap )
 {
@@ -929,7 +867,6 @@ ErrVal FrameMng::setRefPicLists( SliceHeader& rcSH, Bool bDoNotRemap )
   }
 
 // cleanup //dump
-#ifdef   LF_INTERLACE
 #if 1
   if( rcSH.isInterP() )
   {
@@ -941,21 +878,7 @@ ErrVal FrameMng::setRefPicLists( SliceHeader& rcSH, Bool bDoNotRemap )
     xDumpRefList( LIST_1, rcSH );
   }
 #endif
-#else
-#if 0
-  if( rcSH.isInterP() )
-  {
-    xDumpRefList( LIST_0, rcSH );
-  }
-  else if (rcSH.isInterB())
-  {
-    xDumpRefList( LIST_0, rcSH );
-    xDumpRefList( LIST_1, rcSH );
-  }
-#endif
-#endif
 
-#ifdef   LF_INTERLACE
 	PicType eCurrPicType = rcSH.getPicType();
   //===== MBAFF field lists =====
   if( eCurrPicType == FRAME && rcSH.getSPS().getMbAdaptiveFrameFieldFlag() )
@@ -963,7 +886,6 @@ ErrVal FrameMng::setRefPicLists( SliceHeader& rcSH, Bool bDoNotRemap )
     RNOK( xSetMbaffFieldLists( rcSH, LIST_0 ) );
     RNOK( xSetMbaffFieldLists( rcSH, LIST_1 ) );
   }
-#endif //LF_INTERLACE
 
   return Err::m_nOK;
 }
@@ -972,24 +894,18 @@ ErrVal FrameMng::setRefPicLists( SliceHeader& rcSH, Bool bDoNotRemap )
 
 ErrVal FrameMng::xSetReferenceLists( SliceHeader& rcSH )
 {
-#ifdef   LF_INTERLACE
   rcSH.getRefPicList( FRAME    , LIST_0 ).reset( 0 );
   rcSH.getRefPicList( FRAME    , LIST_1 ).reset( 0 );
   rcSH.getRefPicList( TOP_FIELD, LIST_0 ).reset( 0 );
   rcSH.getRefPicList( TOP_FIELD, LIST_1 ).reset( 0 );
   rcSH.getRefPicList( BOT_FIELD, LIST_0 ).reset( 0 );
   rcSH.getRefPicList( BOT_FIELD, LIST_1 ).reset( 0 );
-#else //!LF_INTERLACE
-  rcSH.getRefPicList( LIST_0 ).reset( 0 );
-  rcSH.getRefPicList( LIST_1 ).reset( 0 );
-#endif //LF_INTERLACE
 
   if( rcSH.isIntra() )
   {
     return Err::m_nOK;
   }
 
-#ifdef   LF_INTERLACE
   PicType eCurrPicType = rcSH.getPicType();
   rcSH.getRefPicList( eCurrPicType, LIST_0 ).reset();
   if( eCurrPicType == FRAME && rcSH.getSPS().getMbAdaptiveFrameFieldFlag() )
@@ -997,28 +913,20 @@ ErrVal FrameMng::xSetReferenceLists( SliceHeader& rcSH )
       rcSH.getRefPicList( TOP_FIELD, LIST_0 ).reset();
       rcSH.getRefPicList( BOT_FIELD, LIST_0 ).reset();
   }
-#else //!LF_INTERLACE
-  rcSH.getRefPicList( LIST_0 ).reset();
-#endif //LF_INTERLACE
 
   if( rcSH.isInterB() )
   {
-#ifdef   LF_INTERLACE
       rcSH.getRefPicList( eCurrPicType, LIST_1 ).reset();
       if( eCurrPicType == FRAME && rcSH.getSPS().getMbAdaptiveFrameFieldFlag() )
       {
           rcSH.getRefPicList( TOP_FIELD, LIST_1 ).reset();
           rcSH.getRefPicList( BOT_FIELD, LIST_1 ).reset();
       }
-#else //!LF_INTERLACE
-      rcSH.getRefPicList( LIST_1 ).reset();
-#endif //LF_INTERLACE
   }
   
   //===== initial lists =====
   if( ! rcSH.isInterB() )
   {
-#ifdef   LF_INTERLACE
       if( eCurrPicType == FRAME )
       {
           RNOK( xSetInitialReferenceListPFrame( rcSH ) );
@@ -1027,13 +935,9 @@ ErrVal FrameMng::xSetReferenceLists( SliceHeader& rcSH )
       {
           RNOK( xSetInitialReferenceListPFields( rcSH ) );
       }
-#else //!LF_INTERLACE
-      RNOK( xSetInitialReferenceListPFrame( rcSH ) );
-#endif //LF_INTERLACE
       }
   else
   {
-#ifdef   LF_INTERLACE
       if( eCurrPicType == FRAME )
       {
           RNOK( xSetInitialReferenceListBFrame( rcSH ) );
@@ -1042,9 +946,6 @@ ErrVal FrameMng::xSetReferenceLists( SliceHeader& rcSH )
       {
           RNOK( xSetInitialReferenceListBFields( rcSH ) );
       }
-#else //!LF_INTERLACE
-      RNOK( xSetInitialReferenceListBFrame( rcSH ) );
-#endif //LF_INTERLACE
   }
 
 
@@ -1058,7 +959,6 @@ ErrVal FrameMng::xSetReferenceLists( SliceHeader& rcSH )
 
 ErrVal FrameMng::xClearListsIDR( const SliceHeader& rcSH  )
 {
-#ifdef   LF_INTERLACE
 	FUIter iterTemp = m_cOrderedPOCList.begin();
 	FUIter iter;
   //===== output =====
@@ -1074,20 +974,9 @@ ErrVal FrameMng::xClearListsIDR( const SliceHeader& rcSH  )
 #else
 	if(rcSH.getViewId() == (*iter)->getFrame().getViewId() )
 #endif
-#else
-  for( FUIter iter = m_cOrderedPOCList.begin(); iter != m_cOrderedPOCList.end(); iter++ )
-  {
-    if(rcSH.getViewId() == (*iter)->getFrame().getViewId() )
-#endif
     {
       if( ! rcSH.getNoOutputOfPriorPicsFlag() )
       {
-/*        if( (*iter)->getFGSPicBuffer() )
-        {
-          (*iter)->getFGSPicBuffer()->setCts( (UInt64)((*iter)->getMaxPOC()) ); // HS: decoder robustness
-          m_cPicBufferOutputList.push_back( (*iter)->getFGSPicBuffer() );
-        }
-        else */
         if ((*iter)->getPicBuffer() )  //JVT-S036 
         {
           (*iter)->getPicBuffer()->setCts( (UInt64)((*iter)->getMaxPOC()) ); // HS: decoder robustness
@@ -1107,7 +996,6 @@ ErrVal FrameMng::xClearListsIDR( const SliceHeader& rcSH  )
 
 //  m_cOrderedPOCList.clear();
 
-#ifdef   LF_INTERLACE
   iterTemp = m_cShortTermList.begin();
   for( ;; )//lufeng: clear short term list
   {
@@ -1125,7 +1013,6 @@ ErrVal FrameMng::xClearListsIDR( const SliceHeader& rcSH  )
       RNOK( xRemoveFromRefList( m_cShortTermList, iter ) );
     }
   }
-#endif
 
   return Err::m_nOK;
 }
@@ -1189,11 +1076,7 @@ ErrVal FrameMng::storeFGSPicture( PicBuffer* pcPicBuffer )
 ErrVal FrameMng::xStoreCurrentPicture( const SliceHeader& rcSH )
 {
 	// Frame& cBaseFrame = m_pcCurrentFrameUnit->getFrame();
-#ifdef   LF_INTERLACE
 	Frame& cBaseFrame = m_pcCurrentFrameUnit->getPic( rcSH.getPicType() ); //th fix
-#else
-	Frame& cBaseFrame = m_pcCurrentFrameUnit->getFrame();
-#endif
   PicBuffer cTempPicBuffer(cBaseFrame.getFullPelYuvBuffer()->getBuffer());
 
   PicBuffer*  pcTempPicBuffer = m_pcCurrentFrameUnit->getPicBuffer();
@@ -1201,7 +1084,6 @@ ErrVal FrameMng::xStoreCurrentPicture( const SliceHeader& rcSH )
   pcTempPicBuffer->setViewId(rcSH.getViewId());
   m_uiLastViewId = rcSH.getViewId();
 
-#ifdef   LF_INTERLACE
   PicType eCurrPicType = rcSH.getPicType();
 
   Bool bFieldCoded = rcSH.getFieldPicFlag()? true : rcSH.isMbAff();
@@ -1223,89 +1105,24 @@ ErrVal FrameMng::xStoreCurrentPicture( const SliceHeader& rcSH )
 	  RNOK( m_pcCurrentFrameUnit->getPic( eCurrPicType ).extendFrame( m_pcQuarterPelFilter, rcSH.getSPS().getFrameMbsOnlyFlag(), false ) );
       RNOK( xStoreNonRef( m_pcCurrentFrameUnit ) );
   }
-#else //!LF_INTERLACE
-
-  RNOK( m_pcCurrentFrameUnit->getFrame().extendFrame( m_pcQuarterPelFilter ) );
-
-  if( rcSH.getNalRefIdc() )
-  {
-    //===== store as short term picture =====
-    m_pcCurrentFrameUnit->setFrameNumber( rcSH.getFrameNum() );
-    m_pcCurrentFrameUnit->setUsed       ();
-
-    m_cShortTermList.push_front( m_pcCurrentFrameUnit );
-    m_iEntriesInDPB++;
-
-//JVT-S036  start
-	if( rcSH.getKeyPicFlagScalable() )
-	{
-		RNOK( m_cFrameUnitBuffer.getFrameUnit( m_pcCurrentFrameUnitBase ) );
-		RNOK( m_pcCurrentFrameUnitBase->copyBase( rcSH, *m_pcCurrentFrameUnit ) );
-		m_pcCurrentFrameUnitBase->setBaseRep( true );
-		m_cShortTermList.push_front( m_pcCurrentFrameUnitBase );
-		m_iEntriesInDPB++; 
-	}
-//JVT-S036  end
-  }
-  else
-  {
-
-    m_cNonRefList.push_back( m_pcCurrentFrameUnit );
-    m_iEntriesInDPB++;
-  }
-
-  //===== store reference in ordered POC List =====
-  FUIter  iter;
-  for( iter = m_cOrderedPOCList.begin(); iter != m_cOrderedPOCList.end(); iter++ )
-  {
-    if( (*iter)->getMaxPOC() > m_pcCurrentFrameUnit->getMaxPOC() )
-    {
-      break;
-    }
-  }
-
-  if( rcSH.getKeyPicFlagScalable() ) //JVT-S036 
-  {
-	m_cOrderedPOCList.insert( iter, m_pcCurrentFrameUnitBase );
-  }
-  else
-  {
-	  m_cOrderedPOCList.insert( iter, m_pcCurrentFrameUnit );
-  }
-
-#endif //LF_INTERLACE
   return Err::m_nOK;
 }
 
 
 
-#ifdef   LF_INTERLACE
 ErrVal FrameMng::xMmcoMarkShortTermAsUnused( const PicType eCurrPicType, const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums )
-#else //!LF_INTERLACE
-ErrVal FrameMng::xMmcoMarkShortTermAsUnused( const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums )
-#endif //LF_INTERLACE
 {
-#ifdef   LF_INTERLACE
     UInt  uiCurrPicNum  = ( eCurrPicType == FRAME ? pcCurrFrameUnit->getFrameNumber()
         : pcCurrFrameUnit->getFrameNumber() * 2 + 1 );
     PicType ePicType;
-#else //!LF_INTERLACE
-    UInt  uiCurrPicNum  = pcCurrFrameUnit->getFrameNumber();
-#endif //LF_INTERLACE
     UInt  uiPicNumN     = uiCurrPicNum - uiDiffOfPicNums - 1;
 
     if( uiCurrPicNum <= uiDiffOfPicNums )
     {
-#ifdef   LF_INTERLACE
         uiPicNumN += ( eCurrPicType == FRAME ? m_uiMaxFrameNumPrev : 2 * m_uiMaxFrameNumPrev );
-#else //!LF_INTERLACE
-        uiPicNumN += m_uiMaxFrameNumPrev;
-#endif //LF_INTERLACE
     }
 
-#ifdef   LF_INTERLACE
     xSetIdentifier( uiPicNumN, ePicType, eCurrPicType );
-#endif //LF_INTERLACE
 
     FUIter iter = m_cShortTermList.findShortTerm( uiPicNumN );
     if( iter == m_cShortTermList.end() )
@@ -1315,48 +1132,29 @@ ErrVal FrameMng::xMmcoMarkShortTermAsUnused( const FrameUnit* pcCurrFrameUnit, U
     }
 
     FrameUnit* pcFrameUnit = (*iter);
-#ifdef   LF_INTERLACE
     pcFrameUnit->setUnused( ePicType );
     if( ! pcFrameUnit->isUsed( FRAME ) )
     {
         RNOK( xRemoveFromRefList( m_cShortTermList, iter ) )
     }
-#else //!LF_INTERLACE
-    pcFrameUnit->setUnused();
-    RNOK( xRemoveFromRefList( m_cShortTermList, iter ) );
-#endif //LF_INTERLACE
 
     return Err::m_nOK;
 }
 
 //JVT-S036  start
-#ifdef   LF_INTERLACE
 ErrVal FrameMng::xMmcoMarkShortTermAsUnusedBase( const PicType eCurrPicType, const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums )
-#else //!LF_INTERLACE
-ErrVal FrameMng::xMmcoMarkShortTermAsUnusedBase( const FrameUnit* pcCurrFrameUnit, UInt uiDiffOfPicNums )
-#endif //LF_INTERLACE
 {
-#ifdef   LF_INTERLACE
     UInt  uiCurrPicNum  = ( eCurrPicType == FRAME ? pcCurrFrameUnit->getFrameNumber()
         : pcCurrFrameUnit->getFrameNumber() * 2 + 1 );
     PicType ePicType;
-#else //!LF_INTERLACE
-    UInt  uiCurrPicNum  = pcCurrFrameUnit->getFrameNumber();
-#endif //LF_INTERLACE
     UInt  uiPicNumN     = uiCurrPicNum - uiDiffOfPicNums - 1;
 
     if( uiCurrPicNum <= uiDiffOfPicNums )
     {
-#ifdef   LF_INTERLACE
         uiPicNumN += ( eCurrPicType == FRAME ? m_uiMaxFrameNumPrev : 2 * m_uiMaxFrameNumPrev );
-#else //!LF_INTERLACE
-        uiPicNumN += m_uiMaxFrameNumPrev;
-#endif //LF_INTERLACE
     }
 
-#ifdef   LF_INTERLACE
     xSetIdentifier( uiPicNumN, ePicType, eCurrPicType );
-#endif //LF_INTERLACE
 
     FUIter iter = m_cShortTermList.findShortTerm( uiPicNumN );
     if( iter == m_cShortTermList.end() )
@@ -1366,7 +1164,6 @@ ErrVal FrameMng::xMmcoMarkShortTermAsUnusedBase( const FrameUnit* pcCurrFrameUni
     }
 
     FrameUnit* pcFrameUnit = (*iter);
-#ifdef   LF_INTERLACE
     if(pcFrameUnit->getBaseRep() )
     {
         pcFrameUnit->setUnused( ePicType );
@@ -1375,13 +1172,6 @@ ErrVal FrameMng::xMmcoMarkShortTermAsUnusedBase( const FrameUnit* pcCurrFrameUni
             RNOK( xRemoveFromRefList( m_cShortTermList, iter ) )
         }
     }
-#else //!LF_INTERLACE
-    if(pcFrameUnit->getBaseRep() )
-    {
-        pcFrameUnit->setUnused();
-        RNOK( xRemoveFromRefList( m_cShortTermList, iter ) );
-    }
-#endif //LF_INTERLACE
 
     return Err::m_nOK;
 }
@@ -1393,18 +1183,14 @@ ErrVal FrameMng::xManageMemory( const SliceHeader& rcSH )
 
   if( ! rcSH.getAdaptiveRefPicBufferingFlag() )
   {
-#ifdef   LF_INTERLACE
 #if JM_MVC_COMPATIBLE // hwsun, add #if
 	if( !getCurrentFrameUnit()->isRefPic() )
 #endif
-#endif //LF_INTERLACE
     RNOK( xSlidingWindowUpdate() );
     return Err::m_nOK;
   }
 
-#ifdef   LF_INTERLACE
 	PicType eCurrPicType = rcSH.getPicType();
-#endif //LF_INTERLACE
 
   MmcoOp eMmcoOp;
   const MmcoBuffer& rcMmcoBuffer = rcSH.getMmcoBuffer();
@@ -1416,11 +1202,7 @@ ErrVal FrameMng::xManageMemory( const SliceHeader& rcSH )
     switch (eMmcoOp)
     {
     case MMCO_SHORT_TERM_UNUSED:
-#ifdef   LF_INTERLACE
 		RNOK( xMmcoMarkShortTermAsUnusedMVC(rcSH.getPicType(), m_pcCurrentFrameUnit, uiVal1, rcSH.getViewId() ) );
-#else //!LF_INTERLACE
-		RNOK( xMmcoMarkShortTermAsUnusedMVC( m_pcCurrentFrameUnit, uiVal1, rcSH.getViewId() ) );
-#endif //LF_INTERLACE
 
       break;
     case MMCO_RESET:
@@ -1483,11 +1265,7 @@ ErrVal FrameMng::xSlidingWindowUpdateBase( UInt mCurrFrameNum )
 		{
 			if ( (*iiter)->getFrameNumber() == (*iter)->getFrameNumber() && !(*iiter)->getBaseRep() )
 			{
-#ifdef LF_INTERLACE			
                 (*iter)->setUnused(FRAME);
-#else
-                (*iter)->setUnused();
-#endif
 				RNOK( xRemoveFromRefList( m_cShortTermList, iter ) );
 				return Err::m_nOK;
 			}
@@ -1510,11 +1288,7 @@ ErrVal FrameMng::xMMCOUpdateBase( SliceHeader* rcSH )
 		switch( eMmcoOp )
 		{
 		case MMCO_SHORT_TERM_UNUSED:
-#ifdef LF_INTERLACE
             RNOK( xMmcoMarkShortTermAsUnusedBase( rcSH->getPicType(), m_pcCurrentFrameUnit, uiVal1 ) );
-#else
-			RNOK( xMmcoMarkShortTermAsUnusedBase(  m_pcCurrentFrameUnit, uiVal1 ) );
-#endif
 		break;
 		case MMCO_RESET:
 		case MMCO_MAX_LONG_TERM_IDX:
@@ -1530,18 +1304,10 @@ ErrVal FrameMng::xMMCOUpdateBase( SliceHeader* rcSH )
 }
 //JVT-S036  end
 
-#ifdef   LF_INTERLACE
 ErrVal FrameMng::getRecYuvBuffer( YuvPicBuffer*& rpcRecYuvBuffer, PicType ePicType )
-#else //!LF_INTERLACE
-ErrVal FrameMng::getRecYuvBuffer( YuvPicBuffer*& rpcRecYuvBuffer )
-#endif //LF_INTERLACE
 {
     ROT( NULL == m_pcCurrentFrameUnit );
-#ifdef   LF_INTERLACE
     rpcRecYuvBuffer = m_pcCurrentFrameUnit->getPic( ePicType ).getFullPelYuvBuffer();
-#else //!LF_INTERLACE
-    rpcRecYuvBuffer = m_pcCurrentFrameUnit->getFrame().getFullPelYuvBuffer();
-#endif //LF_INTERLACE
     return Err::m_nOK;
 }
 
@@ -1562,26 +1328,17 @@ FrameMng::getReconstructedFrameUnit( Int iPoc )
 
 ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
 {
-#ifdef   LF_INTERLACE
     PicType eCurrPicType   = rcSH.getPicType();
     RefPicList<RefPic>& rcList = rcSH.getRefPicList( eCurrPicType, eListIdx );
-#else //!LF_INTERLACE
-    RefPicList<RefPic>& rcList = rcSH.getRefPicList( eListIdx );
-#endif //LF_INTERLACE
     ROTRS( 0 == rcList.bufSize(), Err::m_nOK );
 
     const RplrBuffer& rcRplrBuffer = rcSH.getRplrBuffer( eListIdx );
 
     ROTRS( ! rcRplrBuffer.getRefPicListReorderingFlag(), Err::m_nOK );
 
-#ifdef   LF_INTERLACE
     UInt      uiPicNumPred  = ( eCurrPicType == FRAME ? rcSH.getFrameNum()
         : rcSH.getFrameNum() * 2 + 1 );
     UInt      uiMaxPicNum   = ( eCurrPicType == FRAME ? m_uiMaxFrameNumPrev : 2 * m_uiMaxFrameNumPrev );
-#else //!LF_INTERLACE
-    UInt      uiPicNumPred  = rcSH.getFrameNum();
-    UInt      uiMaxPicNum   = m_uiMaxFrameNumPrev;
-#endif //LF_INTERLACE
     UInt      uiIndex       = 0;
     UInt      uiCommand;
     UInt      uiIdentifier;
@@ -1591,9 +1348,7 @@ ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
 
   while( RPLR_END != ( uiCommand = rcRplrBuffer.get( uiIndex ).getCommand( uiIdentifier ) ) )
   {
-#ifdef   LF_INTERLACE
       PicType   ePicType;
-#endif //LF_INTERLACE
     FUIter    iter;
     const Frame* pcFrame = NULL;
 	Bool InterViewFlag=false;
@@ -1631,52 +1386,19 @@ ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
         }
       }
       uiIdentifier = uiPicNumPred;
-#ifdef   LF_INTERLACE
       xSetIdentifier( uiIdentifier, ePicType, eCurrPicType );
-#endif //LF_INTERLACE
       //---- search for short term picture ----
       iter = m_cShortTermList.findShortTermMVC( uiIdentifier, rcSH.getViewId() ); 
 
       //---- check ----
-#ifdef   LF_INTERLACE
-          if( iter == m_cShortTermList.end() || ! (*iter)->isShortTerm( ePicType ) )
-#else //!LF_INTERLACE
-          if( iter == m_cShortTermList.end() )
-#endif //LF_INTERLACE
+      if( iter == m_cShortTermList.end() || ! (*iter)->isShortTerm( ePicType ) )
       {
         return Err::m_nDataNotAvailable;
       }
       else
       { // everything is fine
         //---- set frame ----
-        if( ! rcSH.getKeyPictureFlag() ) 
-        {
-			    if((*iter)->getBaseRep()) //JVT-S036 
-			    {
-				    iter++;
-			    }
-/*
-			    if( (*iter)->getFGSPicBuffer() )
-			    {
-				    pcFrame = &( (*iter)->getFGSFrame() );
-			    }
-			    else
-*/		    {
-#ifdef   LF_INTERLACE
-                 pcFrame = &((*iter)->getPic( ePicType ) );
-#else //!LF_INTERLACE
-                    pcFrame = &( (*iter)->getFrame() );
-#endif //LF_INTERLACE
-			    }
-			    }
-			    else
-			    {
-#ifdef   LF_INTERLACE
-                    pcFrame = &((*iter)->getPic( ePicType ) );
-#else //!LF_INTERLACE
-				    pcFrame = &((*iter)->getFrame() );
-#endif //LF_INTERLACE
-			    }
+          pcFrame = &((*iter)->getPic( ePicType ) );
       }
     }
     else // uiCommand == 4 or 5 JVT-V043
@@ -1729,11 +1451,7 @@ ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
      //---- set frame ----
      InterViewFlag = (*iter)->getFrame().getInterViewFlag(); 
 	  if (InterViewFlag == true)
-#ifdef   LF_INTERLACE
 		  pcFrame = &((*iter)->getFrame(rcSH.getPicType()) );
-#else
-		  pcFrame = &((*iter)->getFrame() ); 
-#endif
 
     }
     //---- find picture in reference list -----
@@ -1766,7 +1484,6 @@ ErrVal FrameMng::xReferenceListRemapping( SliceHeader& rcSH, ListIdx eListIdx )
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 ErrVal FrameMng::xSetOutputListMVC( FrameUnit* pcFrameUnit, UInt uiNumOfViews )
 {
   ROTRS( m_iEntriesInDPB <= m_iMaxEntriesinDPB, Err::m_nOK );
@@ -1828,7 +1545,6 @@ ErrVal FrameMng::xSetOutputListMVC( FrameUnit* pcFrameUnit, UInt uiNumOfViews )
 
   return Err::m_nOK;
 }
-#endif
 
 ErrVal FrameMng::xSetOutputListMVC( FrameUnit* pcFrameUnit, const SliceHeader& rcSH )
 {
@@ -1897,11 +1613,7 @@ FrameMng::xDumpRefList( ListIdx       eListIdx,
 #if 0 // NO_DEBUG
   return Err::m_nOK;
 #endif
-#ifdef LF_INTERLACE
   RefPicList<RefPic>& rcList = rcSH.getRefPicList( rcSH.getPicType() ,eListIdx  );
-#else
-  RefPicList<RefPic>& rcList = rcSH.getRefPicList( eListIdx  );
-#endif
 
 #if JM_MVC_COMPATIBLE
 #define DELTA_POCA  DELTA_POC
@@ -1913,48 +1625,28 @@ FrameMng::xDumpRefList( ListIdx       eListIdx,
   //for( UInt uiIndex = 0; uiIndex < rcList.size(); uiIndex++ )
   for( UInt uiIndex = 0; uiIndex < rcSH.getNumRefIdxActive(eListIdx); uiIndex++ )
   {
-#ifdef   LF_INTERLACE
     printf("%d/%d ", rcList.get(uiIndex).getFrame()->getViewId(), 
            rcList.get(uiIndex).getFrame()->getPOC()-DELTA_POCA );
-#else
-    printf("%d/%d ", rcList.get(uiIndex).getFrame()->getViewId(), 
-           rcList.get(uiIndex).getFrame()->getPOC() );
-#endif
   }
   printf("\n");
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
    ErrVal FrameMng::xMmcoMarkShortTermAsUnusedMVC( const PicType eCurrPicType, const FrameUnit* pcCurrFrameUnit, 
                                                UInt uiDiffOfPicNums, UInt uiCurrViewId )
-#else //!LF_INTERLACE
-ErrVal FrameMng::xMmcoMarkShortTermAsUnusedMVC( const FrameUnit* pcCurrFrameUnit, 
-                                               UInt uiDiffOfPicNums, UInt uiCurrViewId )
-#endif //LF_INTERLACE
 {
-#ifdef   LF_INTERLACE
   UInt  uiCurrPicNum  = ( eCurrPicType == FRAME ? pcCurrFrameUnit->getFrameNumber()
       : pcCurrFrameUnit->getFrameNumber() * 2 + 1 );
   PicType ePicType;
-#else //!LF_INTERLACE
-  UInt  uiCurrPicNum  = pcCurrFrameUnit->getFrameNumber();
-#endif //LF_INTERLACE
 
   UInt  uiPicNumN     = uiCurrPicNum - uiDiffOfPicNums - 1;
 
   if( uiCurrPicNum <= uiDiffOfPicNums )
   {
-#ifdef   LF_INTERLACE
     uiPicNumN += ( eCurrPicType == FRAME ? m_uiMaxFrameNumPrev : 2 * m_uiMaxFrameNumPrev );
-#else //!LF_INTERLACE
-    uiPicNumN += m_uiMaxFrameNumPrev;
-#endif //LF_INTERLACE
   }
 
-#ifdef   LF_INTERLACE
   xSetIdentifier( uiPicNumN, ePicType, eCurrPicType );
-#endif //LF_INTERLACE
 
   FUIter iter = m_cShortTermList.findShortTermMVC( uiPicNumN, uiCurrViewId );
   if( iter == m_cShortTermList.end() )
@@ -1964,16 +1656,11 @@ ErrVal FrameMng::xMmcoMarkShortTermAsUnusedMVC( const FrameUnit* pcCurrFrameUnit
   }
 
   FrameUnit* pcFrameUnit = (*iter);
-#ifdef   LF_INTERLACE
   pcFrameUnit->setUnused( ePicType );
   if( ! pcFrameUnit->isUsed( FRAME ) )
   {
       RNOK( xRemoveFromRefList( m_cShortTermList, iter ) )
   }
-#else //!LF_INTERLACE
-  pcFrameUnit->setUnused();
-  RNOK( xRemoveFromRefList( m_cShortTermList, iter ) );
-#endif //LF_INTERLACE
 
   return Err::m_nOK;
 }
@@ -2002,12 +1689,7 @@ ErrVal FrameMng::xSetReferenceListsMVC( SliceHeader& rcSH )
 ErrVal            
 FrameMng::xSetPFrameListMVC ( SliceHeader& rcSH)
 {
-#ifdef LF_INTERLACE
   RefPicList<RefPic>& rcList0 = rcSH.getRefPicList(  rcSH.getPicType() ,LIST_0 );
-#else
-  RefPicList<RefPic>& rcList0 = rcSH.getRefPicList( LIST_0  );
-
-#endif
 
   UInt  uiInterViewPredRefNumFwd = ( rcSH.getAnchorPicFlag() ? rcSH.getSPS().SpsMVC->getNumAnchorRefsForListX(rcSH.getViewId(), LIST_0) : rcSH.getSPS().SpsMVC->getNumNonAnchorRefsForListX(rcSH.getViewId(), LIST_0));
   if (uiInterViewPredRefNumFwd ==0 ) 
@@ -2027,11 +1709,7 @@ FrameMng::xSetPFrameListMVC ( SliceHeader& rcSH)
   for(UInt uiIdx=0; uiIdx< uiInterViewPredRefNumFwd; uiIdx++)
   {
 	  rcList0.next();
-#ifdef LF_INTERLACE
 	  rcList0.getElementAndRemove(uiIdx + uiInterPredSize , uiIdx+uiInterPredSize ).setFrame( &cTempFrameList0.get(uiIdx)->getFrameUnit()->getPic(rcSH.getPicType()));
-#else
-	 rcList0.getElementAndRemove(uiIdx + uiInterPredSize , uiIdx+uiInterPredSize ).setFrame( cTempFrameList0.get(uiIdx)); 
-#endif
   }
 
   return Err::m_nOK;
@@ -2040,13 +1718,8 @@ FrameMng::xSetPFrameListMVC ( SliceHeader& rcSH)
 ErrVal
 FrameMng::xSetBFrameListMVC ( SliceHeader& rcSH)
 {
-#ifdef LF_INTERLACE
   RefPicList<RefPic>& rcList0 = rcSH.getRefPicList(  rcSH.getPicType(),LIST_0  );
   RefPicList<RefPic>& rcList1 = rcSH.getRefPicList(  rcSH.getPicType() ,LIST_1 );
-#else
-  RefPicList<RefPic>& rcList0 = rcSH.getRefPicList( LIST_0 );
-  RefPicList<RefPic>& rcList1 = rcSH.getRefPicList( LIST_1 );
-#endif
 
   UInt  uiInterViewPredRefNumFwd = ( rcSH.getAnchorPicFlag() ? rcSH.getSPS().SpsMVC->getNumAnchorRefsForListX(rcSH.getViewId(), LIST_0) : rcSH.getSPS().SpsMVC->getNumNonAnchorRefsForListX(rcSH.getViewId(), LIST_0));
   UInt  uiInterViewPredRefNumBwd = ( rcSH.getAnchorPicFlag() ? rcSH.getSPS().SpsMVC->getNumAnchorRefsForListX(rcSH.getViewId(), LIST_1) : rcSH.getSPS().SpsMVC->getNumNonAnchorRefsForListX(rcSH.getViewId(), LIST_1));
@@ -2074,22 +1747,14 @@ FrameMng::xSetBFrameListMVC ( SliceHeader& rcSH)
   for( uiIdx=0; uiIdx< cTempFrameList0.size(); uiIdx++)
   {
     rcList0.next();
-#ifdef   LF_INTERLACE
     rcList0.getElementAndRemove(uiIdx + uiInterPredSizeL0 , uiIdx+uiInterPredSizeL0 ).setFrame( &cTempFrameList0.get(uiIdx)->getFrameUnit()->getPic(rcSH.getPicType()));
-#else  
-	rcList0.getElementAndRemove(uiIdx + uiInterPredSizeL0 , uiIdx+uiInterPredSizeL0 ).setFrame( cTempFrameList0.get(uiIdx));
-#endif
   }
   
   //for( uiIdx=0; uiIdx< uiInterViewPredRefNumBwd; uiIdx++)
   for( uiIdx=0; uiIdx< cTempFrameList1.size(); uiIdx++)
   {
     rcList1.next();
-#ifdef   LF_INTERLACE
     rcList1.getElementAndRemove(uiIdx + uiInterPredSizeL1 , uiIdx+uiInterPredSizeL1 ).setFrame( &cTempFrameList1.get(uiIdx)->getFrameUnit()->getPic(rcSH.getPicType()));
-#else
-	rcList1.getElementAndRemove(uiIdx + uiInterPredSizeL1 , uiIdx+uiInterPredSizeL1 ).setFrame( cTempFrameList1.get(uiIdx));
-#endif
   }
   return Err::m_nOK;
 }  

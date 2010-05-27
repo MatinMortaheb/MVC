@@ -217,7 +217,6 @@ CreaterH264AVCDecoder::RoiDecodeInit()
 	m_pcH264AVCDecoder->RoiDecodeInit();
 }
 
-#ifdef   LF_INTERLACE
 //frame crop
 Void    
 CreaterH264AVCDecoder::setCrop(UInt* uiCrop)
@@ -226,7 +225,6 @@ CreaterH264AVCDecoder::setCrop(UInt* uiCrop)
 	for(i=0;i<4;i++)
 		*(uiCrop+i)=m_pcH264AVCDecoder->getCrop(i);
 }
-#endif
 
 //JVT-V054
 UInt*
@@ -243,13 +241,12 @@ CreaterH264AVCDecoder::getViewCodingOrder_SubStream()
 // Dec. 1 fix 
 }
 
-#ifdef LF_INTERLACE//lufeng: add vieworder
+//lufeng: add vieworder
 void
 CreaterH264AVCDecoder::addViewCodingOrder()
 {
 	m_pcH264AVCDecoder->addViewOrder();
 }
-#endif
 
 ErrVal CreaterH264AVCDecoder::create( CreaterH264AVCDecoder*& rpcCreaterH264AVCDecoder )
 {

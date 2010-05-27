@@ -70,18 +70,11 @@ ErrVal MbCoder::uninit()
 
 
 
-#ifdef LF_INTERLACE
 ErrVal MbCoder::encode( MbDataAccess& rcMbDataAccess,
                         MbDataAccess* pcMbDataAccessBase,
                         Int           iSpatialScalabilityType,
                         Bool          bTerminateSlice, 
 						Bool          bSendTerminateSlice)
-#else
-ErrVal MbCoder::encode( MbDataAccess& rcMbDataAccess,
-                        MbDataAccess* pcMbDataAccessBase,
-                        Int           iSpatialScalabilityType,
-                        Bool          bTerminateSlice )
-#endif
 {
   ROF( m_bInitDone );
 
@@ -93,13 +86,11 @@ ErrVal MbCoder::encode( MbDataAccess& rcMbDataAccess,
   if( bIsCoded )
   {
 
-#ifdef LF_INTERLACE
 		Bool bFieldFlagCoded = true;
     if( bFieldFlagCoded && rcMbDataAccess.getSH().isMbAff() && ( rcMbDataAccess.isTopMb() || m_bPrevIsSkipped ) )
     {
       RNOK( m_pcMbSymbolWriteIf->fieldFlag( rcMbDataAccess) );
     }
-#endif
 
     //===== base layer mode flag and base layer refinement flag =====
     if( rcMbDataAccess.getSH().getBaseLayerId() != MSYS_UINT_MAX )
@@ -220,9 +211,7 @@ ErrVal MbCoder::encode( MbDataAccess& rcMbDataAccess,
 
   m_bPrevIsSkipped = !bIsCoded;
 
-#ifdef LF_INTERLACE
   ROTRS( ! bSendTerminateSlice, Err::m_nOK );
-#endif
 
   //--- write terminating bit ---
   RNOK( m_pcMbSymbolWriteIf->terminatingBit ( bTerminateSlice ? 1:0 ) );

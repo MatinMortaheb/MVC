@@ -14,12 +14,8 @@ public:
   Void copyFrom( const MbMvData& rcMbMvData, const ParIdx8x8 eParIdx );
   Void copyFrom( const MbMvData& rcMbMvData );
 
-#ifdef LF_INTERLACE
   MbMvData():
 	     m_bFieldFlag ( false )
-#else
-    MbMvData()
-#endif
   {
     clear();  
   }
@@ -92,9 +88,7 @@ private:
 public:
   Mv  m_acMv[16];
 
-#ifdef   LF_INTERLACE
   Bool m_bFieldFlag;
-#endif
 
 };
 
@@ -137,16 +131,12 @@ public:
   {
     MbMvData::clear();
     m_usMotPredFlags = 0x0000;
-#ifdef   LF_INTERLACE
     m_bFieldFlag = false;
-#endif //LF_INTERLACE
     m_ascRefIdx[ 0 ] = m_ascRefIdx[ 1 ] = m_ascRefIdx[ 2 ] = m_ascRefIdx[ 3 ] = eRefIdxValues;
   }
 
-#ifdef   LF_INTERLACE
   Void  setFieldMode( Bool b )       { m_bFieldFlag = b; }
   Bool  getFieldMode()         const { return m_bFieldFlag; }
-#endif //LF_INTERLACE
 
   Void  setRefIdx( SChar scRefIdx );
   Void  setRefIdx( SChar scRefIdx, ParIdx16x8 eParIdx  );
@@ -205,11 +195,7 @@ public:
   Void  getMvRef         ( Mv& rcMv, SChar& rscRef, LumaIdx cIdx )                            const;
   Void  getMv3D          ( Mv3D& rcMv3D,            LumaIdx cIdx )                            const;
   Void  getMvRefNeighbour( Mv& rcMv, SChar& rscRef, LumaIdx cIdx )    const;
-#ifdef   LF_INTERLACE
   Void  getMv3DNeighbour ( Mv3D& rcMv3D,            LumaIdx cIdx, Bool bCurrentFieldFlag )    const;
-#else //!LF_INTERLACE
-  Void  getMv3DNeighbour ( Mv3D& rcMv3D,            LumaIdx cIdx )    const;
-#endif //LF_INTERLACE
 
   ErrVal  save( FILE* pFile );
   ErrVal  load( FILE* pFile );
@@ -456,15 +442,10 @@ __inline Void MbMotionData::getMvRefNeighbour( Mv& rcMv, SChar& rscRef, LumaIdx 
   rscRef = m_ascRefIdx[ m_auiBlk2Part[ cIdx.b4x4()] ];
 }
 
-#ifdef   LF_INTERLACE
 __inline Void MbMotionData::getMv3DNeighbour( Mv3D& rcMv3D, LumaIdx cIdx, Bool bCurrentFieldFlag ) const
-#else //!LF_INTERLACE
-__inline Void MbMotionData::getMv3DNeighbour( Mv3D& rcMv3D, LumaIdx cIdx ) const
-#endif //LF_INTERLACE
 {
     rcMv3D.set( m_acMv[ cIdx.b4x4() ], m_ascRefIdx[ m_auiBlk2Part[ cIdx.b4x4()] ] );
 
-#ifdef   LF_INTERLACE
     if( bCurrentFieldFlag && ! m_bFieldFlag )
     {
         rcMv3D.setFrameToFieldPredictor();
@@ -473,7 +454,6 @@ __inline Void MbMotionData::getMv3DNeighbour( Mv3D& rcMv3D, LumaIdx cIdx ) const
     {
         rcMv3D.setFieldToFramePredictor();
     }
-#endif //LF_INTERLACE
 }
 
 H264AVC_NAMESPACE_END

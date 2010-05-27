@@ -37,30 +37,16 @@ public:
   virtual ErrVal initMbForParsing     ( MbDataAccess*&              rpcMbDataAccess,
                                         UInt                        uiMbIndex )         = 0;
 
-#ifdef LF_INTERLACE
   virtual ErrVal initMbForDecoding    (MbDataAccess*& rpcMbDataAccess,UInt uiMbY, UInt uiMbX, Bool bMbAFF  )=0;
   virtual ErrVal initMbForFiltering   ( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMbX, Bool bMbAFF )=0;
   virtual ErrVal initMbForFiltering   ( UInt uiMbY, UInt uiMbX, Bool bMbAFF )=0;
-#else
-  virtual ErrVal initMbForDecoding    ( MbDataAccess*&              rpcMbDataAccess,
-                                        UInt                        uiMbIndex )         = 0;
-  virtual ErrVal initMbForFiltering   ( MbDataAccess*&              rpcMbDataAccess,
-                                        UInt                        uiMbIndex )         = 0;
-#endif
 
   virtual ErrVal initSliceForCoding   ( const SliceHeader&          rcSH )              = 0;
   virtual ErrVal initSliceForReading  ( const SliceHeader&          rcSH )              = 0;
   virtual ErrVal initSliceForDecoding ( const SliceHeader&          rcSH )              = 0;
   virtual ErrVal initSliceForFiltering( const SliceHeader&          rcSH )              = 0;
 
-#ifdef LF_INTERLACE
   virtual ErrVal initMbForCoding( MbDataAccess& rcMbDataAccess, UInt uiMbY, UInt uiMbX, Bool bMbAFF, Bool bFieldFlag )=0;
-#else
-  virtual ErrVal initMbForCoding      ( MbDataAccess&               rcMbDataAccess,
-                                        UInt                        uiMbIndex )         = 0;
-  virtual ErrVal initMbForDecoding    ( UInt                        uiMbIndex )         = 0;
-  virtual ErrVal initMbForFiltering   ( UInt                        uiMbIndex )         = 0;
-#endif
 
 //TMM_WP
   virtual ErrVal initSliceForWeighting   ( const SliceHeader&          rcSH )           = 0;

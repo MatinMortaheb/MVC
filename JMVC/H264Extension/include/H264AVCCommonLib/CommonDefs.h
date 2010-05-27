@@ -7,7 +7,7 @@
 
 #define _JSVM_VERSION_ "6.5" //added by jerome.vieron@thomson.net
 #define _JMVM_VERSION_ "7.0" //added by purvin.pandit@thomson.net
-#define _JMVC_VERSION_ "8.0" //added by ying.chen@tut.fi
+#define _JMVC_VERSION_ "8.2" //added by ying.chen@tut.fi
 
 #define MB_BUFFER_WIDTH 24
 #define MB_BASE_WIDTH   16
@@ -25,7 +25,6 @@
 
 H264AVC_NAMESPACE_BEGIN
 
-#ifdef   LF_INTERLACE
 enum PicType
 {
 	NOT_SPECIFIED   = 0x00,
@@ -34,7 +33,6 @@ enum PicType
 	FRAME           = 0x03,
 	MAX_FRAME_TYPE  = 0x04
 };
-#endif //LF_INTERLACE
 
 #if JM_MVC_COMPATIBLE
 #define DELTA_POC 0//lufeng: offset for negtive poc
@@ -225,11 +223,7 @@ H264AVC_NAMESPACE_END
 
 #define YUV_X_MARGIN        32
 
-#ifdef   LF_INTERLACE
 #define YUV_Y_MARGIN        128
-#else
-#define YUV_Y_MARGIN        64
-#endif
 
 #define MAX_LAYERS          8
 #define MAX_TEMP_LEVELS     8

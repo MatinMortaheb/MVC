@@ -28,9 +28,7 @@ public:
 public:
   ErrVal getBoundaryMask( Int iMbY, Int iMbX, UInt& ruiMask ) const ;
   ErrVal initMb( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMbX, const Int iForceQp = -1 );
-#ifdef   LF_INTERLACE
   ErrVal initMb( MbDataAccess*& rpcMbDataAccess, UInt uiMbY, UInt uiMbX, const Bool bFieldFlag, const Int iForceQp );
-#endif //LF_INTERLACE
   ErrVal init( const SequenceParameterSet& rcSPS );
 //	TMM_EC {{
   ErrVal initMbTDEnhance( MbDataAccess*& rpcMbDataAccess, MbDataCtrl *pcMbDataCtrl, MbDataCtrl *pcMbDataCtrlRef, UInt uiMbY, UInt uiMbX, const Int iForceQp = -1 );
@@ -136,9 +134,7 @@ protected:
   UInt                m_uiSize;
   UInt                m_uiMbProcessed;
   UInt                m_uiSliceId;
-#ifdef   LF_INTERLACE
   Int                 m_iColocatedOffset;
-#endif //LF_INTERLACE
   ProcessingState     m_eProcessingState;
   const MbDataCtrl*   m_pcMbDataCtrl0L1;
   Bool                m_bUseTopField;
@@ -167,9 +163,6 @@ public:
   ErrVal        init                ( SliceHeader*  pcSliceHeader );
 
   Double        getLambda           ()  { return  m_dLambda;            }
-#ifndef LF_INTERLACE
-  SliceHeader*  getSliceHeader      ()  { return  m_pcSliceHeader;      }
-#endif
   MbDataCtrl*   getMbDataCtrl       ()  { return  m_pcMbDataCtrl;       }
   Bool          isInitialized       ()  { return  m_pcMbDataCtrl != 0;  }
 
@@ -179,7 +172,6 @@ public:
     return Err::m_nOK;
   }
 
-#ifdef LF_INTERLACE
   	SliceHeader*  getSliceHeader      ( PicType ePicType = FRAME ) { return ( ePicType==BOT_FIELD ) ? m_pcSliceHeaderBot : m_pcSliceHeader;	}
     ErrVal        setSliceHeader      ( SliceHeader* pcSliceHeader,
         PicType      ePicType = FRAME )
@@ -195,14 +187,6 @@ public:
 
         return Err::m_nOK;
     }
-#else
-  ErrVal        setSliceHeader      ( SliceHeader* pcSliceHeader )
-  {
-      m_pcSliceHeader = pcSliceHeader;
-      return Err::m_nOK;
-  }
-
-#endif
 
   ErrVal        activateMbDataCtrlForQpAndCbp( Bool bNormalMbDataCtrl )
   {
@@ -272,9 +256,7 @@ public:
 private:
   MbDataCtrl*   m_pcMbDataCtrl;
   SliceHeader*  m_pcSliceHeader;
-#ifdef LF_INTERLACE
    SliceHeader*  m_pcSliceHeaderBot;
-#endif
 
   Double        m_dLambda;
 

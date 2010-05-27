@@ -91,7 +91,6 @@ private:
 typedef MyList< ExtBinDataAccessor* > ExtBinDataAccessorList;
 typedef MyList< ExtBinDataAccessorList* > ExtBinDataAccessorListList;
 
-#ifdef   LF_INTERLACE
 enum PicStruct
 {
     PS_NOT_SPECIFIED = -1,
@@ -101,7 +100,6 @@ enum PicStruct
     PS_TOP_BOT       =  3, // top field, bottom field, in that order field_pic_flag shall be 0 2
     PS_BOT_TOP       =  4  // bottom field, top field, in that order field_pic_flag shall be 0 2
 };
-#endif //LF_INTERLACE
 
 class PicBuffer
 {
@@ -111,14 +109,12 @@ public:
         , m_pcBuffer     ( pcBuffer )
         , m_iInUseCout   ( 0 )
         , m_ui64Cts      ( ui64Cts )
-#ifdef   LF_INTERLACE
         , m_ePicStruct   ( PS_NOT_SPECIFIED )
         , m_iTopPoc      ( 0 )
         , m_iBotPoc      ( 0 )
         , m_iFramePoc    ( 0 )
         , m_uiIdrPicId   ( 0 )
         , m_bFieldCoded  ( false )
-#endif //LF_INTERLACE
     {}
 
     Void setUnused()           { m_iInUseCout--; }
@@ -129,7 +125,6 @@ public:
     Void* getMediaPacket()     { return m_pcMediaPacket; }
     UInt64& getCts()           { return m_ui64Cts; }
 
-#ifdef   LF_INTERLACE
     Void setPicStruct     ( PicStruct e  ) { m_ePicStruct  = e;  }
     Void setFieldCoding   ( Bool      b  ) { m_bFieldCoded = b;  }
     Void setIdrPicId      ( UInt      ui ) { m_uiIdrPicId  = ui; }
@@ -143,7 +138,6 @@ public:
     Int  getTopPOC        () const  { return m_iTopPoc; }
     Int  getBotPOC        () const  { return m_iBotPoc; }
     Int  getFramePOC      () const  { return m_iFramePoc; }
-#endif //LF_INTERLACE
     Void setCts( UInt64 ui64 ) { m_ui64Cts = ui64; } // HS: decoder robustness
 
     UInt          getViewId       ()  const { return m_uiViewId; }
@@ -155,14 +149,12 @@ private:
     Int    m_iInUseCout;
     UInt64 m_ui64Cts;
 
-#ifdef   LF_INTERLACE
     PicStruct m_ePicStruct;
     Int       m_iTopPoc;
     Int       m_iBotPoc;
     Int       m_iFramePoc;
     UInt      m_uiIdrPicId;
     Bool      m_bFieldCoded;
-#endif //LF_INTERLACE
     UInt          m_uiViewId;
 };
 

@@ -9,11 +9,7 @@ H264AVC_NAMESPACE_BEGIN
 
 
 PocCalculator::PocCalculator()
-#ifdef   LF_INTERLACE
 : m_iLastIdrFieldNum    ( 0 )
-#else //!LF_INTERLACE
-  : m_iLastIdrFrameNum    ( 0 )
-#endif //LF_INTERLACE
   , m_iBitsLsb            ( 0 )
   , m_iTop2BotOffset      ( 1 )
   , m_iPrevRefPocMsb      ( 0 )
@@ -42,11 +38,7 @@ ErrVal PocCalculator::copy( PocCalculator*& rpcPocCalculator )
 
   ROT( NULL == rpcPocCalculator );
 
-#ifdef   LF_INTERLACE
   rpcPocCalculator->m_iLastIdrFieldNum = m_iLastIdrFieldNum;
-#else //!LF_INTERLACE
-  rpcPocCalculator->m_iLastIdrFrameNum = m_iLastIdrFrameNum;
-#endif //LF_INTERLACE
   rpcPocCalculator->m_iBitsLsb         = m_iBitsLsb;
   rpcPocCalculator->m_iTop2BotOffset   = m_iTop2BotOffset;
   rpcPocCalculator->m_iPrevRefPocMsb   = m_iPrevRefPocMsb;
@@ -66,7 +58,6 @@ ErrVal PocCalculator::destroy()
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 ErrVal PocCalculator::initSPS( const SequenceParameterSet& rcSequenceParameterSet )
 {
     switch( rcSequenceParameterSet.getPicOrderCntType() )
@@ -102,7 +93,6 @@ ErrVal PocCalculator::initSPS( const SequenceParameterSet& rcSequenceParameterSe
 
     return Err::m_nOK;
 }
-#endif //LF_INTERLACE
 
 ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
     {
@@ -147,7 +137,6 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
 #define DELTA_POCA  0
 #endif
 
-#ifdef LF_INTERLACE
       if( rcSliceHeader.getPicType() & TOP_FIELD )
       {
           rcSliceHeader.setTopFieldPoc( iCurrPocMsb + iCurrPocLsb+DELTA_POCA );
@@ -162,9 +151,6 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
           rcSliceHeader.setBotFieldPoc( iCurrPocMsb + iCurrPocLsb+DELTA_POCA );
       }
       rcSliceHeader.setPoc( iCurrPocMsb + iCurrPocLsb + DELTA_POCA );
-#else
-	  rcSliceHeader.setPoc( iCurrPocMsb + iCurrPocLsb );	
-#endif //LF_INTERLACE
     }
     break;
   case 1:
@@ -211,7 +197,6 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
       }
 
       //--- set POC ---
-#ifdef LF_INTERLACE
       if( rcSliceHeader.getPicType() & TOP_FIELD )
       {
           rcSliceHeader.setTopFieldPoc( iExpectedPoc + rcSliceHeader.getDeltaPicOrderCnt( 0 ) );
@@ -225,9 +210,6 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
       {
           rcSliceHeader.setBotFieldPoc( iExpectedPoc + rcSliceHeader.getDeltaPicOrderCnt( 0 ) + rcSliceHeader.getSPS().getOffsetForTopToBottomField() );
       }
-#else
-      rcSliceHeader.setPoc( iExpectedPoc + rcSliceHeader.getDeltaPicOrderCnt( 0 ) );
-#endif //LF_INTERLACE
     }
     break;
   case 2:
@@ -254,7 +236,6 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
       {
         m_iPrevFrameNum = rcSliceHeader.getFrameNum();
       }
-#ifdef LF_INTERLACE
       if( rcSliceHeader.getPicType() == FRAME )
       {
           rcSliceHeader.setTopFieldPoc( iCurrPoc );
@@ -268,9 +249,6 @@ ErrVal PocCalculator::calculatePoc( SliceHeader& rcSliceHeader )
       {
           rcSliceHeader.setBotFieldPoc( iCurrPoc );
       }
-#else
-      rcSliceHeader.setPoc( iCurrPoc );
-#endif //LF_INTERLACE
     }
     break;
   default:
@@ -321,7 +299,6 @@ ErrVal PocCalculator::setPoc( SliceHeader&  rcSliceHeader,
 {
   ROTRS( iContFrameNumber > ( INT_MAX - 1 ), Err::m_nERR );
 
-#ifdef   LF_INTERLACE
 //  UInt iCurrFieldNum = ( iContFrameNumber/* << 1*/ ) + (m_iTop2BotOffset?1:0) + ( rcSliceHeader.getBottomFieldFlag() ? m_iTop2BotOffset : 0 );//thBug
 UInt iCurrFieldNum=iContFrameNumber;
 
@@ -350,20 +327,6 @@ if( rcSliceHeader.isIdrNalUnit() && !rcSliceHeader.getBottomFieldFlag() )
   {
       rcSliceHeader.setBotFieldPoc  ( iCurrPoc );
   }
-#else //!LF_INTERLACE
-  if( rcSliceHeader.isIdrNalUnit() )
-  {
-      m_iBitsLsb          = rcSliceHeader.getSPS().getLog2MaxPicOrderCntLsb();
-
-      // JVT-Q065 EIDR
-      //m_iLastIdrFrameNum  = iContFrameNumber; 
-
-  }
-
-  Int iCurrPoc = iContFrameNumber - m_iLastIdrFrameNum;
-
-  rcSliceHeader.setPoc            ( iCurrPoc );
-#endif //LF_INTERLACE
 
   rcSliceHeader.setPicOrderCntLsb ( iCurrPoc & ~ ( -1 << m_iBitsLsb ) );
 

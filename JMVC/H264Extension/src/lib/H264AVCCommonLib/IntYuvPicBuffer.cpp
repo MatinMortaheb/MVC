@@ -11,14 +11,9 @@
 H264AVC_NAMESPACE_BEGIN
 
 
-#ifdef   LF_INTERLACE
 IntYuvPicBuffer::IntYuvPicBuffer( YuvBufferCtrl& rcYuvBufferCtrl, PicType ePicType )
 : m_rcBufferParam   ( rcYuvBufferCtrl.getBufferParameter( ePicType ) ),
 m_ePicType        ( ePicType ),
-#else //!LF_INTERLACE
-IntYuvPicBuffer::IntYuvPicBuffer( YuvBufferCtrl& rcYuvBufferCtrl )
-: m_rcBufferParam   ( rcYuvBufferCtrl.getBufferParameter() ),
-#endif //LF_INTERLACE
 m_rcYuvBufferCtrl ( rcYuvBufferCtrl ),
 m_iStride         ( 0 ),
 m_pPelCurrY       ( NULL ),
@@ -27,11 +22,9 @@ m_pPelCurrV       ( NULL ),
 m_pucYuvBuffer    ( NULL ),
 m_pucOwnYuvBuffer ( NULL )
 {
-#ifdef   LF_INTERLACE
 #ifdef EXT_CHECK_1_GOP
     m_bExtended =false;
 #endif
-#endif //LF_INTERLACE
 }
 
 
@@ -1332,7 +1325,6 @@ ErrVal IntYuvPicBuffer::setNonZeroFlags( UShort* pusNonZeroFlags, UInt uiStride 
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 Void IntYuvPicBuffer::xCopyFillPlaneMargin( XPel *pucSrc, XPel *pucDest, Int iHeight, Int iWidth, Int iStride, Int iXMargin, Int iYMargin )
 {
     XPel* puc;
@@ -1441,7 +1433,6 @@ ErrVal IntYuvPicBuffer::loadBufferAndFillMargin( IntYuvPicBuffer *pcSrcYuvPicBuf
 
     return Err::m_nOK;
 }
-#endif //LF_INTERLACE
 
 ErrVal IntYuvPicBuffer::fillMargin()
 {

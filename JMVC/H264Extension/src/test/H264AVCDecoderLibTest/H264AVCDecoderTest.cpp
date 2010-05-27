@@ -134,6 +134,15 @@ ErrVal H264AVCDecoderTest::xRemovePicBuffer( PicBufferList& rcPicBufferUnusedLis
 	      m_cActivePicBufferList.erase    (  iter );
     }
   }
+
+  // hwsun, fix meomory for field coding
+  for(int i = (m_cActivePicBufferList.size() - m_pcH264AVCDecoder->getMaxEtrDPB() * 4); i > 0; i--)
+  {
+    PicBuffer* pcBuffer = m_cActivePicBufferList.popFront();    
+    if( NULL != pcBuffer )
+      m_cUnusedPicBufferList.push_back( pcBuffer );
+  }
+
   return Err::m_nOK;
 }
 
@@ -341,9 +350,7 @@ ErrVal H264AVCDecoderTest::go()
 	// ROI DECODE ICU/ETRI
 	m_pcH264AVCDecoder->RoiDecodeInit();
 
-#ifdef   LF_INTERLACE
 	setCrop();//lufeng: support frame cropping
-#endif
 
     // picture output
     while( ! cPicBufferOutputList.empty() )
@@ -354,7 +361,6 @@ ErrVal H264AVCDecoderTest::go()
       {
 		  //UInt *vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
 		  UInt *vcOrder = m_pcH264AVCDecoder->getViewCodingOrder_SubStream();
-#ifdef LF_INTERLACE
 		  if(vcOrder == NULL)//lufeng: in order to output non-MVC seq
           {
 			  UInt order=0;
@@ -362,7 +368,6 @@ ErrVal H264AVCDecoderTest::go()
 			  //vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
 			  vcOrder = m_pcH264AVCDecoder->getViewCodingOrder_SubStream();
 		  }
-#endif
        		m_pcWriteYuv->xInitMVC(m_pcParameter->cYuvFile, vcOrder, m_pcParameter->getNumOfViews()); // JVT-AB024 modified remove active view info SEI  			
       }
 
@@ -445,7 +450,6 @@ ErrVal H264AVCDecoderTest::go()
 
 
 
-#ifdef   LF_INTERLACE
 ErrVal H264AVCDecoderTest::setCrop()
 {
 	UInt uiCrop[4];
@@ -453,4 +457,3 @@ ErrVal H264AVCDecoderTest::setCrop()
 	m_pcWriteYuv->setCrop(uiCrop);
 	return Err::m_nOK;
 }
-#endif

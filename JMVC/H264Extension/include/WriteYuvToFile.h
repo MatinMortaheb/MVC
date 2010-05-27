@@ -61,9 +61,7 @@ protected:
   //JVT-V054
   Bool getFileInitDone() {return m_bFileInitDone;}
 
-#ifdef   LF_INTERLACE
   ErrVal setCrop(UInt *uiCrop);
-#endif
 
 protected:
   LargeFile m_cFile;
@@ -77,9 +75,7 @@ protected:
 //JVT-V054
   Bool  m_bFileInitDone;
 
-#ifdef   LF_INTERLACE
   UInt m_uiCrop[4];
-#endif
 
 };
 

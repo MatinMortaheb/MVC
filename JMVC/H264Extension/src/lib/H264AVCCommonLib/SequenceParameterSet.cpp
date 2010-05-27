@@ -102,22 +102,18 @@ SequenceParameterSet::SequenceParameterSet  ()
 ,m_uiChromaPhaseYPlus1                      ( 1 )// TMM_ESS
 , m_bFGSCodingMode                          ( false )
 , m_uiGroupingSize                          ( 1 )
-#ifdef   LF_INTERLACE
 , m_bFrameMbsOnlyFlag                       ( true )
 , m_bMbAdaptiveFrameFieldFlag               ( false ) 
-#endif //LF_INTERLACE
 {
 	m_auiNumRefIdxUpdateActiveDefault[LIST_0]=1;// VW
 	m_auiNumRefIdxUpdateActiveDefault[LIST_1]=1;// VW
 
   ::memset( m_aiOffsetForRefFrame, 0x00, 64*sizeof(Int) );
   ::memset( m_uiPosVect,           0x00, 16*sizeof(UInt));
-#ifdef   LF_INTERLACE
   m_frame_crop_offset[0] =0;
   m_frame_crop_offset[1] =0;
   m_frame_crop_offset[2] =0;
   m_frame_crop_offset[3] =0;
-#endif
 }
 
 SequenceParameterSet::~SequenceParameterSet()
@@ -156,7 +152,6 @@ SequenceParameterSet::destroy()
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 SequenceParameterSet& SequenceParameterSet::operator = ( const SequenceParameterSet& rcSPS )
 {
     m_eNalUnitType                      = rcSPS.m_eNalUnitType;
@@ -199,7 +194,6 @@ SequenceParameterSet& SequenceParameterSet::operator = ( const SequenceParameter
 
     return *this;
 }
-#endif //LF_INTERLACE
 
 UInt
 SequenceParameterSet::getMaxDPBSize(UInt mvcScaleFactor) const
@@ -307,7 +301,7 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
   RNOK  ( pcWriteIf->writeUvlc( getNumRefFrames(),                        "SPS: num_ref_frames" ) );
   RNOK  ( pcWriteIf->writeFlag( getRequiredFrameNumUpdateBehaviourFlag(), "SPS: required_frame_num_update_behaviour_flag" ) );
 
-#ifdef LF_INTERLACE//wirte SequenceParameterSet
+//wirte SequenceParameterSet
   if( !getFrameMbsOnlyFlag() )
   {
       RNOK  ( pcWriteIf->writeUvlc( getFrameWidthInMbs  () - 1,               "SPS: pic_width_in_mbs_minus_1" ) );
@@ -321,11 +315,6 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
       RNOK  ( pcWriteIf->writeUvlc( getFrameHeightInMbs () - 1,               "SPS: pic_height_in_map_units_minus_1" ) );
       RNOK  ( pcWriteIf->writeFlag( true,                                     "SPS: frame_mbs_only_flag" ) );
   }
-#else
-  RNOK  ( pcWriteIf->writeUvlc( getFrameWidthInMbs  () - 1,               "SPS: pic_width_in_mbs_minus_1" ) );
-  RNOK  ( pcWriteIf->writeUvlc( getFrameHeightInMbs () - 1,               "SPS: pic_height_in_map_units_minus_1" ) );
-  RNOK  ( pcWriteIf->writeFlag( true,                                     "SPS: frame_mbs_only_flag" ) );
-#endif
 
 
   RNOK  ( pcWriteIf->writeFlag( getDirect8x8InferenceFlag(),              "SPS: direct_8x8_inference_flag" ) );
@@ -342,7 +331,6 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
   {
     RNOK( pcWriteIf->writeFlag( false,                                    "SPS: frame_cropping_flag" ) );
   }
-
 
   RNOK  ( pcWriteIf->writeFlag( false,                                  "SPS: vui_parameters_present_flag" ) );
 
@@ -478,17 +466,13 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
     RNOK( pcReadIf->getSvlc( m_iOffsetForNonRefPic,                       "SPS: offset_for_non_ref_pic" ) );
     RNOK( pcReadIf->getSvlc( m_iOffsetForTopToBottomField,                "SPS: offset_for_top_to_bottom_field" ) );
     RNOK( pcReadIf->getUvlc( m_uiNumRefFramesInPicOrderCntCycle,          "SPS: num_ref_frames_in_pic_order_cnt_cycle" ) );
-#ifdef LF_INTERLACE
       RNOK( initOffsetForRefFrame( m_uiNumRefFramesInPicOrderCntCycle ) );
-#endif  
    
             for( UInt i = 0; i < m_uiNumRefFramesInPicOrderCntCycle; i++)
       {
           Int  iTmp;
           RNOK( pcReadIf->getSvlc( iTmp, "SPS: offset_for_ref_frame" ) );
-#ifdef LF_INTERLACE
           setOffsetForRefFrame( i, iTmp );
-#endif
       }
   }
 
@@ -498,7 +482,6 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
   setFrameWidthInMbs ( 1 + uiTmp );
   RNOK( pcReadIf->getUvlc( uiTmp,                                         "SPS: pic_height_in_map_units_minus_1" ) );
 
-#ifdef   LF_INTERLACE
   RNOK( pcReadIf->getFlag( m_bFrameMbsOnlyFlag,                           "SPS: frame_mbs_only_flag" ) );
   if( getFrameMbsOnlyFlag() )
   {
@@ -510,17 +493,11 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
       setFrameHeightInMbs( (uiTmp+1)<<1 );
       RNOK( pcReadIf->getFlag( m_bMbAdaptiveFrameFieldFlag,                 "SPS: mb_adaptive_frame_field_flag"));
   }
-#else //!LF_INTERLACE
-  setFrameHeightInMbs( 1 + uiTmp );
-  RNOK( pcReadIf->getFlag( bTmp,                                          "SPS: frame_mbs_only_flag" ) );
-  ROF ( bTmp );
-#endif //LF_INTERLACE
 
   RNOK( pcReadIf->getFlag( m_bDirect8x8InferenceFlag,                     "SPS: direct_8x8_inference_flag" ) );
   RNOK( pcReadIf->getFlag( bTmp,                                          "SPS: frame_cropping_flag" ) );
 //  ROT ( bTmp ); // always set to 0 in jmvc
 
-#ifdef   LF_INTERLACE
   if(bTmp)//lufeng: support frame cropping
   {
 	  RNOK( pcReadIf->getUvlc( m_frame_crop_offset[0],                                         "SPS: frame_crop_left_offset" ) );
@@ -528,7 +505,6 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
       RNOK( pcReadIf->getUvlc( m_frame_crop_offset[2],                                         "SPS: frame_crop_top_offset" ) );
 	  RNOK( pcReadIf->getUvlc( m_frame_crop_offset[3],                                         "SPS: frame_crop_bottom_offset" ) );
   }
-#endif
 
   RNOK( pcReadIf->getFlag( bTmp,                                          "SPS: vui_parameters_present_flag" ) );
   ROT ( bTmp ); // always set to 0 in jmvc
@@ -615,7 +591,6 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 	RNOK  ( pcReadIf->getFlag( bTmp,                      "SUBSET SPS: mvc_vui_parameters_present_flag" ) );
 //	ROT ( bTmp ); // always shoule be set to 0 
 
-#ifdef   LF_INTERLACE
 	if(bTmp)//lufeng: support uvi syntax element
 	{
 		UInt uiTemp;
@@ -631,7 +606,6 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 		RNOK  ( pcReadIf->getFlag(bTmp,"SPS: vui_mvc_pic_struct_present_flag[ 0 ]"));
 		ROT ( bTmp ); // always shoule be set to 0
 	}
-#endif
 
 	RNOK  ( pcReadIf->getFlag( bTmp,                      "SUBSET SPS: Additional_extension2_flag" ) );
 //	ROT ( bTmp ); // always shoule be set to 0 

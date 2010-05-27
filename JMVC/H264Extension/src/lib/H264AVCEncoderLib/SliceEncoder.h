@@ -47,7 +47,6 @@ public:
                                         RefFrameList& rcList1,
                                         UInt          uiMbInRow,
                                         Double        dlambda	);
-#ifdef LF_INTERLACE
   ErrVal      encodeSliceMbAff             ( SliceHeader&  rcSliceHeader,
                                       IntFrame*     pcFrame,
                                       MbDataCtrl*   pcMbDataCtrl,
@@ -55,7 +54,6 @@ public:
                                       RefFrameList& rcList1,
                                       UInt          uiMbInRow,
                                       Double        dlambda	);
-#endif//LF_INTERLACE
 //TMM_WP
   ErrVal xSetPredWeights( SliceHeader& rcSliceHeader, 
                           IntFrame* pOrgFrame,

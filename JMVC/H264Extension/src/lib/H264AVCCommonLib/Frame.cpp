@@ -8,16 +8,10 @@ H264AVC_NAMESPACE_BEGIN
 
 
 
-#ifdef   LF_INTERLACE
   Frame::Frame( YuvBufferCtrl& rcYuvFullPelBufferCtrl, YuvBufferCtrl& rcYuvHalfPelBufferCtrl, PicType ePicType ):
   m_cFullPelYuvBuffer( rcYuvFullPelBufferCtrl, ePicType ),
       m_cHalfPelYuvBuffer( rcYuvHalfPelBufferCtrl, ePicType ),
       m_ePicType( ePicType ),
-#else //!LF_INTERLACE
-  Frame::Frame( YuvBufferCtrl& rcYuvFullPelBufferCtrl, YuvBufferCtrl& rcYuvHalfPelBufferCtrl ):
-  m_cFullPelYuvBuffer( rcYuvFullPelBufferCtrl ),
-      m_cHalfPelYuvBuffer( rcYuvHalfPelBufferCtrl ),
-#endif //LF_INTERLACE
   m_pcFrameUnit( NULL ),
   m_iStamp( 0 )
 {
@@ -57,37 +51,23 @@ ErrVal Frame::uninit()
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 Bool Frame::isShortTerm() const
 {
     return m_pcFrameUnit->isShortTerm( m_ePicType );
 }
-#endif //LF_INTERLACE
 
 const Bool Frame::isUsed() const
 {
-#ifdef   LF_INTERLACE
     return m_pcFrameUnit->isUsed( m_ePicType );
-#else //!LF_INTERLACE
-    return m_pcFrameUnit->isUsed();
-#endif //LF_INTERLACE
 }
 
-#ifdef   LF_INTERLACE
 ErrVal
 Frame::extendFrame( QuarterPelFilter* pcQuarterPelFilter, Bool bFrameMbsOnly, Bool bFGS )
-#else //!LF_INTERLACE
-ErrVal
-Frame::extendFrame( QuarterPelFilter* pcQuarterPelFilter )
-#endif //LF_INTERLACE
 {
-#ifdef   LF_INTERLACE
     Bool bNoHalfPel = ( NULL == pcQuarterPelFilter );
-#endif //LF_INTERLACE
 
     RNOK( getFullPelYuvBuffer()->fillMargin() );
 
-#ifdef   LF_INTERLACE
     if( FRAME == getPicType() )
     {
         Frame* pcTopField = NULL;
@@ -200,10 +180,6 @@ Frame::extendFrame( QuarterPelFilter* pcQuarterPelFilter )
         }
     }
     return Err::m_nOK;
-#else //!LF_INTERLACE
-    ROTRS( NULL == pcQuarterPelFilter, Err::m_nOK );
-    return Err::m_nERR;
-#endif //LF_INTERLACE
 }
 
 

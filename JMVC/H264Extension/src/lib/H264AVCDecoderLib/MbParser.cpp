@@ -76,10 +76,8 @@ ErrVal MbParser::process( MbDataAccess& rcMbDataAccess, Bool& rbEndOfSlice)
   ROF( m_bInitDone );
 
   Bool bIsCoded       = true;
-#ifdef   LF_INTERLACE
   Bool bIsMbAdaptive  = rcMbDataAccess.getSH().isMbAff();
   Bool bIsFirstMb     = rcMbDataAccess.isTopMb();
-#endif //LF_INTERLACE
 
   //===== parse SKIP flag =====
   if( m_pcMbSymbolReadIf->isMbSkipped( rcMbDataAccess ) )
@@ -93,13 +91,11 @@ ErrVal MbParser::process( MbDataAccess& rcMbDataAccess, Bool& rbEndOfSlice)
 
   if( bIsCoded )
   {
-#ifdef   LF_INTERLACE
       //===== parse FIELD flag =====
       if( bIsMbAdaptive && ( bIsFirstMb || m_bPrevIsSkipped ) )
       {
           DECRNOK( m_pcMbSymbolReadIf->fieldFlag( rcMbDataAccess ) );
       }
-#endif //LF_INTERLACE
     DECRNOK( xReadMbType( rcMbDataAccess ) );
 
     if( ! rcMbDataAccess.getSH().isIntra() )
@@ -139,14 +135,10 @@ ErrVal MbParser::process( MbDataAccess& rcMbDataAccess, Bool& rbEndOfSlice)
 
   m_bPrevIsSkipped = ! bIsCoded;
 
-#ifdef   LF_INTERLACE
   if( ! bIsMbAdaptive || ! bIsFirstMb  )
   {
       rbEndOfSlice = m_pcMbSymbolReadIf->isEndOfSlice();
   }
-#else //!LF_INTERLACE
-  rbEndOfSlice = m_pcMbSymbolReadIf->isEndOfSlice();
-#endif //LF_INTERLACE
 
   return Err::m_nOK;
 }
@@ -561,11 +553,7 @@ ErrVal MbParser::readMotion(MbDataAccess&  rcMbDataAccess,
         {
           if( rcMbDataAccess.getMbData().isBlockFwdBwd( c8x8Idx.b8x8Index() , eListIdx ) )
           {
-#ifdef   LF_INTERLACE
             const Frame* pcRefFrame = rcSH.getRefPic( rcMbMotionData.getRefIdx( c8x8Idx.b8x8Index() ),  rcMbDataAccess.getMbPicType(), eListIdx ).getFrame();
-#else //!LF_INTERLACE
-            const Frame* pcRefFrame = rcSH.getRefPic( rcMbMotionData.getRefIdx( c8x8Idx.b8x8Index() ),  eListIdx ).getFrame();
-#endif //LF_INTERLACE
             rcMbMotionData.setRefPic( pcRefFrame, c8x8Idx.b8x8() );
           }
         }
@@ -719,11 +707,7 @@ ErrVal MbParser::xReadReferenceFrames( MbDataAccess& rcMbDataAccess, MbMode eMbM
           {
             DECRNOK( m_pcMbSymbolReadIf->refFrame( rcMbDataAccess, eLstIdx ) );
           }
-#ifdef   LF_INTERLACE
           pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(), rcMbDataAccess.getMbPicType(), eLstIdx ).getFrame();
-#else //!LF_INTERLACE
-          pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(), eLstIdx ).getFrame();
-#endif //LF_INTERLACE
           rcMbMotionData.setRefPic( pcRefPic );
         }
         else
@@ -744,11 +728,7 @@ ErrVal MbParser::xReadReferenceFrames( MbDataAccess& rcMbDataAccess, MbMode eMbM
           {
             DECRNOK( m_pcMbSymbolReadIf->refFrame( rcMbDataAccess, eLstIdx, PART_16x8_0 ) );
           }
-#ifdef   LF_INTERLACE
           pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(PART_16x8_0), rcMbDataAccess.getMbPicType(), eLstIdx ).getFrame();
-#else //!LF_INTERLACE
-          pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(PART_16x8_0), eLstIdx ).getFrame();
-#endif //LF_INTERLACE
           rcMbMotionData.setRefPic( pcRefPic, PART_16x8_0 );
         }
         else
@@ -766,11 +746,7 @@ ErrVal MbParser::xReadReferenceFrames( MbDataAccess& rcMbDataAccess, MbMode eMbM
           {
             DECRNOK( m_pcMbSymbolReadIf->refFrame( rcMbDataAccess, eLstIdx, PART_16x8_1 ) );
           }
-#ifdef   LF_INTERLACE
           pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(PART_16x8_1), rcMbDataAccess.getMbPicType(), eLstIdx ).getFrame();
-#else //!LF_INTERLACE
-          pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(PART_16x8_1), eLstIdx ).getFrame();
-#endif //LF_INTERLACE
           rcMbMotionData.setRefPic( pcRefPic, PART_16x8_1 );
         }
         else
@@ -791,11 +767,7 @@ ErrVal MbParser::xReadReferenceFrames( MbDataAccess& rcMbDataAccess, MbMode eMbM
           {
             DECRNOK( m_pcMbSymbolReadIf->refFrame( rcMbDataAccess, eLstIdx, PART_8x16_0 ) );
           }
-#ifdef   LF_INTERLACE
           pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(PART_8x16_0), rcMbDataAccess.getMbPicType(), eLstIdx ).getFrame();
-#else //!LF_INTERLACE
-          pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(PART_8x16_0), eLstIdx ).getFrame();
-#endif //LF_INTERLACE
           rcMbMotionData.setRefPic( pcRefPic, PART_8x16_0 );
         }
         else
@@ -813,11 +785,7 @@ ErrVal MbParser::xReadReferenceFrames( MbDataAccess& rcMbDataAccess, MbMode eMbM
           {
             DECRNOK( m_pcMbSymbolReadIf->refFrame( rcMbDataAccess, eLstIdx, PART_8x16_1 ) );
           }
-#ifdef   LF_INTERLACE
           pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(PART_8x16_1), rcMbDataAccess.getMbPicType(), eLstIdx ).getFrame();
-#else //!LF_INTERLACE
-          pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(PART_8x16_1), eLstIdx ).getFrame();
-#endif //LF_INTERLACE
           rcMbMotionData.setRefPic( pcRefPic, PART_8x16_1 );
         }
         else
@@ -840,11 +808,7 @@ ErrVal MbParser::xReadReferenceFrames( MbDataAccess& rcMbDataAccess, MbMode eMbM
             {
               DECRNOK( m_pcMbSymbolReadIf->refFrame( rcMbDataAccess, eLstIdx, c8x8Idx.b8x8() ) );
             }
-#ifdef   LF_INTERLACE
             pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(c8x8Idx.b8x8() ), rcMbDataAccess.getMbPicType(), eLstIdx ).getFrame();
-#else //!LF_INTERLACE
-            pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(c8x8Idx.b8x8() ), eLstIdx ).getFrame();
-#endif //LF_INTERLACE
             rcMbMotionData.setRefPic( pcRefPic, c8x8Idx.b8x8() );
           }
           else
@@ -857,11 +821,7 @@ ErrVal MbParser::xReadReferenceFrames( MbDataAccess& rcMbDataAccess, MbMode eMbM
     case MODE_8x8ref0:
       {
         rcMbMotionData.setRefIdx( 1 );
-#ifdef   LF_INTERLACE
         pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(), rcMbDataAccess.getMbPicType(), eLstIdx ).getFrame();
-#else //!LF_INTERLACE
-        pcRefPic = rcSliceHeader.getRefPic( rcMbMotionData.getRefIdx(), eLstIdx ).getFrame();
-#endif //LF_INTERLACE
         rcMbMotionData.setRefPic( pcRefPic );
         break;
       }
@@ -1451,11 +1411,7 @@ ErrVal MbParser::xSkipMb( MbDataAccess& rcMbDataAccess )
     const Frame* pcRefPic = 0;
     if( rcMbDataAccess.getSH().isH264AVCCompatible() )
     {
-#ifdef   LF_INTERLACE
       pcRefPic = rcMbDataAccess.getSH().getRefPic( 1, rcMbDataAccess.getMbPicType(), LIST_0 ).getFrame();
-#else //!LF_INTERLACE
-      pcRefPic = rcMbDataAccess.getSH().getRefPic(1, LIST_0 ).getFrame();
-#endif //LF_INTERLACE
     }
 
     rcMbDataAccess.getMbMotionData( LIST_0 ).setRefIdx( 1 );

@@ -32,26 +32,18 @@ public:
 
     MbDataAccess( MbDataAccess& rcMbDataAccess, MbData& rcMbData ) :
     m_rcMbCurr(                     rcMbData ),
-#ifdef   LF_INTERLACE
         m_rcMbComplementary(            rcMbDataAccess.m_rcMbComplementary ),
-#endif //LF_INTERLACE
         m_rcMbLeft(                     rcMbDataAccess.m_rcMbLeft ),
         m_rcMbAbove(                    rcMbDataAccess.m_rcMbAbove ),
         m_rcMbAboveLeft(                rcMbDataAccess.m_rcMbAboveLeft ),
         m_rcMbAboveRight(               rcMbDataAccess.m_rcMbAboveRight ),
-#ifdef   LF_INTERLACE
         m_rcMbAboveAbove(               rcMbDataAccess.m_rcMbAboveAbove ),
         m_rcMbAboveAboveLeft(           rcMbDataAccess.m_rcMbAboveAboveLeft ),
         m_rcMbAboveAboveRight(          rcMbDataAccess.m_rcMbAboveAboveRight ),
         m_rcMbBelowLeft(                rcMbDataAccess.m_rcMbBelowLeft ),
-#endif //LF_INTERLACE
         m_rcMbUnavailable(              rcMbDataAccess.m_rcMbUnavailable ),
-#ifdef   LF_INTERLACE
         m_rcMbColocatedTop(             rcMbDataAccess.m_rcMbColocatedTop ),
         m_rcMbColocatedBot(             rcMbDataAccess.m_rcMbColocatedBot ),
-#else //!LF_INTERLACE
-        m_rcMbColocated(                rcMbDataAccess.m_rcMbColocated ),
-#endif //LF_INTERLACE
         m_rcSliceHeader(                rcMbDataAccess.m_rcSliceHeader ),
         m_rcDFP(                        rcMbDataAccess.m_rcDFP ),
         m_cMv3D_A(                      rcMbDataAccess.m_cMv3D_A ),
@@ -60,80 +52,56 @@ public:
         m_uiAvailable(                  rcMbDataAccess.m_uiAvailable ),
         m_uiPosX(                       rcMbDataAccess.m_uiPosX ),
         m_uiPosY(                       rcMbDataAccess.m_uiPosY ),
-#ifdef   LF_INTERLACE
         m_bTopMb(                       rcMbDataAccess.m_bTopMb ),
         m_bUseTopField(                 rcMbDataAccess.m_bUseTopField ),
         m_bColocatedField(              rcMbDataAccess.m_bColocatedField ),
         m_bIsTopRowMb(                  rcMbDataAccess.m_bIsTopRowMb ),
         m_bMbAff(                       rcMbDataAccess.m_bMbAff ),
-#endif //LF_INTERLACE
         m_ucLastMbQp(                   rcMbDataAccess.m_ucLastMbQp ),
-#ifdef   LF_INTERLACE
         m_eMbPicType(                   rcMbDataAccess.m_eMbPicType ),
-#endif //LF_INTERLACE
         m_pcMbDataAccessBase(           rcMbDataAccess.m_pcMbDataAccessBase )
     {
         m_rcMbCurr.copyFrom( rcMbDataAccess.getMbData() );
-#ifdef   LF_INTERLACE
         //--- set motion data connections ---
         getMbMotionData( LIST_0 ).setFieldMode( rcMbDataAccess.getMbMotionData( LIST_0 ).getFieldMode() );
         getMbMotionData( LIST_1 ).setFieldMode( rcMbDataAccess.getMbMotionData( LIST_1 ).getFieldMode() );
-#endif //LF_INTERLACE
     }
 
 
     MbDataAccess( MbData&          rcMbCurr,
-#ifdef   LF_INTERLACE
         MbData&          rcMbComplementary,
-#endif //LF_INTERLACE
         const MbData&    rcMbLeft,
         const MbData&    rcMbAbove,
         const MbData&    rcMbAboveLeft,
         const MbData&    rcMbAboveRight,
-#ifdef   LF_INTERLACE
         const MbData&    rcMbAboveAbove,
         const MbData&    rcMbAboveAboveLeft,
         const MbData&    rcMbAboveAboveRight,
         const MbData&    rcMbBelowLeft,
-#endif //LF_INTERLACE
         const MbData&    rcMbUnavailable,
-#ifdef   LF_INTERLACE
         const MbData&    m_rcMbColocatedTop,
         const MbData&    m_rcMbColocatedBot,
-#else //!LF_INTERLACE
-        const MbData&    rcMbColocated,
-#endif //LF_INTERLACE
         SliceHeader&     rcSliceHeader,
         const DFP&       rcDFP,
         UInt             uiPosX,
         UInt             uiPosY,
-#ifdef   LF_INTERLACE
         Bool             bTopMb,
         Bool             bUseTopField,
         Bool             bColocatedField,
-#endif //LF_INTERLACE
         SChar            ucLastMbQp )
         : m_rcMbCurr                    ( rcMbCurr                ),
-#ifdef   LF_INTERLACE
         m_rcMbComplementary           ( rcMbComplementary       ),
-#endif //LF_INTERLACE
         m_rcMbLeft                    ( rcMbLeft                ),
         m_rcMbAbove                   ( rcMbAbove               ),
         m_rcMbAboveLeft               ( rcMbAboveLeft           ),
         m_rcMbAboveRight              ( rcMbAboveRight          ),
-#ifdef   LF_INTERLACE
         m_rcMbAboveAbove              ( rcMbAboveAbove          ),
         m_rcMbAboveAboveLeft          ( rcMbAboveAboveLeft      ),
         m_rcMbAboveAboveRight         ( rcMbAboveAboveRight     ),
         m_rcMbBelowLeft               ( rcMbBelowLeft           ),
-#endif //LF_INTERLACE
         m_rcMbUnavailable             ( rcMbUnavailable         ),
-#ifdef   LF_INTERLACE
         m_rcMbColocatedTop            ( m_rcMbColocatedTop      ),
         m_rcMbColocatedBot            ( m_rcMbColocatedBot      ),
-#else //!LF_INTERLACE
-        m_rcMbColocated               ( rcMbColocated         ),
-#endif //LF_INTERLACE
         m_rcSliceHeader               ( rcSliceHeader           ),
         m_rcDFP                       ( rcDFP                   ),
         m_cMv3D_A                     ( 0, 0, 0                 ),
@@ -142,21 +110,17 @@ public:
         m_uiAvailable                 ( 0                       ),
         m_uiPosX                      ( uiPosX                  ),
         m_uiPosY                      ( uiPosY                  ),
-#ifdef   LF_INTERLACE
         m_bTopMb                      ( bTopMb                  ),
         m_bUseTopField                ( bUseTopField            ),
         m_bColocatedField             ( bColocatedField         ),
         m_bMbAff                      ( rcSliceHeader.isMbAff() ),
-#endif //LF_INTERLACE
         m_ucLastMbQp                  ( ucLastMbQp              ),
         m_pcMbDataAccessBase          ( NULL                    )
     {
-#ifdef   LF_INTERLACE
         m_bIsTopRowMb = ( m_rcSliceHeader.getFieldPicFlag() ? ! m_rcSliceHeader.getBottomFieldFlag() : ( m_uiPosY % 2 == 0 ) );
         m_eMbPicType  = ( m_rcSliceHeader.getFieldPicFlag()
             ? ( m_rcSliceHeader.getBottomFieldFlag()   ? BOT_FIELD : TOP_FIELD )
             : ( m_rcMbCurr.getFieldFlag() ? ( m_bTopMb ? TOP_FIELD : BOT_FIELD ) : FRAME ) );
-#endif //LF_INTERLACE
         setAvailableMask();
     }
 
@@ -174,11 +138,8 @@ public:
     const MbData&   getMbDataLeft         ()    const { return m_rcMbLeft; }
     const MbData&   getMbDataAbove        ()    const { return m_rcMbAbove; }
     const MbData&   getMbDataAboveLeft    ()    const { return m_rcMbAboveLeft; }
-#ifdef   LF_INTERLACE
     const MbData&   getMbDataAboveAbove   ()    const { return m_rcMbAboveAbove; }
     const MbData&   getMbDataBelowLeft    ()    const { return m_rcMbBelowLeft; }
-#endif
-#ifdef   LF_INTERLACE
     const MbData&   getMbDataComplementary()    const { return m_rcMbComplementary; }
     Bool            isTopMb               ()    const { return m_bTopMb; }
     PicType         getMbPicType          ()    const { return m_eMbPicType; }
@@ -200,20 +161,16 @@ public:
             : ( bFieldFlag ? ( isTopMb() ? TOP_FIELD : BOT_FIELD ) : FRAME ) );
 		setAvailableMask();
     }
-#endif //LF_INTERLACE
 
     UInt      getNumActiveRef       ( ListIdx eListIdx) const
     {
-#ifdef LF_INTERLACE
         if( m_rcSliceHeader.getPicType() == FRAME && FRAME != getMbPicType() )
         {
             return m_rcSliceHeader.getNumRefIdxActive( eListIdx ) * 2;
         }
-#endif
         return m_rcSliceHeader.getNumRefIdxActive( eListIdx );
     }
 
-#ifdef   LF_INTERLACE
     Bool getDefaultFieldFlag() const
     {
         if( xIsAvailable( m_rcMbLeft ) )
@@ -226,7 +183,6 @@ public:
         }
         return false;
     }
-#endif //LF_INTERLACE
     UInt    getConvertBlkMode ( Par8x8 ePar8x8 );
     ErrVal  setConvertBlkMode ( Par8x8 ePar8x8, UInt uiBlockMode );
     UInt    getConvertMbType  ();
@@ -271,11 +227,7 @@ public:
 
     Bool  isLeftMbExisting        () const { return m_uiPosX != 0; }
 
-#ifdef LF_INTERLACE
     Bool  isAboveMbExisting       () const { return ( ! ((m_uiPosY == 0) || ((m_uiPosY == 1) && m_rcMbCurr.getFieldFlag()))); }
-#else
-    Bool  isAboveMbExisting () const { return ( ! ( m_uiPosY == 0 ) ); }
-#endif //LF_INTERLACE
 
   Bool isConstrainedInterLayerPred( )
     {
@@ -296,9 +248,7 @@ public:
     UInt getCtxBLSkipFlag     ()                  const;
     UInt getCtxDirectMbWoCoeff()                  const;
     UInt getCtxCodedBlockBit  ( UInt uiBitPos )   const;
-#ifdef   LF_INTERLACE
     UInt getCtxFieldFlag      ()                  const;
-#endif //LF_INTERLACE
     UInt getCtxRefIdx         ( ListIdx eLstIdx, ParIdx8x8 eParIdx ) const;
     UInt getCtxMotPredFlag    ( ListIdx eLstIdx, ParIdx8x8 eParIdx ) const;
     UInt getCtxBLQRefFlag     ()                  const;
@@ -327,10 +277,8 @@ public:
     Void  getMvPredictor( Mv& rcMv, SChar scRef, ListIdx eListIdx, ParIdx8x8  eParIdx, SParIdx8x4 eSParIdx );
     Void  getMvPredictor( Mv& rcMv, SChar scRef, ListIdx eListIdx, ParIdx8x8  eParIdx, SParIdx4x8 eSParIdx );
     Void  getMvPredictor( Mv& rcMv, SChar scRef, ListIdx eListIdx, ParIdx8x8  eParIdx, SParIdx4x4 eSParIdx );
-#ifdef LF_INTERLACE
     Void  getMvPredictor( Mv& rcMv, SChar scRef, ListIdx eListIdx, ParIdx16x16 eParIdx );
     Void  getMvPredictor( Mv& rcMv, SChar scRef, ListIdx eListIdx, ParIdx8x8  eParIdx, SParIdx8x8 eSParIdx );
-#endif
 
 
 
@@ -341,10 +289,8 @@ public:
     Void  setMvPredictorsBL( const Mv& rcMvBL, ListIdx eListIdx, ParIdx8x8  eParIdx, SParIdx8x4 eSParIdx );
     Void  setMvPredictorsBL( const Mv& rcMvBL, ListIdx eListIdx, ParIdx8x8  eParIdx, SParIdx4x8 eSParIdx );
     Void  setMvPredictorsBL( const Mv& rcMvBL, ListIdx eListIdx, ParIdx8x8  eParIdx, SParIdx4x4 eSParIdx );
-#ifdef LF_INTERLACE
     Void  setMvPredictorsBL( const Mv& rcMvBL, ListIdx eListIdx, ParIdx16x16 eParIdx );
     Void  setMvPredictorsBL( const Mv& rcMvBL, ListIdx eListIdx, ParIdx8x8  eParIdx, SParIdx8x8 eSParIdx );
-#endif
 
 
     Void  getMvPredictors       ( Mv* pcMv     ) const;
@@ -389,9 +335,7 @@ protected:
     __inline const MbData& xGetMbLeft           () const;
     __inline const MbData& xGetMbAbove          () const;
     __inline const MbData& xGetBlockLeft        ( LumaIdx&   rcIdx ) const;
-#ifdef   LF_INTERLACE
     __inline const MbData& xGetBlockLeftBottom  ( LumaIdx&   rcIdx ) const;
-#endif //LF_INTERLACE
     __inline const MbData& xGetBlockAbove       ( LumaIdx&   rcIdx ) const;
     __inline const MbData& xGetBlockAboveLeft   ( LumaIdx&   cIdx ) const;
     __inline const MbData& xGetBlockAboveRight  ( LumaIdx&   cIdx ) const;
@@ -401,7 +345,6 @@ protected:
     __inline SChar xGetRefIdxLeft ( ListIdx eListIdx, ParIdx8x8 eParIdx )       const;
     __inline SChar xGetRefIdxAbove( ListIdx eListIdx, ParIdx8x8 eParIdx )       const;
 
-#ifdef   LF_INTERLACE
     enum MvRefConversion
     {
         ONE_TO_ONE,
@@ -410,7 +353,6 @@ protected:
     };
     __inline const MbData& xGetBlockColocated                 ( LumaIdx&  rcIdx, MvRefConversion& eMvRefConversion )  const;
     __inline const MbData& xGetBlockColocatedNonInterlaced    () const;
-#endif //LF_INTERLACE
 
     __inline Bool xGetMotPredFlagLeft ( ListIdx eListIdx, ParIdx8x8 eParIdx )       const;
     __inline Bool xGetMotPredFlagAbove( ListIdx eListIdx, ParIdx8x8 eParIdx )       const;
@@ -462,26 +404,18 @@ private:
 
 public:
     MbData&        m_rcMbCurr;
-#ifdef   LF_INTERLACE
     MbData&        m_rcMbComplementary;
-#endif //LF_INTERLACE
     const MbData&  m_rcMbLeft;
     const MbData&  m_rcMbAbove;
     const MbData&  m_rcMbAboveLeft;
     const MbData&  m_rcMbAboveRight;
-#ifdef   LF_INTERLACE
     const MbData&  m_rcMbAboveAbove;
     const MbData&  m_rcMbAboveAboveLeft;
     const MbData&  m_rcMbAboveAboveRight;
     const MbData&  m_rcMbBelowLeft;
-#endif //LF_INTERLACE
     const MbData&  m_rcMbUnavailable;
-#ifdef   LF_INTERLACE
     const MbData&  m_rcMbColocatedTop;
     const MbData&  m_rcMbColocatedBot;
-#else //!LF_INTERLACE
-    const MbData&  m_rcMbColocated;
-#endif //LF_INTERLACE
 
     SliceHeader&  m_rcSliceHeader;
     const DFP&          m_rcDFP;
@@ -493,22 +427,17 @@ public:
     UInt      m_uiAvailable;
     UInt      m_uiPosX;
     UInt      m_uiPosY;
-#ifdef   LF_INTERLACE
     Bool      m_bTopMb;
     Bool      m_bUseTopField;
     Bool      m_bColocatedField;
     Bool      m_bIsTopRowMb;
     Bool      m_bMbAff;
-#endif //LF_INTERLACE
     SChar     m_ucLastMbQp;
-#ifdef LF_INTERLACE
     PicType   m_eMbPicType;
-#endif //LF_INTERLACE
 
     MbDataAccess* m_pcMbDataAccessBase;
 };
 
-#ifdef LF_INTERLACE
 __inline Void MbDataAccess::getMvPredictor( Mv& rcMv, SChar scRef, ListIdx eListIdx, ParIdx16x16 eParIdx )
 {
     xGetMvPredictor( rcMv, scRef, eListIdx, MEDIAN, B4x4Idx( 0 ), B4x4Idx( 3 ) );
@@ -517,7 +446,6 @@ __inline Void MbDataAccess::getMvPredictor( Mv& rcMv, SChar scRef, ListIdx eList
 {
     xGetMvPredictor( rcMv, scRef, eListIdx, MEDIAN, B4x4Idx( eParIdx ), B4x4Idx( eParIdx+1 ) );
 }
-#endif
 __inline Void MbDataAccess::getMvPredictor( Mv& rcMv, SChar scRef, ListIdx eListIdx )
 {
     xGetMvPredictor( rcMv, scRef, eListIdx, MEDIAN, B4x4Idx( 0 ), B4x4Idx( 3 ) );
@@ -552,7 +480,6 @@ __inline Void MbDataAccess::getMvPredictor( Mv& rcMv, SChar scRef, ListIdx eList
 
 
 
-#ifdef LF_INTERLACE
 __inline Void MbDataAccess::setMvPredictorsBL( const Mv& rcMv, ListIdx eListIdx, ParIdx16x16 eParIdx )
 {
     xSetMvPredictorsBL( rcMv, eListIdx, B4x4Idx( 0 ), B4x4Idx( 3 ) );
@@ -561,7 +488,6 @@ __inline Void MbDataAccess::setMvPredictorsBL( const Mv& rcMv, ListIdx eListIdx,
 {
     xSetMvPredictorsBL( rcMv, eListIdx, B4x4Idx( eParIdx ), B4x4Idx( eParIdx+1 ) );
 }
-#endif
 __inline Void MbDataAccess::setMvPredictorsBL( const Mv& rcMv, ListIdx eListIdx )
 {
     xSetMvPredictorsBL( rcMv, eListIdx, B4x4Idx( 0 ), B4x4Idx( 3 ) );
@@ -611,7 +537,6 @@ __inline SChar MbDataAccess::xGetRefIdxLeft( ListIdx eListIdx, ParIdx8x8 eParIdx
     }
 
     SChar  scRefIdx  = rcMbData.getMbMotionData( eListIdx ).getRefIdx( ParIdx8x8( cIdx.b4x4() ) );
-#ifdef   LF_INTERLACE
     if( scRefIdx > BLOCK_NOT_AVAILABLE )
     {
         if( rcMbData.getFieldFlag() && ! m_rcMbCurr.getFieldFlag() )
@@ -625,7 +550,6 @@ __inline SChar MbDataAccess::xGetRefIdxLeft( ListIdx eListIdx, ParIdx8x8 eParIdx
             //      scRefIdx <<= 1; 
         }
     }
-#endif //LF_INTERLACE
     return scRefIdx;
 }
 
@@ -648,7 +572,6 @@ __inline SChar MbDataAccess::xGetRefIdxAbove( ListIdx eListIdx, ParIdx8x8 eParId
 
     SChar  scRefIdx  = rcMbData.getMbMotionData( eListIdx ).getRefIdx( ParIdx8x8( cIdx.b4x4() ) );
 
-#ifdef   LF_INTERLACE
     if( scRefIdx > BLOCK_NOT_AVAILABLE )
     {
         if( rcMbData.getFieldFlag() && ! m_rcMbCurr.getFieldFlag() )
@@ -662,7 +585,6 @@ __inline SChar MbDataAccess::xGetRefIdxAbove( ListIdx eListIdx, ParIdx8x8 eParId
             //      scRefIdx <<= 1;
         }
     }
-#endif //LF_INTERLACE
 
     return scRefIdx;
 }
@@ -696,7 +618,6 @@ __inline Void MbDataAccess::getMvdLeft( Mv& rcMv, ListIdx eListIdx, LumaIdx cIdx
 {
     const MbData& rcMbData = xGetBlockLeft( cIdx );
     rcMv = rcMbData.getMbMvdData( eListIdx ).getMv( cIdx );
-#ifdef   LF_INTERLACE
     if( rcMbData.getFieldFlag() && ! m_rcMbCurr.getFieldFlag() )
     {
         rcMv.setVer( rcMv.getVer() * 2 );
@@ -705,14 +626,12 @@ __inline Void MbDataAccess::getMvdLeft( Mv& rcMv, ListIdx eListIdx, LumaIdx cIdx
     {
         rcMv.setVer( rcMv.getVer() / 2 );
     }
-#endif //LF_INTERLACE
 }
 
 __inline Void MbDataAccess::getMvdAbove( Mv& rcMv, ListIdx eListIdx, LumaIdx cIdx ) const
 {
     const MbData& rcMbData = xGetBlockAbove( cIdx );
     rcMv = rcMbData.getMbMvdData( eListIdx ).getMv( cIdx );
-#ifdef   LF_INTERLACE
     if( rcMbData.getFieldFlag() && ! m_rcMbCurr.getFieldFlag() )
     {
         rcMv.setVer( rcMv.getVer() * 2 );
@@ -721,7 +640,6 @@ __inline Void MbDataAccess::getMvdAbove( Mv& rcMv, ListIdx eListIdx, LumaIdx cId
     {
         rcMv.setVer( rcMv.getVer() / 2 );
     }
-#endif //LF_INTERLACE
 }
 
 
@@ -858,7 +776,6 @@ __inline Int MbDataAccess::decodeIntraPredMode( LumaIdx cIdx )
         return (iIntraPredMode < iMostProbable) ? iIntraPredMode : iIntraPredMode+1;
 }
 
-#ifdef   LF_INTERLACE
 __inline UInt MbDataAccess::getCtxFieldFlag()  const
 {
     UInt uiCtx = (m_rcMbLeft.getFieldFlag() ? 1: 0);
@@ -872,7 +789,6 @@ __inline UInt MbDataAccess::getCtxFieldFlag()  const
     }
     return uiCtx;
 }
-#endif //LF_INTERLACE
 
 __inline UInt MbDataAccess::getCtxMbType() const
 {
@@ -896,7 +812,6 @@ __inline UInt MbDataAccess::getCtx8x8Flag() const
 
 __inline UInt MbDataAccess::getCtxMbSkipped() const
 {
-#ifdef   LF_INTERLACE
     Bool bFieldFlag = m_rcMbCurr.getFieldFlag();
 
     if( m_bMbAff && ( isTopMb() || m_rcMbComplementary.getSkipFlag()  ) )
@@ -913,9 +828,6 @@ __inline UInt MbDataAccess::getCtxMbSkipped() const
 
     m_rcMbCurr.setFieldFlag( bFieldFlag );
     return uiCtx;
-#else //!LF_INTERLACE
-    return getCtxMbType();
-#endif //LF_INTERLACE
 }
 
 
@@ -1194,20 +1106,12 @@ __inline Void MbDataAccess::xGetColocatedMvRefIdx( Mv& rcMv, SChar& rscRefIdx, L
 {
     ListIdx         eListIdx         = LIST_0;
 
-#ifdef   LF_INTERLACE
     MvRefConversion eMvRefConversion = ONE_TO_ONE;
     const MbData&   rcMbColocated    = xGetBlockColocated( cIdx, eMvRefConversion );
     if( ( rscRefIdx = rcMbColocated.getMbMotionData( eListIdx ).getRefIdx( cIdx ) ) <= BLOCK_NOT_AVAILABLE )
-#else //!LF_INTERLACE
-    if( ( rscRefIdx = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getRefIdx( cIdx ) ) < 1 )
-#endif //LF_INTERLACE
     {
         eListIdx  = LIST_1;
-#ifdef   LF_INTERLACE
         rscRefIdx = rcMbColocated.getMbMotionData( eListIdx ).getRefIdx( cIdx );
-#else //!LF_INTERLACE
-        rscRefIdx = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getRefIdx( cIdx );
-#endif //LF_INTERLACE
     }
 #ifdef   LF_INTERLACE_FIX
     if( rscRefIdx <= BLOCK_NOT_AVAILABLE )
@@ -1219,11 +1123,7 @@ __inline Void MbDataAccess::xGetColocatedMvRefIdx( Mv& rcMv, SChar& rscRefIdx, L
     }
     else
     {
-#ifdef   LF_INTERLACE
         rcMv = rcMbColocated.getMbMotionData( eListIdx ).getMv( cIdx );
-#else //!LF_INTERLACE
-        rcMv = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getMv( cIdx );
-#endif //LF_INTERLACE
     }
 }
 
@@ -1233,19 +1133,11 @@ __inline Void MbDataAccess::xGetColocatedMvsRefIdxNonInterlaced( Mv acMv[], SCha
 {
     ListIdx         eListIdx         = LIST_0;
 
-#ifdef   LF_INTERLACE
     const MbData&   rcMbColocated    = xGetBlockColocatedNonInterlaced();
     if( ( rscRefIdx = rcMbColocated.getMbMotionData( eListIdx ).getRefIdx( eParIdx ) ) <= BLOCK_NOT_AVAILABLE )
-#else //!LF_INTERLACE
-    if( ( rscRefIdx = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getRefIdx( eParIdx ) ) < 1 )
-#endif //LF_INTERLACE
     {
         eListIdx  = LIST_1;
-#ifdef   LF_INTERLACE
         rscRefIdx = rcMbColocated.getMbMotionData( eListIdx ).getRefIdx( eParIdx );
-#else //!LF_INTERLACE
-        rscRefIdx = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getRefIdx( eParIdx );
-#endif //LF_INTERLACE
     }
 #ifdef   LF_INTERLACE_FIX
     if( rscRefIdx <= BLOCK_NOT_AVAILABLE )
@@ -1257,17 +1149,10 @@ __inline Void MbDataAccess::xGetColocatedMvsRefIdxNonInterlaced( Mv acMv[], SCha
     }
     else
     {
-#ifdef   LF_INTERLACE
         acMv[0] = rcMbColocated.getMbMotionData( eListIdx ).getMv( eParIdx, SPART_4x4_0 );
         acMv[1] = rcMbColocated.getMbMotionData( eListIdx ).getMv( eParIdx, SPART_4x4_1 );
         acMv[2] = rcMbColocated.getMbMotionData( eListIdx ).getMv( eParIdx, SPART_4x4_2 );
         acMv[3] = rcMbColocated.getMbMotionData( eListIdx ).getMv( eParIdx, SPART_4x4_3 );
-#else //!LF_INTERLACE
-        acMv[0] = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getMv( eParIdx, SPART_4x4_0 );
-        acMv[1] = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getMv( eParIdx, SPART_4x4_1 );
-        acMv[2] = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getMv( eParIdx, SPART_4x4_2 );
-        acMv[3] = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getMv( eParIdx, SPART_4x4_3 );
-#endif //LF_INTERLACE_FIX
     }
 }
 
@@ -1276,20 +1161,12 @@ __inline const RefPic& MbDataAccess::xGetColocatedMvRefPic( Mv& rcMv, SChar& rsc
 {
     ListIdx         eListIdx         = LIST_0;
 
-#ifdef   LF_INTERLACE
     MvRefConversion eMvRefConversion = ONE_TO_ONE;
     const MbData&   rcMbColocated    = xGetBlockColocated( cIdx, eMvRefConversion );
     if( ( rscRefIdx = rcMbColocated.getMbMotionData( eListIdx ).getRefIdx( cIdx ) ) <= BLOCK_NOT_AVAILABLE )
-#else //!LF_INTERLACE
-    if( ( rscRefIdx = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getRefIdx( cIdx ) ) < 1 )
-#endif //LF_INTERLACE
     {
         eListIdx  = LIST_1;
-#ifdef   LF_INTERLACE
         rscRefIdx = rcMbColocated.getMbMotionData( eListIdx ).getRefIdx( cIdx );
-#else //!LF_INTERLACE
-        rscRefIdx = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getRefIdx( cIdx );
-#endif //LF_INTERLACE
     }
 #ifdef   LF_INTERLACE_FIX
     if( rscRefIdx <= BLOCK_NOT_AVAILABLE )
@@ -1301,14 +1178,9 @@ __inline const RefPic& MbDataAccess::xGetColocatedMvRefPic( Mv& rcMv, SChar& rsc
     }
     else
     {
-#ifdef   LF_INTERLACE
         rcMv = rcMbColocated.getMbMotionData( eListIdx ).getMv( cIdx );
-#else //!LF_INTERLACE
-        rcMv = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getMv( cIdx );
-#endif //LF_INTERLACE
     }
 
-#ifdef  LF_INTERLACE
     //--- mv scaling ----
     if( eMvRefConversion == FRM_TO_FLD )
     {
@@ -1319,28 +1191,17 @@ __inline const RefPic& MbDataAccess::xGetColocatedMvRefPic( Mv& rcMv, SChar& rsc
         rcMv.setFieldToFramePredictor();
     }
     return rcMbColocated.getMbMotionData( eListIdx ).getRefPic( cIdx );
-#else //!LF_INTERLACE
-    return m_rcMbColocated.getMbMotionDataBase( eListIdx ).getRefPic( cIdx );
-#endif //LF_INTERLACE
 }
 
 __inline const RefPic& MbDataAccess::xGetColocatedMvsRefPicNonInterlaced( Mv acMv[], SChar& rscRefIdx, ParIdx8x8 eParIdx ) const
 {
     ListIdx         eListIdx         = LIST_0;
 
-#ifdef   LF_INTERLACE
     const MbData&   rcMbColocated    = xGetBlockColocatedNonInterlaced();
     if( ( rscRefIdx = rcMbColocated.getMbMotionData( eListIdx ).getRefIdx( eParIdx ) ) <= BLOCK_NOT_AVAILABLE )
-#else //!LF_INTERLACE
-    if( ( rscRefIdx = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getRefIdx( eParIdx ) ) < 1 )
-#endif //LF_INTERLACE
     {
         eListIdx  = LIST_1;
-#ifdef   LF_INTERLACE
         rscRefIdx = rcMbColocated.getMbMotionData( eListIdx ).getRefIdx( eParIdx );
-#else //!LF_INTERLACE
-        rscRefIdx = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getRefIdx( eParIdx );
-#endif //LF_INTERLACE
     }
     if( rscRefIdx < 1 )
     {
@@ -1348,43 +1209,27 @@ __inline const RefPic& MbDataAccess::xGetColocatedMvsRefPicNonInterlaced( Mv acM
     }
     else
     {
-#ifdef   LF_INTERLACE
         acMv[0] = rcMbColocated.getMbMotionData( eListIdx ).getMv( eParIdx, SPART_4x4_0 );
         acMv[1] = rcMbColocated.getMbMotionData( eListIdx ).getMv( eParIdx, SPART_4x4_1 );
         acMv[2] = rcMbColocated.getMbMotionData( eListIdx ).getMv( eParIdx, SPART_4x4_2 );
         acMv[3] = rcMbColocated.getMbMotionData( eListIdx ).getMv( eParIdx, SPART_4x4_3 );
-#else //!LF_INTERLACE
-        acMv[0] = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getMv( eParIdx, SPART_4x4_0 );
-        acMv[1] = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getMv( eParIdx, SPART_4x4_1 );
-        acMv[2] = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getMv( eParIdx, SPART_4x4_2 );
-        acMv[3] = m_rcMbColocated.getMbMotionDataBase( eListIdx ).getMv( eParIdx, SPART_4x4_3 );
-#endif //LF_INTERLACE
     }
 
-#ifdef   LF_INTERLACE
     return rcMbColocated.getMbMotionData( eListIdx ).getRefPic( eParIdx );
-#else //!LF_INTERLACE
-    return m_rcMbColocated.getMbMotionDataBase( eListIdx ).getRefPic( eParIdx );
-#endif //LF_INTERLACE
 }
 
 
 __inline const MbData& MbDataAccess::xGetMbLeft() const
 {
-#ifdef   LF_INTERLACE
     if( m_rcMbCurr.getFieldFlag() == m_rcMbLeft.getFieldFlag() ) // same frame/field mode
     {
         return m_rcMbLeft;
     }
     return ( isTopMb() ? m_rcMbLeft : m_rcMbAboveLeft );
-#else //!LF_INTERLACE
-    return m_rcMbLeft;
-#endif //LF_INTERLACE
 }
 
 __inline const MbData& MbDataAccess::xGetMbAbove() const
 {
-#ifdef   LF_INTERLACE
     if( ! m_bMbAff )
     {
         return m_rcMbAbove;
@@ -1395,9 +1240,6 @@ __inline const MbData& MbDataAccess::xGetMbAbove() const
         return m_rcMbAbove;
     }
     return m_rcMbAboveAbove;
-#else //!LF_INTERLACE
-    return m_rcMbAbove;
-#endif //LF_INTERLACE
 }
 
 
@@ -1408,7 +1250,6 @@ __inline const MbData& MbDataAccess::xGetBlockLeft( LumaIdx& rcIdx ) const
         rcIdx = rcIdx + CURR_MB_LEFT_NEIGHBOUR;
         return m_rcMbCurr;
     }
-#ifdef   LF_INTERLACE
     if( ! m_bMbAff )
     {
         rcIdx = rcIdx + LEFT_MB_LEFT_NEIGHBOUR;
@@ -1434,13 +1275,8 @@ __inline const MbData& MbDataAccess::xGetBlockLeft( LumaIdx& rcIdx ) const
     }
     rcIdx = B4x4Idx( rcIdx.b4x4() > 4 ? 15 : 11 );
     return m_rcMbAboveLeft;
-#else //!LF_INTERLACE
-    rcIdx = rcIdx + LEFT_MB_LEFT_NEIGHBOUR;
-    return m_rcMbLeft;
-#endif //LF_INTERLACE
 }
 
-#ifdef   LF_INTERLACE
 __inline const MbData& MbDataAccess::xGetBlockLeftBottom( LumaIdx& rcIdx ) const
 {
     if( rcIdx.x() )  // inside current macroblock
@@ -1475,7 +1311,6 @@ __inline const MbData& MbDataAccess::xGetBlockLeftBottom( LumaIdx& rcIdx ) const
     rcIdx = B4x4Idx( rcIdx.b4x4() > 4 ? 15 : 11 );
     return m_rcMbLeft;
 }
-#endif //LF_INTERLACE
 
 __inline const MbData& MbDataAccess::xGetBlockAbove( LumaIdx& rcIdx ) const
 {
@@ -1486,7 +1321,6 @@ __inline const MbData& MbDataAccess::xGetBlockAbove( LumaIdx& rcIdx ) const
     }
     // outside current macroblock
     rcIdx = rcIdx + ABOVE_MB_ABOVE_NEIGHBOUR;
-#ifdef   LF_INTERLACE
     if( ! m_bMbAff )
     {
         return m_rcMbAbove;
@@ -1497,9 +1331,6 @@ __inline const MbData& MbDataAccess::xGetBlockAbove( LumaIdx& rcIdx ) const
         return m_rcMbAbove;
     }
     return m_rcMbAboveAbove;
-#else //!LF_INTERLACE
-    return m_rcMbAbove;
-#endif //LF_INTERLACE
 }
 
 
@@ -1513,26 +1344,15 @@ __inline const MbData& MbDataAccess::xGetBlockAboveLeft( LumaIdx& cIdx ) const
             return m_rcMbCurr;
         }
         // inside above macroblock
-#ifdef   LF_INTERLACE
         cIdx = cIdx + CURR_MB_LEFT_NEIGHBOUR;
         return xGetBlockAbove( cIdx );
-#else //!LF_INTERLACE
-        cIdx = cIdx + ABOVE_MB_ABOVE_NEIGHBOUR + CURR_MB_LEFT_NEIGHBOUR;
-        return m_rcMbAbove;
-#endif //LF_INTERLACE
     }
     if( cIdx.y() ) // inside left macroblock
     {
-#ifdef   LF_INTERLACE
         cIdx = cIdx + CURR_MB_ABOVE_NEIGHBOUR;
         return xGetBlockLeftBottom( cIdx );
-#else //!LF_INTERLACE
-        cIdx = cIdx + CURR_MB_ABOVE_NEIGHBOUR + LEFT_MB_LEFT_NEIGHBOUR;
-        return m_rcMbLeft;
-#endif //LF_INTERLACE
     }
     // inside above left macroblock
-#ifdef   LF_INTERLACE
     cIdx = B4x4Idx( ! m_rcMbCurr.getFieldFlag() && ! isTopMb() && m_rcMbAboveLeft.getFieldFlag() ? 7 : 15 );
 
     if( ! m_rcMbCurr.getFieldFlag() && ! isTopMb() && m_rcMbAboveLeft.getFieldFlag() )
@@ -1544,10 +1364,6 @@ __inline const MbData& MbDataAccess::xGetBlockAboveLeft( LumaIdx& cIdx ) const
         return m_rcMbAboveLeft;
     }
     return m_rcMbAboveAboveLeft;
-#else //!LF_INTERLACE
-    cIdx = B4x4Idx( 15 );
-    return m_rcMbAboveLeft;
-#endif //LF_INTERLACE
 }
 
 __inline const MbData& MbDataAccess::xGetBlockAboveRight( LumaIdx& cIdx ) const
@@ -1565,15 +1381,9 @@ __inline const MbData& MbDataAccess::xGetBlockAboveRight( LumaIdx& cIdx ) const
             return m_rcMbCurr;
         }
         // inside above macroblock pair
-#ifdef   LF_INTERLACE
         cIdx = cIdx + CURR_MB_RIGHT_NEIGHBOUR;
         return xGetBlockAbove( cIdx );
-#else //!LF_INTERLACE
-        cIdx = cIdx + ABOVE_MB_ABOVE_NEIGHBOUR + CURR_MB_RIGHT_NEIGHBOUR;
-        return m_rcMbAbove;
-#endif //LF_INTERLACE
     }
-#ifdef   LF_INTERLACE
     if( cIdx.y() || ( ! m_rcMbCurr.getFieldFlag() && ! isTopMb() ) ) // not available ( inside right mb or inside above right macroblock for a bottom macroblock )
     {
         cIdx = cIdx + RIGHT_MB_RIGHT_NEIGHBOUR;
@@ -1586,19 +1396,8 @@ __inline const MbData& MbDataAccess::xGetBlockAboveRight( LumaIdx& cIdx ) const
         return m_rcMbAboveRight;
     }
     return m_rcMbAboveAboveRight;
-#else //!LF_INTERLACE
-    if( cIdx.y() )
-    {
-        cIdx = cIdx + CURR_MB_ABOVE_NEIGHBOUR + RIGHT_MB_RIGHT_NEIGHBOUR;
-        return m_rcMbUnavailable;
-    }
-    // inside above rigth macroblock pair
-    cIdx = B4x4Idx( 12 );
-    return m_rcMbAboveRight;
-#endif //LF_INTERLACE
 }
 
-#ifdef   LF_INTERLACE
 __inline const MbData& MbDataAccess::xGetBlockColocated( LumaIdx& rcIdx, MvRefConversion& eMvRefConversion ) const
 {
     Bool bCurrField = getSH().getFieldPicFlag() || m_rcMbCurr.        getFieldFlag();
@@ -1627,7 +1426,6 @@ __inline const MbData& MbDataAccess::xGetBlockColocatedNonInterlaced() const
 {
     return ( m_bIsTopRowMb ? m_rcMbColocatedTop : m_rcMbColocatedBot );
 }
-#endif //LF_INTERLACE
 
 H264AVC_NAMESPACE_END
 

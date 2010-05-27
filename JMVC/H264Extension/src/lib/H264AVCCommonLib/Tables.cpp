@@ -20,7 +20,6 @@ const UChar g_aucLumaFrameDCScan[16] =
   0, 16, 64, 128, 80, 32, 48, 96, 144, 192, 208, 160, 112, 176, 224, 240
 };
 
-#ifdef   LF_INTERLACE
 const UChar g_aucFieldScan[16] =
 {
     0, 4, 1, 8, 12, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15
@@ -29,7 +28,6 @@ const UChar g_aucLumaFieldDCScan[16] =
 {
     0x00, 0x40, 0x10, 0x80, 0xc0, 0x50, 0x90, 0xd0, 0x20, 0x60, 0xa0, 0xe0, 0x30, 0x70, 0xb0, 0xf0
 };
-#endif //LF_INTERLACE
 
 const Int g_aaiQuantCoef[6][16] =
 {
@@ -125,7 +123,6 @@ const UChar g_aucFrameScan64[64] =
   53, 60, 61, 54, 47, 55, 62, 63
 };
 
-#ifdef   LF_INTERLACE
 const UChar g_aucFieldScan64[64] =
 {
     0,  8, 16,  1,  9, 24, 32, 17,
@@ -137,7 +134,6 @@ const UChar g_aucFieldScan64[64] =
     45, 53, 61, 30,  7, 15, 38, 46,
     54, 62, 23, 31, 39, 47, 55, 63
 };
-#endif //LF_INTERLACE
 
 const Int g_aaiDequantCoef64[6][64] = 
 {

@@ -6,7 +6,6 @@ H264AVC_NAMESPACE_BEGIN
 
 
 FrameUnit::FrameUnit( YuvBufferCtrl& rcYuvFullPelBufferCtrl, YuvBufferCtrl& rcYuvHalfPelBufferCtrl, Bool bOriginal )
-#ifdef   LF_INTERLACE
 : m_cFrame         ( rcYuvFullPelBufferCtrl, rcYuvHalfPelBufferCtrl, FRAME )
 , m_cTopField      ( rcYuvFullPelBufferCtrl, rcYuvHalfPelBufferCtrl, TOP_FIELD )
 , m_cBotField      ( rcYuvFullPelBufferCtrl, rcYuvHalfPelBufferCtrl, BOT_FIELD )
@@ -15,9 +14,6 @@ FrameUnit::FrameUnit( YuvBufferCtrl& rcYuvFullPelBufferCtrl, YuvBufferCtrl& rcYu
 , m_eAvailable     ( NOT_SPECIFIED )
 , m_ePicStruct     ( PS_NOT_SPECIFIED )     
 , m_bFieldCoded    ( false )
-#else //!LF_INTERLACE
-: m_cFrame         ( rcYuvFullPelBufferCtrl, rcYuvHalfPelBufferCtrl )
-#endif //LF_INTERLACE
 , m_cMbDataCtrl    ( )
 , m_pcPicBuffer    ( NULL )
 , m_uiFrameNumber  ( MSYS_UINT_MAX )
@@ -61,11 +57,9 @@ ErrVal FrameUnit::init( const SliceHeader& rcSH, PicBuffer *pcPicBuffer )
     m_uiFrameNumber = rcSH.getFrameNum();
 
     RNOK( m_cFrame.   init( m_pcPicBuffer->getBuffer(), this ) );
-#ifdef   LF_INTERLACE
     RNOK( m_cTopField.init( m_pcPicBuffer->getBuffer(), this ) );
     RNOK( m_cBotField.init( m_pcPicBuffer->getBuffer(), this ) );
     m_ePicStruct    = m_pcPicBuffer->getPicStruct();
-#endif //LF_INTERLACE
     m_pcPicBuffer->setUsed();
 
 #ifdef LF_INTERLACE_FIX
@@ -75,18 +69,12 @@ ErrVal FrameUnit::init( const SliceHeader& rcSH, PicBuffer *pcPicBuffer )
     RNOK( m_cMbDataCtrl.init( rcSH.getSPS() ) );
 
     m_uiStatus   = 0;
-#ifdef   LF_INTERLACE
     m_eAvailable = NOT_SPECIFIED;
     m_iMaxPOC    = 0;
-#endif //LF_INTERLACE
 
-#ifdef   LF_INTERLACE
     UInt uiStamp = max( m_cFrame.stamp(), max( m_cTopField.stamp(), m_cBotField.stamp() ) ) + 1;
     m_cTopField.stamp() = uiStamp;
     m_cBotField.stamp() = uiStamp;
-#else //!LF_INTERLACE
-    UInt uiStamp = m_cFrame.stamp() + 1;
-#endif //LF_INTERLACE
     m_cFrame.   stamp() = uiStamp;
 
     m_bInitDone = true;
@@ -109,30 +97,22 @@ ErrVal FrameUnit::init( const SliceHeader& rcSH, FrameUnit& rcFrameUnit )
     RNOK( m_cFrame.   init( NULL, this ) );
     m_cFrame.getFullPelYuvBuffer()->copy( rcFrameUnit.getFrame().getFullPelYuvBuffer() );
     m_cFrame.getFullPelYuvBuffer()->fillMargin();
-#ifdef   LF_INTERLACE
     RNOK( m_cTopField.init( NULL, this ) );
     RNOK( m_cBotField.init( NULL, this ) );
     m_cTopField.getFullPelYuvBuffer()->copy( rcFrameUnit.getTopField().getFullPelYuvBuffer() );
     m_cBotField.getFullPelYuvBuffer()->copy( rcFrameUnit.getBotField().getFullPelYuvBuffer() );
     m_cTopField.getFullPelYuvBuffer()->fillMargin();
     m_cBotField.getFullPelYuvBuffer()->fillMargin();
-#endif //LF_INTERLACE
 
     RNOK( m_cMbDataCtrl.init( rcSH.getSPS() ) );
 
     m_uiStatus = 0;
-#ifdef   LF_INTERLACE
     m_eAvailable = NOT_SPECIFIED;
     m_iMaxPOC    = 0;
-#endif //LF_INTERLACE
 
-#ifdef   LF_INTERLACE
     UInt uiStamp = max( m_cFrame.stamp(), max( m_cTopField.stamp(), m_cBotField.stamp() ) ) + 1;
     m_cTopField.stamp() = uiStamp;
     m_cBotField.stamp() = uiStamp;
-#else //!LF_INTERLACE
-    UInt uiStamp = m_cFrame.stamp() + 1;
-#endif //LF_INTERLACE
     m_cFrame.   stamp() = uiStamp;
 
     m_bInitDone = true;
@@ -144,7 +124,6 @@ ErrVal FrameUnit::init( const SliceHeader& rcSH, FrameUnit& rcFrameUnit )
     return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 Void FrameUnit::setTopFieldPoc( Int iPoc )
 {
     m_cTopField.setPOC( iPoc );
@@ -158,15 +137,6 @@ Void FrameUnit::setBotFieldPoc( Int iPoc )
     m_cFrame   .setPOC( m_cTopField.isPOCAvailable() ? min( m_cTopField.getPOC(), iPoc ) : iPoc );
     m_iMaxPOC   =     ( m_cTopField.isPOCAvailable() ? max( m_cTopField.getPOC(), iPoc ) : iPoc );
 }
-#else //!LF_INTERLACE
-
-Void FrameUnit::setPoc( Int iPoc )
-{
-    m_cFrame.setPOC( iPoc );
-
-    m_iMaxPOC = iPoc;
-}
-#endif //LF_INTERLACE
 
 //JVT-S036  start //this two funcs not treated
 ErrVal FrameUnit::copyBase( const SliceHeader& rcSH, FrameUnit& rcFrameUnit )
@@ -229,15 +199,12 @@ ErrVal FrameUnit::uninit()
         RNOK( m_cMbDataCtrl.uninit() );
     }
     RNOK( m_cFrame.uninit() );
-#ifdef   LF_INTERLACE
     RNOK( m_cTopField.uninit() );
     RNOK( m_cBotField.uninit() );
-#endif //LF_INTERLACE
     m_bInitDone = false;
     return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 RefPic FrameUnit::getRefPic( PicType ePicType, const RefPic& rcRefPic ) const
 {
     const Frame& rcPic = getPic( ePicType );
@@ -263,15 +230,7 @@ Void FrameUnit::setUnused( PicType ePicType )
         getFrame().stamp()++;
     }
 }
-#else //!LF_INTERLACE
-Void FrameUnit::setUnused()
-{
-    m_uiStatus &= ~REFERENCE;
-    getFrame().stamp()++;
-}
-#endif //LF_INTERLACE
 
-#ifdef   LF_INTERLACE
 Void FrameUnit::addPic( PicType ePicType, Bool bFieldCoded, UInt uiIdrPicId )
 { 
     m_eAvailable = PicType( m_eAvailable + ePicType); 
@@ -296,6 +255,5 @@ Void FrameUnit::addPic( PicType ePicType, Bool bFieldCoded, UInt uiIdrPicId )
         }
     }
 }
-#endif //LF_INTERLACE
 
 H264AVC_NAMESPACE_END

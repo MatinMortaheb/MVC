@@ -25,9 +25,7 @@ ControlMngH264AVCDecoder::ControlMngH264AVCDecoder():
   m_pcSampleWeighting     ( NULL ),
   m_uiCurrLayer           ( MSYS_UINT_MAX ),
   m_bLayer0IsAVC          ( true )
-#ifdef   LF_INTERLACE
   , m_bMbAff              ( false ) // for future use
-#endif //LF_INTERLACE
 {
   for( UInt uiLayer = 0; uiLayer < MAX_LAYERS; uiLayer++ )
   {
@@ -168,109 +166,33 @@ ErrVal ControlMngH264AVCDecoder::initMbForParsing( MbDataAccess*& rpcMbDataAcces
   uiMbX = uiMbIndex - uiMbY * m_auiMbXinFrame[m_uiCurrLayer];
 
   RNOK( m_pcMbDataCtrl                          ->initMb( rpcMbDataAccess, uiMbY, uiMbX ) );
-#ifdef   LF_INTERLACE
   RNOK( m_apcYuvFullPelBufferCtrl[m_uiCurrLayer]->initMb(                  uiMbY, uiMbX, m_bMbAff ) ); // for future use
-#else //!LF_INTERLACE
-  RNOK( m_apcYuvFullPelBufferCtrl[m_uiCurrLayer]->initMb(                  uiMbY, uiMbX ) );
-#endif //LF_INTERLACE
 
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 ErrVal ControlMngH264AVCDecoder::initMbForDecoding( MbDataAccess*& rpcMbDataAccess,UInt uiMbY, UInt uiMbX, Bool bMbAFF  )
-#else
-ErrVal ControlMngH264AVCDecoder::initMbForDecoding( MbDataAccess*& rpcMbDataAccess,UInt  uiMbIndex)
-#endif
 {
   ROF( m_uiCurrLayer < MAX_LAYERS );
-  
-#ifndef   LF_INTERLACE
-  UInt uiMbY, uiMbX;
-
-  uiMbY = uiMbIndex         / m_auiMbXinFrame[m_uiCurrLayer];
-  uiMbX = uiMbIndex - uiMbY * m_auiMbXinFrame[m_uiCurrLayer];
-#endif
-
   RNOK( m_pcMbDataCtrl                          ->initMb( rpcMbDataAccess, uiMbY, uiMbX ) );
-#ifdef   LF_INTERLACE
   RNOK( m_apcYuvFullPelBufferCtrl[m_uiCurrLayer]->initMb(                  uiMbY, uiMbX, bMbAFF ) ); // for future use
-#else //!LF_INTERLACE
-  RNOK( m_apcYuvFullPelBufferCtrl[m_uiCurrLayer]->initMb(                  uiMbY, uiMbX ) );
-#endif //LF_INTERLACE
-#ifdef   LF_INTERLACE
   RNOK( m_pcMotionCompensation                  ->initMb(                  uiMbY, uiMbX, *rpcMbDataAccess ) ) ;
-#else
-  RNOK( m_pcMotionCompensation                  ->initMb(                  uiMbY, uiMbX ) ) ;
-#endif
   return Err::m_nOK;
 }
 
-#ifndef LF_INTERLACE
-ErrVal ControlMngH264AVCDecoder::initMbForDecoding( UInt uiMbIndex )
-{
-    ROF( m_uiCurrLayer < MAX_LAYERS );
-
-    UInt uiMbY, uiMbX;
-
-    uiMbY = uiMbIndex         / m_auiMbXinFrame[m_uiCurrLayer];
-    uiMbX = uiMbIndex - uiMbY * m_auiMbXinFrame[m_uiCurrLayer];
-
-    RNOK( m_apcYuvFullPelBufferCtrl[m_uiCurrLayer]->initMb( uiMbY, uiMbX ) );
-    RNOK( m_pcMotionCompensation                  ->initMb( uiMbY, uiMbX ) ) ;
-
-    return Err::m_nOK;
-}
-
-#endif
-
-#ifdef   LF_INTERLACE
 ErrVal ControlMngH264AVCDecoder::initMbForFiltering( MbDataAccess*& rpcMbDataAccess,UInt uiMbY, UInt uiMbX, Bool bMbAFF  )
-#else
-ErrVal ControlMngH264AVCDecoder::initMbForFiltering( MbDataAccess*& rpcMbDataAccess,UInt  uiMbIndex)
-#endif
 {
   ROF( m_uiCurrLayer < MAX_LAYERS );
-  
-#ifndef   LF_INTERLACE
-  UInt uiMbY, uiMbX;
-
-  uiMbY = uiMbIndex         / m_auiMbXinFrame[m_uiCurrLayer];
-  uiMbX = uiMbIndex - uiMbY * m_auiMbXinFrame[m_uiCurrLayer];
-#endif
-
   RNOK( m_pcMbDataCtrl                          ->initMb( rpcMbDataAccess, uiMbY, uiMbX           ) );
-#ifdef   LF_INTERLACE
   RNOK( m_apcYuvFullPelBufferCtrl[m_uiCurrLayer]->initMb(                  uiMbY, uiMbX, bMbAFF ) ); // for future use
-#else //!LF_INTERLACE
-  RNOK( m_apcYuvFullPelBufferCtrl[m_uiCurrLayer]->initMb(                  uiMbY, uiMbX ) );
-#endif //LF_INTERLACE
-
   return Err::m_nOK;
 }
 
 
-#ifdef   LF_INTERLACE
 ErrVal ControlMngH264AVCDecoder::initMbForFiltering( UInt uiMbY, UInt uiMbX, Bool bMbAFF  )
-#else
-ErrVal ControlMngH264AVCDecoder::initMbForFiltering(UInt uiMbIndex)
-#endif
 {
   ROF( m_uiCurrLayer < MAX_LAYERS );
-  
-#ifndef   LF_INTERLACE
-  UInt uiMbY, uiMbX;
-
-  uiMbY = uiMbIndex         / m_auiMbXinFrame[m_uiCurrLayer];
-  uiMbX = uiMbIndex - uiMbY * m_auiMbXinFrame[m_uiCurrLayer];
-#endif
-
-#ifdef   LF_INTERLACE
   RNOK( m_apcYuvFullPelBufferCtrl[m_uiCurrLayer]->initMb(                  uiMbY, uiMbX, bMbAFF ) ); // for future use
-#else //!LF_INTERLACE
-  RNOK( m_apcYuvFullPelBufferCtrl[m_uiCurrLayer]->initMb(                  uiMbY, uiMbX ) );
-#endif //LF_INTERLACE
-
   return Err::m_nOK;
 }
 
@@ -438,10 +360,8 @@ ErrVal ControlMngH264AVCDecoder::initSlice( SliceHeader& rcSH, ProcessingState e
   {
     RNOK( m_pcMotionCompensation->initSlice( rcSH ) );
   }
-#ifdef   LF_INTERLACE
   m_bMbAff = rcSH.isMbAff(); // for future use
   m_pcSliceHeader = &rcSH;
-#endif
   return Err::m_nOK;
 }
 
@@ -467,9 +387,7 @@ ErrVal ControlMngH264AVCDecoder::initSliceForReading( const SliceHeader& rcSH )
 		RNOK( pcMbSymbolReadIf->startSlice( rcSH ) );
 	}
   RNOK( m_pcMbParser->initSlice( pcMbSymbolReadIf ) );
-#ifdef LF_INTERLACE
   m_pcSliceHeader = &rcSH;
-#endif
 
   return Err::m_nOK;
 }
@@ -481,9 +399,7 @@ ErrVal ControlMngH264AVCDecoder::initSliceForDecoding( const SliceHeader& rcSH )
 
   RNOK( m_pcMotionCompensation->initSlice( rcSH ) );
   RNOK( m_pcSampleWeighting->initSlice( rcSH ) );
-#ifdef LF_INTERLACE
   m_pcSliceHeader = &rcSH;
-#endif
 
 
   return Err::m_nOK;

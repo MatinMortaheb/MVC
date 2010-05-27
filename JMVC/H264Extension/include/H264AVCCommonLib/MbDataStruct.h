@@ -14,9 +14,7 @@ class H264AVCCOMMONLIB_API MbDataStruct
 public:
   MbDataStruct();
 
-#ifdef LF_INTERLACE
   Void copy( const MbDataStruct& rcMbDataStruct );
-#endif
   Void reset();
   Void initMbData( UChar ucQp, UInt uiSliceId )                 { m_uiSliceId = uiSliceId;  m_ucQp = ucQp;  }
   Void copyFrom( const MbDataStruct& rcMbDataStruct );
@@ -74,10 +72,8 @@ public:
   UInt getBCBP()                                          const { return m_uiBCBP; }
   Bool getSkipFlag()                                      const { return m_bSkipFlag; }
   Void setSkipFlag( Bool b)                                     { m_bSkipFlag = b; }
-#ifdef LF_INTERLACE
     Void setMbCbpResidual( UInt uiMbCbpResidual )                 { m_uiMbCbpResidual = uiMbCbpResidual; }//loopfilter
       Bool is4x4BlkResidual( LumaIdx cLumaIdx )               const { return (0 != ((m_uiMbCbpResidual >> cLumaIdx) & 1)); }//loopfilter
-#endif
 
   UShort  getResidualPredFlags  ()                        const { return   m_usResidualPredFlags; }
   Bool    getResidualPredFlag   ( LumaIdx     cIdx      ) const { return ( m_usResidualPredFlags & ( 1 << cIdx.b4x4() ) ) != 0; }
@@ -143,10 +139,8 @@ public:
   Bool    getSmoothedRefFlag    () const    { return m_bSmoothedRefFlag;	}
 	//--
 
-#ifdef   LF_INTERLACE
   Void    setFieldFlag          ( Bool b )  { m_bFieldFlag = b; }
   Bool    getFieldFlag          () const    { return m_bFieldFlag; }
-#endif //LF_INTERLACE
 
 public:
   UInt    m_uiSliceId;
@@ -169,10 +163,8 @@ public:
   // TMM_ESS 
   Bool    m_bInCropWindowFlag;  // indicates if the scaled base layer MB is inside the cropping window
 
-#ifdef   LF_INTERLACE
   Bool    m_bFieldFlag;
     UInt m_uiMbCbpResidual;//loop filter
-#endif //LF_INTERLACE
 	//-- JVT-R091
 	Bool		m_bSmoothedRefFlag;		// indicates if the smoothed reference mode is used
 	//--

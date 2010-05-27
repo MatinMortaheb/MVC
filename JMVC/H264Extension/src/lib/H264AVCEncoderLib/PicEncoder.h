@@ -108,18 +108,11 @@ private:
 
   ErrVal  xInitReorderingInterView  ( SliceHeader*&               rpcSliceHeader ); // JVT-V043  related
 
-#ifdef LF_INTERLACE
   ErrVal  xInitSliceHeader          ( SliceHeader*&               rpcSliceHeader,
                                       FrameSpec&                  rcFrameSpec,
                                       Double&                     dLambda, 
                                       Bool                        fakeHeader=false,
 									  PicType                     ePicType=FRAME);
-#else
-  ErrVal  xInitSliceHeader          ( SliceHeader*&               rpcSliceHeader,
-                                      FrameSpec&                  rcFrameSpec,
-                                      Double&                     dLambda, 
-                                      Bool                        fakeHeader=false );
-#endif
 
   UIntList                      m_cLPFrameNumList;                    
 //  }}
@@ -152,12 +145,10 @@ private:
   ErrVal          xGetPSNR                      ( RecPicBufUnit&              rcRecPicBufUnit,
                                                   Double*                     adPSNR );
 
-#ifdef LF_INTERLACE
 ErrVal
 xFieldList(    SliceHeader&   rcSliceHeader,
                            RefFrameList&  rcList,
                            RefFrameList&  rcListTemp );//lufeng
-#endif
 
 // ying GOP stucture support, simplify the configuration files {{
   ErrVal          xInitFrameSpec               ();

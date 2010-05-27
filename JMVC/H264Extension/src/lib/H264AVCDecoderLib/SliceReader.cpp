@@ -92,39 +92,27 @@ ErrVal SliceReader::process( SliceHeader& rcSH, UInt& ruiMbRead )
 
   //====== initialization ======
   UInt  uiMbAddress       = rcSH.getFirstMbInSlice();
-#ifdef   LF_INTERLACE
   UInt  uiLastMbAddress   = rcSH.getMbInPic()-1;
-#endif //LF_INTERLACE
   Bool  bEndOfSlice       = false;
 
   //===== loop over macroblocks =====
-#ifdef   LF_INTERLACE
   for(  ruiMbRead = 0;uiMbAddress!=UInt(-1)&&!bEndOfSlice;ruiMbRead++ )//!bEndOfSlice; uiMbAddress++ )
-#else //!LF_INTERLACE
-  for(  ruiMbRead = 0; !bEndOfSlice; ruiMbRead++ ) //--ICU/ETRI FMO Implementation
-#endif //LF_INTERLACE
   {
     DTRACE_NEWMB( uiMbAddress );
     MbDataAccess* pcMbDataAccess;
 
-#ifdef   LF_INTERLACE
     RNOK( m_pcControlMng->initMbForParsing( pcMbDataAccess, rcSH.getMbIndexFromAddress( uiMbAddress )  ) );
     if( rcSH.isMbAff() && uiMbAddress % 2 == 0 ) // for future use
     {
         pcMbDataAccess->setFieldMode( pcMbDataAccess->getDefaultFieldFlag() );
     }
     rcSH.setLastMbInSlice( uiMbAddress );
-#else
-    RNOK( m_pcControlMng->initMbForParsing( pcMbDataAccess, uiMbAddress ) );
-#endif //LF_INTERLACE
     pcMbDataAccess->getMbData().deactivateMotionRefinement();
 
-#ifdef LF_INTERLACE
 	if( rcSH.isMbAff() && uiMbAddress % 2 == 0 )
     {
       pcMbDataAccess->setFieldMode( pcMbDataAccess->getDefaultFieldFlag() );
     }
-#endif
 
     DECRNOK( m_pcMbParser->process( *pcMbDataAccess, bEndOfSlice) );
 
@@ -309,7 +297,6 @@ SliceReader::readSliceHeaderVirtual(	NalUnitType   eNalUnitType,
 	UInt	uiMaxPocLsb		=	1 << rpcSH->getSPS().getLog2MaxPicOrderCntLsb();
 	rpcSH->setFrameNum( uiFrameNum);
 	rpcSH->setPicOrderCntLsb( uiPoc % uiMaxPocLsb);
-#ifdef LF_INTERLACE
     if( rpcSH->getPicType() == FRAME )
     {
         rpcSH->setTopFieldPoc( uiPoc );
@@ -323,9 +310,6 @@ SliceReader::readSliceHeaderVirtual(	NalUnitType   eNalUnitType,
     {
         rpcSH->setBotFieldPoc( uiPoc );
     }
-#else
-	rpcSH->setPoc( uiPoc);
-#endif //LF_INTERLACE not sure
 	rpcSH->setAdaptivePredictionFlag(1);
 	rpcSH->setDirectSpatialMvPredFlag(false);
 	rpcSH->setNumRefIdxActiveOverrideFlag( true);
@@ -664,7 +648,6 @@ SliceReader::readSliceHeader( NalUnitType   eNalUnitType,
 	  RNOK( m_pcHeaderReadIf->getFlag( KeyPicFlag,                        "SH: key_pic_flag"));
 	  rpcSH->setKeyPicFlagScalable( KeyPicFlag );  //JVT-S036 
   }
-#ifdef   LF_INTERLACE
   if (!rpcSH->getSPS().getFrameMbsOnlyFlag())
   {
       if ((!rpcSH->getFieldPicFlag()) && (rpcSH->getSPS().getMbAdaptiveFrameFieldFlag()))
@@ -672,7 +655,6 @@ SliceReader::readSliceHeader( NalUnitType   eNalUnitType,
           rpcSH->setFirstMbInSlice  ( uiFirstMbInSlice << 1);
       }
   }
-#endif //!LF_INTERLACE
   if ( eNalUnitType == NAL_UNIT_CODED_SLICE ||
 	   eNalUnitType == NAL_UNIT_CODED_SLICE_IDR )
 

@@ -182,7 +182,6 @@ ErrVal MotionCompensation::uninit()
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 Short MotionCompensation::xCorrectChromaMv( const MbDataAccess& rcMbDataAccess, PicType eRefPicType )
 {
     PicType eCurrType = rcMbDataAccess.getMbPicType();
@@ -197,7 +196,6 @@ Short MotionCompensation::xCorrectChromaMv( const MbDataAccess& rcMbDataAccess, 
     }
     return 0;
 }
-#endif //LF_INTERLACE
 
 
 Void MotionCompensation::xGetMbPredData( MbDataAccess& rcMbDataAccess, MC8x8D& rcMC8x8D )
@@ -221,20 +219,12 @@ Void MotionCompensation::xGetMbPredData( MbDataAccess& rcMbDataAccess, MC8x8D& r
     {
       rcMv3D.limitComponents( m_cMin, m_cMax );
 
-#ifdef   LF_INTERLACE
       const Frame* pcRefFrame = rcSH.getRefPic( rcMv3D.getRef(), rcMbDataAccess.getMbPicType(), eLstIdx ).getFrame();
       rcMC8x8D.m_sChromaOffset[eLstIdx] = xCorrectChromaMv( rcMbDataAccess, pcRefFrame->getPicType() );
-#else //!LF_INTERLACE
-      const Frame* pcRefFrame = rcSH.getRefPic( rcMv3D.getRef(), eLstIdx ).getFrame();
-#endif //LF_INTERLACE
 
       rcMC8x8D.m_apcRefBuffer[eLstIdx]  = const_cast<Frame*>(pcRefFrame)->getFullPelYuvBuffer();
       apcFrame[n]                       = pcRefFrame;
-#ifdef   LF_INTERLACE
       rcMC8x8D.m_apcPW[eLstIdx]         = &rcSH.getPredWeight( eLstIdx, rcMv3D.getRef() ,rcMbDataAccess.getMbData().getFieldFlag());
-#else
-	  rcMC8x8D.m_apcPW[eLstIdx]         = &rcSH.getPredWeight( eLstIdx, rcMv3D.getRef() );
-#endif
 	  iPredCount++;
     }
   }
@@ -274,21 +264,13 @@ __inline Void MotionCompensation::xGetBlkPredData( MbDataAccess& rcMbDataAccess,
     if( BLOCK_NOT_PREDICTED != rcMv3D.getRef() )
     {
       iPredCount++;
-#ifdef   LF_INTERLACE
       const Frame* pcRefFrame = rcSH.getRefPic( rcMv3D.getRef(), rcMbDataAccess.getMbPicType(), eLstIdx ).getFrame();
       rcMC8x8D.m_sChromaOffset[eLstIdx] = xCorrectChromaMv( rcMbDataAccess, pcRefFrame->getPicType() );
-#else //!LF_INTERLACE
-      const Frame* pcRefFrame = rcSH.getRefPic( rcMv3D.getRef(), eLstIdx ).getFrame();
-#endif //LF_INTERLACE
 
       rcMC8x8D.m_apcRefBuffer[eLstIdx]  = const_cast<Frame*>(pcRefFrame)->getFullPelYuvBuffer();
 
       apcFrame[n]                       = pcRefFrame;
-#ifdef   LF_INTERLACE     
 	  rcMC8x8D.m_apcPW[eLstIdx]         = &rcSH.getPredWeight( eLstIdx, rcMv3D.getRef() ,rcMbDataAccess.getMbData().getFieldFlag());
-#else
-     rcMC8x8D.m_apcPW[eLstIdx]         = &rcSH.getPredWeight( eLstIdx, rcMv3D.getRef() );
-#endif
       switch( eBlkMode )
       {
       case BLK_8x8:
@@ -364,9 +346,7 @@ Void MotionCompensation::xPredChroma( YuvMbBuffer* apcTarBuffer[2], Int iSizeX, 
     if( NULL != pcRefBuffer )
     {
       Mv cMv = rcMc8x8D.m_aacMv[n][eSParIdx];
-#ifdef   LF_INTERLACE
       cMv.setVer( cMv.getVer() + rcMc8x8D.m_sChromaOffset[n] );
-#endif //LF_INTERLACE
       xPredChroma( apcTarBuffer[n], pcRefBuffer, cIdx, cMv, iSizeY, iSizeX );
     }
   }
@@ -404,9 +384,7 @@ Void MotionCompensation::xPredChroma( YuvMbBuffer* pcRecBuffer, Int iSizeX, Int 
     if( NULL != pcRefBuffer )
     {
       Mv cMv = rcMc8x8D.m_aacMv[n][0];
-#ifdef   LF_INTERLACE
       cMv.setVer( cMv.getVer() + rcMc8x8D.m_sChromaOffset[n] );
-#endif //LF_INTERLACE
       xPredChroma( apcTarBuffer[n], pcRefBuffer, rcMc8x8D.m_cIdx, cMv, iSizeY, iSizeX );
     }
   }
@@ -752,20 +730,14 @@ ErrVal MotionCompensation::compensateDirectBlock( MbDataAccess& rcMbDataAccess, 
 
 
 
-#ifdef   LF_INTERLACE
 ErrVal MotionCompensation::initMb( UInt uiMbY, UInt uiMbX, MbDataAccess& rcMbDataAccess)
-#else
-ErrVal MotionCompensation::initMb( UInt uiMbY, UInt uiMbX)
-#endif
 {
   UInt uiMbInFrameY = m_uiMbInFrameY;
-#ifdef   LF_INTERLACE
   if( rcMbDataAccess.getMbData().getFieldFlag() )
   {
       uiMbInFrameY >>= 1;
       uiMbY        >>= 1;
   }
-#endif //LF_INTERLACE
   m_cMin.setHor( (Short) max( (Int)MSYS_SHORT_MIN, (Int)((-(Int)uiMbX << 4) - (16+8) ) << 2 ) );
   m_cMin.setVer( (Short) max( (Int)MSYS_SHORT_MIN, (Int)((-(Int)uiMbY << 4) - (16+8) ) << 2 ) );
 
@@ -945,9 +917,7 @@ Void MotionCompensation::xPredChroma( IntYuvMbBuffer* pcRecBuffer, Int iSizeX, I
     if( NULL != pcRefBuffer )
     {
       Mv cMv = rcMc8x8D.m_aacMv[n][0];
-#ifdef   LF_INTERLACE
       cMv.setVer( cMv.getVer() + rcMc8x8D.m_sChromaOffset[n] ); //tobi
-#endif //LF_INTERLACE
       xPredChroma( apcTarBuffer[n], pcRefBuffer, rcMc8x8D.m_cIdx, cMv, iSizeY, iSizeX );
     }
   }
@@ -964,9 +934,7 @@ Void MotionCompensation::xPredChroma( IntYuvMbBuffer* apcTarBuffer[2], Int iSize
     if( NULL != pcRefBuffer )
     {
       Mv cMv = rcMc8x8D.m_aacMv[n][eSParIdx];
-#ifdef   LF_INTERLACE
 			cMv.setVer( cMv.getVer() + rcMc8x8D.m_sChromaOffset[n] );
-#endif //LF_INTERLACE
       xPredChroma( apcTarBuffer[n], pcRefBuffer, cIdx, cMv, iSizeY, iSizeX );
     }
   }
@@ -1786,16 +1754,10 @@ __inline Void MotionCompensation::xGetMbPredData(       MbDataAccess& rcMbDataAc
       iPredCount++;
       rcMv3D.limitComponents( m_cMin, m_cMax );
 
-#ifdef   LF_INTERLACE
 			rcMC8x8D.m_sChromaOffset[eLstIdx] = xCorrectChromaMv( rcMbDataAccess, pcRefFrame->getPicType() );
-#endif //LF_INTERLACE
       rcMC8x8D.m_apcRefBuffer [eLstIdx] = const_cast<IntFrame*>(pcRefFrame)->getFullPelYuvBuffer();
       apcFrame[n]                       = pcRefFrame;
-#ifdef   LF_INTERLACE     
 	  rcMC8x8D.m_apcPW[eLstIdx]         = &rcSH.getPredWeight( eLstIdx, rcMv3D.getRef() ,rcMbDataAccess.getMbData().getFieldFlag());
-#else
-	  rcMC8x8D.m_apcPW[eLstIdx]         = &rcSH.getPredWeight( eLstIdx, rcMv3D.getRef() );
-#endif
     }
   }
   if( ( 2 == iPredCount ) && ( 2 == rcSH.getPPS().getWeightedBiPredIdc() ) )
@@ -1839,16 +1801,10 @@ __inline Void MotionCompensation::xGetBlkPredData(       MbDataAccess& rcMbDataA
     if( pcRefFrame != NULL ) 
     {
       iPredCount++;
-#ifdef   LF_INTERLACE
 			rcMC8x8D.m_sChromaOffset[eLstIdx] = xCorrectChromaMv( rcMbDataAccess, pcRefFrame->getPicType() );
-#endif //LF_INTERLACE
       rcMC8x8D.m_apcRefBuffer[eLstIdx]  = const_cast<IntFrame*>(pcRefFrame)->getFullPelYuvBuffer();
       apcFrame[n]                       = pcRefFrame;
-#ifdef   LF_INTERLACE
 	  rcMC8x8D.m_apcPW[eLstIdx]         = &rcSH.getPredWeight( eLstIdx, rcMv3D.getRef() ,rcMbDataAccess.getMbData().getFieldFlag());
-#else
-	  rcMC8x8D.m_apcPW[eLstIdx]         = &rcSH.getPredWeight( eLstIdx, rcMv3D.getRef() );
-#endif
       switch( eBlkMode )
       {
       case BLK_8x8:

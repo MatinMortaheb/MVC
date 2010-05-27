@@ -35,14 +35,9 @@ public:
     Void getMbPositionFromAddress( UInt& ruiMbY, UInt& ruiMbX, UInt& ruiMbIndex, const UInt uiMbAddress ) const ;
     UInt getMbIndexFromAddress( UInt uiMbAddress ) const; //th
 
-#ifdef   LF_INTERLACE
   ErrVal  compare     ( const SliceHeader*          pcSH,
       Bool&                       rbNewPic,
       Bool&                       rbNewFrame ) const;
-#else //!LF_INTERLACE
-  ErrVal  compare     ( const SliceHeader*          pcSH,
-      Bool&                       rbNewFrame ) const;
-#endif //LF_INTERLACE
 
 // JVT-Q054 Red. Picture {
   ErrVal  compareRedPic     ( const SliceHeader*          pcSH,
@@ -55,7 +50,6 @@ public:
   Bool    isInterP    ()  const   { return m_eSliceType == P_SLICE; }
   Bool    isInterB    ()  const   { return m_eSliceType == B_SLICE; }
 
-#ifdef   LF_INTERLACE
   Bool    isMbAff     ()  const   { return ( ! getFieldPicFlag() && getSPS().getMbAdaptiveFrameFieldFlag() ); }  // for future use
 
   const RefPicList<RefPic>& getRefPicList( PicType ePicType, ListIdx eListIdx ) const
@@ -94,26 +88,6 @@ public:
 
   Void  setTopFieldPoc  ( Int           i  )  { m_iTopFieldPoc        = i;  }
   Void  setBotFieldPoc  ( Int           i  )  { m_iBotFieldPoc        = i;  }
-#else //!LF_INTERLACE
-  const RefPicList<RefPic>& getRefPicList( ListIdx eListIdx ) const
-  {
-      return m_acRefPicList[eListIdx];
-  }
-  RefPicList<RefPic>& getRefPicList( ListIdx eListIdx )
-  {
-      return m_acRefPicList[eListIdx];
-  }
-  UInt  getRefListSize( ListIdx eListIdx ) const
-  {
-      return m_acRefPicList[eListIdx].size();
-  }
-  const RefPic& getRefPic( UInt uiFrameId, ListIdx eLstIdx ) const
-  {
-      uiFrameId--;
-      AOT_DBG( eLstIdx > 2 );
-      return m_acRefPicList[eLstIdx].get( uiFrameId );
-  }
-#endif
 
 
   Void  setPoc          ( Int           i  )  { m_iPoc                = i; }
@@ -122,7 +96,6 @@ public:
   Void  setRefFrameList ( RefFrameList* pc,
                           ListIdx       e  )  { m_apcRefFrameList[e]  = pc; }
 
-#ifdef   LF_INTERLACE
   Int             getTopFieldPoc        ()                    const { return m_iTopFieldPoc; }
   Int             getBotFieldPoc        ()                    const { return m_iBotFieldPoc; }
   Int             getPoc            ()                    const { return ( m_bFieldPicFlag ? ( m_bBottomFieldFlag ? m_iBotFieldPoc : m_iTopFieldPoc ) : min( m_iTopFieldPoc, m_iBotFieldPoc ) ); }
@@ -136,9 +109,6 @@ public:
                     }
   RefFrameList*   getRefFrameList       ( PicType ePicType,
       ListIdx eLstIdx )   const { return m_aapcRefFrameList[ePicType-1][eLstIdx]; }
-#else
-    Int             getPoc                ()                    const { return m_iPoc; }
-#endif
 
   UInt            getLastMbInSlice      ()                    const { return m_uiLastMbInSlice; }
   FrameUnit*      getFrameUnit          ()                    const { return m_pcFrameUnit; }
@@ -150,7 +120,6 @@ public:
   const Bool      isScalingMatrixPresent( UInt    uiMatrix )  const { return NULL != m_acScalingMatrix.get( uiMatrix ); }
   const UChar*    getScalingMatrix      ( UInt    uiMatrix )  const { return m_acScalingMatrix.get( uiMatrix ); }
   
-#ifdef   LF_INTERLACE
   Int             getDistScaleFactor    ( PicType eMbPicType,
       SChar   sL0RefIdx,
       SChar   sL1RefIdx ) const;
@@ -165,18 +134,6 @@ public:
       RefFrameList& rcRefFrameListL0, 
       RefFrameList& rcRefFrameListL1 ) const;
   //  TMM_EC }}
-#else //!LF_INTERLACE
-  Int             getDistScaleFactor    ( SChar   sL0RefIdx,
-      SChar   sL1RefIdx ) const;
-//	TMM_EC {{
-  Int             getDistScaleFactorVirtual( SChar   sL0RefIdx,
-      SChar   sL1RefIdx,
-      RefFrameList& rcRefFrameListL0, 
-      RefFrameList& rcRefFrameListL1 ) const;
-//  TMM_EC }}
-  Int             getDistScaleFactorScal( SChar   sL0RefIdx,
-                                          SChar   sL1RefIdx ) const;
-#endif //LF_INTERLACE
 
   Int             getDistScaleFactorWP  ( const Frame*    pcFrameL0, const Frame*     pcFrameL1 )  const;
   Int             getDistScaleFactorWP  ( const IntFrame* pcFrameL0, const IntFrame*  pcFrameL1 )  const;
@@ -192,12 +149,10 @@ protected:
 
 
 protected:
-#ifdef   LF_INTERLACE
     RefPicList<RefPic>      m_aacRefPicList[3][2];
     RefFrameList*           m_aapcRefFrameList[3][2];
     Int                     m_iTopFieldPoc;
     Int                     m_iBotFieldPoc;
-#endif
     RefPicList<RefPic>      m_acRefPicList[2];
     Int                     m_iPoc;
   UInt                    m_uiLastMbInSlice;

@@ -447,9 +447,7 @@ NalUnitParser::initNalUnit( BinDataAccessor* pcBinDataAccessor, Bool* KeyPicFlag
 
   if(!m_bDiscardableFlag || (m_bDiscardableFlag && m_uiDecodedLayer == m_uiLayerId) || m_bCheckAllNALUs) //JVT-P031
   {
-#ifdef   LF_INTERLACE
 	  if(uiBitsInPacket<1)return Err::m_nOK;//lufeng: empty packet
-#endif
 
       RNOK( m_pcBitReadBuffer->initPacket( (UInt32*)(m_pucBuffer), uiBitsInPacket) );
   }

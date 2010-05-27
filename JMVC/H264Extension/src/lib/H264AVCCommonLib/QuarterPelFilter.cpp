@@ -469,7 +469,6 @@ Void QuarterPelFilter::xPredElse( Pel* pucDest, Pel* pucSrc, Int iDestStride, In
 }
 
 
-#ifdef   LF_INTERLACE
 ErrVal QuarterPelFilter::filterFrame( YuvPicBuffer *pcPelBuffer, YuvPicBuffer *pcHalfPelBuffer )
 {
     ROT( NULL == pcPelBuffer );
@@ -558,7 +557,6 @@ ErrVal QuarterPelFilter::filterFrame( YuvPicBuffer *pcPelBuffer, YuvPicBuffer *p
     psTemp = NULL;
     return Err::m_nOK;
 }
-#endif //LF_INTERLACE
 
 
 ErrVal QuarterPelFilter::filterFrame( IntYuvPicBuffer *pcPelBuffer, IntYuvPicBuffer *pcHalfPelBuffer )

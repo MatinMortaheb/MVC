@@ -100,9 +100,7 @@ public:
   ErrVal  deltaQp             ( MbDataAccess& rcMbDataAccess );
   ErrVal  intraPredModeLuma   ( MbDataAccess& rcMbDataAccess, LumaIdx cIdx );
   ErrVal  intraPredModeChroma ( MbDataAccess& rcMbDataAccess );
-#ifdef   LF_INTERLACE
   ErrVal  fieldFlag           ( MbDataAccess& rcMbDataAccess );
-#endif //LF_INTERLACE
   ErrVal  samplesPCM          ( MbDataAccess& rcMbDataAccess );
 
   ErrVal  startSlice          ( const SliceHeader& rcSliceHeader );
@@ -176,11 +174,7 @@ private:
   ErrVal xGetCode     ( UInt& ruiCode, UInt uiLength );
   ErrVal xGetUvlcCode ( UInt& ruiVal  );
   ErrVal xGetSvlcCode ( Int&  riVal   );
-#ifdef   LF_INTERLACE
   ErrVal xGetRefFrame ( Bool bWriteBit, UInt& uiRefFrame, ListIdx eLstIdx );
-#else //!LF_INTERLACE
-  ErrVal xGetRefFrame ( Bool bWriteBit, UInt& uiRefFrame );
-#endif //LF_INTERLACE
   ErrVal xGetMotionPredFlag( Bool& rbFlag );
   ErrVal xGetMvd      ( Mv& cMv );
 

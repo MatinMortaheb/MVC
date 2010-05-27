@@ -23,11 +23,9 @@ const int COUNT_THR[9] = { 3, 4, 4, 4, 3, 2, 2, 3, 3};
 
 
 CabacReader::CabacReader():
-#ifdef   LF_INTERLACE
 m_cFieldFlagCCModel   ( 1,                3),
 m_cFldMapCCModel      ( NUM_BLOCK_TYPES,  NUM_MAP_CTX),
 m_cFldLastCCModel     ( NUM_BLOCK_TYPES,  NUM_LAST_CTX),
-#endif //LF_INTERLACE
   m_cBCbpCCModel        ( NUM_BLOCK_TYPES,  NUM_BCBP_CTX ),
   m_cMapCCModel         ( NUM_BLOCK_TYPES,  NUM_MAP_CTX ),
   m_cLastCCModel        ( NUM_BLOCK_TYPES,  NUM_LAST_CTX ),
@@ -98,11 +96,9 @@ ErrVal CabacReader::xInitContextModels( const SliceHeader& rcSliceHeader )
     RNOK( m_cBCbpEnhanceCCModel.initBuffer( (Short*)INIT_BCBP_ENH_I,      iQp ) );
 
     RNOK( m_cTransSizeCCModel.initBuffer(   (Short*)INIT_TRANSFORM_SIZE_I,iQp ) );
-#ifdef   LF_INTERLACE
     RNOK( m_cFieldFlagCCModel.initBuffer(   (Short*)INIT_MB_AFF_I,        iQp ) );
     RNOK( m_cFldMapCCModel.initBuffer(      (Short*)INIT_FLD_MAP_I,       iQp ) );
     RNOK( m_cFldLastCCModel.initBuffer(     (Short*)INIT_FLD_LAST_I,      iQp ) );
-#endif //LF_INTERLACE
 
   }
   else
@@ -133,11 +129,9 @@ ErrVal CabacReader::xInitContextModels( const SliceHeader& rcSliceHeader )
     RNOK( m_cBCbpEnhanceCCModel.initBuffer( (Short*)INIT_BCBP_ENH_P       [iIndex], iQp ) );
 
     RNOK( m_cTransSizeCCModel.initBuffer(   (Short*)INIT_TRANSFORM_SIZE_P [iIndex], iQp ) );
-#ifdef   LF_INTERLACE
     RNOK( m_cFieldFlagCCModel.initBuffer(   (Short*)INIT_MB_AFF_P         [iIndex], iQp ) );
     RNOK( m_cFldMapCCModel.initBuffer(      (Short*)INIT_FLD_MAP_P        [iIndex], iQp ) );
     RNOK( m_cFldLastCCModel.initBuffer(     (Short*)INIT_FLD_LAST_P       [iIndex], iQp ) );
-#endif //
 
   }
 
@@ -274,16 +268,12 @@ ErrVal CabacReader::xRefFrame( MbDataAccess& rcMbDataAccess, UInt& ruiRefFrame, 
   }
 
   ruiRefFrame++;
-#ifdef LF_INTERLACE
   DTRACE_DO(if (eLstIdx==LIST_0))
       DTRACE_T( "ref_idx_l0" );
   DTRACE_DO(else)
       DTRACE_T( "ref_idx_l1" );
   const UInt uiMaxRefFrames = rcMbDataAccess.getNumActiveRef( eLstIdx );
   DECROT( ruiRefFrame > uiMaxRefFrames );
-#else //LF_INTERLACE
-  DTRACE_T( "RefFrame" );
-#endif //LF_INTERLACE
   DTRACE_TY( "ae(v)" );
   DTRACE_CODE(ruiRefFrame);
   DTRACE_N;
@@ -399,21 +389,15 @@ Bool CabacReader::isMbSkipped( MbDataAccess& rcMbDataAccess )
 
   if( rcMbDataAccess.getSH().isInterB() )
   {
-#ifdef   LF_INTERLACE
  //   CabaDecoder::getSymbol( uiSymbol, m_cMbTypeCCModel.get( 2, 7 + rcMbDataAccess.getCtxDirectMbWoCoeff() ) );
 	 CabaDecoder::getSymbol( uiSymbol, m_cMbTypeCCModel.get( 2, 7 + rcMbDataAccess.getCtxMbSkipped() ) );//lufeng: follow jsvm
-#else
-	 CabaDecoder::getSymbol( uiSymbol, m_cMbTypeCCModel.get( 2, 7 + rcMbDataAccess.getCtxDirectMbWoCoeff() ) );
-#endif
 	  rcMbDataAccess.getMbData().setSkipFlag(0!=uiSymbol);
   }
   else
   {
     CabaDecoder::getSymbol( uiSymbol, m_cMbTypeCCModel.get( 1, rcMbDataAccess.getCtxMbSkipped() ) );
   }
-#ifdef   LF_INTERLACE
   rcMbDataAccess.getMbData().setSkipFlag(0!=uiSymbol);
-#endif
 
   ROTRS( 0 == uiSymbol, false );
   m_uiLastDQpNonZero = 0; // no DeltaQP for Skipped Macroblock
@@ -782,7 +766,6 @@ ErrVal CabacReader::xGetMvd( MbDataAccess& rcMbDataAccess, Mv& rcMv, LumaIdx cId
   return Err::m_nOK;
 }
 
-#ifdef   LF_INTERLACE
 ErrVal CabacReader::fieldFlag( MbDataAccess& rcMbDataAccess )
 {
     UInt uiSymbol;
@@ -797,7 +780,6 @@ ErrVal CabacReader::fieldFlag( MbDataAccess& rcMbDataAccess )
 
     return Err::m_nOK;
 }
-#endif //LF_INTERLACE
 
 
 ErrVal CabacReader::intraPredModeChroma( MbDataAccess& rcMbDataAccess )
@@ -929,12 +911,8 @@ ErrVal CabacReader::residualBlock( MbDataAccess&  rcMbDataAccess,
                                    ResidualMode   eResidualMode,
                                    UInt&          ruiMbExtCbp )
 {
-#ifdef   LF_INTERLACE
     const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
     const UChar* pucScan = (bFrame) ? g_aucFrameScan : g_aucFieldScan;
-#else //!LF_INTERLACE
-    const UChar* pucScan = ( eResidualMode==LUMA_I16_DC ? g_aucLumaFrameDCScan : g_aucFrameScan );
-#endif //LF_INTERLACE
 
   Bool bCoded;
 
@@ -950,7 +928,6 @@ ErrVal CabacReader::residualBlock( MbDataAccess&  rcMbDataAccess,
     return Err::m_nOK;
   }
 
-#ifdef   LF_INTERLACE
   switch( eResidualMode )
   {
   case LUMA_I16_AC:
@@ -967,15 +944,10 @@ ErrVal CabacReader::residualBlock( MbDataAccess&  rcMbDataAccess,
       AOT( 1 );
       break;
   }
-#endif //LF_INTERLACE
 
   TCoeff*       piCoeff   = rcMbDataAccess.getMbTCoeffs().get( cIdx );
 
-#ifdef   LF_INTERLACE
   DECRNOK( xReadCoeff( piCoeff, eResidualMode, pucScan, !bFrame ) );
-#else //!LF_INTERLACE
-  DECRNOK( xReadCoeff( piCoeff, eResidualMode, pucScan ) );
-#endif //LF_INTERLACE
 
   return Err::m_nOK;
 }
@@ -988,16 +960,11 @@ ErrVal CabacReader::residualBlock( MbDataAccess&  rcMbDataAccess,
                                    ResidualMode   eResidualMode
                                    )
 {
-#ifdef   LF_INTERLACE
   const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
   const UChar* pucScan = (bFrame) ? g_aucFrameScan : g_aucFieldScan;
-#else //!LF_INTERLACE
-  const UChar* pucScan = ( eResidualMode == CHROMA_DC ? g_aucIndexChromaDCScan : g_aucFrameScan );
-#endif //LF_INTERLACE
 
   Bool bCoded;
 
-#ifdef   LF_INTERLACE
   switch( eResidualMode )
   {
   case CHROMA_DC:
@@ -1015,9 +982,6 @@ ErrVal CabacReader::residualBlock( MbDataAccess&  rcMbDataAccess,
       AOT( 1 );
       break;
   }
-#else //!LF_INTERLACE
-  DTRACE_T( eResidualMode == CHROMA_DC ? "CHROMA_DC:" : "CHROMA_AC:" );
-#endif //LF_INTERLACE
 
   DTRACE_V( cIdx );
   DTRACE_N;
@@ -1028,11 +992,7 @@ ErrVal CabacReader::residualBlock( MbDataAccess&  rcMbDataAccess,
 
   ROTRS( ! bCoded, Err::m_nOK );
 
-#ifdef   LF_INTERLACE
   DECRNOK( xReadCoeff( piCoeff, eResidualMode, pucScan, !bFrame ) );
-#else //!LF_INTERLACE
-  DECRNOK( xReadCoeff( piCoeff, eResidualMode, pucScan ) );
-#endif //LF_INTERLACE
 
   return Err::m_nOK;
 }
@@ -1152,26 +1112,14 @@ ErrVal CabacReader::xReadBCbp( MbDataAccess& rcMbDataAccess, Bool& rbCoded, Resi
 
 
 
-#ifdef   LF_INTERLACE
 ErrVal CabacReader::xReadCoeff( TCoeff*         piCoeff,
                                ResidualMode    eResidualMode,
                                const UChar*    pucScan,
                                Bool            bFieldModel
                                )
-#else //!LF_INTERLACE
-ErrVal CabacReader::xReadCoeff( TCoeff*         piCoeff,
-                               ResidualMode    eResidualMode,
-                               const UChar*    pucScan
-                               )
-#endif //LF_INTERLACE
 {
-#ifdef   LF_INTERLACE
   CabacContextModel2DBuffer&  rcMapCCModel  = ( bFieldModel ? m_cFldMapCCModel  : m_cMapCCModel  );
   CabacContextModel2DBuffer&  rcLastCCModel = ( bFieldModel ? m_cFldLastCCModel : m_cLastCCModel );
-#else //!LF_INTERLACE
-  CabacContextModel2DBuffer&  rcMapCCModel  = m_cMapCCModel;
-  CabacContextModel2DBuffer&  rcLastCCModel = m_cLastCCModel;
-#endif //LF_INTERLACE
 
   UInt uiStart = 0;
   UInt uiStop  = 15;
@@ -1339,12 +1287,8 @@ ErrVal CabacReader::intraPredModeLuma8x8( MbDataAccess& rcMbDataAccess, B8x8Idx 
 ErrVal CabacReader::residualBlock8x8( MbDataAccess& rcMbDataAccess,
                                       B8x8Idx       cIdx )
 {
-#ifdef   LF_INTERLACE
   const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
   const UChar* pucScan = (bFrame) ? g_aucFrameScan64 : g_aucFieldScan64;
-#else //!LF_INTERLACE
-  const UChar*  pucScan       = g_aucFrameScan64;
-#endif //LF_INTERLACE
 
   DTRACE_T( "LUMA_8x8:" );
   DTRACE_V( cIdx.b8x8Index() );
@@ -1359,11 +1303,7 @@ ErrVal CabacReader::residualBlock8x8( MbDataAccess& rcMbDataAccess,
   }
 
   TCoeff*     piCoeff     = rcMbDataAccess.getMbTCoeffs().get8x8( cIdx );
-#ifdef   LF_INTERLACE
   const Int*  pos2ctx_map = (bFrame) ? pos2ctx_map8x8 : pos2ctx_map8x8i;
-#else //!LF_INTERLACE
-  const Int*  pos2ctx_map = pos2ctx_map8x8;
-#endif //LF_INTERLACE
   UInt        uiStart     = 0;
   UInt        uiStop      = 63;
   UInt        ui;
@@ -1371,13 +1311,8 @@ ErrVal CabacReader::residualBlock8x8( MbDataAccess& rcMbDataAccess,
 
   {
     const UInt          uiCtxOffset       = 2;
-#ifdef   LF_INTERLACE
     CabacContextModel*  pcMapCCModel  = ( bFrame ? m_cMapCCModel  : m_cFldMapCCModel). get( uiCtxOffset );
     CabacContextModel*  pcLastCCModel = ( bFrame ? m_cLastCCModel : m_cFldLastCCModel).get( uiCtxOffset );
-#else //!LF_INTERLACE
-    CabacContextModel*  pcMapCCModel  = m_cMapCCModel .get( uiCtxOffset );
-    CabacContextModel*  pcLastCCModel = m_cLastCCModel.get( uiCtxOffset );
-#endif //LF_INTERLACE
 
     for( ui = uiStart; ui < uiStop; ui++ ) // if last coeff is reached, it has to be significant
     {

@@ -31,9 +31,7 @@ public:
   Void predBlk4Tap    ( IntYuvMbBuffer*     pcDesBuffer, IntYuvPicBuffer*     pcSrcBuffer, LumaIdx cIdx, Mv cMv, Int iSizeY, Int iSizeX);
   Bool getClipMode    ()        { return m_bClip; }
   Void setClipMode( Bool bEnableClip ) { m_bClip = bEnableClip; }
-#ifdef   LF_INTERLACE
   virtual ErrVal filterFrame( YuvPicBuffer* pcPelBuffer, YuvPicBuffer* pcHalfPelBuffer );
-#endif //LF_INTERLACE
   virtual ErrVal filterFrame( IntYuvPicBuffer* pcPelBuffer, IntYuvPicBuffer* pcHalfPelBuffer );
   Void filterBlock( Pel* pDes, Pel* pSrc, Int iSrcStride, UInt uiXSize, UInt uiYSize, UInt uiFilter )
   {

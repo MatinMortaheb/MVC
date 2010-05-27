@@ -174,10 +174,8 @@ SliceHeaderBase::SliceHeaderBase( const SequenceParameterSet& rcSPS,
 , m_uiIdrPicId                        ( 0 )
 , m_uiPicOrderCntLsb                  ( 0 )
 , m_iDeltaPicOrderCntBottom           ( 0 )
-#ifdef   LF_INTERLACE
 , m_bFieldPicFlag                     ( false )
 , m_bBottomFieldFlag                  ( false )
-#endif //LF_INTERLACE
 , m_bBasePredWeightTableFlag          ( false )
 , m_uiLumaLog2WeightDenom             ( 5 )
 , m_uiChromaLog2WeightDenom           ( 5 )
@@ -369,21 +367,15 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
 	RNOK(     pcWriteIf->writeCode( m_uiFrameNum,
 									getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
 
-#ifdef   LF_INTERLACE
 	if(!getSPS().getFrameMbsOnlyFlag())
 	{
 		RNOK(   pcWriteIf->writeFlag( m_bFieldPicFlag,                                 "SH: field_pic_flag" ) );
 		if(m_bFieldPicFlag)
 			RNOK(   pcWriteIf->writeFlag( m_bBottomFieldFlag,                                 "SH: bottom_field_flag" ) );
 	}
-#endif
 
-#ifdef   LF_INTERLACE
 	//if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR_SCALABLE ) // fix Ying @QCT
 	if(!getNonIDRFlag())//lufeng
-#else
-	if  ( this->getNonIDRFlag() == false )
-#endif
 	{
 		RNOK(   pcWriteIf->writeUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
 	}
@@ -392,11 +384,7 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
 	{
 	RNOK(     pcWriteIf->writeCode( m_uiPicOrderCntLsb,
 									getSPS().getLog2MaxPicOrderCntLsb(),          "SH: pic_order_cnt_lsb" ) );
-#ifdef   LF_INTERLACE
 	if( getPPS().getPicOrderPresentFlag() &&  m_bFieldPicFlag  )
-#else
-		if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
-#endif
 	{
 		RNOK( pcWriteIf->writeSvlc( m_iDeltaPicOrderCntBottom,                    "SH: delta_pic_order_cnt_bottom" ) );
 		}
@@ -406,11 +394,7 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
 	if( getSPS().getPicOrderCntType() == 1 && ! getSPS().getDeltaPicOrderAlwaysZeroFlag() )
 	{
 		RNOK(   pcWriteIf->writeSvlc( m_aiDeltaPicOrderCnt[0],                      "SH: delta_pic_order_cnt[0]" ) );
-#ifdef   LF_INTERLACE		
 		if( getPPS().getPicOrderPresentFlag() &&   ! m_bFieldPicFlag )
-#else
-		if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
-#endif
 		{
 		RNOK( pcWriteIf->writeSvlc( m_aiDeltaPicOrderCnt[1],                      "SH: delta_pic_order_cnt[1]" ) );
 		}
@@ -640,7 +624,6 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
   RNOK(     pcWriteIf->writeCode( m_uiFrameNum,
                                   getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
 
-#ifdef   LF_INTERLACE
   //lufeng: write field_pic_flag, bottom_field_flag in SH
   	if(!getSPS().getFrameMbsOnlyFlag() )
 	{
@@ -650,9 +633,6 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
 	}
   //if( NNalUnitType == NAL_UNIT_CODED_SLICE_IDR )
   if(!this->getNonIDRFlag())//lufeng
-#else
-  if( isIdrNalUnit()  ) // bug fix Ying @ QCT
-#endif
   {
     RNOK(   pcWriteIf->writeUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
   }
@@ -661,11 +641,7 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
   {
   RNOK(     pcWriteIf->writeCode( m_uiPicOrderCntLsb,
                                   getSPS().getLog2MaxPicOrderCntLsb(),          "SH: pic_order_cnt_lsb" ) );
-#ifdef   LF_INTERLACE
     if( getPPS().getPicOrderPresentFlag() &&  ! m_bFieldPicFlag  )
-#else
-    if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
-#endif
     {
       RNOK( pcWriteIf->writeSvlc( m_iDeltaPicOrderCntBottom,                    "SH: delta_pic_order_cnt_bottom" ) );
     }
@@ -673,11 +649,7 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
   if( getSPS().getPicOrderCntType() == 1 && ! getSPS().getDeltaPicOrderAlwaysZeroFlag() )
   {
     RNOK(   pcWriteIf->writeSvlc( m_aiDeltaPicOrderCnt[0],                      "SH: delta_pic_order_cnt[0]" ) );
-#ifdef   LF_INTERLACE
 	if( getPPS().getPicOrderPresentFlag() && ! m_bFieldPicFlag )
-#else
-    if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
-#endif
     {
       RNOK( pcWriteIf->writeSvlc( m_aiDeltaPicOrderCnt[1],                      "SH: delta_pic_order_cnt[1]" ) );
     }
@@ -811,14 +783,12 @@ SliceHeaderBase::xReadScalable( HeaderSymbolReadIf* pcReadIf )
 
   RNOK(     pcReadIf->getCode( m_uiFrameNum,
                                getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
-#ifdef   LF_INTERLACE
 	if(!getSPS().getFrameMbsOnlyFlag())
 	{
 		RNOK(   pcReadIf->getFlag( m_bFieldPicFlag,                                 "SH: field_pic_flag" ) );
 		if(m_bFieldPicFlag)
 			RNOK(   pcReadIf->getFlag( m_bBottomFieldFlag,                                 "SH: bottom_field_flag" ) );
 	}
-#endif
 
   if( !getNonIDRFlag()) //JVT-W035  
   {
@@ -829,11 +799,7 @@ SliceHeaderBase::xReadScalable( HeaderSymbolReadIf* pcReadIf )
   {
   RNOK(     pcReadIf->getCode( m_uiPicOrderCntLsb,
                                getSPS().getLog2MaxPicOrderCntLsb(),          "SH: pic_order_cnt_lsb" ) );
-#ifdef   LF_INTERLACE
   if( getPPS().getPicOrderPresentFlag() &&  ! m_bFieldPicFlag )
-#else
-    if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
-#endif
     {
       RNOK( pcReadIf->getSvlc( m_iDeltaPicOrderCntBottom,                    "SH: delta_pic_order_cnt_bottom" ) );
     }
@@ -842,11 +808,7 @@ SliceHeaderBase::xReadScalable( HeaderSymbolReadIf* pcReadIf )
   if( getSPS().getPicOrderCntType() == 1 && ! getSPS().getDeltaPicOrderAlwaysZeroFlag() )
   {
     RNOK(   pcReadIf->getSvlc( m_aiDeltaPicOrderCnt[0],                      "SH: delta_pic_order_cnt[0]" ) );
-#ifdef   LF_INTERLACE
 	if( getPPS().getPicOrderPresentFlag() &&  ! m_bFieldPicFlag  )
-#else
-    if( getPPS().getPicOrderPresentFlag() /*&& true ! field_pic_flag */ )
-#endif
     {
       RNOK( pcReadIf->getSvlc( m_aiDeltaPicOrderCnt[1],                      "SH: delta_pic_order_cnt[1]" ) );
     }
@@ -1062,14 +1024,12 @@ SliceHeaderBase::xReadH264AVCCompatible( HeaderSymbolReadIf* pcReadIf )
  
   RNOK(     pcReadIf->getCode( m_uiFrameNum,
                                getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
-#ifdef   LF_INTERLACE
 	if(!getSPS().getFrameMbsOnlyFlag())
 	{
 		RNOK(   pcReadIf->getFlag( m_bFieldPicFlag,                                 "SH: field_pic_flag" ) );
 		if(m_bFieldPicFlag)
 			RNOK(   pcReadIf->getFlag( m_bBottomFieldFlag,                                 "SH: bottom_field_flag" ) );
 	}
-#endif
   if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR )
   {
     RNOK(   pcReadIf->getUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
@@ -1079,11 +1039,7 @@ SliceHeaderBase::xReadH264AVCCompatible( HeaderSymbolReadIf* pcReadIf )
   {
   RNOK(     pcReadIf->getCode( m_uiPicOrderCntLsb,
                                getSPS().getLog2MaxPicOrderCntLsb(),          "SH: pic_order_cnt_lsb" ) );
-#ifdef   LF_INTERLACE  
   if( getPPS().getPicOrderPresentFlag() &&! m_bFieldPicFlag )
-#else
-    if( getPPS().getPicOrderPresentFlag() /*&& true  ! field_pic_flag */ )
-#endif
     {
       RNOK( pcReadIf->getSvlc( m_iDeltaPicOrderCntBottom,                    "SH: delta_pic_order_cnt_bottom" ) );
     }
@@ -1091,11 +1047,7 @@ SliceHeaderBase::xReadH264AVCCompatible( HeaderSymbolReadIf* pcReadIf )
   if( getSPS().getPicOrderCntType() == 1 && ! getSPS().getDeltaPicOrderAlwaysZeroFlag() )
   {
     RNOK(   pcReadIf->getSvlc( m_aiDeltaPicOrderCnt[0],                      "SH: delta_pic_order_cnt[0]" ) );
-#ifdef   LF_INTERLACE  
 	if( getPPS().getPicOrderPresentFlag() &&  ! m_bFieldPicFlag )
-#else
-    if( getPPS().getPicOrderPresentFlag() /*&& true ! field_pic_flag */ )
-#endif
   {
       RNOK( pcReadIf->getSvlc( m_aiDeltaPicOrderCnt[1],                      "SH: delta_pic_order_cnt[1]" ) );
     }
@@ -1258,11 +1210,7 @@ SliceHeaderBase::FMOInit()
 
 	const SequenceParameterSet* pcSPS = &(getSPS());
 	const PictureParameterSet* pcPPS = &(getPPS());
-#ifdef   LF_INTERLACE
 	m_pcFMO->img_.field_pic_flag = getFieldPicFlag();
-#else
-	m_pcFMO->img_.field_pic_flag = false;  //interlaced TODO
-#endif
 
 	m_pcFMO->pps_.num_slice_groups_minus1 = pcPPS->getNumSliceGroupsMinus1();
 	m_pcFMO->pps_.slice_group_map_type = pcPPS->getSliceGroupMapType();
@@ -1277,25 +1225,14 @@ SliceHeaderBase::FMOInit()
 	m_pcFMO->pps_.slice_group_change_direction_flag = pcPPS->getSliceGroupChangeDirection_flag();
 	m_pcFMO->pps_.slice_group_change_rate_minus1 = pcPPS->getSliceGroupChangeRateMinus1();
 	m_pcFMO->pps_.copy_slice_group_id(pcPPS->getArraySliceGroupId());
-#ifdef   LF_INTERLACE
 	m_pcFMO->sps_.pic_height_in_map_units_minus1 = ( pcSPS->getFrameMbsOnlyFlag()? pcSPS->getFrameHeightInMbs() : pcSPS->getFrameHeightInMbs() >>1 ) -1;
-#else
-	m_pcFMO->sps_.pic_height_in_map_units_minus1 =pcSPS->getFrameHeightInMbs()-1;
-#endif
 	m_pcFMO->sps_.pic_width_in_mbs_minus1 = pcSPS->getFrameWidthInMbs()-1;
-#ifdef   LF_INTERLACE
 	m_pcFMO->sps_.frame_mbs_only_flag = pcSPS->getFrameMbsOnlyFlag();
 	m_pcFMO->sps_.mb_adaptive_frame_field_flag = pcSPS->getMbAdaptiveFrameFieldFlag();
-#else
-	m_pcFMO->sps_.frame_mbs_only_flag = 1; // interlaced TODO
-	m_pcFMO->sps_.mb_adaptive_frame_field_flag = 0; //
-#endif
-#ifdef   LF_INTERLACE
 	m_pcFMO->img_.PicHeightInMapUnits = m_pcFMO->sps_.pic_height_in_map_units_minus1+1;//pcSPS->getFrameHeightInMbs(); //by lf
 	m_pcFMO->img_.PicWidthInMbs = pcSPS->getFrameWidthInMbs();
 	m_pcFMO->img_.PicSizeInMbs = ( pcSPS->getFrameHeightInMbs() >> (UChar)getFieldPicFlag() ) *pcSPS->getFrameWidthInMbs();
 	m_pcFMO->img_.slice_group_change_cycle = getSliceGroupChangeCycle();
-#endif
 	m_pcFMO->init(&(m_pcFMO->pps_),&(m_pcFMO->sps_));
 
 	m_pcFMO->StartPicture();
@@ -1427,20 +1364,14 @@ SliceHeaderBase::xReadMVCCompatible( HeaderSymbolReadIf* pcReadIf )
  
   RNOK(     pcReadIf->getCode( m_uiFrameNum,
                                getSPS().getLog2MaxFrameNum(),                "SH: frame_num" ) );
-#ifdef   LF_INTERLACE
   	if(!getSPS().getFrameMbsOnlyFlag())
 	{
 		RNOK(   pcReadIf->getFlag( m_bFieldPicFlag,                                 "SH: field_pic_flag" ) );
 		if(m_bFieldPicFlag)
 			RNOK(   pcReadIf->getFlag( m_bBottomFieldFlag,                                 "SH: bottom_field_flag" ) );
 	}
-#endif
-#ifdef   LF_INTERLACE
 //  if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR) // JVT-W035 
   if(!getNonIDRFlag())//lufeng
-#else
-  if( m_eNalUnitType == NAL_UNIT_CODED_SLICE_IDR || !getNonIDRFlag() ) // JVT-W035 ying @ QCT, the first condition might be useless
-#endif
   {
     RNOK(   pcReadIf->getUvlc( m_uiIdrPicId,                                 "SH: idr_pic_id" ) );
   }
@@ -1449,11 +1380,7 @@ SliceHeaderBase::xReadMVCCompatible( HeaderSymbolReadIf* pcReadIf )
   {
   RNOK(     pcReadIf->getCode( m_uiPicOrderCntLsb,
                                getSPS().getLog2MaxPicOrderCntLsb(),          "SH: pic_order_cnt_lsb" ) );
-#ifdef   LF_INTERLACE
   if( getPPS().getPicOrderPresentFlag() && ! m_bFieldPicFlag )
-#else
-  if( getPPS().getPicOrderPresentFlag() /*&& true ! field_pic_flag */ )
-#endif
     {
       RNOK( pcReadIf->getSvlc( m_iDeltaPicOrderCntBottom,                    "SH: delta_pic_order_cnt_bottom" ) );
     }
@@ -1461,11 +1388,7 @@ SliceHeaderBase::xReadMVCCompatible( HeaderSymbolReadIf* pcReadIf )
   if( getSPS().getPicOrderCntType() == 1 && ! getSPS().getDeltaPicOrderAlwaysZeroFlag() )
   {
     RNOK(   pcReadIf->getSvlc( m_aiDeltaPicOrderCnt[0],                      "SH: delta_pic_order_cnt[0]" ) );
-#ifdef   LF_INTERLACE 
 	if( getPPS().getPicOrderPresentFlag() &&  ! m_bFieldPicFlag )
-#else
-	 if( getPPS().getPicOrderPresentFlag() /*&& true ! field_pic_flag */ )
-#endif
   {
       RNOK( pcReadIf->getSvlc( m_aiDeltaPicOrderCnt[1],                      "SH: delta_pic_order_cnt[1]" ) );
     }

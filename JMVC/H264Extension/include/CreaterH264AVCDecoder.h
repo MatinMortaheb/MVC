@@ -5,6 +5,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "H264AVCCommonLib/FrameMng.h" // hwsun, fix meomory for field coding
 
 #include "H264AVCCommonLib/Sei.h"
 #include "../../test/H264AVCDecoderLibTest/DecoderParameter.h"
@@ -60,9 +61,9 @@ public:
   UInt* getViewCodingOrder();
   UInt* getViewCodingOrder_SubStream();
 
-#ifdef LF_INTERLACE
+  Int getMaxEtrDPB() { return m_pcFrameMng->getMaxEntriesinDPB(); } // hwsun, fix meomory for field coding
+
     void addViewCodingOrder();
-#endif
 
   ErrVal uninit     ( Bool bCloseTrace ); 
   ErrVal process    ( PicBuffer*        pcPicBuffer,
@@ -124,9 +125,7 @@ public:
 
   Void	  RoiDecodeInit();
 
-#ifdef LF_INTERLACE
   Void    setCrop(UInt *uiCrop);
-#endif
 
 protected:
   ErrVal xCreateDecoder();

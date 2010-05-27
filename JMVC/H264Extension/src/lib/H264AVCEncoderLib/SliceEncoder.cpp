@@ -127,7 +127,6 @@ SliceEncoder::encodeSlice( SliceHeader&  rcSliceHeader,
   RNOK( pcMbDataCtrl  ->initSlice         ( rcSliceHeader, ENCODE_PROCESS, false, pcMbDataCtrlL1 ) );
   RNOK( m_pcControlMng->initSliceForCoding( rcSliceHeader ) );
 
-#ifdef LF_INTERLACE
 	UInt uiPos;
 	for( uiPos = 0; uiPos < rcList0.getActive(); uiPos++ )
     {
@@ -140,7 +139,6 @@ SliceEncoder::encodeSlice( SliceHeader&  rcSliceHeader,
 	  pcRefFrame->getFullPelYuvBuffer()->fillMargin();
 	}
 	//lufeng:frame/field margin
-#endif
 
 //JVT-W080
 	if( getPdsEnable() )
@@ -165,11 +163,7 @@ SliceEncoder::encodeSlice( SliceHeader&  rcSliceHeader,
 
     RNOK( pcMbDataCtrl  ->initMb          (  pcMbDataAccess, uiMbY, uiMbX ) );
  
-#ifdef LF_INTERLACE
         RNOK( m_pcControlMng    ->initMbForCoding ( *pcMbDataAccess,    uiMbY, uiMbX,  0,0) );
-#else
-        RNOK( m_pcControlMng    ->initMbForCoding ( *pcMbDataAccess,    uiMbAddress  ) );
-#endif
 
 //JVT-W080
     if( getPdsEnable() )
@@ -179,7 +173,6 @@ SliceEncoder::encodeSlice( SliceHeader&  rcSliceHeader,
 		}
 //~JVT-W080
 
-#ifdef LF_INTERLACE
     Double cost;
     RNOK( m_pcMbEncoder ->encodeMacroblock( *pcMbDataAccess,
                                              pcFrame,
@@ -194,24 +187,11 @@ SliceEncoder::encodeSlice( SliceHeader&  rcSliceHeader,
 
     RNOK( m_pcMbCoder   ->encode          ( *pcMbDataAccess, NULL, SST_RATIO_1,
                                              ( uiMbAddress == rcSliceHeader.getLastMbInSlice() ) , true ) );
-#else
-    RNOK( m_pcMbEncoder ->encodeMacroblock( *pcMbDataAccess,
-                                             pcFrame,
-                                             rcList0,
-                                             rcList1,
-                                             m_pcCodingParameter->getMotionVectorSearchParams().getNumMaxIter(),
-                                             m_pcCodingParameter->getMotionVectorSearchParams().getIterSearchRange(),
-                                             dlambda ) );
-
-    RNOK( m_pcMbCoder   ->encode          ( *pcMbDataAccess, NULL, SST_RATIO_1,
-                                             ( uiMbAddress == rcSliceHeader.getLastMbInSlice() ) ) );
-#endif
   }
 
   return Err::m_nOK;
 }
 
-#ifdef LF_INTERLACE
 
 /*
 * lufeng: MbAff Slice encoding
@@ -432,7 +412,6 @@ SliceEncoder::encodeSliceMbAff( SliceHeader&  rcSliceHeader,
     }
     return Err::m_nOK;
 }
-#endif
 
 
 //TMM_WP

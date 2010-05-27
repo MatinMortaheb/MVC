@@ -544,11 +544,7 @@ public:
  
 
   Int                               getPicQp                      ()  const { return m_rcPPS.getPicInitQp() + getSliceQpDelta(); }
-#ifdef   LF_INTERLACE
   UInt                              getMbInPic                    ()  const { const UInt uiMbInPic = m_rcSPS.getMbInFrame(); return getFieldPicFlag() ? uiMbInPic/2 : uiMbInPic; }
-#else //!LF_INTERLACE
-  UInt                              getMbInPic                    ()  const { return m_rcSPS.getMbInFrame(); }
-#endif //LF_INTERLACE
 
   
   //===== get parameter sets =====
@@ -558,9 +554,7 @@ public:
 
   //===== get parameters =====
   NalRefIdc                         getNalRefIdc                  ()  const { return m_eNalRefIdc; }
-#ifdef   LF_INTERLACE
   Bool                              isNalRefIdc                   ()  const { return m_eNalRefIdc != NAL_REF_IDC_PRIORITY_LOWEST; }
-#endif //LF_INTERLACE
   NalUnitType                       getNalUnitType                ()  const { return m_eNalUnitType; }
   UInt                              getLayerId                    ()  const { return m_uiLayerId; }
   UInt                              getTemporalLevel              ()  const { return m_uiTemporalLevel; }
@@ -594,20 +588,12 @@ public:
   UInt                              getChromaLog2WeightDenom      ()  const { return m_uiChromaLog2WeightDenom; }
   const PredWeightTable&            getPredWeightTable   (ListIdx e)  const { return m_acPredWeightTable[e]; }
   PredWeightTable&                  getPredWeightTable   (ListIdx e)        { return m_acPredWeightTable[e]; }
-#ifdef LF_INTERLACE
   const PredWeight&                 getPredWeight        (ListIdx e,
                                                             UInt   ui,
                                                             Bool bFieldFlag )  const { return m_acPredWeightTable[e].get((ui-1)/(bFieldFlag?2:1)); }
   PredWeight&                       getPredWeight        (ListIdx e,
                                                             UInt   ui,
                                                             Bool bFieldFlag )        { return m_acPredWeightTable[e].get((ui-1)/(bFieldFlag?2:1)); }
-#else
-const PredWeight&                 getPredWeight        (ListIdx e,
-                                                          UInt   ui)  const { return m_acPredWeightTable[e].get(ui-1); }
-  PredWeight&                       getPredWeight        (ListIdx e,
-                                                          UInt   ui)        { return m_acPredWeightTable[e].get(ui-1); }
- 
-#endif
 
 //TMM_WP
   ErrVal copyWeightedPred(PredWeightTable& pcPredWeightTable, UInt uiLumaLogWeightDenom,
@@ -711,12 +697,10 @@ const PredWeight&                 getPredWeight        (ListIdx e,
   UInt                              getRedundantPicCnt             ()       { return m_uiRedundantPicCnt; } // JVT-Q054 Red. Picture
 
 
-#ifdef   LF_INTERLACE
   Bool                              getFieldPicFlag               ()  const { return m_bFieldPicFlag; }
 
   Bool                              getBottomFieldFlag            ()  const { return m_bBottomFieldFlag; }
   PicType                           getPicType                    ()  const { return ( ! m_bFieldPicFlag ? FRAME : m_bBottomFieldFlag ? BOT_FIELD : TOP_FIELD ); }
-#endif //LF_INTERLACE
 
   //===== set parameters =====
   Void  setAVCCompatible              ( Bool     Flag  )  { m_eAVCCompatible                    = Flag;}  //JVT-S036 
@@ -778,10 +762,8 @@ const PredWeight&                 getPredWeight        (ListIdx e,
 
   Void setBaseLayerUsesConstrainedIntraPred( Bool b ) { m_bBaseLayerUsesConstrainedIntraPred = b; }
 
-#ifdef   LF_INTERLACE
   Void setFieldPicFlag                ( Bool        b  )  { m_bFieldPicFlag                     = b;  }
   Void setBottomFieldFlag             ( Bool        b  )  { m_bBottomFieldFlag                  = b;  }
-#endif //LF_INTERLACE
 
   Void  setSliceGroupChangeCycle(UInt uiSliceGroupChangeCycle){m_uiSliceGroupChangeCycle = uiSliceGroupChangeCycle;};
   ErrVal FMOInit();
@@ -903,10 +885,8 @@ protected:
   UInt                        m_uiBaseQualityLevelCGSSNR;
 //JVT-T054}
 
-#ifdef   LF_INTERLACE
   Bool                        m_bFieldPicFlag;
   Bool                        m_bBottomFieldFlag;
-#endif //LF_INTERLACE
 
 // TMM_ESS {
 public:

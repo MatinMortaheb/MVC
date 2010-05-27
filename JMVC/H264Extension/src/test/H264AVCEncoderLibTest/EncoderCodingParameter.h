@@ -679,11 +679,9 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 	m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("PDISEIMessage",           &m_uiPdsEnable,                                        0 );
 	m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("PDIInitialDelayAnc",      &m_uiPdsInitialDelayAnc,                               0 );
 	m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("PDIInitialDelayNonAnc",   &m_uiPdsInitialDelayNonAnc,                            0 );
-#ifdef LF_INTERLACE
 //lufeng: read from .cfg
     m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("MbAff",      &m_uiMbAff,                               0 );
     m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("PAff",   &m_uiPAff,                            0 );
-#endif
 //~JVT-W080
     m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("DPBConformanceCheck",             &m_uiDPBConformanceCheck,                                       1);
   m_CurrentViewId = uiViewId; 
@@ -805,7 +803,6 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 				(YUVFileParams(cFileNameStringTemp,view_id,
 				m_uiFrameHeight, CodingParameter::getVerPadding(), 
 				m_uiFrameWidth, CodingParameter::getHorPadding()));
-       
       }
     }
 
@@ -944,13 +941,11 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
       AF();
     }*/
 
-#ifdef LF_INTERLACE
   if((m_uiPAff>0)&&(CodingParameter::SpsMVC.getNumViewMinus1()>1)) // hwsun (add if)
 	{
       fprintf(stderr, "field coding is used for 1/2 views only, set NumViewsMinusOne <= 1\n");
       AF();
     }
-#endif
 
   if (m_uiMultiviewAcquisitionInfoSEIEnable==1) // SEI JVT-W060
   {

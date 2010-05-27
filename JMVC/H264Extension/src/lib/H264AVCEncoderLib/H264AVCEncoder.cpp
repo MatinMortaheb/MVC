@@ -1599,12 +1599,10 @@ H264AVCEncoder::writeParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor, Bo
     RNOK( m_pcNalUnitEncoder->initNalUnit( pcExtBinDataAccessor ) );
     SequenceParameterSet& rcSPS = *m_cUnWrittenSPS.front();
 
-#ifdef LF_INTERLACE
 	   if( rcSPS.getMbAdaptiveFrameFieldFlag() )
     {
       rcSPS.setFrameMbsOnlyFlag( false );
     }
-#endif
 
     RNOK( m_pcNalUnitEncoder->write( rcSPS ) );
     RNOK( m_pcNalUnitEncoder->closeNalUnit( uiBits ) );
@@ -1728,14 +1726,12 @@ H264AVCEncoder::xInitParameterSets()
     pcSPS->setSeqParameterSetId( uiSPSId++ );
     RNOK( m_pcParameterSetMng->store( pcSPS   ) );
 
-#ifdef LF_INTERLACE
     pcSPS->setMbAdaptiveFrameFieldFlag( (m_pcCodingParameter->getMbAff()?true:false) ); //th test
     if( pcSPS->getMbAdaptiveFrameFieldFlag() && uiMbY % 2)
     {
         printf(" mbaff ignored ");
     }
     pcSPS->setFrameMbsOnlyFlag( ! (m_pcCodingParameter->getMbAff() != 0 || m_pcCodingParameter->getPAff() != 0 ));
-#endif
 
 
     //===== set sequence parameter set parameters =====

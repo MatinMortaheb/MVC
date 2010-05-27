@@ -86,7 +86,6 @@ public:
     return (m_sHor==rcMv.m_sHor && m_sVer==rcMv.m_sVer);
   }
 
-#ifdef   LF_INTERLACE
   const Mv& setFrameToFieldPredictor()
   {
       m_sVer /= 2;
@@ -97,7 +96,6 @@ public:
       m_sVer *= 2;
       return *this;
   }
-#endif //LF_INTERLACE
 
   Void limitComponents( const Mv& rcMvMin, const Mv& rcMvMax )
   {
@@ -156,7 +154,6 @@ public:
   Void  set( Short sHor, Short sVer, SChar scRef )  { Mv::set( sHor, sVer); m_scRef = scRef; }
   Void  set( const Mv& rcMv, SChar scRef )          { Mv::operator= ( rcMv ); m_scRef = scRef; }
 
-#ifdef   LF_INTERLACE
   const Mv3D& setFrameToFieldPredictor()
   {
     Mv::setFrameToFieldPredictor();
@@ -177,7 +174,6 @@ public:
     }
     return *this;
   }
-#endif //LF_INTERLACE
 
   Mv3D& minRefIdx( Mv3D& rcMv3D )  { return (((UChar)(rcMv3D.getRef()-1)) < ((UChar)(getRef()-1)) ? rcMv3D : *this); }
   Bool operator== ( const RefIdxValues eRefIdxValues )  { return ( eRefIdxValues == m_scRef ); }
