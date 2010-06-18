@@ -1,3 +1,8 @@
+JMVC_8_2 -> JMVC_8_3
+Date            : June 18, 2010
+Authors         : Technicolor, Qualcomm
+Contribution    : Bug fixes
+
 JMVC_8_1 -> JMVC_8_2
 Date            : May 27, 2010
 Authors         : Panasonic, Qualcomm
