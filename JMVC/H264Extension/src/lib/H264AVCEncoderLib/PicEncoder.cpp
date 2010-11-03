@@ -941,8 +941,10 @@ PicEncoder::xInitSPS( Bool bAVCSPS )
   
   UInt uiMaxFramesInDPB = rpcSPS->getMaxDPBSize(mvcScaleFactor);
  
+#if REDUCE_MAX_FRM_DPB 
   //uiMaxFramesInDPB = min ( mvcScaleFactor*uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16) );
   uiMaxFramesInDPB = min ( uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)NumViews)/log(2.)))*16) );
+#endif
 
   if( (m_pcCodingParameter->getMbAff() != 0 || m_pcCodingParameter->getPAff() != 0 ))
 

@@ -1,3 +1,10 @@
+JMVC_8_3 -> JMVC_8_3_1
+Date            : Nov. 03, 2010
+Authors         : Qualcomm
+Contribution    : Bug fixes
+Changes:
+- Bug fix for the DPB management when the level constrain does not apply
+
 JMVC_8_2 -> JMVC_8_3
 Date            : June 18, 2010
 Authors         : Technicolor, Qualcomm

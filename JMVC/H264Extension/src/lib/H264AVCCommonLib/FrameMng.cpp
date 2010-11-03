@@ -336,8 +336,10 @@ ErrVal FrameMng::initSlice( SliceHeader *rcSH , UInt NumOfViewsInTheStream)
   UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;
 
   m_iMaxEntriesinDPB = rcSH->getSPS().getMaxDPBSize(mvcScaleFactor);
+#if REDUCE_MAX_FRM_DPB 
   //m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
   m_iMaxEntriesinDPB = min ( m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+#endif
   
   printf("MaxNumRefFrames=%d NumViews=%d dec DPB-size=%d\n",m_uiNumRefFrames,Num_Views,	m_iMaxEntriesinDPB);
 

@@ -7,7 +7,7 @@
 
 #define _JSVM_VERSION_ "6.5" //added by jerome.vieron@thomson.net
 #define _JMVM_VERSION_ "7.0" //added by purvin.pandit@thomson.net
-#define _JMVC_VERSION_ "8.2" //added by ying.chen@tut.fi
+#define _JMVC_VERSION_ "8.3.1" //added by ying.chen@tut.fi, cheny@qualcomm.com
 
 #define MB_BUFFER_WIDTH 24
 #define MB_BASE_WIDTH   16
@@ -283,6 +283,6 @@ typedef	enum
 }	ERROR_CONCEAL;
 //TMM_EC }}
 
-
+#define REDUCE_MAX_FRM_DPB 0
 
 #endif // !defined(AFX_COMMONDEFS_H__4CE634CE_B48D_4812_8098_9CAEA258BAA2__INCLUDED_)
