@@ -111,11 +111,11 @@ public:
 
   ErrVal  terminatingBit ( UInt uiIsLast ) { return Err::m_nOK;}
 
-  ErrVal writeUvlc( UInt uiCode, Char* pcTraceString );
-  ErrVal writeSvlc( Int iCode, Char* pcTraceString );
-  ErrVal writeCode( UInt uiCode, UInt uiLength, Char* pcTraceString );
-  ErrVal writeSCode( Int iCode, UInt uiLength, Char* pcTraceString );
-  ErrVal writeFlag( Bool bFlag, Char* pcTraceString );
+  ErrVal writeUvlc( UInt uiCode, const Char* pcTraceString );
+  ErrVal writeSvlc( Int iCode, const Char* pcTraceString );
+  ErrVal writeCode( UInt uiCode, UInt uiLength, const Char* pcTraceString );
+  ErrVal writeSCode( Int iCode, UInt uiLength, const Char* pcTraceString );
+  ErrVal writeFlag( Bool bFlag, const Char* pcTraceString );
 
   UInt getNumberOfWrittenBits();
 

@@ -402,7 +402,7 @@ ErrVal UvlcWriter::xWriteSvlcCode( Int iVal)
   return Err::m_nOK;
 }
 
-ErrVal UvlcWriter::writeUvlc( UInt uiCode, Char* pcTraceString )
+ErrVal UvlcWriter::writeUvlc( UInt uiCode, const Char* pcTraceString )
 {
   ETRACE_TH( pcTraceString );
 
@@ -413,7 +413,7 @@ ErrVal UvlcWriter::writeUvlc( UInt uiCode, Char* pcTraceString )
 }
 
 
-ErrVal UvlcWriter::writeSvlc( Int iCode, Char* pcTraceString )
+ErrVal UvlcWriter::writeSvlc( Int iCode, const Char* pcTraceString )
 {
   UInt uiCode;
 
@@ -429,7 +429,7 @@ ErrVal UvlcWriter::writeSvlc( Int iCode, Char* pcTraceString )
   return Err::m_nOK;
 }
 
-ErrVal UvlcWriter::writeFlag( Bool bFlag, Char* pcTraceString )
+ErrVal UvlcWriter::writeFlag( Bool bFlag, const Char* pcTraceString )
 {
   ETRACE_TH( pcTraceString );
   ETRACE_TY( " u(1)" );
@@ -441,7 +441,7 @@ ErrVal UvlcWriter::writeFlag( Bool bFlag, Char* pcTraceString )
 }
 
 
-ErrVal UvlcWriter::writeSCode( Int iCode, UInt uiLength, Char* pcTraceString )
+ErrVal UvlcWriter::writeSCode( Int iCode, UInt uiLength, const Char* pcTraceString )
 {
   AOT_DBG(uiLength<1);
   ETRACE_TH( pcTraceString );
@@ -459,7 +459,7 @@ ErrVal UvlcWriter::writeSCode( Int iCode, UInt uiLength, Char* pcTraceString )
   return Err::m_nOK;
 }
 
-ErrVal UvlcWriter::writeCode( UInt uiCode, UInt uiLength, Char* pcTraceString )
+ErrVal UvlcWriter::writeCode( UInt uiCode, UInt uiLength, const Char* pcTraceString )
 {
   AOT_DBG(uiLength<1);
   ETRACE_TH( pcTraceString );
