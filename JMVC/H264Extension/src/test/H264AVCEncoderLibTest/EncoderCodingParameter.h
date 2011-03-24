@@ -17,7 +17,7 @@
 class EncoderConfigLineStr : public h264::EncoderConfigLineBase
 {
 public:
-  EncoderConfigLineStr( const Char* pcTag, std::string* pcPar, Char* pcDefault ) : EncoderConfigLineBase( pcTag, 1 ), m_pcPar( pcPar )
+  EncoderConfigLineStr( Char* pcTag, std::string* pcPar, Char* pcDefault ) : EncoderConfigLineBase( pcTag, 1 ), m_pcPar( pcPar )
   {
     *m_pcPar = pcDefault;
   };
@@ -32,7 +32,7 @@ protected:
 class EncoderConfigLineDbl : public h264::EncoderConfigLineBase
 {
 public:
-  EncoderConfigLineDbl( const Char* pcTag, Double* pdPar, Double pdDefault ) :  EncoderConfigLineBase( pcTag, 2 ), m_pdPar( pdPar ) 
+  EncoderConfigLineDbl( Char* pcTag, Double* pdPar, Double pdDefault ) :  EncoderConfigLineBase( pcTag, 2 ), m_pdPar( pdPar ) 
   {
     *m_pdPar = pdDefault;
   };
@@ -47,7 +47,7 @@ protected:
 class EncoderConfigLineInt : public h264::EncoderConfigLineBase
 {
 public:
-  EncoderConfigLineInt( const Char* pcTag, Int* piPar, Int piDefault ) : EncoderConfigLineBase( pcTag, 3 ), m_piPar( piPar )
+  EncoderConfigLineInt( Char* pcTag, Int* piPar, Int piDefault ) : EncoderConfigLineBase( pcTag, 3 ), m_piPar( piPar )
   {
     *m_piPar = piDefault;
   };
@@ -62,7 +62,7 @@ protected:
 class EncoderConfigLineUInt : public h264::EncoderConfigLineBase
 {
 public:
-  EncoderConfigLineUInt( const Char* pcTag, UInt* puiPar, UInt puiDefault ) : EncoderConfigLineBase( pcTag, 4 ), m_puiPar( puiPar )
+  EncoderConfigLineUInt( Char* pcTag, UInt* puiPar, UInt puiDefault ) : EncoderConfigLineBase( pcTag, 4 ), m_puiPar( puiPar )
   {
     *m_puiPar = puiDefault;
   };
@@ -77,7 +77,7 @@ protected:
 class EncoderConfigLineChar : public h264::EncoderConfigLineBase
 {
 public:
-  EncoderConfigLineChar( const Char* pcTag, Char* pcPar, Char pcDefault ) : EncoderConfigLineBase( pcTag, 5 ), m_pcPar( pcPar )
+  EncoderConfigLineChar( Char* pcTag, Char* pcPar, Char pcDefault ) : EncoderConfigLineBase( pcTag, 5 ), m_pcPar( pcPar )
   {
     *m_pcPar = pcDefault;
   };
