@@ -30,7 +30,7 @@
   #define MSYS_TYPE_VOID void
 #endif
 #if !(defined MSYS_NO_TYPE_VOID )
-  typedef MSYS_TYPE_VOID Void;
+  #define Void MSYS_TYPE_VOID     // To avoid certain Linux compiling issue. -Dong
 #endif
 
 #if !(defined MSYS_TYPE_BOOL)

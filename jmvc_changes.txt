@@ -1,3 +1,26 @@
+JMVC_8_3_1 -> JMVC_8_4
+Date            : Mar. 23, 2011
+Authors         : MERL, Panasonic, Samsung, Fujitsu
+Contribution    : Encoder and decoder improvements and bug fixes
+Changes:
+
+[Encoder]
+- Print correct POC numbers. (MERL)
+- Fix crash on Linux 64 system. (MERL)
+- Fix sliding window operation under interlace mode. (MERL)
+- Fix bug with MbDataCtrl behavior under interlace mode. (Panasonic, MERL)
+- Correct where to inspect if LIST_0 equivalent to LIST_1. (MERL)
+- Support frame rate greater than 50 up to 120. Safe check on frame rate parameter. (MERL)
+- Allow usage of "IntraPeriod" parameter in case of "GOPSize" equal 12 or 15. (Samsung)
+
+[Decoder]
+- Decode bitstream with unknown NAL units being skipped. (MERL)
+- Decode slice_type greater than 4. (Fujitsu, MERL)
+
+[Encoder and Decoder]
+- Fix compiling issues with newer gcc version. (MERL)
+- Update software Manual editorial changes. E.g. cvs command line example, cfg example. (MERL)
+
 JMVC_8_3 -> JMVC_8_3_1
 Date            : Nov. 03, 2010
 Authors         : Qualcomm

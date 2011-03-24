@@ -85,8 +85,8 @@ public:
                       Bool&              bFragmented,
                       Bool&              bDiscardable,
                       //~JVT-P031
-					  UInt NumOfViewInTheStream
-                      
+					  UInt NumOfViewInTheStream,
+                      Bool& bSkip
                       ); 
 
 //JVT-S036  start

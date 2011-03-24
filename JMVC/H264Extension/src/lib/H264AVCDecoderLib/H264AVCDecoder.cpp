@@ -1086,7 +1086,8 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 														Bool&             bDiscardable
                             //~JVT-P031
 														 ,Bool&			  UnitAVCFlag    //JVT-S036 
-														 ,UInt NumOfViewsInTheStream                            )
+														 ,UInt NumOfViewsInTheStream
+                                                         ,Bool& bSkip)
 {
   ROF( m_bInitDone );
   UInt uiLayerId;
@@ -1798,7 +1799,8 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
     }
     break;
   default:
-    return Err::m_nERR;
+    bSkip = true;
+    return Err::m_nOK;
     break;
   }
 

@@ -251,6 +251,8 @@ ErrVal CodingParameter::check()
   ROTS( m_cLoopFilterParams         .check() );
   ROTS( m_cMotionVectorSearchParams .check() );
 
+  ROTREPORT( getMaximumFrameRate  () > (MAX_FRAMERATE + 0.00001),            "Frame rate NOT supported, bigger than MAX_FRAMERATE in CommonDefs.h" ); // Safe check. -Dong
+
   if( getMVCmode() )
   {
 

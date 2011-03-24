@@ -204,7 +204,10 @@ IntFrame::IntFrame( YuvBufferCtrl& rcYuvFullPelBufferCtrl,
   m_pcDPBUnit             ( 0 )
   , m_bUnusedForRef       ( false) // JVT-Q065 EIDR
   ,m_piChannelDistortion   ( 0 )     // JVT-R057 LA-RDO
+  ,m_iPOC                  (-600)     // random number
 {
+  m_iTopFieldPoc = m_iPOC*2;
+  m_iBotFieldPoc = m_iPOC*2 + 1;    // give some random numbers
   m_uiViewId = 0;
   m_ePicStat = NOT_SPECIFIED;
 }

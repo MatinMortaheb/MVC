@@ -422,7 +422,7 @@ SliceReader::readSliceHeader( NalUnitType   eNalUnitType,
 
   RNOK( m_pcHeaderReadIf    ->getUvlc( uiFirstMbInSlice,  "SH: first_mb_in_slice" ) );
   RNOK( m_pcHeaderReadIf    ->getUvlc( uiSliceType,       "SH: slice_type" ) );
-  if( uiSliceType > 4 && ! bScalable )
+  if( uiSliceType > 4 )  // Remove "&& ! bScalable" to decode slice_type > 4
   {
       uiSliceType -= 5;
   }
@@ -568,7 +568,7 @@ SliceReader::readSliceHeader( NalUnitType   eNalUnitType,
 		 // slice_header_in_scalable_extenson() begins
       RNOK( m_pcHeaderReadIf    ->getUvlc( uiFirstMbInSlice,  "SH: first_mb_in_slice" ) );
       RNOK( m_pcHeaderReadIf    ->getUvlc( uiSliceType,       "SH: slice_type" ) );
-      if( uiSliceType > 4 && ! bScalable )
+      if( uiSliceType > 4 ) // Remove "&& ! bScalable" to decode slice_type > 4
       {
         uiSliceType -= 5;
       }
@@ -609,7 +609,7 @@ SliceReader::readSliceHeader( NalUnitType   eNalUnitType,
 
       RNOK( m_pcHeaderReadIf    ->getUvlc( uiFirstMbInSlice,  "SH: first_mb_in_slice" ) );
       RNOK( m_pcHeaderReadIf    ->getUvlc( uiSliceType,       "SH: slice_type" ) );
-      if( uiSliceType > 4 && ! bScalable )
+      if( uiSliceType > 4 ) // Remove "&& ! bScalable" to decode slice_type > 4
       {
           uiSliceType -= 5;
       }

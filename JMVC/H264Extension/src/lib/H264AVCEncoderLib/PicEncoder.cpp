@@ -336,6 +336,12 @@ PicEncoder::xInitFrameSpecSpecial() // for 12 and 15 only
    {
      xGetListSizesSpecial( m_acFrameSpecification[uiFrame].getTemporalLayer(), uiFrame, auiPredListSize);
 
+     // PATCH BEGIN -Samsung
+     // To allow usage of “IntraPeriod” parameter in case of “GOPSize” equal 12 or 15.
+     if((uiFrame == m_uiGOPSize) && ((m_pcCodingParameter->getIntraPeriod() != m_uiGOPSize)))
+         auiPredListSize[0] = 1;
+     //  PATCH END
+
      m_acFrameSpecification[uiFrame].setNumRefIdxActive( LIST_0, auiPredListSize[0]);
      m_acFrameSpecification[uiFrame].setNumRefIdxActive( LIST_1, auiPredListSize[1]);
      SliceType     eSliceType      = ( auiPredListSize[1] ? B_SLICE : auiPredListSize[0] ? P_SLICE : I_SLICE );
@@ -744,6 +750,9 @@ PicEncoder::process( PicBuffer*               pcInputPicBuffer,
 
 			if(uiPicType == 0)uiFirstPicPoc=pcSliceHeader->getPoc(eFirstPicType);
 			
+            if (uiPicType == 0 && bFieldCoded)   // Dong. Bug fix for sliding window with interlace mode
+                m_pcRecPicBuffer->store2(pcRecPicBufUnit->isNeededForRef());
+
             //----- reset -----
             delete pcSliceHeader;
 			pcSliceHeader=0;

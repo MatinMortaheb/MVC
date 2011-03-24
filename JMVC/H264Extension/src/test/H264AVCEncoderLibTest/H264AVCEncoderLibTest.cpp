@@ -6,7 +6,7 @@
 int
 main( int argc, char** argv)   
 {
-  printf("JMVC %s Encoder\n\n",_JMVC_VERSION_);
+  printf("JMVC %s Encoder (running on a %d-bit system)\n\n",_JMVC_VERSION_, sizeof(void*)*8);
 
   H264AVCEncoderTest*               pcH264AVCEncoderTest = NULL;
   RNOK( H264AVCEncoderTest::create( pcH264AVCEncoderTest ) );

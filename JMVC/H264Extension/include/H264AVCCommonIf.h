@@ -44,6 +44,8 @@ public:
 #include "Macros.h"
 #include "MemList.h"
 
+#include <list>         // Move the two lines prior to min() and max() to avoid certain Linux compiling issue. -Dong
+#include <algorithm>
 
 #define min(x,y) ((x)<(y)?(x):(y))
 #define max(x,y) ((x)>(y)?(x):(y))
@@ -51,9 +53,6 @@ public:
 typedef MemCont< UChar > BinData;
 typedef MemList< UChar > BinDataList;
 typedef MemAccessor< UChar > BinDataAccessor;
-
-#include <list>
-#include <algorithm>
 
 typedef UChar   Pel;
 typedef Short   TCoeff;
@@ -69,8 +68,8 @@ public:
   MyList& operator += ( const MyList& rcMyList) { if( ! rcMyList.empty() ) { insert( this->end(), rcMyList.begin(), rcMyList.end());} return *this; } // leszek
   T popBack()                           { T cT = this->back(); this->pop_back(); return cT;  }
   T popFront()                          { T cT = this->front(); this->pop_front(); return cT; }
-  Void pushBack( const T& rcT )         { if( sizeof(T) == 4) { if( rcT != NULL ){ push_back( rcT);} } }
-  Void pushFront( const T& rcT )        { if( sizeof(T) == 4) { if( rcT != NULL ){ push_front( rcT);} } }
+  Void pushBack( const T& rcT )         { if( sizeof(T) == sizeof(void*)) { if( rcT != NULL ){ push_back( rcT);} } } // Fix crash with Linux 64 systems. -Dong
+  Void pushFront( const T& rcT )        { if( sizeof(T) == sizeof(void*)) { if( rcT != NULL ){ push_front( rcT);} } }
   MyIterator find( const T& rcT ) {  return std::find( this->begin(), this->end(), rcT ); } // leszek
 };
 

@@ -30,6 +30,8 @@ public:
   }
   Pel* getMbLumAddr()
   { AOF_DBG(m_pucYuvBuffer); return m_pucYuvBuffer + m_rcBufferParam.getMbLum(); }
+  Pel* getMbLumAddrConst() const
+  { AOF_DBG(m_pucYuvBuffer); return m_pucYuvBuffer + m_rcBufferParam.getMbLum(); }
 
   Pel* getUBlk( LumaIdx cIdx )
   { AOF_DBG(m_pucYuvBuffer); return m_pucYuvBuffer + m_rcBufferParam.getUBlk( cIdx ); }
@@ -40,6 +42,10 @@ public:
   Pel* getMbCrAddr()
   { AOF_DBG(m_pucYuvBuffer); return m_pucYuvBuffer + m_rcBufferParam.getMbCr(); }
   const Int getCStride()    const { return m_iStride>>1;}
+  Pel* getMbCbAddrConst() const
+  { AOF_DBG(m_pucYuvBuffer); return m_pucYuvBuffer + m_rcBufferParam.getMbCb(); }
+  Pel* getMbCrAddrConst() const
+  { AOF_DBG(m_pucYuvBuffer); return m_pucYuvBuffer + m_rcBufferParam.getMbCr(); }
 
 
   const Int getLWidth()     const { return m_rcBufferParam.getWidth(); }

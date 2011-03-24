@@ -401,7 +401,7 @@ ErrVal MbDataCtrl::initSlice( SliceHeader& rcSH, ProcessingState eProcessingStat
           && rcSH.getRefListSize( LIST_1 )
 		  )
     {
-        const RefPic& rcRefPic0L1 = rcSH.getRefPic( 1, rcSH.getPicType(), LIST_1 );
+      const RefPic& rcRefPic0L1 = rcSH.getRefPic( 1, rcSH.getPicType(), LIST_1 );
       AOF_DBG( rcRefPic0L1.isAvailable() );
       const FrameUnit* pcFU = rcRefPic0L1.getPic().getFrameUnit();
       Int iCurrPoc    = rcSH.getPoc();
@@ -428,10 +428,36 @@ ErrVal MbDataCtrl::initSlice( SliceHeader& rcSH, ProcessingState eProcessingStat
       m_pcMbDataCtrl0L1 = pcMbDataCtrl;
     }
 
-	if(!bDecoder)
-	{
-		m_bUseTopField=true;//lufeng: default
-	}
+    if(!bDecoder)
+    { // Fix by hwsun@Panasonic & Dong
+      if (eProcessingState == ENCODE_PROCESS)
+      {
+        if( (rcSH.getNalUnitType() != NAL_UNIT_CODED_SLICE_IDR_SCALABLE &&
+          rcSH.getNalUnitType() != NAL_UNIT_CODED_SLICE_SCALABLE) || (!rcSH.getSvcMvcFlag()) )
+        {
+          PicType picType = rcSH.getPicType();
+          RefFrameList* pRefFrameList1 = rcSH.getRefFrameList(picType, LIST_1);
+
+          Int iCurrPoc    = rcSH.getPoc();
+          Int iTopDiffPOC = iCurrPoc - pRefFrameList1->getEntry( 0 )->getTopFieldPoc();
+          Int iBotDiffPOC = iCurrPoc - pRefFrameList1->getEntry( 0 )->getBotFieldPoc();
+
+          m_bUseTopField    = (abs( iTopDiffPOC ) < abs( iBotDiffPOC ) );
+
+          if( FRAME != rcSH.getPicType() )
+          {
+            if( pRefFrameList1->getEntry( 0 )->getPicType() != rcSH.getPicType() && m_pcMbDataCtrl0L1->isPicCodedField() )
+            {
+              m_iColocatedOffset = m_iMbPerLine;
+            }
+          }
+        }
+      }
+      else
+      {
+        m_bUseTopField = true;//lufeng: default
+      }
+    }
   }
 
   if( PARSE_PROCESS == m_eProcessingState || ENCODE_PROCESS == m_eProcessingState )

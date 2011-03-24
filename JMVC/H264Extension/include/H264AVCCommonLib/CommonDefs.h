@@ -7,7 +7,7 @@
 
 #define _JSVM_VERSION_ "6.5" //added by jerome.vieron@thomson.net
 #define _JMVM_VERSION_ "7.0" //added by purvin.pandit@thomson.net
-#define _JMVC_VERSION_ "8.3.1" //added by ying.chen@tut.fi, cheny@qualcomm.com
+#define _JMVC_VERSION_ "8.4" //added by ying.chen@tut.fi, cheny@qualcomm.com
 
 #define MB_BUFFER_WIDTH 24
 #define MB_BASE_WIDTH   16
@@ -231,7 +231,7 @@ H264AVC_NAMESPACE_END
 #define MAX_FGS_LAYERS      3
 #define MAX_DSTAGES         6
 #define MAX_DSTAGES_MVC		10	//SEI LSJ
-#define	MAX_FRAMERATE		50  //SEI LSJ
+#define	MAX_FRAMERATE		120  //SEI LSJ
 #define LOG2_GOP_ID_WRAP    4
 #define PRI_ID_BITS         6
 #define MAX_SCALABLE_LAYERS MAX_LAYERS * MAX_TEMP_LEVELS * MAX_QUALITY_LEVELS

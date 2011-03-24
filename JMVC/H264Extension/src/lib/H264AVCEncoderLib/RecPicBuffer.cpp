@@ -326,6 +326,14 @@ RecPicBuffer::initCurrRecPicBufUnit( RecPicBufUnit*&  rpcCurrRecPicBufUnit,
   return Err::m_nOK;
 }
 
+// Dong: Bug fix for sliding window with interlace mode
+ErrVal
+RecPicBuffer::store2(Bool isRef)
+{
+  if (isRef)
+      xSlidingWindow(1);
+  return Err::m_nOK;
+}
 
 ErrVal
 RecPicBuffer::store( RecPicBufUnit*   pcRecPicBufUnit,
@@ -457,6 +465,23 @@ RecPicBuffer::getRefLists( RefFrameList&  rcList0,
 	ProcessRef(rcSliceHeader,rcList0,rcListTemp0,pcQuarterPelFilter);//lufeng
 	ProcessRef(rcSliceHeader,rcList1,rcListTemp1,pcQuarterPelFilter);//lufeng
 
+      //----- check for element switching -----   Corrected place -Dong
+      if( rcList1.getActive() >= 2 && rcList0.getActive() == rcList1.getActive() )
+      {
+        Bool bSwitch = true;
+        for( UInt uiPos = 0; uiPos < rcList1.getActive(); uiPos++ )
+        {
+          if( rcList0.getEntry( uiPos ) != rcList1.getEntry( uiPos ) )
+          {
+            bSwitch = false;
+            break;
+          }
+        }
+        if( bSwitch )
+        {
+          rcList1.switchFirst();
+        }
+      }
 	AddMultiviewRef(m_cUsedRecPicBufUnitList, rcList0, rcSliceHeader.getNumRefIdxActive(LIST_0), FORWARD, rcSliceHeader, pcQuarterPelFilter);//JVT-W056  Samsung
     AddMultiviewRef(m_cUsedRecPicBufUnitList, rcList1, rcSliceHeader.getNumRefIdxActive(LIST_1), BACKWARD, rcSliceHeader, pcQuarterPelFilter);//JVT-W056  Samsung
 
@@ -774,7 +799,7 @@ RecPicBuffer::xUpdateMemory( SliceHeader* pcSliceHeader )
   }
   else
   {
-    RNOK( xSlidingWindow() );
+    RNOK( xSlidingWindow(0) );
   }
 
   //===== clear buffer -> remove non-ref pictures =====
@@ -868,17 +893,19 @@ RecPicBuffer::xMarkShortTermUnused( RecPicBufUnit*  pcCurrentRecPicBufUnit,
   RERR();
 }
 
-
+// input param: bFirstField, to indicate frame /field.  -Dong
 ErrVal
-RecPicBuffer::xSlidingWindow()
+RecPicBuffer::xSlidingWindow(int bFirstField)
 {
   //===== get number of reference frames =====
   UInt                        uiCurrNumRefFrames  = 0;
   RecPicBufUnitList::iterator iter                = m_cUsedRecPicBufUnitList.begin();
   RecPicBufUnitList::iterator end                 = m_cUsedRecPicBufUnitList.end  ();
+  if (bFirstField)
+      uiCurrNumRefFrames++;  // Dong: Bug fix for sliding window under interlace mode. Count the first coded field.
   for( ; iter != end; iter++ )
   {
-    if( (*iter)->isNeededForRef() )
+      if( (*iter)->isNeededForRef() && (*iter)->getViewId() == m_pcCurrRecPicBufUnit->getViewId() ) // Dong: Check view id
     {
       uiCurrNumRefFrames++;
     }
@@ -891,7 +918,7 @@ RecPicBuffer::xSlidingWindow()
   iter                     = m_cUsedRecPicBufUnitList.begin();
   for( ; iter != end; iter++ )
   {
-    if( (*iter)->isNeededForRef() )
+    if( (*iter)->isNeededForRef() && (*iter)->getViewId() == m_pcCurrRecPicBufUnit->getViewId() ) // Dong: Check view id
     {
       uiRefFramesToRemove--;
       if( uiRefFramesToRemove == 0 )
@@ -906,7 +933,7 @@ RecPicBuffer::xSlidingWindow()
   iter = m_cUsedRecPicBufUnitList.begin();
   for( ; iter != end; iter++ )
   {
-    if( (*iter)->isNeededForRef() )
+    if( (*iter)->isNeededForRef() && (*iter)->getViewId() == m_pcCurrRecPicBufUnit->getViewId() ) // Dong: Check view id
     {
       RNOK( (*iter)->markNonRef() );
     }
@@ -1146,24 +1173,6 @@ RecPicBuffer::xInitRefListsBSlice( RefFrameList&  rcList0,
   for( uiPos = 0; uiPos < cDecreasingPocList.getSize(); uiPos++ )
   {
     RNOK( rcList1.add( cDecreasingPocList.getEntry( uiPos ) ) );
-  }
-
-  //----- check for element switching -----
-  if( rcList1.getActive() >= 2 && rcList0.getActive() == rcList1.getActive() )
-  {
-    Bool bSwitch = true;
-    for( uiPos = 0; uiPos < rcList1.getActive(); uiPos++ )
-    {
-      if( rcList0.getEntry( uiPos ) != rcList1.getEntry( uiPos ) )
-      {
-        bSwitch = false;
-        break;
-      }
-    }
-    if( bSwitch )
-    {
-      rcList1.switchFirst();
-    }
   }
 
   	if(bFieldRef)//LF_INTERLACE

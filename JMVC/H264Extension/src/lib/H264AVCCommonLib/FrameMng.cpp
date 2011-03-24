@@ -948,11 +948,27 @@ ErrVal FrameMng::xSetReferenceLists( SliceHeader& rcSH )
       {
           RNOK( xSetInitialReferenceListBFields( rcSH ) );
       }
+
+      // Check if L0==L1 here. -Dong
+      RefPicList<RefPic>&     rcList0 = rcSH.getRefPicList( eCurrPicType, LIST_0 );
+      RefPicList<RefPic>&     rcList1 = rcSH.getRefPicList( eCurrPicType, LIST_1 );
+      if( rcList1.size() >= 2 && rcList0.size() == rcList1.size() )
+      {
+          Bool bSwitch = true;
+          for( UInt uiPos = 0; uiPos < rcList1.size(); uiPos++ )
+          {
+              if( rcList0.get(uiPos) != rcList1.get(uiPos) )
+              {
+                  bSwitch = false;
+                  break;
+              }
+          }
+          if( bSwitch )
+          {
+              rcList1.switchFirstEntries();
+          }
+      }
   }
-
-
-// cleanup 
-
 
   return Err::m_nOK;
 }

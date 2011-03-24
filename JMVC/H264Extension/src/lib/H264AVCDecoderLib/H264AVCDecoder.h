@@ -81,7 +81,7 @@ public:
                         //~JVT-P031
 						,Bool&			  UnitAVCFlag	//JVT-S036 
 						,UInt NumOfViewsInTheStream
-                        ); 
+                        ,Bool& bSkip); 
 //Dec. 1 fix view order for base view {{                        
   UInt*   getViewOrder  () { return m_puiViewOrder; } 
   UInt*   getViewOrder_SubStream  () { return m_puiViewOrder_SubStream; } 

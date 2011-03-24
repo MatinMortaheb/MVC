@@ -331,7 +331,7 @@ public:
       }
       if( ! m_pcIntFrameTopField || ! m_pcIntFrameBotField )
       {
-          setPoc( max( m_iTopFieldPoc, m_iBotFieldPoc ) );
+          setPoc( min( m_iTopFieldPoc, m_iBotFieldPoc ) ); // Dong: max -> min. Output correct POC.
       }
   }
 

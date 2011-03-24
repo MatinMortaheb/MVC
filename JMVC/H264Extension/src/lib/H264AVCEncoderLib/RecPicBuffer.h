@@ -126,6 +126,7 @@ public:
                                           PicBufferList&              rcUnusedList 
 					  ,MultiviewReferenceDirection refDirection = NOT_MULTIVIEW							  
 										  );
+  ErrVal          store2                ( Bool isRef );       // just in order to trigger sliding window. -Dong
   ErrVal          store                 ( RecPicBufUnit*              pcRecPicBufUnit,
                                           SliceHeader*                pcSliceHeader,
                                           PicBufferList&              rcOutputList,
@@ -188,7 +189,7 @@ private:
                                           PicBufferList&              rcUnusedList );
   ErrVal          xUpdateMemory         ( SliceHeader*                pcSliceHeader );
   ErrVal          xClearBuffer          ();
-  ErrVal          xSlidingWindow        ();
+  ErrVal          xSlidingWindow        (int bFirstField);
   ErrVal          xMMCO                 ( SliceHeader*                pcSliceHeader );
   ErrVal          xMarkShortTermUnused  ( RecPicBufUnit*              pcCurrentRecPicBufUnit,
                                           UInt                        uiDiffOfPicNums );

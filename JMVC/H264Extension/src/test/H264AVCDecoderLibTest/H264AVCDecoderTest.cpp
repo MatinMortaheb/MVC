@@ -202,6 +202,7 @@ ErrVal H264AVCDecoderTest::go()
     BinDataAccessor cBinDataAccessorTmp[MAX_FRAGMENTS];
     UInt uiFragNb, auiStartPos[MAX_FRAGMENTS], auiEndPos[MAX_FRAGMENTS];
 	Bool bConcatenated = false; //FRAG_FIX_3
+    Bool bSkip  = false;  // Dong: To skip unknown NAL unit types
     uiFragNb = 0;
     bEOS = false;
     pcBinData = 0;
@@ -230,17 +231,25 @@ ErrVal H264AVCDecoderTest::go()
 //TMM_EC }}
 
       pcBinDataTmp[uiFragNb]->setMemAccessor( cBinDataAccessorTmp[uiFragNb] );
+
+      bSkip = false;
       // open the NAL Unit, determine the type and if it's a slice get the frame size
 
       RNOK( m_pcH264AVCDecoder->initPacket( &cBinDataAccessorTmp[uiFragNb], 
                                             uiNalUnitType, uiMbX, uiMbY, uiSize,  true, 
 		  false, //FRAG_FIX_3
 //		  bStart, auiStartPos[uiFragNb], auiEndPos[uiFragNb], bFragmented, bDiscardable ) );
-		  bStart, auiStartPos[uiFragNb], auiEndPos[uiFragNb], bFragmented, bDiscardable, this->m_pcParameter->getNumOfViews() ) );
+		  bStart, auiStartPos[uiFragNb], auiEndPos[uiFragNb], bFragmented, bDiscardable, this->m_pcParameter->getNumOfViews(), bSkip ) );
 
       uiTotalLength += auiEndPos[uiFragNb] - auiStartPos[uiFragNb];
 
-      if(!bStart)
+      // Dong: Skip unknown NAL units
+      if( bSkip )
+      {
+        printf("Unknown NAL unit type: %d\n", uiNalUnitType);
+        uiTotalLength -= (auiEndPos[uiFragNb] - auiStartPos[uiFragNb]);
+      }
+      else if(!bStart)
       {
         ROT( bEOS) ; //jerome.vieron@thomson.net
         uiFragNb++;
@@ -279,7 +288,7 @@ ErrVal H264AVCDecoderTest::go()
                     false, bConcatenated, //FRAG_FIX_3
 					bStart, auiStartPos[uiFragNb+1], auiEndPos[uiFragNb+1], 
 //                    bFragmented, bDiscardable) );
-                    bFragmented, bDiscardable, this->m_pcParameter->getNumOfViews()) );
+                    bFragmented, bDiscardable, this->m_pcParameter->getNumOfViews(), bSkip) );
             }
 
         else if( uiNalUnitType == 14 )
@@ -290,7 +299,7 @@ ErrVal H264AVCDecoderTest::go()
                     false, bConcatenated, //FRAG_FIX_3
 					bStart, auiStartPos[uiFragNb+1], auiEndPos[uiFragNb+1], 
 //                    bFragmented, bDiscardable) );
-                    bFragmented, bDiscardable,this->m_pcParameter->getNumOfViews()) );
+                    bFragmented, bDiscardable,this->m_pcParameter->getNumOfViews(), bSkip) );
                     
               }
               else

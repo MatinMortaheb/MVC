@@ -100,8 +100,8 @@ CreaterH264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
                                 Bool&              bFragmented,
                                 Bool&              bDiscardable,
                                 //~JVT-P031
-                                UInt NumOfViewsInTheStream	
-																) 
+                                UInt NumOfViewsInTheStream,	
+								Bool&  bSkip								) 
 {
 	return m_pcH264AVCDecoder->initPacket( pcBinDataAccessor,
 		                                      ruiNalUnitType,
@@ -120,7 +120,7 @@ CreaterH264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
                                               //~JVT-P031
 											  ,UnitAVCFlag  //JVT-S036 lsj 
   											  , NumOfViewsInTheStream
-                                               );
+                                              ,bSkip );
 }
 
 //JVT-S036  start

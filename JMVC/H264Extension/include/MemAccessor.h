@@ -6,7 +6,7 @@
 #endif // _MSC_VER > 1000
 
 #include <list>
-
+#include <string.h> // Add it to avoid certain Linux compiling issue. -Dong
 
 template< class T >
 class MemAccessor
