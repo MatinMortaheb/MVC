@@ -56,10 +56,10 @@ public:
   ErrVal uninit ();
 
   Bool    moreRBSPData();
-  ErrVal  getUvlc     ( UInt& ruiCode,                Char* pcTraceString );
-  ErrVal  getCode     ( UInt& ruiCode, UInt uiLength, Char* pcTraceString );
-  ErrVal  getSvlc     ( Int&  riCode,                 Char* pcTraceString );
-  ErrVal  getFlag     ( Bool& rbFlag,                 Char* pcTraceString );
+  ErrVal  getUvlc     ( UInt& ruiCode,                const Char* pcTraceString );
+  ErrVal  getCode     ( UInt& ruiCode, UInt uiLength, const Char* pcTraceString );
+  ErrVal  getSvlc     ( Int&  riCode,                 const Char* pcTraceString );
+  ErrVal  getFlag     ( Bool& rbFlag,                 const Char* pcTraceString );
   ErrVal  readByteAlign();
   ErrVal  readZeroByteAlign();//SEI LSJ
 

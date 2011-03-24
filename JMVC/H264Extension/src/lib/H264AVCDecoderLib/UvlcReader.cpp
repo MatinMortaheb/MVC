@@ -401,7 +401,7 @@ ErrVal UvlcReader::xGetSvlcCode( Int& riVal)
 
 
 
-ErrVal UvlcReader::getFlag( Bool& rbFlag, Char* pcTraceString )
+ErrVal UvlcReader::getFlag( Bool& rbFlag, const Char* pcTraceString )
 {
   DTRACE_TH( pcTraceString );
 
@@ -415,7 +415,7 @@ ErrVal UvlcReader::getFlag( Bool& rbFlag, Char* pcTraceString )
 }
 
 
-ErrVal UvlcReader::getCode( UInt& ruiCode, UInt uiLength, Char* pcTraceString )
+ErrVal UvlcReader::getCode( UInt& ruiCode, UInt uiLength, const Char* pcTraceString )
 {
   DTRACE_TH( pcTraceString );
   DTRACE_TY( " u(v)" );
@@ -432,7 +432,7 @@ ErrVal UvlcReader::getCode( UInt& ruiCode, UInt uiLength, Char* pcTraceString )
 }
 
 
-ErrVal UvlcReader::getUvlc( UInt& ruiCode, Char* pcTraceString )
+ErrVal UvlcReader::getUvlc( UInt& ruiCode, const Char* pcTraceString )
 {
   DTRACE_TH( pcTraceString );
 
@@ -444,7 +444,7 @@ ErrVal UvlcReader::getUvlc( UInt& ruiCode, Char* pcTraceString )
 }
 
 
-ErrVal UvlcReader::getSvlc( Int& riCode, Char* pcTraceString )
+ErrVal UvlcReader::getSvlc( Int& riCode, const Char* pcTraceString )
 {
   DTRACE_TH( pcTraceString );
 
