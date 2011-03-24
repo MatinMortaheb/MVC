@@ -1,9 +1,10 @@
+#include <cstdio>
+#include <math.h>
 #include "AssemblerParameter.h"
 #include "Assembler.h"
 #include "ReadBitstreamFile.h"
 #include "MVCScalableModifyCode.h"
 #include "MVCScalableTestCode.h"
-#include <math.h>
 
 
 

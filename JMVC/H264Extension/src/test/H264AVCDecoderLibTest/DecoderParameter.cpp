@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "H264AVCDecoderLibTest.h"
 #include "DecoderParameter.h"
 

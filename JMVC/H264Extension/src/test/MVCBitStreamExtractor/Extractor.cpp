@@ -1,8 +1,9 @@
+#include <cstdio>
+#include <math.h>
 #include "MVCBStreamExtractor.h"
 #include "Extractor.h"
 #include "MVCScalableModifyCode.h"
 #include "MVCScalableTestCode.h"
-#include <math.h>
 
 
 

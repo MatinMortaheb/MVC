@@ -1,7 +1,7 @@
+#include <cstdio>
 #include "H264AVCEncoderLibTest.h"
 #include "H264AVCEncoderTest.h"
 #include "EncoderCodingParameter.h"
-#include <cstdio>
 
 
 H264AVCEncoderTest::H264AVCEncoderTest() :

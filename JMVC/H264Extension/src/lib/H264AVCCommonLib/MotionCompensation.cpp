@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "H264AVCCommonLib.h"
 
 #include "H264AVCCommonLib/SampleWeighting.h"

@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "H264AVCDecoderLib.h"
 #include "H264AVCDecoder.h"
 

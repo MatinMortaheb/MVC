@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "MVCBStreamExtractor.h"
 #include "Extractor.h"
 

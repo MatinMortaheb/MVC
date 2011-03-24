@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "H264AVCEncoderLibTest.h"
 #include "H264AVCEncoderTest.h"
 #include "H264AVCCommonLib/CommonBuffers.h"

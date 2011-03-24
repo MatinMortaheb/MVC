@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "MVCBStreamAssembler.h"
 #include "AssemblerParameter.h"
 #include "Assembler.h"

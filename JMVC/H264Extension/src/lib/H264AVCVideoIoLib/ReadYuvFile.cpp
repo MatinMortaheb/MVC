@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "H264AVCVideoIoLib.h"
 #include "ReadYuvFile.h"
 

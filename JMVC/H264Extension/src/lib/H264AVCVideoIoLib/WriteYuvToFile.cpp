@@ -1,6 +1,7 @@
+#include <cstdio>
+#include <stdlib.h>
 #include "H264AVCVideoIoLib.h"
 #include "WriteYuvToFile.h"
-#include <stdlib.h>
 
 
 WriteYuvToFile::WriteYuvToFile()

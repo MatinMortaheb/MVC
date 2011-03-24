@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "H264AVCCommonLib.h"
 #include "H264AVCCommonLib/YuvBufferCtrl.h"
 #include "H264AVCCommonLib/IntYuvPicBuffer.h"

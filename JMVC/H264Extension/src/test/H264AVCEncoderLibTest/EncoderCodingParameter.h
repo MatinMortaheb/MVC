@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
  
  
+#include <cstdio>
 #include <string> 
 #include "CodingParameter.h"
 

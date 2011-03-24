@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "H264AVCDecoderLib.h"
 #include "ControlMngH264AVCDecoder.h"
 
