@@ -845,7 +845,7 @@ H264AVCDecoder::checkSliceGap( BinDataAccessor*  pcBinDataAccessor,
 					}
 				}
 				// F slices are also ignored
-				if( pcSliceHeader->getSliceType() == F_SLICE || pcSliceHeader->getFrameNum() == 1 && pcSliceHeader->getLayerId() < m_uiMaxLayerId)
+				if( pcSliceHeader->getSliceType() == F_SLICE || (pcSliceHeader->getFrameNum() == 1 && pcSliceHeader->getLayerId() < m_uiMaxLayerId))
 //				if( pcSliceHeader->getSliceType() == F_SLICE)
 				{
 					if( pcSliceHeader != NULL )
@@ -2557,7 +2557,7 @@ H264AVCDecoder::xProcessSliceVirtual( SliceHeader&    rcSH,
 
   m_bReconstruct = bReconstruct;
   //***** NOTE: Motion-compensated prediction for non-key pictures is done in xReconstructLastFGS()
-  bReconstruct   = bReconstruct && bKeyPicture || ! bConstrainedIP;
+  bReconstruct   = (bReconstruct && bKeyPicture) || ! bConstrainedIP;
 
   RNOK( m_pcControlMng  ->initSlice ( rcSH, DECODE_PROCESS ) );
 
@@ -2736,7 +2736,7 @@ H264AVCDecoder::xProcessSlice( SliceHeader& rcSH,
   Bool  bReconstruct    = (m_uiRecLayerId == 0) || ! bConstrainedIP || bHighestLayer; //JVT-T054
   m_bReconstruct  = bReconstruct;
   //***** NOTE: Motion-compensated prediction for non-key pictures is done in xReconstructLastFGS()
-  bReconstruct    = bReconstruct && bKeyPicture || ! bConstrainedIP;
+  bReconstruct    = (bReconstruct && bKeyPicture) || ! bConstrainedIP;
 
   RNOK( m_pcControlMng  ->initSlice ( rcSH, DECODE_PROCESS ) );
 

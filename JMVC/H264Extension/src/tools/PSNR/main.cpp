@@ -128,7 +128,7 @@ void writeFrame( YuvFrame* f, FILE* file, int downscale )
   writeColorComponent( &f->cr,  file, downscale );
 }
 
-void print_usage_and_exit( int test, char* name, char* message = 0 )
+void print_usage_and_exit( int test, char* name, const char* message = 0 )
 {
   if( test )
   {

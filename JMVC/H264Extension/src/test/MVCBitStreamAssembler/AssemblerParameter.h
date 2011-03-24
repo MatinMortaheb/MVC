@@ -14,7 +14,7 @@
 class ConfigLineBase
 {
 protected:
-  ConfigLineBase(Char* pcTag, UInt uiType ) : m_cTag( pcTag ), m_uiType( uiType ) {}
+  ConfigLineBase(const Char* pcTag, UInt uiType ) : m_cTag( pcTag ), m_uiType( uiType ) {}
   ConfigLineBase() {}
 public:
   virtual ~ConfigLineBase() {}
@@ -28,7 +28,7 @@ protected:
 class ConfigLineStr : public ConfigLineBase
 {
 public:
-  ConfigLineStr( Char* pcTag, std::string* pcPar, Char* pcDefault ) : ConfigLineBase( pcTag, 1 ), m_pcPar( pcPar )
+  ConfigLineStr( const Char* pcTag, std::string* pcPar, const Char* pcDefault ) : ConfigLineBase( pcTag, 1 ), m_pcPar( pcPar )
   {
     *m_pcPar = pcDefault;
   };
@@ -43,7 +43,7 @@ protected:
 class ConfigLineDbl : public ConfigLineBase
 {
 public:
-  ConfigLineDbl( Char* pcTag, Double* pdPar, Double pdDefault ) :  ConfigLineBase( pcTag, 2 ), m_pdPar( pdPar ) 
+  ConfigLineDbl( const Char* pcTag, Double* pdPar, Double pdDefault ) :  ConfigLineBase( pcTag, 2 ), m_pdPar( pdPar ) 
   {
     *m_pdPar = pdDefault;
   };
@@ -58,7 +58,7 @@ protected:
 class ConfigLineInt : public ConfigLineBase
 {
 public:
-  ConfigLineInt( Char* pcTag, Int* piPar, Int piDefault ) : ConfigLineBase( pcTag, 3 ), m_piPar( piPar )
+  ConfigLineInt( const Char* pcTag, Int* piPar, Int piDefault ) : ConfigLineBase( pcTag, 3 ), m_piPar( piPar )
   {
     *m_piPar = piDefault;
   };
@@ -73,7 +73,7 @@ protected:
 class ConfigLineUInt : public ConfigLineBase
 {
 public:
-  ConfigLineUInt( Char* pcTag, UInt* puiPar, UInt puiDefault ) : ConfigLineBase( pcTag, 4 ), m_puiPar( puiPar )
+  ConfigLineUInt( const Char* pcTag, UInt* puiPar, UInt puiDefault ) : ConfigLineBase( pcTag, 4 ), m_puiPar( puiPar )
   {
     *m_puiPar = puiDefault;
   };
@@ -88,7 +88,7 @@ protected:
 class ConfigLineChar : public ConfigLineBase
 {
 public:
-  ConfigLineChar( Char* pcTag, Char* pcPar, Char pcDefault ) : ConfigLineBase( pcTag, 5 ), m_pcPar( pcPar )
+  ConfigLineChar( const Char* pcTag, Char* pcPar, Char pcDefault ) : ConfigLineBase( pcTag, 5 ), m_pcPar( pcPar )
   {
     *m_pcPar = pcDefault;
   };

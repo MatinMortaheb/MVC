@@ -512,7 +512,7 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
 //SEI 
   Bool bFragmentedFlag = false; //JVT-P031
   UInt uiFragmentOrder = 0; //JVT-P031
-  Bool bLastFragmentFlag = false; //JVT-P031
+  //Bool bLastFragmentFlag = false; //JVT-P031
   rcPacketDescription.uiNumLevelsQL = 0;
   
 	for(UInt ui = 0; ui < MAX_NUM_RD_LEVELS; ui++)
@@ -539,7 +539,7 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
 	  if( !bSvcMvcFlag )
 	  {
                                                     // 1 bit
-      Bool bNonIDRFlag     = ( ucByte >> 6)  & 0x01;     // 1 bit
+      //Bool bNonIDRFlag     = ( ucByte >> 6)  & 0x01;     // 1 bit
       uiSimplePriorityId   = ( ucByte     ) & 0x3f ;    // 6
       // view_id
       ucByte               = pcBinData->data()[2];
@@ -548,11 +548,11 @@ H264AVCPacketAnalyzer::process( BinData*            pcBinData,
       ucByte               = pcBinData->data()[3];
       uiViewId            += ( ucByte >>6  ) & 0x03;     // 2 bit more
 
-      UInt  uiTemporalId   = ( ucByte >>3 )  & 0x07;     // 3 bit 
+      //UInt  uiTemporalId   = ( ucByte >>3 )  & 0x07;     // 3 bit 
 		  bAnchorPicFlag       = ( ucByte >>2 )  & 0x01;     // 1 bit
-		  Bool  bInterViewFlag = ( ucByte >>1	)	 & 0x01;     // 1 bit  
+		  //Bool  bInterViewFlag = ( ucByte >>1	)	 & 0x01;     // 1 bit  
 
-		  Bool  b_Res1Zero     = ( ucByte     )  & 0x01;           // 1 bit
+		  //Bool  b_Res1Zero     = ( ucByte     )  & 0x01;           // 1 bit
 		}
     else
     {

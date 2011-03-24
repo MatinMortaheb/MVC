@@ -134,7 +134,7 @@ void writeFrame( YuvFrame* f, FILE* file, int width, int height )
   writeColorComponent( &f->cr,  file, width/2, height/2 );
 }
 
-void print_usage_and_exit( int test, char* name, char* message = 0 )
+void print_usage_and_exit( int test, char* name, const char* message = 0 )
 {
   if( test )
   {

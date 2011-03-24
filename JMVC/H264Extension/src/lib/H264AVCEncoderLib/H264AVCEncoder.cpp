@@ -1550,6 +1550,7 @@ H264AVCEncoder::writeParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor, Bo
 
     RNOK( xInitParameterSets() );
     if( m_bScalableSeiMessage )
+    {
     if(m_pcCodingParameter->getCGSSNRRefinement() )
     { 
       RNOK( xWriteScalableSEICGSSNR( pcExtBinDataAccessor ) ); //JVT-T054
@@ -1558,7 +1559,7 @@ H264AVCEncoder::writeParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor, Bo
     {
       RNOK( xWriteScalableSEI( pcExtBinDataAccessor ) );
     }
-
+    }
 	LayerParameters& rcLayer = m_pcCodingParameter->getLayerParameters ( 0 );
 	if (0 < rcLayer.getNumROI())
 		m_bWrteROISEI = true;
