@@ -1209,8 +1209,6 @@ ErrVal FrameMng::xManageMemory( const SliceHeader& rcSH )
     return Err::m_nOK;
   }
 
-	PicType eCurrPicType = rcSH.getPicType();
-
   MmcoOp eMmcoOp;
   const MmcoBuffer& rcMmcoBuffer = rcSH.getMmcoBuffer();
   UInt uiVal1, uiVal2;

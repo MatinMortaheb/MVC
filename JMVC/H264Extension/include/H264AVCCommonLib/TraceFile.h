@@ -37,7 +37,7 @@ public:
   static ErrVal startSlice  ();
   static ErrVal startMb     ( Int   iMbAddress  );
 
-  static ErrVal printHeading( Char* pcString    );
+  static ErrVal printHeading( const Char* pcString    );
 
   static ErrVal countBits   ( UInt  uiBitCount );
   static ErrVal printPos    ();

@@ -457,7 +457,6 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
   RNOK  ( pcReadIf->getUvlc( m_uiPicOrderCntType,                         "SPS: pic_order_cnt_type" ) );
   if( m_uiPicOrderCntType == 0 )
   {
-      UInt uiTmp;
       RNOK( pcReadIf->getUvlc( uiTmp, "SPS: log2_max_pic_order_cnt_lsb_minus4" ));
       setLog2MaxPicOrderCntLsb( 4+uiTmp );
   }

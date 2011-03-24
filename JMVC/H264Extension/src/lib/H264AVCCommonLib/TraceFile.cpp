@@ -131,7 +131,7 @@ ErrVal
 TraceFile::startNalUnit()
 {
   if (IsInitialized())
-	RNOK( printHeading("Nal Unit") );
+    RNOK( printHeading("Nal Unit") );
   return Err::m_nOK;
 }
 
@@ -177,7 +177,7 @@ TraceFile::startMb( Int iMbAddress )
 
 
 ErrVal
-TraceFile::printHeading( Char* pcString )
+TraceFile::printHeading( const Char* pcString )
 {
   if (IsInitialized())
   {
