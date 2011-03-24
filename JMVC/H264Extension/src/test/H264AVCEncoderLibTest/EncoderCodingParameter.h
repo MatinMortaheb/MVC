@@ -17,7 +17,7 @@
 class EncoderConfigLineStr : public h264::EncoderConfigLineBase
 {
 public:
-  EncoderConfigLineStr( const Char* pcTag, std::string* pcPar, const Char* pcDefault ) : EncoderConfigLineBase( pcTag, 1 ), m_pcPar( pcPar )
+  EncoderConfigLineStr( const Char* pcTag, std::string* pcPar, Char* pcDefault ) : EncoderConfigLineBase( pcTag, 1 ), m_pcPar( pcPar )
   {
     *m_pcPar = pcDefault;
   };
