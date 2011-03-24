@@ -373,7 +373,7 @@ ErrVal H264AVCDecoderTest::go()
 		  UInt *vcOrder = m_pcH264AVCDecoder->getViewCodingOrder_SubStream();
 		  if(vcOrder == NULL)//lufeng: in order to output non-MVC seq
           {
-			  UInt order=0;
+			  //UInt order=0;
 			  m_pcH264AVCDecoder->addViewCodingOrder();
 			  //vcOrder = m_pcH264AVCDecoder->getViewCodingOrder();
 			  vcOrder = m_pcH264AVCDecoder->getViewCodingOrder_SubStream();

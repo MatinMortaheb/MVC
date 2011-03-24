@@ -92,7 +92,7 @@ ErrVal SliceReader::process( SliceHeader& rcSH, UInt& ruiMbRead )
 
   //====== initialization ======
   UInt  uiMbAddress       = rcSH.getFirstMbInSlice();
-  UInt  uiLastMbAddress   = rcSH.getMbInPic()-1;
+  //UInt  uiLastMbAddress   = rcSH.getMbInPic()-1;
   Bool  bEndOfSlice       = false;
 
   //===== loop over macroblocks =====

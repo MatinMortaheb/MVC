@@ -188,7 +188,7 @@ TraceFile::printHeading( const Char* pcString )
 	}
 
 	::snprintf( sm_acLine, MAX_LINE_LENGTH, "-------------------- %s --------------------\n", pcString );
-	::fprintf ( sm_fTrace[sm_uiViewId], sm_acLine );
+	::fprintf ( sm_fTrace[sm_uiViewId], "%s", sm_acLine );
 	::fflush  ( sm_fTrace[sm_uiViewId] );
 	sm_acLine[0] = '\0';
   }
@@ -218,8 +218,8 @@ TraceFile::printPos()
 ErrVal
 TraceFile::printString( const Char* pcString )
 {
-  if (IsInitialized())		
-  ::strncat( sm_acLine, pcString, MAX_LINE_LENGTH );
+  if (IsInitialized())
+  ::strncat( sm_acLine, pcString, MAX_LINE_LENGTH-strlen(pcString) );
   return Err::m_nOK;
 }
 
@@ -239,7 +239,7 @@ TraceFile::printVal( UInt uiVal )
   Char tmp[8];
   if (IsInitialized()) {
 	::snprintf( tmp, 8, "%3u", uiVal);
-	::strncat( sm_acLine, tmp, MAX_LINE_LENGTH);
+	::strncat( sm_acLine, tmp, MAX_LINE_LENGTH-8 );
   }
   return Err::m_nOK;
 }
@@ -252,7 +252,7 @@ TraceFile::printVal( Int iVal )
   if (IsInitialized())
   {
 	::snprintf( tmp, 8, "%3i", iVal );
-	::strncat( sm_acLine, tmp, MAX_LINE_LENGTH );
+	::strncat( sm_acLine, tmp, MAX_LINE_LENGTH-8 );
   }
   return Err::m_nOK;
 }
@@ -265,7 +265,7 @@ TraceFile::printXVal( UInt uiVal )
   if (IsInitialized())
   {
 	::snprintf( tmp, 8, "0x%04x", uiVal );
-	::strncat( sm_acLine, tmp, MAX_LINE_LENGTH);
+	::strncat( sm_acLine, tmp, MAX_LINE_LENGTH-8);
   }
   return Err::m_nOK;
 }
@@ -323,7 +323,7 @@ ErrVal
 TraceFile::printCode( UInt uiVal )
 {
   if (IsInitialized())
-	::snprintf( sm_acCode, MAX_LINE_LENGTH, "%u", uiVal );
+	::snprintf( sm_acCode, 5, "%u", uiVal );
   return Err::m_nOK;
 }
 
@@ -332,7 +332,7 @@ ErrVal
 TraceFile::printCode(Int iVal)
 {
   if (IsInitialized())	
-	::snprintf( sm_acCode, MAX_LINE_LENGTH, "%i", iVal );
+	::snprintf( sm_acCode, 5, "%i", iVal );
   return Err::m_nOK;
 }
 

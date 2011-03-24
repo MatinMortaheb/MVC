@@ -17,7 +17,7 @@
 class EncoderConfigLineStr : public h264::EncoderConfigLineBase
 {
 public:
-  EncoderConfigLineStr( Char* pcTag, std::string* pcPar, Char* pcDefault ) : EncoderConfigLineBase( pcTag, 1 ), m_pcPar( pcPar )
+  EncoderConfigLineStr( const Char* pcTag, std::string* pcPar, const Char* pcDefault ) : EncoderConfigLineBase( pcTag, 1 ), m_pcPar( pcPar )
   {
     *m_pcPar = pcDefault;
   };
@@ -32,7 +32,7 @@ protected:
 class EncoderConfigLineDbl : public h264::EncoderConfigLineBase
 {
 public:
-  EncoderConfigLineDbl( Char* pcTag, Double* pdPar, Double pdDefault ) :  EncoderConfigLineBase( pcTag, 2 ), m_pdPar( pdPar ) 
+  EncoderConfigLineDbl( const Char* pcTag, Double* pdPar, Double pdDefault ) :  EncoderConfigLineBase( pcTag, 2 ), m_pdPar( pdPar ) 
   {
     *m_pdPar = pdDefault;
   };
@@ -47,7 +47,7 @@ protected:
 class EncoderConfigLineInt : public h264::EncoderConfigLineBase
 {
 public:
-  EncoderConfigLineInt( Char* pcTag, Int* piPar, Int piDefault ) : EncoderConfigLineBase( pcTag, 3 ), m_piPar( piPar )
+  EncoderConfigLineInt( const Char* pcTag, Int* piPar, Int piDefault ) : EncoderConfigLineBase( pcTag, 3 ), m_piPar( piPar )
   {
     *m_piPar = piDefault;
   };
@@ -62,7 +62,7 @@ protected:
 class EncoderConfigLineUInt : public h264::EncoderConfigLineBase
 {
 public:
-  EncoderConfigLineUInt( Char* pcTag, UInt* puiPar, UInt puiDefault ) : EncoderConfigLineBase( pcTag, 4 ), m_puiPar( puiPar )
+  EncoderConfigLineUInt( const Char* pcTag, UInt* puiPar, UInt puiDefault ) : EncoderConfigLineBase( pcTag, 4 ), m_puiPar( puiPar )
   {
     *m_puiPar = puiDefault;
   };
@@ -112,7 +112,7 @@ protected:
   Bool    equals( const Char* str1, const Char* str2, UInt nLetter ) { return 0 == ::strncmp( str1, str2, nLetter); }
 
 
-  Void    xAppendStringWithNO( std::string&  rcInStr, std::string&  rcoutStr, UInt uiV, char * type)
+  Void    xAppendStringWithNO( std::string&  rcInStr, std::string&  rcoutStr, UInt uiV, const char * type)
   {
     char aAppendedID[10]="";
 
@@ -692,9 +692,9 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
   m_pEncoderLines[uiParLnCount] = NULL;
 
 
-  int cur_view_id, view_id, view_cnt=-1;
+  int cur_view_id=0, view_id, view_cnt=-1;
   int cur_level_id,level_cnt=-1;
-  int num_of_ops,num_target_views_minus1,num_views_minus1,temporal_id,view_idx;
+  int num_of_ops=0,num_target_views_minus1,num_views_minus1,temporal_id,view_idx;
   int ref_idx,num_of_refs,temp;
   //int vcOrder;
   CodingParameter::SpsMVC.setNumViewsMinus1(0);
@@ -986,8 +986,8 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 		CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_minus1[0][0]=(temp_num_views=CodingParameter::SpsMVC.getNumViewMinus1());
 		CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_3D(0,temp_num_views,0,0);   
 		CodingParameter::SpsMVC.m_ui_applicable_op_num_views_minus1[0][0]=temp_num_views;
-		for (int i=0;i<=(int)temp_num_views;i++)
-			CodingParameter::SpsMVC.m_ui_applicable_op_target_view_id[0][0][i]=order[i];	
+		for (int k=0;k<=(int)temp_num_views;k++)
+			CodingParameter::SpsMVC.m_ui_applicable_op_target_view_id[0][0][k]=order[k];	
 
 	}
 	////

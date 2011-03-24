@@ -1578,8 +1578,8 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 					m_uiNumOpMinus1 = ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getNumOperationPointsMinus1();
 					m_uiNumActiveViews=0;
 					UInt TotNumView=0;	
-					for( UInt i = 0; i <= m_uiNumOpMinus1; i++ )
-					  TotNumView += ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getNumTargetOutputViewsMinus1(i)+1;
+					for( UInt k = 0; k <= m_uiNumOpMinus1; k++ )
+					  TotNumView += ((SEI::ViewScalabilityInfoSei*)pcSEIMessage)->getNumTargetOutputViewsMinus1(k)+1;
 					TotNumView *=3;
 					
 					m_uiActiveViewId = new UInt[TotNumView];

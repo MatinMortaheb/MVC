@@ -139,7 +139,7 @@ PicEncoder::init( CodingParameter*    pcCodingParameter,
 
 //SEI {
   m_adMaxBitRate = 0.0;
-  uiNumPics = 0;
+  m_uiNumPics = 0;
   UInt ui;
   for( ui = 0; ui < MAX_DSTAGES_MVC; ui++ )
   {
@@ -812,20 +812,20 @@ PicEncoder::finish( PicBufferList&  rcOutputList,
 ErrVal
 PicEncoder::xModifyMaxBitrate( UInt uiBits )
 {
-  uiNumPics++;
-  if(uiNumPics > (UInt)m_pcCodingParameter->getMaximumFrameRate())
+  m_uiNumPics++;
+  if(m_uiNumPics > (UInt)m_pcCodingParameter->getMaximumFrameRate())
   {
-    uiNumPics--;
-	for( UInt i = 0; i < uiNumPics - 1; i++ )
+    m_uiNumPics--;
+	for( UInt i = 0; i < m_uiNumPics - 1; i++ )
 		m_adMVCPicBits[i] = m_adMVCPicBits[i+1];
-	m_adMVCPicBits[uiNumPics-1] = uiBits;
+	m_adMVCPicBits[m_uiNumPics-1] = uiBits;
   }
   else
-  	m_adMVCPicBits[uiNumPics-1] = uiBits;
+  	m_adMVCPicBits[m_uiNumPics-1] = uiBits;
   Double TotalBits = 0;
-  for( UInt i = 0; i < uiNumPics; i++ )
+  for( UInt i = 0; i < m_uiNumPics; i++ )
 	  TotalBits += m_adMVCPicBits[i];
-  TotalBits = TotalBits * 0.001 * (m_pcCodingParameter->getMaximumFrameRate()) / uiNumPics;
+  TotalBits = TotalBits * 0.001 * (m_pcCodingParameter->getMaximumFrameRate()) / m_uiNumPics;
   if( TotalBits > m_adMaxBitRate )
 	  m_adMaxBitRate = TotalBits;
   return Err::m_nOK;

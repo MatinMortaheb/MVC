@@ -250,7 +250,7 @@ private:
   UInt                        m_auiMVCNumFramesCoded [MAX_DSTAGES_MVC+1];
   Double					  m_adMVCPicBits	  [MAX_FRAMERATE];
   Double					  m_adMaxBitRate;
-  UInt						  uiNumPics;
+  UInt						  m_uiNumPics;
 //SEI LSJ}
 
   //===== multiview stuff

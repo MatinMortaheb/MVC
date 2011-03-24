@@ -28,7 +28,7 @@ H264AVC_NAMESPACE_BEGIN
 class H264AVCENCODERLIB_API EncoderConfigLineBase
 {
 protected:
-  EncoderConfigLineBase(Char* pcTag, UInt uiType ) : m_cTag( pcTag ), m_uiType( uiType ) {}
+  EncoderConfigLineBase(const Char* pcTag, UInt uiType ) : m_cTag( pcTag ), m_uiType( uiType ) {}
   EncoderConfigLineBase() {}
 public:
   virtual ~EncoderConfigLineBase() {}
