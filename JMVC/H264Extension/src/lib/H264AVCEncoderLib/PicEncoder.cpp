@@ -628,7 +628,13 @@ PicEncoder::xUpdateFrameSepNextGOP()
   if (!m_bSpecialGOP )
     xGetListSizes ( 0, m_uiGOPSize, auiPredListSize);
   else 
+  {
     xGetListSizesSpecial( 0, m_uiGOPSize, auiPredListSize);
+    // PATCH Samsung
+    // To allow usage of .IntraPeriod. parameter in case of .GOPSize. equal 12 or 15. 
+    if((m_pcCodingParameter->getIntraPeriod() != m_uiGOPSize))
+      auiPredListSize[0] = 1;
+  }
 
   m_acFrameSpecification[m_uiGOPSize].setNumRefIdxActive( LIST_0, auiPredListSize[0]);
   m_acFrameSpecification[m_uiGOPSize].setNumRefIdxActive( LIST_1, auiPredListSize[1]);
