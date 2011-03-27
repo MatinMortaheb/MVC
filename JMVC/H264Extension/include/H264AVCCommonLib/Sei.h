@@ -739,6 +739,10 @@ public:
 	Bool getOpConstraintSet1Flag( UInt index )		  { return m_bOpConstraintSet1Flag[index]; }
 	Bool getOpConstraintSet2Flag( UInt index )		  { return m_bOpConstraintSet2Flag[index]; }
 	Bool getOpConstraintSet3Flag( UInt index )		  { return m_bOpConstraintSet3Flag[index]; }
+//bug_fix_chenlulu{
+	Bool getOpConstraintSet4Flag( UInt index )		  { return m_bOpConstraintSet4Flag[index]; }
+	Bool getOpConstraintSet5Flag( UInt index )		  { return m_bOpConstraintSet5Flag[index]; }
+//bug_fix_chenlulu}
 	UInt getOpLevelIdc( UInt index )			      { return m_uiOpLevelIdc[index]; }
 	UInt getProfileLevelInfoSrcOpIdDelta( UInt i )    { return m_uiProfileLevelInfoSrcOpIdDelta[i]; }
 	UInt getAvgBitrate( UInt index )				  { return m_uiAvgBitrate[index]; }
@@ -784,6 +788,10 @@ public:
 	Void setOpConstraintSet1Flag( UInt index, Bool b )		  { m_bOpConstraintSet1Flag[index] = b; }
 	Void setOpConstraintSet2Flag( UInt index, Bool b )		  { m_bOpConstraintSet2Flag[index] = b; }
 	Void setOpConstraintSet3Flag( UInt index, Bool b )  	  { m_bOpConstraintSet3Flag[index] = b; }
+//bug_fix_chenlulu{
+	Void setOpConstraintSet4Flag( UInt index, Bool b )		  { m_bOpConstraintSet4Flag[index] = b; }
+	Void setOpConstraintSet5Flag( UInt index, Bool b )		  { m_bOpConstraintSet5Flag[index] = b; }
+//bug_fix_chenlulu}
 	Void setOpLevelIdc( UInt index, UInt ui )			      { m_uiOpLevelIdc[index] = ui; }
 	Void setProfileLevelInfoSrcOpIdDelta( UInt i, UInt ui )   { m_uiProfileLevelInfoSrcOpIdDelta[i] = ui; }
 	Void setAvgBitrate( UInt index, UInt ui )				  { m_uiAvgBitrate[index] = ui; }
@@ -862,6 +870,10 @@ public:
 	Bool			m_bOpConstraintSet1Flag[MAX_OPERATION_POINTS];
 	Bool			m_bOpConstraintSet2Flag[MAX_OPERATION_POINTS];
 	Bool			m_bOpConstraintSet3Flag[MAX_OPERATION_POINTS];
+//bug_fix_chenlulu{
+	Bool			m_bOpConstraintSet4Flag[MAX_OPERATION_POINTS];
+	Bool			m_bOpConstraintSet5Flag[MAX_OPERATION_POINTS];
+//bug_fix_chenlulu}
 	UInt			m_uiOpLevelIdc[MAX_OPERATION_POINTS];
 
 	UInt			m_uiProfileLevelInfoSrcOpIdDelta[MAX_OPERATION_POINTS];

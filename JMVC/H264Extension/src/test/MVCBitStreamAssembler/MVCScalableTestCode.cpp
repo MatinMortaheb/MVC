@@ -61,12 +61,13 @@ MVCScalableTestCode::SEICode( h264::SEI::ViewScalabilityInfoSei* pcViewScalInfoS
 			pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet1Flag( uiOpId ) );
 			pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet2Flag( uiOpId ) );
 			pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet3Flag( uiOpId ) );
-			pcScalableTestCode->WriteCode( 0, 4 );
+			//bug_fix_chenlulu{
+			pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet4Flag( uiOpId ) );
+			pcScalableTestCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet5Flag( uiOpId ) );
+			pcScalableTestCode->WriteCode( 0, 2 );
+			//pcScalableTestCode->WriteCode( 0, 4 );
+			//bug_fix_chenlulu}
 			pcScalableTestCode->WriteCode( pcViewScalInfoSei->getOpLevelIdc( uiOpId ), 8 );
-		}
-		else
-		{
-			pcScalableTestCode->WriteUVLC( pcViewScalInfoSei->getProfileLevelInfoSrcOpIdDelta( uiOpId ) );
 		}
 
 		if( pcViewScalInfoSei->getBitRateInfoPresentFlag( uiOpId ) )

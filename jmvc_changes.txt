@@ -1,3 +1,12 @@
+JMVC_8_4 -> JMVC_8_5
+Date            : Mar. 26, 2011
+Authors         : Qualcomm, Xidian University, Nokia, USTC, ST
+Contribution    : Software improvements and bug fixes
+Changes:
+-Changed the configuration item for number reference frames and made it counts temporal references only
+-Fixed the syntax elements for view scalability information SEI message
+-Fixed the problem of encoding more than 300 frames in HD resolution. 
+
 JMVC_8_3_1 -> JMVC_8_4
 Date            : Mar. 23, 2011
 Authors         : MERL, Panasonic, Samsung, Fujitsu

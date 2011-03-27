@@ -241,12 +241,13 @@ MVCScalableModifyCode::SEICode( h264::SEI::ViewScalabilityInfoSei* pcViewScalInf
 			pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet1Flag( uiOpId ) );
 			pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet2Flag( uiOpId ) );
 			pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet3Flag( uiOpId ) );
-			pcScalableModifyCode->WriteCode( 0, 4 );
+			//bug_fix_chenlulu{
+			pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet4Flag( uiOpId ) );
+			pcScalableModifyCode->WriteFlag( pcViewScalInfoSei->getOpConstraintSet5Flag( uiOpId ) );
+			pcScalableModifyCode->WriteCode( 0, 2 );
+			//pcScalableModifyCode->WriteCode( 0, 4 );
+			//bug_fix_chenlulu{
 			pcScalableModifyCode->WriteCode( pcViewScalInfoSei->getOpLevelIdc( uiOpId ), 8 );
-		}
-		else
-		{
-			pcScalableModifyCode->WriteUVLC( pcViewScalInfoSei->getProfileLevelInfoSrcOpIdDelta( uiOpId ) );
 		}
 
 		if( pcViewScalInfoSei->getBitRateInfoPresentFlag( uiOpId ) )

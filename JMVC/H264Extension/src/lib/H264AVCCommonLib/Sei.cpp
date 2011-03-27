@@ -184,6 +184,10 @@ SEI::ViewScalabilityInfoSei::ViewScalabilityInfoSei()
 	::memset( m_bOpConstraintSet1Flag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
 	::memset( m_bOpConstraintSet2Flag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
 	::memset( m_bOpConstraintSet3Flag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
+//bug_fix_chenlulu{
+	::memset( m_bOpConstraintSet4Flag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
+	::memset( m_bOpConstraintSet5Flag, 0x00, MAX_OPERATION_POINTS*sizeof(Bool) );
+//bug_fix_chenlulu}
 
 	::memset( m_uiOpLevelIdc, 0x00, MAX_OPERATION_POINTS*sizeof(UInt) );
 
@@ -288,11 +292,14 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 	  RNOK( pcWriteIf->writeFlag( m_bOpConstraintSet1Flag[i], "ViewScalabilityInfoSei: op_constraint_set1_flag" ) );
 	  RNOK( pcWriteIf->writeFlag( m_bOpConstraintSet2Flag[i], "ViewScalabilityInfoSei: op_constraint_set2_flag" ) );
 	  RNOK( pcWriteIf->writeFlag( m_bOpConstraintSet3Flag[i], "ViewScalabilityInfoSei: op_constraint_set3_flag" ) );
-	  RNOK( pcWriteIf->writeCode( 0, 4, "ViewScalabilityInfoSei: reserved_zero_4bits" ) );
+	  //bug_fix_chenlulu{
+	  RNOK( pcWriteIf->writeFlag( m_bOpConstraintSet4Flag[i], "ViewScalabilityInfoSei: op_constraint_set4_flag" ) );
+	  RNOK( pcWriteIf->writeFlag( m_bOpConstraintSet5Flag[i], "ViewScalabilityInfoSei: op_constraint_set5_flag" ) );	  
+	  RNOK( pcWriteIf->writeCode( 0, 2, "ViewScalabilityInfoSei: reserved_zero_2bits" ) );
+	  //RNOK( pcWriteIf->writeCode( 0, 4, "ViewScalabilityInfoSei: reserved_zero_4bits" ) );
+	  //bug_fix_chenlulu} 
 	  RNOK( pcWriteIf->writeCode( m_uiOpLevelIdc[i], 8, "ViewScalabilityInfoSei: op_level_idc" ) );
 	}
-	else
-		RNOK( pcWriteIf->writeUvlc( m_uiProfileLevelInfoSrcOpIdDelta[i], "ViewScalabilityInfoSei: profile_level_info_src_op_id_delta" ) );
 	
 	if( m_bBitRateInfoPresentFlag[i] )
 	{
@@ -393,12 +400,14 @@ SEI::ViewScalabilityInfoSei::read( HeaderSymbolReadIf *pcReadIf )
 	  RNOK( pcReadIf->getFlag( m_bOpConstraintSet1Flag[i], "ViewScalabilityInfoSei: op_constraint_set1_flag" ) );
 	  RNOK( pcReadIf->getFlag( m_bOpConstraintSet2Flag[i], "ViewScalabilityInfoSei: op_constraint_set2_flag" ) );
 	  RNOK( pcReadIf->getFlag( m_bOpConstraintSet3Flag[i], "ViewScalabilityInfoSei: op_constraint_set3_flag" ) );
-	  RNOK( pcReadIf->getCode( ReservedBit, 4, "ViewScalabilityInfoSei: reserved_zero_4bits" ) );
+	  //bug_fix_chenlulu{
+	  RNOK( pcReadIf->getFlag( m_bOpConstraintSet4Flag[i], "ViewScalabilityInfoSei: op_constraint_set4_flag" ) );
+	  RNOK( pcReadIf->getFlag( m_bOpConstraintSet5Flag[i], "ViewScalabilityInfoSei: op_constraint_set5_flag" ) );	  
+	  RNOK( pcReadIf->getCode( ReservedBit, 2, "ViewScalabilityInfoSei: reserved_zero_2bits" ) );
+	  //RNOK( pcReadIf->getCode( ReservedBit, 4, "ViewScalabilityInfoSei: reserved_zero_4bits" ) );
+	  //bug_fix_chenlulu}
 	  RNOK( pcReadIf->getCode( m_uiOpLevelIdc[i], 8, "ViewScalabilityInfoSei: op_level_idc" ) );
 	}
-	else
-		RNOK( pcReadIf->getUvlc( m_uiProfileLevelInfoSrcOpIdDelta[i], "ViewScalabilityInfoSei: profile_level_info_src_op_id_delta" ) );
-	
 	if( m_bBitRateInfoPresentFlag[i] )
 	{
 	  RNOK( pcReadIf->getCode( m_uiAvgBitrate[i], 16, "ViewScalabilityInfoSei: avg_bitrate" ) );

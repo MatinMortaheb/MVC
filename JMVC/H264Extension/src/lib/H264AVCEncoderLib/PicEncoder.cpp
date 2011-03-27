@@ -338,7 +338,7 @@ PicEncoder::xInitFrameSpecSpecial() // for 12 and 15 only
      xGetListSizesSpecial( m_acFrameSpecification[uiFrame].getTemporalLayer(), uiFrame, auiPredListSize);
 
      // PATCH BEGIN -Samsung
-     // To allow usage of “IntraPeriod” parameter in case of “GOPSize” equal 12 or 15.
+     // To allow usage of “IntraPeriod?parameter in case of “GOPSize?equal 12 or 15.
      if((uiFrame == m_uiGOPSize) && ((m_pcCodingParameter->getIntraPeriod() != m_uiGOPSize)))
          auiPredListSize[0] = 1;
      //  PATCH END
@@ -1367,8 +1367,8 @@ PicEncoder::xGetListSizesSpecial ( UInt  uiTemporalLevel,
     }
   }
 
-  UInt uiMaxNumActiveList0 = m_uiMaxNumRefFrames - min(m_uiMaxNumRefFrames, m_uiNonAncNumFwdViewRef);
-  UInt uiMaxNumActiveList1 = m_uiMaxNumRefFrames - min(m_uiMaxNumRefFrames, m_uiNonAncNumBwdViewRef);
+  UInt uiMaxNumActiveList0 = m_uiMaxNumRefFrames;
+  UInt uiMaxNumActiveList1 = m_uiMaxNumRefFrames;
 // for anchor pictures these values shall be 0 anyway 
   auiPredListSize[0]    = min( uiMaxNumActiveList0, auiPredListSize[0] );
   auiPredListSize[1]    = min( uiMaxNumActiveList1, auiPredListSize[1] );
@@ -1410,8 +1410,8 @@ PicEncoder::xGetListSizes ( UInt  uiTemporalLevel,
         auiPredListSize[1]  = ( uiCutOffFrame - uiFrameIdWrap + 1 ) >> 1;
       }
       
-      UInt uiMaxNumActiveList0 = m_uiMaxNumRefFrames - min(m_uiMaxNumRefFrames, m_uiNonAncNumFwdViewRef);
-      UInt uiMaxNumActiveList1 = m_uiMaxNumRefFrames - min(m_uiMaxNumRefFrames, m_uiNonAncNumBwdViewRef);
+      UInt uiMaxNumActiveList0 = m_uiMaxNumRefFrames;
+      UInt uiMaxNumActiveList1 = m_uiMaxNumRefFrames;
 // for anchor pictures these values shall be 0 anyway 
       auiPredListSize[0]    = min( uiMaxNumActiveList0, auiPredListSize[0] );
       auiPredListSize[1]    = min( uiMaxNumActiveList1, auiPredListSize[1] );

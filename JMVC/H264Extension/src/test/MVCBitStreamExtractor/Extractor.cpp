@@ -261,6 +261,10 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 		pcNewViewScalSei->setOpConstraintSet1Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet1Flag( i ) );
 		pcNewViewScalSei->setOpConstraintSet2Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet2Flag( i ) );
 		pcNewViewScalSei->setOpConstraintSet3Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet3Flag( i ) );
+		//bug_fix_chenlulu{
+		pcNewViewScalSei->setOpConstraintSet4Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet4Flag( i ) );
+		pcNewViewScalSei->setOpConstraintSet5Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet5Flag( i ) );
+		//bug_fix_chenlulu}
 		pcNewViewScalSei->setOpLevelIdc( uiNumNewOps, pcOldViewScalSei->getOpLevelIdc( i ) );
 	  }
 	  else if( pcOldViewScalSei->getProfileLevelInfoSrcOpIdDelta( i ) ) 
@@ -278,13 +282,13 @@ Extractor::xChangeViewScalSEIMessage( BinData *pcBinData, h264::SEI::SEIMessage*
 		  pcNewViewScalSei->setOpConstraintSet1Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet1Flag( OldOpId ) );
 		  pcNewViewScalSei->setOpConstraintSet2Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet2Flag( OldOpId ) );
 		  pcNewViewScalSei->setOpConstraintSet3Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet3Flag( OldOpId ) );
+		  //bug_fix_chenlulu{
+		  pcNewViewScalSei->setOpConstraintSet4Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet4Flag( OldOpId ) );
+		  pcNewViewScalSei->setOpConstraintSet5Flag( uiNumNewOps, pcOldViewScalSei->getOpConstraintSet5Flag( OldOpId ) );
+		  //bug_fix_chenlulu}
 		  pcNewViewScalSei->setOpLevelIdc( uiNumNewOps, pcOldViewScalSei->getOpLevelIdc( OldOpId ) );
 		}
-		else
-		  pcNewViewScalSei->setProfileLevelInfoSrcOpIdDelta( uiNumNewOps, uiNumNewOps - uiOldOpToNewOp[OldOpId] );
 	  }
-	  else
-		pcNewViewScalSei->setProfileLevelInfoSrcOpIdDelta( uiNumNewOps, 0 );
 
 	  if( pcOldViewScalSei->getBitRateInfoPresentFlag( i ) )
 	  {
@@ -556,6 +560,10 @@ Extractor::xDisplayOperationPoints()
 		printf( "Op Constraint Set1 Flag(0:false; 1:true): %d\n", (UInt)pcViewScalInfoSei->getOpConstraintSet1Flag(i) );
 		printf( "Op Constraint Set2 Flag(0:false; 1:true): %d\n", (UInt)pcViewScalInfoSei->getOpConstraintSet2Flag(i) );
 		printf( "Op Constraint Set3 Flag(0:false; 1:true): %d\n", (UInt)pcViewScalInfoSei->getOpConstraintSet3Flag(i) );
+		//bug_fix_chenlulu{
+		printf( "Op Constraint Set4 Flag(0:false; 1:true): %d\n", (UInt)pcViewScalInfoSei->getOpConstraintSet4Flag(i) );
+		printf( "Op Constraint Set5 Flag(0:false; 1:true): %d\n", (UInt)pcViewScalInfoSei->getOpConstraintSet5Flag(i) );
+		//bug_fix_chenlulu}
 		printf( "Op Level Idc: %d\n", pcViewScalInfoSei->getOpLevelIdc(i) );
 	  }
 	  else if( pcViewScalInfoSei->getProfileLevelInfoSrcOpIdDelta(i) )

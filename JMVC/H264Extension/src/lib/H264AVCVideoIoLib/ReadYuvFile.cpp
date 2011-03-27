@@ -94,7 +94,7 @@ void ReadYuvFile::GoToFrame(const int frameNumber) {
   
   const int pixelsInFrame = m_uiLumPicWidth * m_uiLumPicHeight * 3 / 2;
 
-  if (-1 == m_cFile.seek( pixelsInFrame * frameNumber , SEEK_SET)) {
+  if (-1 == m_cFile.seek( (Int64)pixelsInFrame * (Int64)frameNumber , SEEK_SET)) {
     fprintf(stderr,"seek(%i,%i) failed.\nAbort.\n",
 	    pixelsInFrame * frameNumber, SEEK_SET);
     fflush(stderr);

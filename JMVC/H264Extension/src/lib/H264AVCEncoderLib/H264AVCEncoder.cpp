@@ -359,6 +359,7 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
 	  UInt uiOpProfileIdc, uiOpLevelIdc;
 	  Bool uiOpConstraintSet0Flag, uiOpConstraintSet1Flag, 
 		  uiOpConstraintSet2Flag, uiOpConstraintSet3Flag;
+	  Bool uiOpConstraintSet4Flag, uiOpConstraintSet5Flag;//bug_fix_chenlulu
 
 	  uiOpProfileIdc = 0;		// may be changed
 	  uiOpLevelIdc = 0;			// may be changed
@@ -366,20 +367,22 @@ ErrVal H264AVCEncoder::writeViewScalInfoSEIMessage(ExtBinDataAccessor *pcExtBinD
 	  uiOpConstraintSet1Flag = false;		// may be changed
 	  uiOpConstraintSet2Flag = false;		// may be changed
 	  uiOpConstraintSet3Flag = false;		// may be changed
+//bug_fix_chenlulu{
+	  uiOpConstraintSet4Flag = false;		// may be changed
+	  uiOpConstraintSet5Flag = false;		// may be changed
+//bug_fix_chenlulu}
 
 	  pcViewScalInfoSei->setOpProfileLevelIdc( i, uiOpProfileIdc );//SEI JJ
 	  pcViewScalInfoSei->setOpConstraintSet0Flag( i, uiOpConstraintSet0Flag );
 	  pcViewScalInfoSei->setOpConstraintSet1Flag( i, uiOpConstraintSet1Flag );
 	  pcViewScalInfoSei->setOpConstraintSet2Flag( i, uiOpConstraintSet2Flag );
 	  pcViewScalInfoSei->setOpConstraintSet3Flag( i, uiOpConstraintSet3Flag );
+//bug_fix_chenlulu{
+	  pcViewScalInfoSei->setOpConstraintSet4Flag( i, uiOpConstraintSet4Flag );
+	  pcViewScalInfoSei->setOpConstraintSet5Flag( i, uiOpConstraintSet5Flag );
+//bug_fix_chenlulu}
 
 	  pcViewScalInfoSei->setOpLevelIdc( i, uiOpLevelIdc );
-	}
-	else
-	{
-	  UInt uiProfileLevelInfoSrcOpIdDelta = 0;		//may be changed
-
-	  pcViewScalInfoSei->setProfileLevelInfoSrcOpIdDelta( i, uiProfileLevelInfoSrcOpIdDelta );
 	}
 
 	if( bBitRateInfoPresentFlag )
@@ -1550,7 +1553,6 @@ H264AVCEncoder::writeParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor, Bo
 
     RNOK( xInitParameterSets() );
     if( m_bScalableSeiMessage )
-    {
     if(m_pcCodingParameter->getCGSSNRRefinement() )
     { 
       RNOK( xWriteScalableSEICGSSNR( pcExtBinDataAccessor ) ); //JVT-T054
@@ -1559,7 +1561,7 @@ H264AVCEncoder::writeParameterSets( ExtBinDataAccessor* pcExtBinDataAccessor, Bo
     {
       RNOK( xWriteScalableSEI( pcExtBinDataAccessor ) );
     }
-    }
+
 	LayerParameters& rcLayer = m_pcCodingParameter->getLayerParameters ( 0 );
 	if (0 < rcLayer.getNumROI())
 		m_bWrteROISEI = true;

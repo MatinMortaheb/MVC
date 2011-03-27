@@ -637,8 +637,8 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
   m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineInt ("SearchFuncFullPel",       (Int*)&(m_cMotionVectorSearchParams.m_eFullPelDFunc),  0 );
   m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineInt ("SearchFuncSubPel",        (Int*)&(m_cMotionVectorSearchParams.m_eSubPelDFunc),   0 );
 // not need to be inputed
-  m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("Log2MaxFrameNum",         &m_uiLog2MaxFrameNum,                                  9 );
-  m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("Log2MaxPocLsb",           &m_uiLog2MaxPocLsb,                                    9 );
+  m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("Log2MaxFrameNum",         &m_uiLog2MaxFrameNum,                                  12 ); // originally it was 9, this modification might not be needed
+  m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("Log2MaxPocLsb",           &m_uiLog2MaxPocLsb,                                    12 ); // same as above: CY
 //TMM_WP
   m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("WeightedPrediction",         &m_uiIPMode,                                     0 );
   m_pEncoderLines[uiParLnCount++] = new EncoderConfigLineUInt("WeightedBiprediction",       &m_uiBMode,                                      0 );  

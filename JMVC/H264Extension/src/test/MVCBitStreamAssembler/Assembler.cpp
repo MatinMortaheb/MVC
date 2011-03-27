@@ -249,11 +249,12 @@ Assembler::xAnalyse()
 		   pcFinalViewScalSei->setOpConstraintSet1Flag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpConstraintSet1Flag(i) );
 		   pcFinalViewScalSei->setOpConstraintSet2Flag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpConstraintSet2Flag(i) );
 		   pcFinalViewScalSei->setOpConstraintSet3Flag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpConstraintSet3Flag(i) );
+		   //bug_fix_chenlulu{
+		   pcFinalViewScalSei->setOpConstraintSet4Flag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpConstraintSet4Flag(i) );
+		   pcFinalViewScalSei->setOpConstraintSet5Flag( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpConstraintSet5Flag(i) );
+		   //bug_fix_chenlulu}
 		   pcFinalViewScalSei->setOpLevelIdc( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getOpLevelIdc(i) );
 		 }
-		 else
-		   pcFinalViewScalSei->setProfileLevelInfoSrcOpIdDelta( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getProfileLevelInfoSrcOpIdDelta(i) );
-
 		 if( pcFinalViewScalSei->getBitRateInfoPresentFlag(OpId) )
 		 {
 		   pcFinalViewScalSei->setAvgBitrate( OpId, pcTmpViewScalInfoSei[uiProcessingView]->getAvgBitrate(i) );
