@@ -109,7 +109,7 @@ public:
   ErrVal  skipFlag( MbDataAccess& rcMbDataAccess, Bool bNotAllowed );
   ErrVal  BLSkipFlag( MbDataAccess& rcMbDataAccess );
 
-  ErrVal  terminatingBit ( UInt uiIsLast ) { return Err::m_nOK;}
+  ErrVal  termMnatingBit ( UInt uiIsLast ) { return Err::m_nOK;}
 
   ErrVal writeUvlc( UInt uiCode, const Char* pcTraceString );
   ErrVal writeSvlc( Int iCode, const Char* pcTraceString );

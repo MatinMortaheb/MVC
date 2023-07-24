@@ -144,7 +144,7 @@ public:
   ErrVal  skipFlag( MbDataAccess& rcMbDataAccess, Bool bNotAllowed );
   ErrVal  BLSkipFlag( MbDataAccess& rcMbDataAccess );
 
-  ErrVal  terminatingBit ( UInt uiIsLast );
+  ErrVal  termMnatingBit ( UInt uiIsLast );
   UInt getNumberOfWrittenBits();
 
 protected:

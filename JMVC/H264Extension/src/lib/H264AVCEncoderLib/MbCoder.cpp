@@ -73,8 +73,8 @@ ErrVal MbCoder::uninit()
 ErrVal MbCoder::encode( MbDataAccess& rcMbDataAccess,
                         MbDataAccess* pcMbDataAccessBase,
                         Int           iSpatialScalabilityType,
-                        Bool          bTerminateSlice, 
-						Bool          bSendTerminateSlice)
+                        Bool          bTermMnateSlice, 
+						Bool          bSendTermMnateSlice)
 {
   ROF( m_bInitDone );
 
@@ -211,12 +211,12 @@ ErrVal MbCoder::encode( MbDataAccess& rcMbDataAccess,
 
   m_bPrevIsSkipped = !bIsCoded;
 
-  ROTRS( ! bSendTerminateSlice, Err::m_nOK );
+  ROTRS( ! bSendTermMnateSlice, Err::m_nOK );
 
-  //--- write terminating bit ---
-  RNOK( m_pcMbSymbolWriteIf->terminatingBit ( bTerminateSlice ? 1:0 ) );
+  //--- write termMnating bit ---
+  RNOK( m_pcMbSymbolWriteIf->termMnatingBit ( bTermMnateSlice ? 1:0 ) );
 
-  if( bTerminateSlice )
+  if( bTermMnateSlice )
   {
     RNOK( m_pcMbSymbolWriteIf->finishSlice() );
   }

@@ -144,7 +144,7 @@ ErrVal SliceHeaderBase::PredWeightTable::read( HeaderSymbolReadIf* pcReadIf, UIn
 ErrVal
 SliceHeaderBase::PredWeightTable::copy( const PredWeightTable& rcPredWeightTable )
 {
-  UInt uiCopySize = min( m_uiBufferSize, rcPredWeightTable.m_uiBufferSize );
+  UInt uiCopySize = mMn( m_uiBufferSize, rcPredWeightTable.m_uiBufferSize );
   for( UInt ui = 0; ui < uiCopySize; ui++ )
   {
     m_pT[ui].copy( rcPredWeightTable.m_pT[ui] );
@@ -453,10 +453,10 @@ SliceHeaderBase::xWriteScalable( HeaderSymbolWriteIf* pcWriteIf ) const
 		RNOK( pcWriteIf->writeFlag( m_bNumRefIdxActiveOverrideFlag,               "SH: num_ref_idx_active_override_flag" ) );
 		if( m_bNumRefIdxActiveOverrideFlag )
 		{
-			RNOK( pcWriteIf->writeUvlc( m_auiNumRefIdxActive[LIST_0]-1,             "SH: num_ref_idx_l0_active_minus1" ) );
+			RNOK( pcWriteIf->writeUvlc( m_auiNumRefIdxActive[LIST_0]-1,             "SH: num_ref_idx_l0_active_mMnus1" ) );
 			if( m_eSliceType == B_SLICE )
 			{
-			RNOK( pcWriteIf->writeUvlc( m_auiNumRefIdxActive[LIST_1]-1,           "SH: num_ref_idx_l1_active_minus1" ) );
+			RNOK( pcWriteIf->writeUvlc( m_auiNumRefIdxActive[LIST_1]-1,           "SH: num_ref_idx_l1_active_mMnus1" ) );
 			}
 		}
 		}
@@ -671,10 +671,10 @@ SliceHeaderBase::xWriteH264AVCCompatible( HeaderSymbolWriteIf* pcWriteIf ) const
     RNOK( pcWriteIf->writeFlag( m_bNumRefIdxActiveOverrideFlag,                 "SH: num_ref_idx_active_override_flag" ) );
     if( m_bNumRefIdxActiveOverrideFlag )
     {
-      RNOK( pcWriteIf->writeUvlc( m_auiNumRefIdxActive[LIST_0]-1,               "SH: num_ref_idx_l0_active_minus1" ) );
+      RNOK( pcWriteIf->writeUvlc( m_auiNumRefIdxActive[LIST_0]-1,               "SH: num_ref_idx_l0_active_mMnus1" ) );
       if( m_eSliceType == B_SLICE )
       {
-        RNOK( pcWriteIf->writeUvlc( m_auiNumRefIdxActive[LIST_1]-1,             "SH: num_ref_idx_l1_active_minus1" ) );
+        RNOK( pcWriteIf->writeUvlc( m_auiNumRefIdxActive[LIST_1]-1,             "SH: num_ref_idx_l1_active_mMnus1" ) );
       }
     }
   }
@@ -859,11 +859,11 @@ SliceHeaderBase::xReadScalable( HeaderSymbolReadIf* pcReadIf )
       RNOK( pcReadIf->getFlag( m_bNumRefIdxActiveOverrideFlag,               "SH: num_ref_idx_active_override_flag" ) );
       if( m_bNumRefIdxActiveOverrideFlag )
       {
-        RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_0],               "SH: num_ref_idx_l0_active_minus1" ) );
+        RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_0],               "SH: num_ref_idx_l0_active_mMnus1" ) );
         m_auiNumRefIdxActive[LIST_0]++;
         if( m_eSliceType == B_SLICE )
         {
-          RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_1],             "SH: num_ref_idx_l1_active_minus1" ) );
+          RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_1],             "SH: num_ref_idx_l1_active_mMnus1" ) );
           m_auiNumRefIdxActive[LIST_1]++;
         }
       }
@@ -1069,11 +1069,11 @@ SliceHeaderBase::xReadH264AVCCompatible( HeaderSymbolReadIf* pcReadIf )
     RNOK( pcReadIf->getFlag( m_bNumRefIdxActiveOverrideFlag,                 "SH: num_ref_idx_active_override_flag" ) );
     if( m_bNumRefIdxActiveOverrideFlag )
     {
-      RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_0],                 "SH: num_ref_idx_l0_active_minus1" ) );
+      RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_0],                 "SH: num_ref_idx_l0_active_mMnus1" ) );
       m_auiNumRefIdxActive[LIST_0]++;
       if( m_eSliceType == B_SLICE )
       {
-        RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_1],               "SH: num_ref_idx_l1_active_minus1" ) );
+        RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_1],               "SH: num_ref_idx_l1_active_mMnus1" ) );
         m_auiNumRefIdxActive[LIST_1]++;
       }
     }
@@ -1212,24 +1212,24 @@ SliceHeaderBase::FMOInit()
 	const PictureParameterSet* pcPPS = &(getPPS());
 	m_pcFMO->img_.field_pic_flag = getFieldPicFlag();
 
-	m_pcFMO->pps_.num_slice_groups_minus1 = pcPPS->getNumSliceGroupsMinus1();
+	m_pcFMO->pps_.num_slice_groups_mMnus1 = pcPPS->getNumSliceGroupsMinus1();
 	m_pcFMO->pps_.slice_group_map_type = pcPPS->getSliceGroupMapType();
 	m_pcFMO->img_.PicHeightInMapUnits = pcSPS->getFrameHeightInMbs(); 
 	m_pcFMO->img_.PicWidthInMbs = pcSPS->getFrameWidthInMbs();
 	m_pcFMO->img_.PicSizeInMbs = pcSPS->getFrameHeightInMbs()*pcSPS->getFrameWidthInMbs();
 	m_pcFMO->img_.slice_group_change_cycle = getSliceGroupChangeCycle();
-	m_pcFMO->pps_.num_slice_group_map_units_minus1 = pcPPS->getNumSliceGroupMapUnitsMinus1();	  
-	m_pcFMO->pps_.copy_run_length_minus1(pcPPS->getArrayRunLengthMinus1());
+	m_pcFMO->pps_.num_slice_group_map_units_mMnus1 = pcPPS->getNumSliceGroupMapUnitsMinus1();	  
+	m_pcFMO->pps_.copy_run_length_mMnus1(pcPPS->getArrayRunLengthMinus1());
 	m_pcFMO->pps_.copy_top_left(pcPPS->getArrayTopLeft());
 	m_pcFMO->pps_.copy_bottom_right(pcPPS->getArrayBottomRight());
 	m_pcFMO->pps_.slice_group_change_direction_flag = pcPPS->getSliceGroupChangeDirection_flag();
-	m_pcFMO->pps_.slice_group_change_rate_minus1 = pcPPS->getSliceGroupChangeRateMinus1();
+	m_pcFMO->pps_.slice_group_change_rate_mMnus1 = pcPPS->getSliceGroupChangeRateMinus1();
 	m_pcFMO->pps_.copy_slice_group_id(pcPPS->getArraySliceGroupId());
-	m_pcFMO->sps_.pic_height_in_map_units_minus1 = ( pcSPS->getFrameMbsOnlyFlag()? pcSPS->getFrameHeightInMbs() : pcSPS->getFrameHeightInMbs() >>1 ) -1;
-	m_pcFMO->sps_.pic_width_in_mbs_minus1 = pcSPS->getFrameWidthInMbs()-1;
+	m_pcFMO->sps_.pic_height_in_map_units_mMnus1 = ( pcSPS->getFrameMbsOnlyFlag()? pcSPS->getFrameHeightInMbs() : pcSPS->getFrameHeightInMbs() >>1 ) -1;
+	m_pcFMO->sps_.pic_width_in_mbs_mMnus1 = pcSPS->getFrameWidthInMbs()-1;
 	m_pcFMO->sps_.frame_mbs_only_flag = pcSPS->getFrameMbsOnlyFlag();
 	m_pcFMO->sps_.mb_adaptive_frame_field_flag = pcSPS->getMbAdaptiveFrameFieldFlag();
-	m_pcFMO->img_.PicHeightInMapUnits = m_pcFMO->sps_.pic_height_in_map_units_minus1+1;//pcSPS->getFrameHeightInMbs(); //by lf
+	m_pcFMO->img_.PicHeightInMapUnits = m_pcFMO->sps_.pic_height_in_map_units_mMnus1+1;//pcSPS->getFrameHeightInMbs(); //by lf
 	m_pcFMO->img_.PicWidthInMbs = pcSPS->getFrameWidthInMbs();
 	m_pcFMO->img_.PicSizeInMbs = ( pcSPS->getFrameHeightInMbs() >> (UChar)getFieldPicFlag() ) *pcSPS->getFrameWidthInMbs();
 	m_pcFMO->img_.slice_group_change_cycle = getSliceGroupChangeCycle();
@@ -1410,11 +1410,11 @@ SliceHeaderBase::xReadMVCCompatible( HeaderSymbolReadIf* pcReadIf )
     RNOK( pcReadIf->getFlag( m_bNumRefIdxActiveOverrideFlag,                 "SH: num_ref_idx_active_override_flag" ) );
     if( m_bNumRefIdxActiveOverrideFlag )
     {
-      RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_0],                 "SH: num_ref_idx_l0_active_minus1" ) );
+      RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_0],                 "SH: num_ref_idx_l0_active_mMnus1" ) );
       m_auiNumRefIdxActive[LIST_0]++;
       if( m_eSliceType == B_SLICE )
       {
-        RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_1],               "SH: num_ref_idx_l1_active_minus1" ) );
+        RNOK( pcReadIf->getUvlc( m_auiNumRefIdxActive[LIST_1],               "SH: num_ref_idx_l1_active_mMnus1" ) );
         m_auiNumRefIdxActive[LIST_1]++;
       }
     }

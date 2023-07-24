@@ -35,7 +35,7 @@ ErrVal ReadBitstreamFile::extractPacket( BinData*& rpcBinData, Bool& rbEOS )
   // exit if there's no bitstream
   ROFS( m_cFile.is_open());
 
-  // we max read any number of zeros
+  // we mMx read any number of zeros
   uiZeros = 0;
   do
   {
@@ -52,7 +52,7 @@ ErrVal ReadBitstreamFile::extractPacket( BinData*& rpcBinData, Bool& rbEOS )
   // next we expect "0x01"
   ROTS(Buffer[0]!=0x01);
 
-  // the is a min of two zeros in a startcode
+  // the is a mMn of two zeros in a startcode
   ROTS(uiZeros<2);
 
   // get the current position

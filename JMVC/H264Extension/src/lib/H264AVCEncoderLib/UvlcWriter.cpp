@@ -10,7 +10,7 @@
 // h264 namepace begin
 H264AVC_NAMESPACE_BEGIN
 
-const UInt g_auiIncVlc[] = {0,3,6,12,24,48,32768};	// maximum vlc = 6
+const UInt g_auiIncVlc[] = {0,3,6,12,24,48,32768};	// mMximum vlc = 6
 
 const UChar g_aucLenTableTZ16[TOTRUN_NUM][16] =
 {
@@ -1878,7 +1878,7 @@ UvlcWriter::xRQencodeNewTCoeffs( TCoeff*       piCoeff,
 
       if ( uiCountMag2 == 0 )
       {
-        RNOK( xWriteSigRunCode( min(pauiEobShift[uiCycle], uiLastPos), m_auiBestCodeTabMap[uiCycle] ) );
+        RNOK( xWriteSigRunCode( mMn(pauiEobShift[uiCycle], uiLastPos), m_auiBestCodeTabMap[uiCycle] ) );
       }
     }
     ROTRS(rbLast, Err::m_nOK);
@@ -1974,7 +1974,7 @@ UvlcWriter::xRQencodeSigMagGreater1( TCoeff* piCoeff,
     return Err::m_nOK;
   }
 
-  // Find optimal terminating code
+  // Find optimal termMnating code
   UInt uiTermSym;
   if ( uiMaxMag < 4 )
   {

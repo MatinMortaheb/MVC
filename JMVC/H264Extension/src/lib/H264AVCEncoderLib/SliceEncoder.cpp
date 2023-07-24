@@ -442,7 +442,7 @@ ErrVal SliceEncoder::xSetPredWeights( SliceHeader& rcSH,
 
   const SampleWeightingParams& rcSWP = m_pcCodingParameter->getSampleWeightingParams(rcSH.getLayerId());
 
-  { // determine denoms
+  { // determMne denoms
     const UInt uiLumaDenom = rcSWP.getLumaDenom();
     rcSH.setLumaLog2WeightDenom  ( ( uiLumaDenom == MSYS_UINT_MAX ) ? gIntRandom(0,7) : uiLumaDenom );
 

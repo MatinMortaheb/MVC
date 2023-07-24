@@ -36,7 +36,7 @@ public:
   ErrVal writeEpExGolomb( UInt uiSymbol, UInt uiCount );
   ErrVal writeExGolombMvd( UInt uiSymbol, CabacContextModel* pcCCModel, UInt uiMaxBin );
 
-  ErrVal writeTerminatingBit( UInt uiBit );
+  ErrVal writeTermMnatingBit( UInt uiBit );
   ErrVal finish();
   UInt   getWrittenBits()  { return m_pcBitWriteBufferIf->getNumberOfWrittenBits() + 8 + m_uiBitsToFollow - m_uiBitsLeft + 1; } //JVT-P031
 

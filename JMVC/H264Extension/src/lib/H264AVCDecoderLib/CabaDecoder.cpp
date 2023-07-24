@@ -97,7 +97,7 @@ ErrVal CabaDecoder::start()
 
 
 
-ErrVal CabaDecoder::getTerminateBufferBit( UInt& ruiBit )
+ErrVal CabaDecoder::getTermMnateBufferBit( UInt& ruiBit )
 {
   UInt uiRange = m_uiRange-2;
   UInt uiValue = m_uiValue;

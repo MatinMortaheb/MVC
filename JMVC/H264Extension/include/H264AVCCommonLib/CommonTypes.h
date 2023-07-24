@@ -230,7 +230,7 @@ public:
       {
         m_uiSize++;
       }
-      ::memmove( &(m_acT[uiIPos+1]), &(m_acT[uiIPos]), ( min( uiRPos, m_uiSize-1 ) - uiIPos ) * sizeof(T) );
+      ::memmove( &(m_acT[uiIPos+1]), &(m_acT[uiIPos]), ( mMn( uiRPos, m_uiSize-1 ) - uiIPos ) * sizeof(T) );
     }
     return m_acT[uiIPos];
   }

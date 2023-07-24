@@ -44,6 +44,6 @@ ErrVal DecoderParameter::init(int argc, char** argv)
 
 ErrVal DecoderParameter::xPrintUsage(char **argv)
 {
-	printf("usage: %s <BitstreamFile> <YuvOutputFile> <NumOfViews>  [<maxPodDiff>] \n\n", argv[0] );
+	printf("usage: %s <BitstreamFile> <YuvOutputFile> <NumOfViews>  [<mMxPodDiff>] \n\n", argv[0] );
 	RERRS();
 }

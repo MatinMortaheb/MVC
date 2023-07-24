@@ -655,7 +655,7 @@ SequenceStructure::FrameSequencePart::init( const String& rcString )
   m_uiCurrentRepetition = 0;
   m_uiCurrentFrame      = 0;
 
-  //----- get minimum required DPB sizes -----
+  //----- get mMnimum required DPB sizes -----
   UInt*   pauiStored;
   ROFS( ( pauiStored = new UInt [ m_uiNumberOfFrames ] ) );
   ::memset( pauiStored, 0x00, m_uiNumberOfFrames*sizeof(UInt) );
@@ -707,9 +707,9 @@ SequenceStructure::FrameSequencePart::init( const String& rcString )
         }
       }
     }
-    //----- update minimum required DPB sizes -----
-    m_uiMinDPBSizeRef     = max( m_uiMinDPBSizeRef,    uiStoredRef    );
-    m_uiMinDPBSizeNonRef  = max( m_uiMinDPBSizeNonRef, uiStoredNonRef );
+    //----- update mMnimum required DPB sizes -----
+    m_uiMinDPBSizeRef     = mMx( m_uiMinDPBSizeRef,    uiStoredRef    );
+    m_uiMinDPBSizeNonRef  = mMx( m_uiMinDPBSizeNonRef, uiStoredNonRef );
   }
   delete[] pauiStored;
 
@@ -889,8 +889,8 @@ SequenceStructure::GeneralSequencePart::init( const String& rcString )
   m_uiMinDPBSizeNonRef  = 0;
   for( uiIndex = 0; uiIndex < m_uiNumberOfParts; uiIndex++ )
   {
-    m_uiMinDPBSizeRef    = max( m_uiMinDPBSizeRef,    m_papcSequencePart[uiIndex]->getMinDPBSizeRef   () );
-    m_uiMinDPBSizeNonRef = max( m_uiMinDPBSizeNonRef, m_papcSequencePart[uiIndex]->getMinDPBSizeNonRef() );
+    m_uiMinDPBSizeRef    = mMx( m_uiMinDPBSizeRef,    m_papcSequencePart[uiIndex]->getMinDPBSizeRef   () );
+    m_uiMinDPBSizeNonRef = mMx( m_uiMinDPBSizeNonRef, m_papcSequencePart[uiIndex]->getMinDPBSizeNonRef() );
   }
 
   //----- set inititalization flag -----
@@ -1598,7 +1598,7 @@ FormattedStringParser::extractRplr( const String& rcString,
 
   for( UInt nBuf = 0, nPos = 1; nPos < uiSize; nPos = uiNext, nBuf++ )
   {
-    uiNext         = min( (UInt)rcString.find_first_of ( "L+-", nPos  +1    ), uiSize);
+    uiNext         = mMn( (UInt)rcString.find_first_of ( "L+-", nPos  +1    ), uiSize);
     String cString =            rcString.substr        ( nPos,  uiNext-nPos );
 
     RNOK( extractSingleRplrCommand( cString, rcRplrBuf.get( nBuf ) ) );
@@ -1620,7 +1620,7 @@ FormattedStringParser::extractMmco( const String& rcString,
 
   for( UInt nBuf = 0, nPos = 1; nPos < uiSize; nPos = uiNext, nBuf++ )
   {
-    uiNext          = min( (UInt) rcString.find_first_of( "LNE",  nPos  +1    ), uiSize);
+    uiNext          = mMn( (UInt) rcString.find_first_of( "LNE",  nPos  +1    ), uiSize);
     String cString  =             rcString.substr       ( nPos,   uiNext-nPos );
 
     RNOK( extractSingleMmcoCommand( cString, rcMmcoBuf.get( nBuf ) ) );

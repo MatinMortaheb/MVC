@@ -98,8 +98,8 @@ public:
 
   Int             getTopFieldPoc        ()                    const { return m_iTopFieldPoc; }
   Int             getBotFieldPoc        ()                    const { return m_iBotFieldPoc; }
-  Int             getPoc            ()                    const { return ( m_bFieldPicFlag ? ( m_bBottomFieldFlag ? m_iBotFieldPoc : m_iTopFieldPoc ) : min( m_iTopFieldPoc, m_iBotFieldPoc ) ); }
-  Int             getPoc            ( PicType ePicType )  const { return ( ePicType == FRAME ? min( m_iTopFieldPoc, m_iBotFieldPoc ) : ePicType == BOT_FIELD ? m_iBotFieldPoc : m_iTopFieldPoc ); }
+  Int             getPoc            ()                    const { return ( m_bFieldPicFlag ? ( m_bBottomFieldFlag ? m_iBotFieldPoc : m_iTopFieldPoc ) : mMn( m_iTopFieldPoc, m_iBotFieldPoc ) ); }
+  Int             getPoc            ( PicType ePicType )  const { return ( ePicType == FRAME ? mMn( m_iTopFieldPoc, m_iBotFieldPoc ) : ePicType == BOT_FIELD ? m_iBotFieldPoc : m_iTopFieldPoc ); }
   Void             setPoc            ( UInt poc, PicType ePicType ) 
                    { 
 					   if( ePicType == BOT_FIELD )

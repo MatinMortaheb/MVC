@@ -28,7 +28,7 @@ public:
   ErrVal getEpExGolomb( UInt& ruiSymbol, UInt uiCount );
   ErrVal getExGolombLevel( UInt& ruiSymbol, CabacContextModel& rcCCModel  );
   ErrVal getExGolombMvd( UInt& ruiSymbol, CabacContextModel* pcCCModel, UInt uiMaxBin );
-  ErrVal getTerminateBufferBit( UInt& ruiBit );
+  ErrVal getTermMnateBufferBit( UInt& ruiBit );
   ErrVal getUnaryMaxSymbol( UInt& ruiSymbol, CabacContextModel* pcCCModel, Int iOffset, UInt uiMaxSymbol );
   ErrVal getUnarySymbol( UInt& ruiSymbol, CabacContextModel* pcCCModel, Int iOffset );
 

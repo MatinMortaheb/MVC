@@ -328,7 +328,7 @@ ErrVal CodingParameter::check()
 
 
 
-  Double  dMaxFrameDelay  = max( 0, m_dMaximumFrameRate * m_dMaximumDelay / 1000.0 );
+  Double  dMaxFrameDelay  = mMx( 0, m_dMaximumFrameRate * m_dMaximumDelay / 1000.0 );
   UInt    uiMaxFrameDelay = (UInt)floor( dMaxFrameDelay );
 
   for( UInt uiLayer = 0; uiLayer < getNumberOfLayers(); uiLayer++ )
@@ -344,7 +344,7 @@ ErrVal CodingParameter::check()
 
     // heiko.schwarz@hhi.fhg.de: add some additional check for input/output frame rates
     ROTREPORT( pcLayer->getInputFrameRate() < pcLayer->getOutputFrameRate(),  "Input frame rate must not be less than output frame rate" );
-    ROTREPORT( pcLayer->getInputFrameRate() > getMaximumFrameRate(),          "Input frame rate must not be greater than maximum frame rate" );
+    ROTREPORT( pcLayer->getInputFrameRate() > getMaximumFrameRate(),          "Input frame rate must not be greater than mMximum frame rate" );
     ROTREPORT( getDecompositionStages() < uiLogFactorMaxInRate + uiLogFactorInOutRate, "Number of decomposition stages is too small for the specified output rate" );
 
     ROTREPORT( uiLogFactorInOutRate == MSYS_UINT_MAX,   "Input frame rate must be a power of 2 of output frame rate" );

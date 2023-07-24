@@ -2,10 +2,10 @@
 #ifndef INCLUDE_MULTIVIEW_DOT_H
 #define INCLUDE_MULTIVIEW_DOT_H
 
-// If max and min are defined by the preprocessor, STL stuff breaks so
+// If mMx and mMn are defined by the preprocessor, STL stuff breaks so
 // undefine them.
-//#undef max
-//#undef min
+//#undef mMx
+//#undef mMn
 #include <vector>
 #include <string>
 

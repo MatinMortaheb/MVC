@@ -133,7 +133,7 @@ ErrVal IntYuvPicBuffer::getSSD( Double& dSSDY, Double& dSSDU, Double& dSSDV, Pic
   {
     for( x = 0; x < uiWidth; x++ )
     {
-      dDiff  = (Double)( pOrg[x] - min( 255, max( 0, pSrc[x] ) ) );
+      dDiff  = (Double)( pOrg[x] - mMn( 255, mMx( 0, pSrc[x] ) ) );
       dSSDY += dDiff * dDiff;
     }
     pSrc += iStride;
@@ -150,7 +150,7 @@ ErrVal IntYuvPicBuffer::getSSD( Double& dSSDY, Double& dSSDU, Double& dSSDV, Pic
   {
     for( x = 0; x < uiWidth; x++ )
     {
-      dDiff  = (Double)( pOrg[x] - min( 255, max( 0, pSrc[x] ) ) );
+      dDiff  = (Double)( pOrg[x] - mMn( 255, mMx( 0, pSrc[x] ) ) );
       dSSDU += dDiff * dDiff;
     }
     pSrc += iStride;
@@ -164,7 +164,7 @@ ErrVal IntYuvPicBuffer::getSSD( Double& dSSDY, Double& dSSDU, Double& dSSDV, Pic
   {
     for( x = 0; x < uiWidth; x++ )
     {
-      dDiff  = (Double)( pOrg[x] - min( 255, max( 0, pSrc[x] ) ) );
+      dDiff  = (Double)( pOrg[x] - mMn( 255, mMx( 0, pSrc[x] ) ) );
       dSSDV += dDiff * dDiff;
     }
     pSrc += iStride;
@@ -195,7 +195,7 @@ ErrVal IntYuvPicBuffer::storeToPicBuffer( PicBuffer* pcPicBuffer )
   {
     for( x = 0; x < uiWidth; x++ )
     {
-      pDes[x] = (UChar)( min( 255, max( 0, pSrc[x] ) ) );
+      pDes[x] = (UChar)( mMn( 255, mMx( 0, pSrc[x] ) ) );
     }
     pSrc += iStride;
     pDes += iStride;
@@ -211,7 +211,7 @@ ErrVal IntYuvPicBuffer::storeToPicBuffer( PicBuffer* pcPicBuffer )
   {
     for( x = 0; x < uiWidth; x++ )
     {
-      pDes[x] = (UChar)( min( 255, max( 0, pSrc[x] ) ) );
+      pDes[x] = (UChar)( mMn( 255, mMx( 0, pSrc[x] ) ) );
     }
     pSrc += iStride;
     pDes += iStride;
@@ -224,7 +224,7 @@ ErrVal IntYuvPicBuffer::storeToPicBuffer( PicBuffer* pcPicBuffer )
   {
     for( x = 0; x < uiWidth; x++ )
     {
-      pDes[x] = (UChar)( min( 255, max( 0, pSrc[x] ) ) );
+      pDes[x] = (UChar)( mMn( 255, mMx( 0, pSrc[x] ) ) );
     }
     pSrc += iStride;
     pDes += iStride;
@@ -367,7 +367,7 @@ ErrVal IntYuvPicBuffer::prediction( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
   UInt  uiWidth     = getLWidth ();
   UInt  y, x;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
@@ -379,7 +379,7 @@ ErrVal IntYuvPicBuffer::prediction( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
     pDes  += iDesStride;
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iSrcStride  >>= 1;
   iMCPStride  >>= 1;
   iDesStride  >>= 1;
@@ -400,7 +400,7 @@ ErrVal IntYuvPicBuffer::prediction( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
     pDes  += iDesStride;
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pSrc          = pcSrcYuvPicBuffer->getMbCrAddr();
   pMCP          = pcMCPYuvPicBuffer->getMbCrAddr();
   pDes          = getMbCrAddr();
@@ -442,7 +442,7 @@ ErrVal IntYuvPicBuffer::update( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
   //UInt  uiShift     = 1;
   XPel  pAdd = 0;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
@@ -454,7 +454,7 @@ ErrVal IntYuvPicBuffer::update( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
     pDes  += iDesStride;
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iSrcStride  >>= 1;
   iMCPStride  >>= 1;
   iDesStride  >>= 1;
@@ -475,7 +475,7 @@ ErrVal IntYuvPicBuffer::update( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
     pDes  += iDesStride;
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pSrc          = pcSrcYuvPicBuffer->getMbCrAddr();
   pMCP          = pcMCPYuvPicBuffer->getMbCrAddr();
   pDes          = getMbCrAddr();
@@ -505,7 +505,7 @@ ErrVal IntYuvPicBuffer::clip()
   UInt  uiWidth     = getLWidth ();
   UInt  y, x;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
@@ -515,7 +515,7 @@ ErrVal IntYuvPicBuffer::clip()
     pDes  += iDesStride;
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iDesStride  >>= 1;
   uiHeight    >>= 1;
   uiWidth     >>= 1;
@@ -530,7 +530,7 @@ ErrVal IntYuvPicBuffer::clip()
     pDes  += iDesStride;
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pDes          = getMbCrAddr();
 
   for( y = 0; y < uiHeight; y++ )
@@ -565,7 +565,7 @@ ErrVal IntYuvPicBuffer::subtract( IntYuvPicBuffer*  pcSrcYuvPicBuffer0,
   UInt  uiWidth     = getLWidth ();
   UInt  y, x;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
@@ -577,7 +577,7 @@ ErrVal IntYuvPicBuffer::subtract( IntYuvPicBuffer*  pcSrcYuvPicBuffer0,
     pDes  += iDesStride;
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iSrc0Stride >>= 1;
   iSrc1Stride >>= 1;
   iDesStride  >>= 1;
@@ -598,7 +598,7 @@ ErrVal IntYuvPicBuffer::subtract( IntYuvPicBuffer*  pcSrcYuvPicBuffer0,
     pDes  += iDesStride;
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pSrc0         = pcSrcYuvPicBuffer0->getMbCrAddr();
   pSrc1         = pcSrcYuvPicBuffer1->getMbCrAddr();
   pDes          = getMbCrAddr();
@@ -631,7 +631,7 @@ ErrVal IntYuvPicBuffer::add( IntYuvPicBuffer*  pcSrcYuvPicBuffer )
   UInt  uiWidth     = pcSrcYuvPicBuffer->getLWidth ();
   UInt  y, x;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
@@ -642,7 +642,7 @@ ErrVal IntYuvPicBuffer::add( IntYuvPicBuffer*  pcSrcYuvPicBuffer )
     pDes  += iDesStride;
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iSrcStride  >>= 1;
   iDesStride  >>= 1;
   uiHeight    >>= 1;
@@ -660,7 +660,7 @@ ErrVal IntYuvPicBuffer::add( IntYuvPicBuffer*  pcSrcYuvPicBuffer )
     pDes  += iDesStride;
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pSrc          = pcSrcYuvPicBuffer->getMbCrAddr();
   pDes          = getMbCrAddr();
 
@@ -697,7 +697,7 @@ ErrVal IntYuvPicBuffer::addWeighted( IntYuvPicBuffer* pcSrcYuvPicBuffer,
   iWeightS = (Int) (dWeight * 256 + 0.5);
   iWeightT = 256 - iWeightS;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
@@ -709,7 +709,7 @@ ErrVal IntYuvPicBuffer::addWeighted( IntYuvPicBuffer* pcSrcYuvPicBuffer,
     pDes  += iDesStride;
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iSrcStride  >>= 1;
   iDesStride  >>= 1;
   uiHeight    >>= 1;
@@ -728,7 +728,7 @@ ErrVal IntYuvPicBuffer::addWeighted( IntYuvPicBuffer* pcSrcYuvPicBuffer,
     pDes  += iDesStride;
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pSrc          = pcSrcYuvPicBuffer->getMbCrAddr();
   pDes          = getMbCrAddr();
 
@@ -769,7 +769,7 @@ ErrVal IntYuvPicBuffer::inverseUpdate( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
   //UInt  uiShift     = 1;
   XPel  pAdd = 0;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
@@ -781,7 +781,7 @@ ErrVal IntYuvPicBuffer::inverseUpdate( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
     pDes  += iDesStride;
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iSrcStride  >>= 1;
   iMCPStride  >>= 1;
   iDesStride  >>= 1;
@@ -802,7 +802,7 @@ ErrVal IntYuvPicBuffer::inverseUpdate( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
     pDes  += iDesStride;
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pSrc          = pcSrcYuvPicBuffer->getMbCrAddr();
   pMCP          = pcMCPYuvPicBuffer->getMbCrAddr();
   pDes          = getMbCrAddr();
@@ -840,7 +840,7 @@ ErrVal IntYuvPicBuffer::inversePrediction( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
   UInt  uiWidth     = getLWidth ();
   UInt  y, x;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
@@ -852,7 +852,7 @@ ErrVal IntYuvPicBuffer::inversePrediction( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
     pDes  += iDesStride;
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iSrcStride  >>= 1;
   iMCPStride  >>= 1;
   iDesStride  >>= 1;
@@ -873,7 +873,7 @@ ErrVal IntYuvPicBuffer::inversePrediction( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
     pDes  += iDesStride;
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pSrc          = pcSrcYuvPicBuffer->getMbCrAddr();
   pMCP          = pcMCPYuvPicBuffer->getMbCrAddr();
   pDes          = getMbCrAddr();
@@ -908,7 +908,7 @@ ErrVal IntYuvPicBuffer::copy( IntYuvPicBuffer*  pcSrcYuvPicBuffer )
   UInt  uiWidth     = pcSrcYuvPicBuffer->getLWidth ();
   UInt  y, x;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
@@ -919,7 +919,7 @@ ErrVal IntYuvPicBuffer::copy( IntYuvPicBuffer*  pcSrcYuvPicBuffer )
     pDes  += iDesStride;
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iSrcStride  >>= 1;
   iDesStride  >>= 1;
   uiHeight    >>= 1;
@@ -937,7 +937,7 @@ ErrVal IntYuvPicBuffer::copy( IntYuvPicBuffer*  pcSrcYuvPicBuffer )
     pDes  += iDesStride;
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pSrc          = pcSrcYuvPicBuffer->getMbCrAddr();
   pDes          = getMbCrAddr();
 
@@ -969,7 +969,7 @@ ErrVal IntYuvPicBuffer::copy( YuvPicBuffer*  pcSrcYuvPicBuffer )
   UInt  uiWidth     = pcSrcYuvPicBuffer->getLWidth ();
   UInt  y, x;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
@@ -980,7 +980,7 @@ ErrVal IntYuvPicBuffer::copy( YuvPicBuffer*  pcSrcYuvPicBuffer )
     pDes  += iDesStride;
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iSrcStride  >>= 1;
   iDesStride  >>= 1;
   uiHeight    >>= 1;
@@ -998,7 +998,7 @@ ErrVal IntYuvPicBuffer::copy( YuvPicBuffer*  pcSrcYuvPicBuffer )
     pDes  += iDesStride;
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pSrc          = pcSrcYuvPicBuffer->getMbCrAddr();
   pDes          = getMbCrAddr();
 
@@ -1030,18 +1030,18 @@ ErrVal IntYuvPicBuffer::dumpLPS( FILE* pFile )
   UInt    uiWidth   = getLWidth ();
   UInt    y, x;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
     {
-      pChar[x] = (UChar)( max( (Int)0, min( (Int)255, pPel[x] ) ) );
+      pChar[x] = (UChar)( mMx( (Int)0, mMn( (Int)255, pPel[x] ) ) );
     }
     pPel += iStride;
     ::fwrite( pChar, sizeof(UChar), uiWidth, pFile );
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iStride   >>= 1;
   uiHeight  >>= 1;
   uiWidth   >>= 1;
@@ -1051,20 +1051,20 @@ ErrVal IntYuvPicBuffer::dumpLPS( FILE* pFile )
   {
     for( x = 0; x < uiWidth; x++ )
     {
-      pChar[x] = (UChar)( max( (Int)0, min( (Int)255, pPel[x] ) ) );
+      pChar[x] = (UChar)( mMx( (Int)0, mMn( (Int)255, pPel[x] ) ) );
     }
     pPel += iStride;
     ::fwrite( pChar, sizeof(UChar), uiWidth, pFile );
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pPel        = getMbCrAddr();
 
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
     {
-      pChar[x] = (UChar)( max( (Int)0, min( (Int)255, pPel[x] ) ) );
+      pChar[x] = (UChar)( mMx( (Int)0, mMn( (Int)255, pPel[x] ) ) );
     }
     pPel += iStride;
     ::fwrite( pChar, sizeof(UChar), uiWidth, pFile );
@@ -1111,21 +1111,21 @@ ErrVal IntYuvPicBuffer::dumpHPS( FILE* pFile, MbDataCtrl* pcMbDataCtrl )
   UInt    uiWidth   = getLWidth ();
   UInt    y, x;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     for( x = 0; x < uiWidth; x++ )
     {
       if( pucIntra[(y>>4)*iNumMbX+(x>>4)] )
-        pChar[x] = (UChar)( max( (Int)0, min( (Int)255,       pPel[x] ) ) );
+        pChar[x] = (UChar)( mMx( (Int)0, mMn( (Int)255,       pPel[x] ) ) );
       else
-        pChar[x] = (UChar)( max( (Int)0, min( (Int)255, 127 + pPel[x] ) ) );
+        pChar[x] = (UChar)( mMx( (Int)0, mMn( (Int)255, 127 + pPel[x] ) ) );
     }
     pPel += iStride;
     ::fwrite( pChar, sizeof(UChar), uiWidth, pFile );
   }
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iStride   >>= 1;
   uiHeight  >>= 1;
   uiWidth   >>= 1;
@@ -1136,15 +1136,15 @@ ErrVal IntYuvPicBuffer::dumpHPS( FILE* pFile, MbDataCtrl* pcMbDataCtrl )
     for( x = 0; x < uiWidth; x++ )
     {
       if( pucIntra[(y>>3)*iNumMbX+(x>>3)] )
-        pChar[x] = (UChar)( max( (Int)0, min( (Int)255,       pPel[x] ) ) );
+        pChar[x] = (UChar)( mMx( (Int)0, mMn( (Int)255,       pPel[x] ) ) );
       else
-        pChar[x] = (UChar)( max( (Int)0, min( (Int)255, 127 + pPel[x] ) ) );
+        pChar[x] = (UChar)( mMx( (Int)0, mMn( (Int)255, 127 + pPel[x] ) ) );
     }
     pPel += iStride;
     ::fwrite( pChar, sizeof(UChar), uiWidth, pFile );
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pPel        = getMbCrAddr();
 
   for( y = 0; y < uiHeight; y++ )
@@ -1152,9 +1152,9 @@ ErrVal IntYuvPicBuffer::dumpHPS( FILE* pFile, MbDataCtrl* pcMbDataCtrl )
     for( x = 0; x < uiWidth; x++ )
     {
       if( pucIntra[(y>>3)*iNumMbX+(x>>3)] )
-        pChar[x] = (UChar)( max( (Int)0, min( (Int)255,       pPel[x] ) ) );
+        pChar[x] = (UChar)( mMx( (Int)0, mMn( (Int)255,       pPel[x] ) ) );
       else
-        pChar[x] = (UChar)( max( (Int)0, min( (Int)255, 127 + pPel[x] ) ) );
+        pChar[x] = (UChar)( mMx( (Int)0, mMn( (Int)255, 127 + pPel[x] ) ) );
     }
     pPel += iStride;
     ::fwrite( pChar, sizeof(UChar), uiWidth, pFile );
@@ -1524,7 +1524,7 @@ ErrVal IntYuvPicBuffer::update( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
   UInt  uiWidth     = getLWidth ();
   UInt  y, x;
 
-  //===== luminance =====
+  //===== lumMnance =====
   for( y = 0; y < uiHeight; y++ )
   {
     XPel* pSrc  = pSrcAnchor  + y * iSrcStride;
@@ -1539,7 +1539,7 @@ ErrVal IntYuvPicBuffer::update( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
   }
 
 
-  //===== chrominance U =====
+  //===== chromMnance U =====
   iSrcStride  >>= 1;
   iMCP0Stride >>= 1;
   iMCP1Stride >>= 1;
@@ -1564,7 +1564,7 @@ ErrVal IntYuvPicBuffer::update( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
     }
   }
 
-  //===== chrominance V =====
+  //===== chromMnance V =====
   pSrcAnchor    = pcSrcYuvPicBuffer ->getMbCrAddr();
   pMCP0Anchor   = pcMCPYuvPicBuffer0->getMbCrAddr();
   pMCP1Anchor   = pcMCPYuvPicBuffer1->getMbCrAddr();
@@ -1616,7 +1616,7 @@ ErrVal IntYuvPicBuffer::inverseUpdate( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
 		UInt  uiWidth     = getLWidth ();
 		UInt  y, x;
 
-		//===== luminance =====
+		//===== lumMnance =====
 		for( y = 0; y < uiHeight; y++ )
 		{
 			XPel* pSrc  = pSrcAnchor  + y * iSrcStride;
@@ -1631,7 +1631,7 @@ ErrVal IntYuvPicBuffer::inverseUpdate( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
 		}
 
 
-		//===== chrominance U =====
+		//===== chromMnance U =====
 		iSrcStride  >>= 1;
 		iMCP0Stride >>= 1;
 		iMCP1Stride >>= 1;
@@ -1656,7 +1656,7 @@ ErrVal IntYuvPicBuffer::inverseUpdate( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
 			}
 		}
 
-		//===== chrominance V =====
+		//===== chromMnance V =====
 		pSrcAnchor    = pcSrcYuvPicBuffer ->getMbCrAddr();
 		pMCP0Anchor   = pcMCPYuvPicBuffer0->getMbCrAddr();
 		pMCP1Anchor   = pcMCPYuvPicBuffer1->getMbCrAddr();
@@ -1702,7 +1702,7 @@ ErrVal IntYuvPicBuffer::inverseUpdate( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
 		
 		
 
-		//===== luminance =====
+		//===== lumMnance =====
 		for( y = 0; y < uiHeight; y++ )
 		{
 			XPel* pSrc  = pSrcAnchor  + y * iSrcStride;
@@ -1716,7 +1716,7 @@ ErrVal IntYuvPicBuffer::inverseUpdate( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
 		}
 
 
-		//===== chrominance U =====
+		//===== chromMnance U =====
 		iSrcStride  >>= 1;
 		iMCStride >>= 1;
 		iDesStride  >>= 1;
@@ -1745,7 +1745,7 @@ ErrVal IntYuvPicBuffer::inverseUpdate( IntYuvPicBuffer*  pcSrcYuvPicBuffer,
 			}
 		}
 
-		//===== chrominance V =====
+		//===== chromMnance V =====
 		pSrcAnchor    = pcSrcYuvPicBuffer ->getMbCrAddr();
 		if (pcMCPYuvPicBuffer0)
 		{

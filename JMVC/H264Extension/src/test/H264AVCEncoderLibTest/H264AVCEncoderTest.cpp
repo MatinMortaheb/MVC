@@ -464,7 +464,7 @@ H264AVCEncoderTest::go()
   }
 //SEI }
 
-  //===== determine parameters for required frame buffers =====
+  //===== determMne parameters for required frame buffers =====
   for( uiLayer = 0; uiLayer < uiNumLayers; uiLayer++ )
   {
     //auiMbX        [uiLayer] = m_pcEncoderCodingParameter->getLayerParameters( uiLayer ).getFrameWidth () >> 4;

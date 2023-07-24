@@ -751,7 +751,7 @@ __inline Int MbDataAccess::mostProbableIntraPredMode( LumaIdx cIdx )
     const MbData& rcMbDataAbove = xGetBlockAbove( cIdxA );
     Int iAbovePredMode = ( xIsAvailableIntra( rcMbDataAbove ) ? rcMbDataAbove.intraPredMode( cIdxA ) : OUTSIDE);
 
-    Int iMostProbable = min( iLeftPredMode, iAbovePredMode );
+    Int iMostProbable = mMn( iLeftPredMode, iAbovePredMode );
 
     return ( OUTSIDE == iMostProbable ) ? DC_PRED : iMostProbable;
 }

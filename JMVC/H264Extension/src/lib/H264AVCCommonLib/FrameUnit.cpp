@@ -72,7 +72,7 @@ ErrVal FrameUnit::init( const SliceHeader& rcSH, PicBuffer *pcPicBuffer )
     m_eAvailable = NOT_SPECIFIED;
     m_iMaxPOC    = 0;
 
-    UInt uiStamp = max( m_cFrame.stamp(), max( m_cTopField.stamp(), m_cBotField.stamp() ) ) + 1;
+    UInt uiStamp = mMx( m_cFrame.stamp(), mMx( m_cTopField.stamp(), m_cBotField.stamp() ) ) + 1;
     m_cTopField.stamp() = uiStamp;
     m_cBotField.stamp() = uiStamp;
     m_cFrame.   stamp() = uiStamp;
@@ -110,7 +110,7 @@ ErrVal FrameUnit::init( const SliceHeader& rcSH, FrameUnit& rcFrameUnit )
     m_eAvailable = NOT_SPECIFIED;
     m_iMaxPOC    = 0;
 
-    UInt uiStamp = max( m_cFrame.stamp(), max( m_cTopField.stamp(), m_cBotField.stamp() ) ) + 1;
+    UInt uiStamp = mMx( m_cFrame.stamp(), mMx( m_cTopField.stamp(), m_cBotField.stamp() ) ) + 1;
     m_cTopField.stamp() = uiStamp;
     m_cBotField.stamp() = uiStamp;
     m_cFrame.   stamp() = uiStamp;
@@ -127,15 +127,15 @@ ErrVal FrameUnit::init( const SliceHeader& rcSH, FrameUnit& rcFrameUnit )
 Void FrameUnit::setTopFieldPoc( Int iPoc )
 {
     m_cTopField.setPOC( iPoc );
-    m_cFrame   .setPOC( m_cBotField.isPOCAvailable() ? min( m_cBotField.getPOC(), iPoc ) : iPoc );
-    m_iMaxPOC   =     ( m_cBotField.isPOCAvailable() ? max( m_cBotField.getPOC(), iPoc ) : iPoc );
+    m_cFrame   .setPOC( m_cBotField.isPOCAvailable() ? mMn( m_cBotField.getPOC(), iPoc ) : iPoc );
+    m_iMaxPOC   =     ( m_cBotField.isPOCAvailable() ? mMx( m_cBotField.getPOC(), iPoc ) : iPoc );
 }
 
 Void FrameUnit::setBotFieldPoc( Int iPoc )
 {
     m_cBotField.setPOC( iPoc );
-    m_cFrame   .setPOC( m_cTopField.isPOCAvailable() ? min( m_cTopField.getPOC(), iPoc ) : iPoc );
-    m_iMaxPOC   =     ( m_cTopField.isPOCAvailable() ? max( m_cTopField.getPOC(), iPoc ) : iPoc );
+    m_cFrame   .setPOC( m_cTopField.isPOCAvailable() ? mMn( m_cTopField.getPOC(), iPoc ) : iPoc );
+    m_iMaxPOC   =     ( m_cTopField.isPOCAvailable() ? mMx( m_cTopField.getPOC(), iPoc ) : iPoc );
 }
 
 //JVT-S036  start //this two funcs not treated

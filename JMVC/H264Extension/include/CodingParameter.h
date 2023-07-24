@@ -638,7 +638,7 @@ public:
 //JVT-W080
 		if( m_uiMVCmode && m_uiPdsEnable )
 	  {
-			UInt uiViewNum = (UInt)SpsMVC.m_num_views_minus_1+1;
+			UInt uiViewNum = (UInt)SpsMVC.m_num_views_mMnus_1+1;
       for( UInt i = 0; i < uiViewNum; i++ )
 			{
 	      delete[] m_ppuiPdsInitialDelayMinus2L0Anc[i];

@@ -217,8 +217,8 @@ RecPicBuffer::initSPS( const SequenceParameterSet& rcSPS )
   UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;
 
   UInt uiMaxFramesInDPB = rcSPS.getMaxDPBSize(mvcScaleFactor);
-  //uiMaxFramesInDPB = min ( mvcScaleFactor*uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
-  uiMaxFramesInDPB = min ( uiMaxFramesInDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+  //uiMaxFramesInDPB = mMn ( mvcScaleFactor*uiMaxFramesInDPB , (mMx(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+  uiMaxFramesInDPB = mMn ( uiMaxFramesInDPB , (mMx(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
 
   RNOK( xCreateData( uiMaxFramesInDPB, rcSPS ) );
   m_uiNumRefFrames      = rcSPS.getNumRefFrames();
@@ -507,7 +507,7 @@ RecPicBuffer::xAdaptListSize( RefFrameList& rcList,
 {
   UInt  uiDefaultListSize = rcSliceHeader.getNumRefIdxActive( eListIdx );
   UInt  uiMaximumListSize = rcList.getActive();
-  UInt  uiCurrentListSize = min( uiDefaultListSize, uiMaximumListSize );
+  UInt  uiCurrentListSize = mMn( uiDefaultListSize, uiMaximumListSize );
   //===== update slice header =====
   rcList.       setActive         (           uiCurrentListSize );
   rcSliceHeader.setNumRefIdxActive( eListIdx, uiCurrentListSize );
@@ -991,7 +991,7 @@ RecPicBuffer::xDumpRecPicBuffer()
 // and some cleanup
 ErrVal 
 RecPicBuffer::AddMultiviewRef( RecPicBufUnitList& recPicBufUnitList,
-			                          RefFrameList& rcList, const int maxListSize,
+			                          RefFrameList& rcList, const int mMxListSize,
 			                          const MultiviewReferenceDirection refDirection, SliceHeader&   rcSliceheader,
 									  QuarterPelFilter* pcQuarterPelFilter) {
 

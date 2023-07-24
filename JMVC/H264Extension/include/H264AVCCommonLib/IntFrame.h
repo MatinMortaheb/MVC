@@ -317,7 +317,7 @@ public:
           if( m_pcIntFrameTopField && m_pcIntFrameBotField )
           {
               m_pcIntFrameTopField->setPoc( m_iTopFieldPoc );
-              setPoc( m_pcIntFrameBotField->isPocAvailable() ? max( m_pcIntFrameBotField->getPoc(), m_iTopFieldPoc ) : m_iTopFieldPoc );
+              setPoc( m_pcIntFrameBotField->isPocAvailable() ? mMx( m_pcIntFrameBotField->getPoc(), m_iTopFieldPoc ) : m_iTopFieldPoc );
           }
       }
       if( ePicType & BOT_FIELD )
@@ -326,12 +326,12 @@ public:
           if( m_pcIntFrameTopField && m_pcIntFrameBotField )
           {
               m_pcIntFrameBotField->setPoc( m_iBotFieldPoc );
-              setPoc( m_pcIntFrameTopField->isPocAvailable() ? min( m_pcIntFrameTopField->getPoc(), m_iBotFieldPoc ) : m_iBotFieldPoc );
+              setPoc( m_pcIntFrameTopField->isPocAvailable() ? mMn( m_pcIntFrameTopField->getPoc(), m_iBotFieldPoc ) : m_iBotFieldPoc );
           }
       }
       if( ! m_pcIntFrameTopField || ! m_pcIntFrameBotField )
       {
-          setPoc( min( m_iTopFieldPoc, m_iBotFieldPoc ) ); // Dong: max -> min. Output correct POC.
+          setPoc( mMn( m_iTopFieldPoc, m_iBotFieldPoc ) ); // Dong: mMx -> mMn. Output correct POC.
       }
   }
 
@@ -429,7 +429,7 @@ H264AVCCOMMONLIB_API extern __inline ErrVal gSetFrameFieldLists ( RefFrameList& 
     rcTopFieldList.reset();
     rcBotFieldList.reset();
 
-    const Int iMaxEntries = min( rcRefFrameList.getSize(), rcRefFrameList.getActive() );
+    const Int iMaxEntries = mMn( rcRefFrameList.getSize(), rcRefFrameList.getActive() );
     for( Int iFrmIdx = 0; iFrmIdx < iMaxEntries; iFrmIdx++ )
     {
         IntFrame* pcTopField = rcRefFrameList.getEntry( iFrmIdx )->getPic( TOP_FIELD );

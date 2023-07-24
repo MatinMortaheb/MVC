@@ -23,7 +23,7 @@ public:
   Void init( Short asCtxInit[], Int iQp )
   {
 	  Int iState = ( ( asCtxInit[0] * iQp ) >> 4 ) + asCtxInit[1];
-    iState = min (max ( 1, iState), 126 );
+    iState = mMn (mMx ( 1, iState), 126 );
 
     if (iState>=64)
     {

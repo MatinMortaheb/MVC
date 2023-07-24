@@ -225,7 +225,7 @@ SequenceParameterSet::getLevelIdc( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt 
   UInt uiFrameSize = uiMbY * uiMbX;
   UInt uiMbPerSec  = uiFrameSize * uiOutFreq * Num_Views;
   UInt uiDPBSizeX2 = (uiFrameSize*16*16*3/2) * uiNumRefPic * 2;
-  UInt uiMaxDPBSizeX2_B = (uiFrameSize*16*16*3/2) * (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) * 2;
+  UInt uiMaxDPBSizeX2_B = (uiFrameSize*16*16*3/2) * (mMx(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) * 2;
 
   for( Int n = 0; n < 52; n++ )
   {
@@ -238,7 +238,7 @@ SequenceParameterSet::getLevelIdc( UInt uiMbY, UInt uiMbX, UInt uiOutFreq, UInt 
           ( uiMbPerLine                   >= uiMbY        ) &&
           ( mvcScaleFactor * pcLevelLimit->uiMaxMbPerSec   >= uiMbPerSec   ) &&
           ( pcLevelLimit->uiMaxFrameSize  >= uiFrameSize  ) &&         
-		  (	min (mvcScaleFactor*pcLevelLimit->uiMaxDPBSizeX2, uiMaxDPBSizeX2_B) >= uiDPBSizeX2	) &&
+		  (	mMn (mvcScaleFactor*pcLevelLimit->uiMaxDPBSizeX2, uiMaxDPBSizeX2_B) >= uiDPBSizeX2	) &&
           ( pcLevelLimit->uiMaxVMvRange   >= uiMvRange    )    )
       {
         return n;
@@ -282,11 +282,11 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
   
   UInt    uiTmp = getLog2MaxFrameNum();
   ROF   ( uiTmp >= 4 );
-  RNOK  ( pcWriteIf->writeUvlc( uiTmp - 4,                                "SPS: log2_max_frame_num_minus_4" ) );
+  RNOK  ( pcWriteIf->writeUvlc( uiTmp - 4,                                "SPS: log2_mMx_frame_num_mMnus_4" ) );
   RNOK  ( pcWriteIf->writeUvlc( getPicOrderCntType(),                     "SPS: pic_order_cnt_type" ) );
   if( getPicOrderCntType() == 0 )
   {
-  RNOK  ( pcWriteIf->writeUvlc( getLog2MaxPicOrderCntLsb() - 4,           "SPS: log2_max_pic_order_cnt_lsb_minus4" ) );
+  RNOK  ( pcWriteIf->writeUvlc( getLog2MaxPicOrderCntLsb() - 4,           "SPS: log2_mMx_pic_order_cnt_lsb_mMnus4" ) );
   }
   else if( getPicOrderCntType() == 1 )
   {
@@ -305,15 +305,15 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
 //wirte SequenceParameterSet
   if( !getFrameMbsOnlyFlag() )
   {
-      RNOK  ( pcWriteIf->writeUvlc( getFrameWidthInMbs  () - 1,               "SPS: pic_width_in_mbs_minus_1" ) );
-      RNOK  ( pcWriteIf->writeUvlc( (getFrameHeightInMbs()-1) >> 1,            "SPS: pic_height_in_map_units_minus_1" ) );
+      RNOK  ( pcWriteIf->writeUvlc( getFrameWidthInMbs  () - 1,               "SPS: pic_width_in_mbs_mMnus_1" ) );
+      RNOK  ( pcWriteIf->writeUvlc( (getFrameHeightInMbs()-1) >> 1,            "SPS: pic_height_in_map_units_mMnus_1" ) );
       RNOK  ( pcWriteIf->writeFlag( false,                                    "SPS: frame_mbs_only_flag" ) );
       RNOK  ( pcWriteIf->writeFlag( getMbAdaptiveFrameFieldFlag(),                                     "SPS: mb_adaptive_frame_field_flag"));
   }
   else
   {
-      RNOK  ( pcWriteIf->writeUvlc( getFrameWidthInMbs  () - 1,               "SPS: pic_width_in_mbs_minus_1" ) );
-      RNOK  ( pcWriteIf->writeUvlc( getFrameHeightInMbs () - 1,               "SPS: pic_height_in_map_units_minus_1" ) );
+      RNOK  ( pcWriteIf->writeUvlc( getFrameWidthInMbs  () - 1,               "SPS: pic_width_in_mbs_mMnus_1" ) );
+      RNOK  ( pcWriteIf->writeUvlc( getFrameHeightInMbs () - 1,               "SPS: pic_height_in_map_units_mMnus_1" ) );
       RNOK  ( pcWriteIf->writeFlag( true,                                     "SPS: frame_mbs_only_flag" ) );
   }
 
@@ -344,19 +344,19 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
 
 		// seq_parameter_set_mvc_extension()
 
-		RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_num_views_minus_1,                   "SPS: num_views_minus_1" ) ); // ue(v)
+		RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_num_views_mMnus_1,                   "SPS: num_views_mMnus_1" ) ); // ue(v)
 		
 		int i,j,k;
 		//JVT-V054
 		printf("ViewCodingOrder: ");
-		for (i=0;i<= SpsMVC->m_num_views_minus_1; i++)
+		for (i=0;i<= SpsMVC->m_num_views_mMnus_1; i++)
 		{
 			printf("%d ", SpsMVC->m_uiViewCodingOrder[i]);
 			RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_uiViewCodingOrder[i], "SPS: view_id[i]")); //ue(v)
 		}	  
 		printf ("\n");
 
-		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
+		for (i=1;i<= SpsMVC->m_num_views_mMnus_1; i++)  //JVT-Y061
 		{
 			//vcOrder = SpsMVC->m_uiViewCodingOrder[i];
 
@@ -369,7 +369,7 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
 				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_anchor_ref_list1[i][j],      "SPS: anchor_ref_l1[i][j]" ) ); // ue(v)
 		}
 
-		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
+		for (i=1;i<= SpsMVC->m_num_views_mMnus_1; i++)  //JVT-Y061
 		{
 			//vcOrder = SpsMVC->m_uiViewCodingOrder[i];
 			RNOK  ( pcWriteIf->writeUvlc( (UInt)SpsMVC->m_num_non_anchor_refs_list0[i],                   "SPS: num_non_anchor_refs_l0[i]" ) ); // ue(v)
@@ -382,20 +382,20 @@ SequenceParameterSet::write( HeaderSymbolWriteIf* pcWriteIf ) const
 
 		}	
 
-		RNOK  ( pcWriteIf->writeUvlc( (UInt &)SpsMVC->m_num_level_values_signalled_minus1,                   "SPS: num_level_values_signalled_minus1" ) ); // ue(v)
+		RNOK  ( pcWriteIf->writeUvlc( (UInt &)SpsMVC->m_num_level_values_signalled_mMnus1,                   "SPS: num_level_values_signalled_mMnus1" ) ); // ue(v)
 
-		for (i=0;i<= SpsMVC->m_num_level_values_signalled_minus1; i++)  
+		for (i=0;i<= SpsMVC->m_num_level_values_signalled_mMnus1; i++)  
 		{
 			RNOK  ( pcWriteIf->writeCode( SpsMVC->m_ui_level_idc[i] ,                               8,      "SPS: level_idc[i]" ) );
-			RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_num_applicable_ops_minus1[i],                   "SPS: num_applicable_ops_minus1[i]" ) ); // ue(v)
-			for (j=0; j<=(int)SpsMVC->m_ui_num_applicable_ops_minus1[i];j++)
+			RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_num_applicable_ops_mMnus1[i],                   "SPS: num_applicable_ops_mMnus1[i]" ) ); // ue(v)
+			for (j=0; j<=(int)SpsMVC->m_ui_num_applicable_ops_mMnus1[i];j++)
 			{
 				RNOK  ( pcWriteIf->writeCode( SpsMVC->m_ui_applicable_op_temporal_id[i][j] ,                               3,      "SPS: applicable_op_temporal_id[i][j]" ) );
-				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j],                   "SPS: applicable_op_num_target_views_minus1[i][j]" ) ); // ue(v)
-				for (k=0; k<= (int)SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j];k++)
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_num_target_views_mMnus1[i][j],                   "SPS: applicable_op_num_target_views_mMnus1[i][j]" ) ); // ue(v)
+				for (k=0; k<= (int)SpsMVC->m_ui_applicable_op_num_target_views_mMnus1[i][j];k++)
 					RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_target_view_id[i][j][k],                    "SPS: applicable_op_num_target_view_id[i][j][k]" ) ); // ue(v)
 				
-				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_num_views_minus1[i][j],                   "SPS: num_applicable_op_num_views_minus1[i][j]" ) ); // ue(v)			
+				RNOK  ( pcWriteIf->writeUvlc( SpsMVC->m_ui_applicable_op_num_views_mMnus1[i][j],                   "SPS: num_applicable_op_num_views_mMnus1[i][j]" ) ); // ue(v)			
 			}		
 		}
 
@@ -450,14 +450,14 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
   //--- fidelity range extension syntax ---  
   RNOK  ( xReadFrext( pcReadIf ) );
 
-  RNOK  ( pcReadIf->getUvlc( uiTmp,                                       "SPS: log2_max_frame_num_minus_4" ) );
+  RNOK  ( pcReadIf->getUvlc( uiTmp,                                       "SPS: log2_mMx_frame_num_mMnus_4" ) );
   ROT   ( uiTmp > 12 );
   setLog2MaxFrameNum( uiTmp + 4 );
 
   RNOK  ( pcReadIf->getUvlc( m_uiPicOrderCntType,                         "SPS: pic_order_cnt_type" ) );
   if( m_uiPicOrderCntType == 0 )
   {
-      RNOK( pcReadIf->getUvlc( uiTmp, "SPS: log2_max_pic_order_cnt_lsb_minus4" ));
+      RNOK( pcReadIf->getUvlc( uiTmp, "SPS: log2_mMx_pic_order_cnt_lsb_mMnus4" ));
       setLog2MaxPicOrderCntLsb( 4+uiTmp );
   }
   else if( getPicOrderCntType() == 1 )
@@ -478,9 +478,9 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 
   RNOK( pcReadIf->getUvlc( m_uiNumRefFrames,                              "SPS: num_ref_frames" ) );
   RNOK( pcReadIf->getFlag( m_bRequiredFrameNumUpdateBehaviourFlag,        "SPS: required_frame_num_update_behaviour_flag" ) );
-  RNOK( pcReadIf->getUvlc( uiTmp,                                         "SPS: pic_width_in_mbs_minus_1" ) );
+  RNOK( pcReadIf->getUvlc( uiTmp,                                         "SPS: pic_width_in_mbs_mMnus_1" ) );
   setFrameWidthInMbs ( 1 + uiTmp );
-  RNOK( pcReadIf->getUvlc( uiTmp,                                         "SPS: pic_height_in_map_units_minus_1" ) );
+  RNOK( pcReadIf->getUvlc( uiTmp,                                         "SPS: pic_height_in_map_units_mMnus_1" ) );
 
   RNOK( pcReadIf->getFlag( m_bFrameMbsOnlyFlag,                           "SPS: frame_mbs_only_flag" ) );
   if( getFrameMbsOnlyFlag() )
@@ -521,20 +521,20 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 		int i,j,k,vcOrder;
 		
 		// seq_parameter_set_mvc_extension()
-		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_views_minus_1,                   "SPS: num_views_minus_1" ) ); // ue(v)
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_views_mMnus_1,                   "SPS: num_views_mMnus_1" ) ); // ue(v)
 		SpsMVC->initViewSPSMemory_num_refs_for_lists(SpsMVC->getNumViewMinus1());
 
 		//JVT-V054
 		SpsMVC->setInitDone(false);
 		printf("ViewCodingOrder: ");
-		for (i=0;i<= SpsMVC->m_num_views_minus_1; i++)
+		for (i=0;i<= SpsMVC->m_num_views_mMnus_1; i++)
 		{
 		RNOK  ( pcReadIf->getUvlc( SpsMVC->m_uiViewCodingOrder[i], "SPS: view_id[i]")); //ue(v)
 		printf("%d ", SpsMVC->m_uiViewCodingOrder[i]);
 		}	  
 		printf ("\n");
 
-		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
+		for (i=1;i<= SpsMVC->m_num_views_mMnus_1; i++)  //JVT-Y061
 		{
 		vcOrder = SpsMVC->m_uiViewCodingOrder[i];
 
@@ -549,7 +549,7 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 			RNOK  ( pcReadIf->getUvlc( SpsMVC->m_anchor_ref_list1[i][j],      "SPS: anchor_ref_l1[i][j]" ) ); // ue(v)
 		}
 
-		for (i=1;i<= SpsMVC->m_num_views_minus_1; i++)  //JVT-Y061
+		for (i=1;i<= SpsMVC->m_num_views_mMnus_1; i++)  //JVT-Y061
 		{
 		vcOrder = SpsMVC->m_uiViewCodingOrder[i];
 		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_non_anchor_refs_list0[i],                   "SPS: num_non_anchor_refs_l0[i]" ) ); // ue(v)
@@ -564,22 +564,22 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 
 		}
 
-		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_level_values_signalled_minus1,                   "SPS: num_level_values_signalled_minus1" ) ); // ue(v)
+		RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_num_level_values_signalled_mMnus1,                   "SPS: num_level_values_signalled_mMnus1" ) ); // ue(v)
 		SpsMVC->initViewSPSMemory_num_level_related_memory(SpsMVC->getNumLevelValuesSignalledMinus1());
-		for (i=0;i<= SpsMVC->m_num_level_values_signalled_minus1; i++)  
+		for (i=0;i<= SpsMVC->m_num_level_values_signalled_mMnus1; i++)  
 		{
 			RNOK  ( pcReadIf->getCode( SpsMVC->m_ui_level_idc[i] ,                               8,      "SPS: level_idc[i]" ) );
-			RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_num_applicable_ops_minus1[i],                   "SPS: num_applicable_ops_minus1[i]" ) ); // ue(v)
-			SpsMVC->initViewSPSMemory_num_level_related_memory_2D(SpsMVC->m_ui_num_applicable_ops_minus1[i],i);
-			for (j=0; j<=(int)SpsMVC->m_ui_num_applicable_ops_minus1[i];j++)
+			RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_num_applicable_ops_mMnus1[i],                   "SPS: num_applicable_ops_mMnus1[i]" ) ); // ue(v)
+			SpsMVC->initViewSPSMemory_num_level_related_memory_2D(SpsMVC->m_ui_num_applicable_ops_mMnus1[i],i);
+			for (j=0; j<=(int)SpsMVC->m_ui_num_applicable_ops_mMnus1[i];j++)
 			{
 				RNOK  ( pcReadIf->getCode( SpsMVC->m_ui_applicable_op_temporal_id[i][j] ,                               3,      "SPS: applicable_op_temporal_id[i][j]" ) );
-				RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j],                   "SPS: applicable_op_num_target_views_minus1[i][j]" ) ); // ue(v)
-				SpsMVC->initViewSPSMemory_num_level_related_memory_3D(SpsMVC->m_ui_num_applicable_ops_minus1[i],SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j], i,j);
-				for (k=0; k<= (int)SpsMVC->m_ui_applicable_op_num_target_views_minus1[i][j];k++)
+				RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_num_target_views_mMnus1[i][j],                   "SPS: applicable_op_num_target_views_mMnus1[i][j]" ) ); // ue(v)
+				SpsMVC->initViewSPSMemory_num_level_related_memory_3D(SpsMVC->m_ui_num_applicable_ops_mMnus1[i],SpsMVC->m_ui_applicable_op_num_target_views_mMnus1[i][j], i,j);
+				for (k=0; k<= (int)SpsMVC->m_ui_applicable_op_num_target_views_mMnus1[i][j];k++)
 					RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_target_view_id[i][j][k],                    "SPS: applicable_op_num_target_view_id[i][j][k]" ) ); // ue(v)
 				
-				RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_num_views_minus1[i][j],                   "SPS: num_applicable_op_num_views_minus1[i][j]" ) ); // ue(v)
+				RNOK  ( pcReadIf->getUvlc( (UInt &)SpsMVC->m_ui_applicable_op_num_views_mMnus1[i][j],                   "SPS: num_applicable_op_num_views_mMnus1[i][j]" ) ); // ue(v)
 			
 			
 			}
@@ -594,11 +594,11 @@ SequenceParameterSet::read( HeaderSymbolReadIf* pcReadIf,
 	if(bTmp)//lufeng: support uvi syntax element
 	{
 		UInt uiTemp;
-		RNOK  ( pcReadIf->getUvlc(uiTemp,"SPS: vui_mvc_num_ops_minus1"));
+		RNOK  ( pcReadIf->getUvlc(uiTemp,"SPS: vui_mvc_num_ops_mMnus1"));
 		RNOK  ( pcReadIf->getCode(uiTemp,3,"SPS: vui_mvc_temporal_id[ 0 ]"));
-		RNOK  ( pcReadIf->getUvlc(uiTemp,"SPS: vui_mvc_num_target_output_views_minus1[ 0 ]"));
+		RNOK  ( pcReadIf->getUvlc(uiTemp,"SPS: vui_mvc_num_target_output_views_mMnus1[ 0 ]"));
 		RNOK  ( pcReadIf->getUvlc(uiTemp,"SPS: vui_mvc_view_id[ 0 ][ 0 ]"));
-		RNOK  ( pcReadIf->getFlag(bTmp,"SPS: vui_mvc_timing_info_present_flag[ 0 ]"));
+		RNOK  ( pcReadIf->getFlag(bTmp,"SPS: vui_mvc_timMng_info_present_flag[ 0 ]"));
 		RNOK  ( pcReadIf->getFlag(bTmp,"SPS: vui_mvc_nal_hrd_parameters_present_flag[ 0 ]"));
 		ROT ( bTmp ); // always shoule be set to 0
 		RNOK  ( pcReadIf->getFlag(bTmp,"SPS: vui_mvc_vcl_hrd_parameters_present_flag[ 0 ]"));
@@ -626,8 +626,8 @@ SequenceParameterSet::xWriteFrext( HeaderSymbolWriteIf* pcWriteIf ) const
          m_eProfileIdc != SCALABLE_PROFILE, Err::m_nOK );
 
   RNOK  ( pcWriteIf->writeUvlc( 1,                              "SPS: chroma_format_idc" ) );
-  RNOK  ( pcWriteIf->writeUvlc( 0,                              "SPS: bit_depth_luma_minus8" ) );
-  RNOK  ( pcWriteIf->writeUvlc( 0,                              "SPS: bit_depth_chroma_minus8" ) );
+  RNOK  ( pcWriteIf->writeUvlc( 0,                              "SPS: bit_depth_luma_mMnus8" ) );
+  RNOK  ( pcWriteIf->writeUvlc( 0,                              "SPS: bit_depth_chroma_mMnus8" ) );
   RNOK  ( pcWriteIf->writeFlag( false,                          "SPS: qpprime_y_zero_transform_bypass_flag" ) );
   RNOK  ( pcWriteIf->writeFlag( m_bSeqScalingMatrixPresentFlag, "SPS: seq_scaling_matrix_present_flag"  ) );
   
@@ -653,9 +653,9 @@ SequenceParameterSet::xReadFrext( HeaderSymbolReadIf* pcReadIf )
   Bool  bTmp;
   RNOK( pcReadIf->getUvlc( uiTmp,                               "SPS: chroma_format_idc" ) );
   ROF ( uiTmp == 1 );
-  RNOK( pcReadIf->getUvlc( uiTmp,                               "SPS: bit_depth_luma_minus8" ) );
+  RNOK( pcReadIf->getUvlc( uiTmp,                               "SPS: bit_depth_luma_mMnus8" ) );
   ROF ( uiTmp == 0 );
-  RNOK( pcReadIf->getUvlc( uiTmp,                               "SPS: bit_depth_chroma_minus8" ) );
+  RNOK( pcReadIf->getUvlc( uiTmp,                               "SPS: bit_depth_chroma_mMnus8" ) );
   ROF ( uiTmp == 0 );
   RNOK( pcReadIf->getFlag( bTmp,                                "SPS: qpprime_y_zero_transform_bypass_flag" ) );
   ROT ( bTmp )

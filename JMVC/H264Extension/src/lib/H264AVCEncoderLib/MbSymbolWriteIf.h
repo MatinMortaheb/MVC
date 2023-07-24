@@ -67,7 +67,7 @@ public:
   virtual ErrVal  skipFlag            ( MbDataAccess& rcMbDataAccess, Bool bNotAllowed ) = 0;
   virtual ErrVal  BLSkipFlag          ( MbDataAccess& rcMbDataAccess ) = 0;
 
-  virtual ErrVal  terminatingBit      ( UInt uiIsLast ) = 0;
+  virtual ErrVal  termMnatingBit      ( UInt uiIsLast ) = 0;
   virtual UInt    getNumberOfWrittenBits() = 0;
   virtual ErrVal  fieldFlag           ( MbDataAccess& rcMbDataAccess ) = 0;
 

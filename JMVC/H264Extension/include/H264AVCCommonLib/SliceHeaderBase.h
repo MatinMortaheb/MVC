@@ -89,7 +89,7 @@ public:
       {
       case 0:
       case 1:
-        RNOK( pcWriteIf->writeUvlc( m_uiVal,  "RPLR: abs_diff_pic_num_minus1" ) );
+        RNOK( pcWriteIf->writeUvlc( m_uiVal,  "RPLR: abs_diff_pic_num_mMnus1" ) );
         break;
       case 2:
         RNOK( pcWriteIf->writeUvlc( m_uiVal,  "RPLR: long_term_pic_num" ) );
@@ -97,7 +97,7 @@ public:
 // JVT-V043 
       case 4:
       case 5:
-        RNOK( pcWriteIf->writeUvlc( m_uiVal,  "RPLR: abs_diff_view_idx_minus1" ) );
+        RNOK( pcWriteIf->writeUvlc( m_uiVal,  "RPLR: abs_diff_view_idx_mMnus1" ) );
         break;
 // JVT-V043 
       default:
@@ -122,7 +122,7 @@ public:
       {
       case 0:
       case 1:
-        RNOK( pcReadIf->getUvlc( m_uiVal, "RPLR: abs_diff_pic_num_minus1" ) );
+        RNOK( pcReadIf->getUvlc( m_uiVal, "RPLR: abs_diff_pic_num_mMnus1" ) );
         break;
       case 2:
         RNOK( pcReadIf->getUvlc( m_uiVal, "RPLR: long_term_pic_num" ) );
@@ -130,7 +130,7 @@ public:
 // JVT-V043 
       case 4:
       case 5:
-        RNOK( pcReadIf->getUvlc( m_uiVal, "RPLR: abs_diff_view_idx_minus1" ) );
+        RNOK( pcReadIf->getUvlc( m_uiVal, "RPLR: abs_diff_view_idx_mMnus1" ) );
         break;
 // JVT-V043 
       default:

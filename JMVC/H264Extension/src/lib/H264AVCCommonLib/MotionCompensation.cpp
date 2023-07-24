@@ -739,11 +739,11 @@ ErrVal MotionCompensation::initMb( UInt uiMbY, UInt uiMbX, MbDataAccess& rcMbDat
       uiMbInFrameY >>= 1;
       uiMbY        >>= 1;
   }
-  m_cMin.setHor( (Short) max( (Int)MSYS_SHORT_MIN, (Int)((-(Int)uiMbX << 4) - (16+8) ) << 2 ) );
-  m_cMin.setVer( (Short) max( (Int)MSYS_SHORT_MIN, (Int)((-(Int)uiMbY << 4) - (16+8) ) << 2 ) );
+  m_cMin.setHor( (Short) mMx( (Int)MSYS_SHORT_MIN, (Int)((-(Int)uiMbX << 4) - (16+8) ) << 2 ) );
+  m_cMin.setVer( (Short) mMx( (Int)MSYS_SHORT_MIN, (Int)((-(Int)uiMbY << 4) - (16+8) ) << 2 ) );
 
-  m_cMax.setHor( (Short) min( (Int)MSYS_SHORT_MAX, (Int)(((m_uiMbInFrameX - uiMbX) << 4) + 8 ) << 2 ) );
-  m_cMax.setVer( (Short) min( (Int)MSYS_SHORT_MAX, (Int)(((  uiMbInFrameY - uiMbY) << 4) + 8 ) << 2 ) );
+  m_cMax.setHor( (Short) mMn( (Int)MSYS_SHORT_MAX, (Int)(((m_uiMbInFrameX - uiMbX) << 4) + 8 ) << 2 ) );
+  m_cMax.setVer( (Short) mMn( (Int)MSYS_SHORT_MAX, (Int)(((  uiMbInFrameY - uiMbY) << 4) + 8 ) << 2 ) );
 
   return Err::m_nOK;
 }
@@ -1319,13 +1319,13 @@ Void MotionCompensation::xUpdAdapt( XPel* pucDest, XPel* pucSrc, Int iDestStride
   }
 
   pBuf = interpBuf;
-  int Th = max(0, (int)weight/2 - 1 ) ;
+  int Th = mMx(0, (int)weight/2 - 1 ) ;
   for( Int y = 0; y < updSizeY; y++)
   {
     for( Int x = 0; x < updSizeX; x++)
     {
       pBuf [x] = (pBuf[x] + (1 << (bitShift-1))) >> bitShift;
-      pBuf [x] = max(-Th, min(Th, pBuf[x]));
+      pBuf [x] = mMx(-Th, mMn(Th, pBuf[x]));
       pDest[x] = (XPel)gClip( pDest[x] + ((pBuf[x] + (pBuf[x]>0? 1:-1))/4) );
     }
     pBuf += BUF_W;
@@ -1405,13 +1405,13 @@ __inline Void MotionCompensation::xUpdateChromaPel( XPel* pucDest, Int iDestStri
   m_pcQuarterPelFilter->xUpdInterpChroma(pBuf, BUF_W, pucSrc, iSrcStride, cMv, iSizeY, iSizeX);
 
   pBuf = interpBuf;
-  int Th = max(0, (int)weight/2 - 1 ) ;
+  int Th = mMx(0, (int)weight/2 - 1 ) ;
   for( Int y = 0; y < iSizeY + 1; y++)
   {
     for( Int x = 0; x < iSizeX + 1; x++)
     {
       pBuf   [x] = (pBuf[x] + 32) >> 6;
-      pBuf   [x] = max(-Th, min(Th, pBuf[x]));
+      pBuf   [x] = mMx(-Th, mMn(Th, pBuf[x]));
       pucDest[x] = (XPel)gClip( pucDest[x] + ((pBuf[x] + (pBuf[x]>0? 2:-2))/4) );
     }
     pBuf += BUF_W;

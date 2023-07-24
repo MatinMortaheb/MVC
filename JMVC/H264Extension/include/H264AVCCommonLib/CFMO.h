@@ -25,37 +25,37 @@ class FMO_PPS
 
 public:
 	
-	unsigned num_slice_group_map_units_minus1;
-	unsigned num_slice_groups_minus1;
+	unsigned num_slice_group_map_units_mMnus1;
+	unsigned num_slice_groups_mMnus1;
 	unsigned slice_group_map_type;
-	unsigned run_length_minus1[Max_Num_Slice_Groups];
+	unsigned run_length_mMnus1[Max_Num_Slice_Groups];
 	unsigned top_left[Max_Num_Slice_Groups];		
 	unsigned bottom_right[Max_Num_Slice_Groups];
 	bool slice_group_change_direction_flag;
-	unsigned slice_group_change_rate_minus1;
+	unsigned slice_group_change_rate_mMnus1;
 	unsigned int slice_group_id[Max_Num_Slice_Groups];
 
 public:
-	FMO_PPS():num_slice_group_map_units_minus1(0)
-		,num_slice_groups_minus1(0)
+	FMO_PPS():num_slice_group_map_units_mMnus1(0)
+		,num_slice_groups_mMnus1(0)
 		,slice_group_map_type(0)
 		,slice_group_change_direction_flag(0)
-		,slice_group_change_rate_minus1(0){};
+		,slice_group_change_rate_mMnus1(0){};
 
 
-	void copy_run_length_minus1(unsigned* Run_length_minus1)
+	void copy_run_length_mMnus1(unsigned* Run_length_mMnus1)
 	{
 		assert(Max_Num_Slice_Groups>0);
 		for(int i=0;i<Max_Num_Slice_Groups;i++)
 		{
-			run_length_minus1[i] = Run_length_minus1[i];
+			run_length_mMnus1[i] = Run_length_mMnus1[i];
 		}
 	};
 
 	void copy_top_left(unsigned* Top_left)
 	{
 		assert(Max_Num_Slice_Groups>0);
-		for(UInt i=0;i<num_slice_groups_minus1;i++)
+		for(UInt i=0;i<num_slice_groups_mMnus1;i++)
 		{
 			top_left[i] = Top_left[i];
 		}
@@ -64,7 +64,7 @@ public:
 	void copy_bottom_right(unsigned* Bottom_right)
 	{
 		assert(Max_Num_Slice_Groups>0);
-		for(UInt i=0;i<num_slice_groups_minus1;i++)
+		for(UInt i=0;i<num_slice_groups_mMnus1;i++)
 		{
 			bottom_right[i] = Bottom_right[i];
 		}
@@ -73,7 +73,7 @@ public:
 	void copy_slice_group_id(unsigned int* Slice_group_id)
 	{
 		assert(Max_Num_Slice_Groups>0);
-		for(UInt i=0;i<num_slice_groups_minus1;i++)
+		for(UInt i=0;i<num_slice_groups_mMnus1;i++)
 			slice_group_id[i] = Slice_group_id[i];
 	}
 
@@ -83,9 +83,9 @@ public:
 class FMO_SPS
 {
 public:
-	FMO_SPS():pic_height_in_map_units_minus1(0),pic_width_in_mbs_minus1(0),frame_mbs_only_flag(1),mb_adaptive_frame_field_flag(0){};
-	unsigned pic_height_in_map_units_minus1;
-	unsigned pic_width_in_mbs_minus1;
+	FMO_SPS():pic_height_in_map_units_mMnus1(0),pic_width_in_mbs_mMnus1(0),frame_mbs_only_flag(1),mb_adaptive_frame_field_flag(0){};
+	unsigned pic_height_in_map_units_mMnus1;
+	unsigned pic_width_in_mbs_mMnus1;
 	bool frame_mbs_only_flag;
 	bool mb_adaptive_frame_field_flag;
 };
@@ -93,7 +93,7 @@ public:
 class FMO
 {
 
-	int NumberOfSliceGroups_;    // the number of slice groups  (0 == scan order, 7 == maximum)
+	int NumberOfSliceGroups_;    // the number of slice groups  (0 == scan order, 7 == mMximum)
 
 	int *MbToSliceGroupMap_;
 	int *MapUnitToSliceGroupMap_; 

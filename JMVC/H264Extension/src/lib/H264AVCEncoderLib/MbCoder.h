@@ -31,8 +31,8 @@ public:
   ErrVal  encode            ( MbDataAccess& rcMbDataAccess,
                               MbDataAccess* pcMbDataAccessBase,
                               Int									iSpatialScalabilityType,
-                              Bool          bTerminateSlice, 
-							  Bool          bSendTerminateSlice);
+                              Bool          bTermMnateSlice, 
+							  Bool          bSendTermMnateSlice);
 
   ErrVal  encodeMotion      ( MbDataAccess& rcMbDataAccess,
                               MbDataAccess* pcMbDataAccessBase );

@@ -564,12 +564,12 @@ Void MbDataAccess::xSpatialDirectMode( ParIdx8x8 eParIdx, Bool b8x8 )
     Mv    acMvPred[2];
     SChar ascRefIdx[2];
     xSetNeighboursMvPredictor(LIST_0, B4x4Idx(0), B4x4Idx(3) );
-    if( ( ascRefIdx[LIST_0] = m_cMv3D_A.minRefIdx( m_cMv3D_B ).minRefIdx( m_cMv3D_C ).getRef() ) > 0 )
+    if( ( ascRefIdx[LIST_0] = m_cMv3D_A.mMnRefIdx( m_cMv3D_B ).mMnRefIdx( m_cMv3D_C ).getRef() ) > 0 )
     {
         xGetMvPredictorUseNeighbours( acMvPred[LIST_0], ascRefIdx[LIST_0], MEDIAN );
     }
     xSetNeighboursMvPredictor(LIST_1, B4x4Idx(0), B4x4Idx(3) );
-    if( ( ascRefIdx[LIST_1] = m_cMv3D_A.minRefIdx( m_cMv3D_B ).minRefIdx( m_cMv3D_C ).getRef() ) > 0 )
+    if( ( ascRefIdx[LIST_1] = m_cMv3D_A.mMnRefIdx( m_cMv3D_B ).mMnRefIdx( m_cMv3D_C ).getRef() ) > 0 )
     {
         xGetMvPredictorUseNeighbours( acMvPred[LIST_1], ascRefIdx[LIST_1], MEDIAN );
     }

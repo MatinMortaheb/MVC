@@ -519,8 +519,8 @@ MbEncoder::encodeResidual( MbDataAccess&  rcMbDataAccess,
 
   UInt    uiMinTrafo  = 0;
   UInt    uiMaxTrafo  = ( ( rcMbDataAccess.getSH().getPPS().getTransform8x8ModeFlag() && rcMbDataAccess.getMbData().is8x8TrafoFlagPresent() ) ? 2 : 1 );
-  UChar   ucMinQp     = (UChar)min( MAX_QP, max( MIN_QP, rcMbDataAccess.getMbData().getQp() - iMaxQpDelta ) );
-  UChar   ucMaxQp     = (UChar)min( MAX_QP, max( MIN_QP, rcMbDataAccess.getMbData().getQp() + iMaxQpDelta ) );
+  UChar   ucMinQp     = (UChar)mMn( MAX_QP, mMx( MIN_QP, rcMbDataAccess.getMbData().getQp() - iMaxQpDelta ) );
+  UChar   ucMaxQp     = (UChar)mMn( MAX_QP, mMx( MIN_QP, rcMbDataAccess.getMbData().getQp() + iMaxQpDelta ) );
   Double  dMinCost    = 1e30;
   UInt    uiDist, uiRate;
   Bool    bCoded;
@@ -629,7 +629,7 @@ MbEncoder::encodeResidual( MbDataAccess&  rcMbDataAccess,
 				}
 				//--
 
-        //----- encode luminance signal -----
+        //----- encode lumMnance signal -----
         UInt  uiExtCbp    = 0;
         UInt  uiCoeffCost = 0;
         UInt  uiMbBits    = 0;
@@ -708,7 +708,7 @@ MbEncoder::encodeResidual( MbDataAccess&  rcMbDataAccess,
         }
         m_pcIntMbTempData->distY() = m_pcXDistortion->getLum16x16( m_pcIntMbTempData->getMbLumAddr(), m_pcIntMbTempData->getLStride() );
 
-        //----- encode chrominance signal -----
+        //----- encode chromMnance signal -----
         RNOK( xEncodeChromaTexture( *m_pcIntMbTempData, uiExtCbp, uiMbBits ) );
 
         //----- set parameters ----
@@ -808,8 +808,8 @@ MbEncoder::encodeResidual( MbDataAccess&  rcMbDataAccess,
   Bool    bInter      = ! bIntra;
   Bool    b8x8Ok      = rcMbDataAccessBL.getSH().getPPS().getTransform8x8ModeFlag() && ( bInter ? rcMbDataAccess.getMbData().is8x8TrafoFlagPresent() : rcMbDataAccessBL.getMbData().is8x8TrafoFlagPresent() );
 
-  UChar   ucMinQp     = (UChar)min( MAX_QP, max( MIN_QP, rcMbDataAccess.getMbData().getQp() - iMaxQpDelta ) );
-  UChar   ucMaxQp     = (UChar)min( MAX_QP, max( MIN_QP, rcMbDataAccess.getMbData().getQp() + iMaxQpDelta ) );
+  UChar   ucMinQp     = (UChar)mMn( MAX_QP, mMx( MIN_QP, rcMbDataAccess.getMbData().getQp() - iMaxQpDelta ) );
+  UChar   ucMaxQp     = (UChar)mMn( MAX_QP, mMx( MIN_QP, rcMbDataAccess.getMbData().getQp() + iMaxQpDelta ) );
   UInt    uiMinTrafo  = ( bIntra8x8                       ? 1 : 0 );
   UInt    uiMaxTrafo  = ( bIntra8x8 || (bInter && b8x8Ok) ? 2 : 1 );
   Double  dMinCost    = 1e30;
@@ -829,7 +829,7 @@ MbEncoder::encodeResidual( MbDataAccess&  rcMbDataAccess,
       m_pcTransform     ->setQp( *m_pcIntMbTempData, bLowPass || bIntra );
 
 
-      //----- encode luminance signal -----
+      //----- encode lumMnance signal -----
       UInt  uiExtCbp    = 0;
       UInt  uiCoeffCost = 0;
       UInt  uiMbBits    = 0;
@@ -906,7 +906,7 @@ MbEncoder::encodeResidual( MbDataAccess&  rcMbDataAccess,
       }
       m_pcIntMbTempData->distY() = m_pcXDistortion->getLum16x16( m_pcIntMbTempData->getMbLumAddr(), m_pcIntMbTempData->getLStride() );
 
-      //----- encode chrominance signal -----
+      //----- encode chromMnance signal -----
       RNOK( xEncodeChromaTexture( *m_pcIntMbTempData, uiExtCbp, uiMbBits ) );
 
       //----- set parameters ----
@@ -1442,7 +1442,7 @@ MbEncoder::xEstimateMbPCM( IntMbTempData*&   rpcMbTempData,
         cnt  ++;
       }
       dest  = ( dest + cnt / 2 ) / cnt;
-      dest  = min( 255, max( 1, dest ) );
+      dest  = mMn( 255, mMx( 1, dest ) );
 
       *pucDest = (Pel)dest;
       pucDest++;
@@ -1475,7 +1475,7 @@ MbEncoder::xEstimateMbPCM( IntMbTempData*&   rpcMbTempData,
         cnt  ++;
       }
       dest  = ( dest + cnt / 2 ) / cnt;
-      dest  = min( 255, max( 1, dest ) );
+      dest  = mMn( 255, mMx( 1, dest ) );
 
       *pucDest = (Pel)dest;
       pucDest++;
@@ -1507,7 +1507,7 @@ MbEncoder::xEstimateMbPCM( IntMbTempData*&   rpcMbTempData,
         cnt  ++;
       }
       dest  = ( dest + cnt / 2 ) / cnt;
-      dest  = min( 255, max( 1, dest ) );
+      dest  = mMn( 255, mMx( 1, dest ) );
 
       *pucDest = (Pel)dest;
       pucDest++;
@@ -2191,7 +2191,7 @@ MbEncoder::xEncodeChromaTexture( IntMbTempData& rcMbTempData,
   if( (uiAcBits1 + uiAcBits2) > 8)
   {
     ruiBits += uiAcBits1 + uiAcBits2;
-    uiChromaCbp = max( uiCbp1, uiCbp2 );
+    uiChromaCbp = mMx( uiCbp1, uiCbp2 );
   }
 
   const QpParameter& rcChromaQp = m_pcTransform->getChromaQp();

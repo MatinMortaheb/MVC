@@ -489,7 +489,7 @@ ErrVal CabacReader::mbMode( MbDataAccess& rcMbDataAccess )
 
     if( 0 != act_sym )
     {
-      RNOKCABAC( CabaDecoder::getTerminateBufferBit( act_sym ) )
+      RNOKCABAC( CabaDecoder::getTermMnateBufferBit( act_sym ) )
       if( 0 != act_sym )
       {
         act_sym = 25;
@@ -604,7 +604,7 @@ ErrVal CabacReader::mbMode( MbDataAccess& rcMbDataAccess )
 
     if( ! ( uiMbMode <= 6 || (rcMbDataAccess.getSH().isInterB() && uiMbMode <= 23) ) )
     {
-      RNOKCABAC( CabaDecoder::getTerminateBufferBit( uiSymbol ) )
+      RNOKCABAC( CabaDecoder::getTermMnateBufferBit( uiSymbol ) )
       if( 0 != uiSymbol )
       {
         uiMbMode += ( rcMbDataAccess.getSH().isInterB() ) ? 22 : 24;
@@ -1038,7 +1038,7 @@ Bool CabacReader::isEndOfSlice()
 {
   UInt uiEOS;
 
-  CabaDecoder::getTerminateBufferBit( uiEOS );
+  CabaDecoder::getTermMnateBufferBit( uiEOS );
   DTRACE_T( "EOS" );
   DTRACE_CODE( uiEOS );
   DTRACE_N;
@@ -1170,13 +1170,13 @@ ErrVal CabacReader::xReadCoeff( TCoeff*         piCoeff,
     UInt uiCoeff = piCoeff[pucScan[ui]];
     if( uiCoeff )
     {
-      UInt uiCtx = min (c1,4);
+      UInt uiCtx = mMn (c1,4);
 
       RNOKCABAC( CabaDecoder::getSymbol( uiCoeff, m_cOneCCModel.get( type2ctx1[eResidualMode], uiCtx ) ) );
 
       if( 1 == uiCoeff )
       {
-        uiCtx = min (c2,4);
+        uiCtx = mMn (c2,4);
         RNOKCABAC( CabaDecoder::getExGolombLevel( uiCoeff, m_cAbsCCModel.get( type2ctx1[eResidualMode], uiCtx ) ) );
         uiCoeff += 2;
 
@@ -1355,13 +1355,13 @@ ErrVal CabacReader::residualBlock8x8( MbDataAccess& rcMbDataAccess,
     
     if( uiCoeff )
     {
-      UInt uiCtx = min (c1,4);
+      UInt uiCtx = mMn (c1,4);
 
       RNOKCABAC( CabaDecoder::getSymbol( uiCoeff, m_cOneCCModel.get( uiCtxOffset, uiCtx ) ) );
 
       if( 1 == uiCoeff )
       {
-        uiCtx = min (c2,4);
+        uiCtx = mMn (c2,4);
         RNOKCABAC( CabaDecoder::getExGolombLevel( uiCoeff, m_cAbsCCModel.get( uiCtxOffset, uiCtx ) ) );
         uiCoeff += 2;
 
@@ -1591,7 +1591,7 @@ CabacReader::RQdecode8x8Flag( MbDataAccess& rcMbDataAccess,
 ErrVal
 CabacReader::RQdecodeTermBit ( UInt& ruiBit )
 {
-  RNOK( CabaDecoder::getTerminateBufferBit( ruiBit ) );
+  RNOK( CabaDecoder::getTermMnateBufferBit( ruiBit ) );
   DTRACE_T( "EOS" );
   DTRACE_V( ruiBit );
   DTRACE_N;

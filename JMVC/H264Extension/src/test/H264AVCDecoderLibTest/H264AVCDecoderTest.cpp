@@ -234,7 +234,7 @@ ErrVal H264AVCDecoderTest::go()
       pcBinDataTmp[uiFragNb]->setMemAccessor( cBinDataAccessorTmp[uiFragNb] );
 
       bSkip = false;
-      // open the NAL Unit, determine the type and if it's a slice get the frame size
+      // open the NAL Unit, determMne the type and if it's a slice get the frame size
 
       RNOK( m_pcH264AVCDecoder->initPacket( &cBinDataAccessorTmp[uiFragNb], 
                                             uiNalUnitType, uiMbX, uiMbY, uiSize,  true, 

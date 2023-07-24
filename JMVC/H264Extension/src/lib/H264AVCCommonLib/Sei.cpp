@@ -260,14 +260,14 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 {
   UInt i=0,j=0;
 
-  RNOK( pcWriteIf->writeUvlc( m_uiNumOperationPointsMinus1, "ViewScalabilityInfoSei: num_operation_points_minus1" ) );
+  RNOK( pcWriteIf->writeUvlc( m_uiNumOperationPointsMinus1, "ViewScalabilityInfoSei: num_operation_points_mMnus1" ) );
 
   for( i = 0; i <= m_uiNumOperationPointsMinus1; i++ )
   {
 	RNOK( pcWriteIf->writeUvlc( m_uiOperationPointId[i], "ViewScalabilityInfoSei: operation_point_id" ) );
 	RNOK( pcWriteIf->writeCode( m_uiPriorityId[i], 5, "ViewScalabilityInfoSei: priority_id" ) );
 	RNOK( pcWriteIf->writeCode( m_uiTemporalId[i], 3, "ViewScalabilityInfoSei: temporal_id" ) );
-	RNOK( pcWriteIf->writeUvlc( m_uiNumTargetOutputViewsMinus1[i], "ViewScalabilityInfoSei: num_target_output_views_minus1" ) );//SEI JJ 
+	RNOK( pcWriteIf->writeUvlc( m_uiNumTargetOutputViewsMinus1[i], "ViewScalabilityInfoSei: num_target_output_views_mMnus1" ) );//SEI JJ 
 
 	for( j = 0; j <= m_uiNumTargetOutputViewsMinus1[i]; j++ )//SEI JJ 
 	{
@@ -304,8 +304,8 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 	if( m_bBitRateInfoPresentFlag[i] )
 	{
 	  RNOK( pcWriteIf->writeCode( m_uiAvgBitrate[i], 16, "ViewScalabilityInfoSei: avg_bitrate" ) );
-	  RNOK( pcWriteIf->writeCode( m_uiMaxBitrate[i], 16, "ViewScalabilityInfoSei: max_bitrate" ) );
-	  RNOK( pcWriteIf->writeCode( m_uiMaxBitrateCalcWindow[i], 16, "ViewScalabilityInfoSei: max_bitrate_calc_window" ) );
+	  RNOK( pcWriteIf->writeCode( m_uiMaxBitrate[i], 16, "ViewScalabilityInfoSei: mMx_bitrate" ) );
+	  RNOK( pcWriteIf->writeCode( m_uiMaxBitrateCalcWindow[i], 16, "ViewScalabilityInfoSei: mMx_bitrate_calc_window" ) );
 	}
 
 	if( m_bFrmRateInfoPresentFlag[i] )
@@ -325,17 +325,17 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 
 	if( m_bParameterSetsInfoPresentFlag[i] )
 	{
-	  RNOK( pcWriteIf->writeUvlc( m_uiNumSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_seq_parameter_set_minus1" ) );
+	  RNOK( pcWriteIf->writeUvlc( m_uiNumSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_seq_parameter_set_mMnus1" ) );
 	  for( j = 0; j <= m_uiNumSeqParameterSetMinus1[i]; j++ )
 	    RNOK( pcWriteIf->writeUvlc( m_uiSeqParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: seq_parameter_set_id_delta" ) );
        
-	  RNOK( pcWriteIf->writeUvlc( m_uiNumSubsetSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_subset_seq_parameter_set_minus1" ) );
+	  RNOK( pcWriteIf->writeUvlc( m_uiNumSubsetSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_subset_seq_parameter_set_mMnus1" ) );
 	  for ( j = 0; j <= m_uiNumSubsetSeqParameterSetMinus1[ i ]; j++)
 	  {
 		  RNOK( pcWriteIf->writeUvlc( m_uiSubsetSeqParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: subset_seq_parameter_set_id_delta" ) );
 	  }
 	  
-	  RNOK( pcWriteIf->writeUvlc( m_uiNumPicParameterSetMinus1[i], "ViewScalabilityInfoSei: num_pic_parameter_set_minus1" ) ); 
+	  RNOK( pcWriteIf->writeUvlc( m_uiNumPicParameterSetMinus1[i], "ViewScalabilityInfoSei: num_pic_parameter_set_mMnus1" ) ); 
 	  for( j = 0; j <= m_uiNumPicParameterSetMinus1[i]; j++ )
 	    RNOK( pcWriteIf->writeUvlc( m_uiPicParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: pic_parameter_set_id_delta" ) );
 	}
@@ -345,12 +345,12 @@ SEI::ViewScalabilityInfoSei::write( HeaderSymbolWriteIf *pcWriteIf )
 	if( m_bBitstreamRestrictionInfoPresentFlag[ i ] ) 
 	{
 		RNOK	( pcWriteIf->writeFlag( m_bMotionVectorsOverPicBoundariesFlag[i],"ScalableSEI:motion_vectors_over_pic_boundaries_flag"	) );
-		RNOK	( pcWriteIf->writeUvlc( m_uiMaxBytesPerPicDenom[i],		"ScalableSEI:max_bytes_per_pic_denom" ) );
-		RNOK	( pcWriteIf->writeUvlc( m_uiMaxBitsPerMbDenom[i],		"ScalableSEI:max_bits_per_mb_denom" ) );
-		RNOK	( pcWriteIf->writeUvlc( m_uiLog2MaxMvLengthHorizontal[i],		"ScalableSEI:log2_max_mv_length_horizontal" ) );
-		RNOK	( pcWriteIf->writeUvlc( m_uiLog2MaxMvLengthVertical[i],		"ScalableSEI:og2_max_mv_length_vertical" ) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiMaxBytesPerPicDenom[i],		"ScalableSEI:mMx_bytes_per_pic_denom" ) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiMaxBitsPerMbDenom[i],		"ScalableSEI:mMx_bits_per_mb_denom" ) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiLog2MaxMvLengthHorizontal[i],		"ScalableSEI:log2_mMx_mv_length_horizontal" ) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiLog2MaxMvLengthVertical[i],		"ScalableSEI:og2_mMx_mv_length_vertical" ) );
 		RNOK	( pcWriteIf->writeUvlc( m_uiNumReorderFrames[i],		"ScalableSEI:num_reorder_frames" ) );
-		RNOK	( pcWriteIf->writeUvlc( m_uiMaxDecFrameBuffering[i],		"ScalableSEI:max_dec_frame_buffering" ) );
+		RNOK	( pcWriteIf->writeUvlc( m_uiMaxDecFrameBuffering[i],		"ScalableSEI:mMx_dec_frame_buffering" ) );
 	}
 	//}}SEI JJ, Ying
   }
@@ -364,14 +364,14 @@ SEI::ViewScalabilityInfoSei::read( HeaderSymbolReadIf *pcReadIf )
   UInt i=0,j=0;
   UInt ReservedBit;
 
-  RNOK( pcReadIf->getUvlc( m_uiNumOperationPointsMinus1, "ViewScalabilityInfoSei: num_operation_points_minus1" ) );
+  RNOK( pcReadIf->getUvlc( m_uiNumOperationPointsMinus1, "ViewScalabilityInfoSei: num_operation_points_mMnus1" ) );
 
   for( i = 0; i <= m_uiNumOperationPointsMinus1; i++ )
   {
 	RNOK( pcReadIf->getUvlc( m_uiOperationPointId[i], "ViewScalabilityInfoSei: operation_point_id" ) );
 	RNOK( pcReadIf->getCode( m_uiPriorityId[i], 5, "ViewScalabilityInfoSei: priority_id" ) );
 	RNOK( pcReadIf->getCode( m_uiTemporalId[i], 3, "ViewScalabilityInfoSei: temporal_id" ) );
-	RNOK( pcReadIf->getUvlc( m_uiNumTargetOutputViewsMinus1[i], "ViewScalabilityInfoSei: num_target_output_views_minus1" ) );//SEI JJ 
+	RNOK( pcReadIf->getUvlc( m_uiNumTargetOutputViewsMinus1[i], "ViewScalabilityInfoSei: num_target_output_views_mMnus1" ) );//SEI JJ 
 
 	if( m_uiViewId[i] != NULL )
 	  free( m_uiViewId[i] );
@@ -411,8 +411,8 @@ SEI::ViewScalabilityInfoSei::read( HeaderSymbolReadIf *pcReadIf )
 	if( m_bBitRateInfoPresentFlag[i] )
 	{
 	  RNOK( pcReadIf->getCode( m_uiAvgBitrate[i], 16, "ViewScalabilityInfoSei: avg_bitrate" ) );
-	  RNOK( pcReadIf->getCode( m_uiMaxBitrate[i], 16, "ViewScalabilityInfoSei: max_bitrate" ) );
-	  RNOK( pcReadIf->getCode( m_uiMaxBitrateCalcWindow[i], 16, "ViewScalabilityInfoSei: max_bitrate_calc_window" ) );
+	  RNOK( pcReadIf->getCode( m_uiMaxBitrate[i], 16, "ViewScalabilityInfoSei: mMx_bitrate" ) );
+	  RNOK( pcReadIf->getCode( m_uiMaxBitrateCalcWindow[i], 16, "ViewScalabilityInfoSei: mMx_bitrate_calc_window" ) );
 	}
 
 	if( m_bFrmRateInfoPresentFlag[i] )
@@ -437,7 +437,7 @@ SEI::ViewScalabilityInfoSei::read( HeaderSymbolReadIf *pcReadIf )
 
 	if( m_bParameterSetsInfoPresentFlag[i] )
 	{
-	  RNOK( pcReadIf->getUvlc( m_uiNumSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_seq_parameter_set_minus1" ) );
+	  RNOK( pcReadIf->getUvlc( m_uiNumSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_seq_parameter_set_mMnus1" ) );
 
 	  if( m_uiSeqParameterSetIdDelta[i] != NULL )
 	    free( m_uiSeqParameterSetIdDelta[i] );
@@ -446,13 +446,13 @@ SEI::ViewScalabilityInfoSei::read( HeaderSymbolReadIf *pcReadIf )
 	  for( j = 0; j <= m_uiNumSeqParameterSetMinus1[i]; j++ )
 	    RNOK( pcReadIf->getUvlc( m_uiSeqParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: init_seq_parameter_set_id_delta" ) );
       
-	  RNOK( pcReadIf->getUvlc( m_uiNumSubsetSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_subset_seq_parameter_set_minus1" ) );
+	  RNOK( pcReadIf->getUvlc( m_uiNumSubsetSeqParameterSetMinus1[i], "ViewScalabilityInfoSei: num_subset_seq_parameter_set_mMnus1" ) );
 	  for ( j = 0; j <= m_uiNumSubsetSeqParameterSetMinus1[ i ]; j++)
 	  {
 		  RNOK( pcReadIf->getUvlc( m_uiSubsetSeqParameterSetIdDelta[i][j], "ViewScalabilityInfoSei: subset_seq_parameter_set_id_delta" ) );
 	  }
 	  
-	  RNOK( pcReadIf->getUvlc( m_uiNumPicParameterSetMinus1[i], "ViewScalabilityInfoSei: num_pic_parameter_set_minus1" ) );
+	  RNOK( pcReadIf->getUvlc( m_uiNumPicParameterSetMinus1[i], "ViewScalabilityInfoSei: num_pic_parameter_set_mMnus1" ) );
 
 	  if( m_uiPicParameterSetIdDelta[i] != NULL )
 	    free( m_uiPicParameterSetIdDelta[i] );
@@ -467,12 +467,12 @@ SEI::ViewScalabilityInfoSei::read( HeaderSymbolReadIf *pcReadIf )
 	if( m_bBitstreamRestrictionInfoPresentFlag[ i ] ) 
 	{
 		RNOK	( pcReadIf->getFlag( m_bMotionVectorsOverPicBoundariesFlag[i],"ScalableSEI:motion_vectors_over_pic_boundaries_flag"	) );
-		RNOK	( pcReadIf->getUvlc( m_uiMaxBytesPerPicDenom[i],		"ScalableSEI:max_bytes_per_pic_denom" ) );
-		RNOK	( pcReadIf->getUvlc( m_uiMaxBitsPerMbDenom[i],		"ScalableSEI:max_bits_per_mb_denom" ) );
-		RNOK	( pcReadIf->getUvlc( m_uiLog2MaxMvLengthHorizontal[i],		"ScalableSEI:log2_max_mv_length_horizontal" ) );
-		RNOK	( pcReadIf->getUvlc( m_uiLog2MaxMvLengthVertical[i],		"ScalableSEI:log2_max_mv_length_vertical" ) );
+		RNOK	( pcReadIf->getUvlc( m_uiMaxBytesPerPicDenom[i],		"ScalableSEI:mMx_bytes_per_pic_denom" ) );
+		RNOK	( pcReadIf->getUvlc( m_uiMaxBitsPerMbDenom[i],		"ScalableSEI:mMx_bits_per_mb_denom" ) );
+		RNOK	( pcReadIf->getUvlc( m_uiLog2MaxMvLengthHorizontal[i],		"ScalableSEI:log2_mMx_mv_length_horizontal" ) );
+		RNOK	( pcReadIf->getUvlc( m_uiLog2MaxMvLengthVertical[i],		"ScalableSEI:log2_mMx_mv_length_vertical" ) );
 		RNOK	( pcReadIf->getUvlc( m_uiNumReorderFrames[i],		"ScalableSEI:num_reorder_frames" ) );
-		RNOK	( pcReadIf->getUvlc( m_uiMaxDecFrameBuffering[i],		"ScalableSEI:max_dec_frame_buffering" ) );
+		RNOK	( pcReadIf->getUvlc( m_uiMaxDecFrameBuffering[i],		"ScalableSEI:mMx_dec_frame_buffering" ) );
 	}
 	//}}SEI JJ
   }
@@ -1094,7 +1094,7 @@ SEI::SubSeqInfo::init( UInt  uiSubSeqLayerNum,
 
 SEI::ScalableSei::ScalableSei	() 
 : SEIMessage									( SCALABLE_SEI )
-, m_num_layers_minus1					( 0	)
+, m_num_layers_mMnus1					( 0	)
 {	
 	::memset( m_layer_id, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
 //	::memset( m_fgs_layer_flag, 0x00, MAX_SCALABLE_LAYERS*sizeof(Bool) );  //JVT-S036 
@@ -1127,17 +1127,17 @@ SEI::ScalableSei::ScalableSei	()
 	::memset( m_quality_level, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
 
 	::memset( m_avg_bitrate, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
-	::memset( m_max_bitrate_layer, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );//
-	::memset( m_max_bitrate_decoded_picture, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );//
-	::memset( m_max_bitrate_calc_window, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );//
+	::memset( m_mMx_bitrate_layer, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );//
+	::memset( m_mMx_bitrate_decoded_picture, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );//
+	::memset( m_mMx_bitrate_calc_window, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );//
 
 	::memset( m_constant_frm_rate_idc, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
 	::memset( m_avg_frm_rate, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
 
 	::memset( m_frm_rate_info_src_layer_id_delta, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );//
 
-	::memset( m_frm_width_in_mbs_minus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
-	::memset( m_frm_height_in_mbs_minus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
+	::memset( m_frm_width_in_mbs_mMnus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
+	::memset( m_frm_height_in_mbs_mMnus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
 
 	::memset( m_frm_size_info_src_layer_id_delta, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );//
 
@@ -1153,23 +1153,23 @@ SEI::ScalableSei::ScalableSei	()
 	::memset( m_roi_id, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
 
 	::memset( m_iroi_slice_division_type, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
-	::memset( m_grid_slice_width_in_mbs_minus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
-	::memset( m_grid_slice_height_in_mbs_minus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
-	::memset( m_num_slice_minus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
+	::memset( m_grid_slice_width_in_mbs_mMnus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
+	::memset( m_grid_slice_height_in_mbs_mMnus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
+	::memset( m_num_slice_mMnus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
 	::memset( m_first_mb_in_slice, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt*) );
-	::memset( m_slice_width_in_mbs_minus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt*) );
-	::memset( m_slice_height_in_mbs_minus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt*) );
+	::memset( m_slice_width_in_mbs_mMnus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt*) );
+	::memset( m_slice_height_in_mbs_mMnus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt*) );
 	::memset( m_slice_id, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt*) );
 
 	::memset( m_num_directly_dependent_layers, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
-	::memset( m_directly_dependent_layer_id_delta_minus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt*) ); //
+	::memset( m_directly_dependent_layer_id_delta_mMnus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt*) ); //
 
 	::memset( m_layer_dependency_info_src_layer_id_delta, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) ); //
 //JVT-S036  end
 
-	::memset( m_num_init_seq_parameter_set_minus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
+	::memset( m_num_init_seq_parameter_set_mMnus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
 	::memset( m_init_seq_parameter_set_id_delta, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt*) );
-	::memset( m_num_init_pic_parameter_set_minus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
+	::memset( m_num_init_pic_parameter_set_mMnus1, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) );
 	::memset( m_init_pic_parameter_set_id_delta, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt*) );
 
 	::memset( m_init_parameter_sets_info_src_layer_id_delta, 0x00, MAX_SCALABLE_LAYERS*sizeof(UInt) ); //JVT-S036 
@@ -1188,15 +1188,15 @@ SEI::ScalableSei::~ScalableSei()
 			free( m_first_mb_in_slice[i] );
 			m_first_mb_in_slice[i] = NULL;
 		}
-		if ( m_slice_width_in_mbs_minus1[i] != NULL )
+		if ( m_slice_width_in_mbs_mMnus1[i] != NULL )
 		{
-			free( m_slice_width_in_mbs_minus1[i] );
-			m_slice_width_in_mbs_minus1[i] = NULL;
+			free( m_slice_width_in_mbs_mMnus1[i] );
+			m_slice_width_in_mbs_mMnus1[i] = NULL;
 		}
-		if ( m_slice_height_in_mbs_minus1[i] != NULL )
+		if ( m_slice_height_in_mbs_mMnus1[i] != NULL )
 		{
-			free( m_slice_height_in_mbs_minus1[i] );
-			m_slice_height_in_mbs_minus1[i] = NULL;
+			free( m_slice_height_in_mbs_mMnus1[i] );
+			m_slice_height_in_mbs_mMnus1[i] = NULL;
 		}
 		if ( m_slice_id[i] != NULL )
 		{
@@ -1221,10 +1221,10 @@ SEI::ScalableSei::write( HeaderSymbolWriteIf *pcWriteIf )
 {
   UInt i=0, j=0;
 
-	ROF( m_num_layers_minus1+1 );
-	RNOK		( pcWriteIf->writeUvlc(m_num_layers_minus1,													"ScalableSEI: num_layers_minus1"											) );
+	ROF( m_num_layers_mMnus1+1 );
+	RNOK		( pcWriteIf->writeUvlc(m_num_layers_mMnus1,													"ScalableSEI: num_layers_mMnus1"											) );
 
-	for( i = 0; i <= m_num_layers_minus1; i++ )
+	for( i = 0; i <= m_num_layers_mMnus1; i++ )
 	{
 		if (0 < m_aiNumRoi[m_dependency_id[i]])
 		{
@@ -1282,9 +1282,9 @@ JVT-S036  */
 		{
 			RNOK	( pcWriteIf->writeCode( m_avg_bitrate[i],										16,		"ScalableSEI: avg_bitrate"														) );
 //JVT-S036  start
-			RNOK	( pcWriteIf->writeCode( m_max_bitrate_layer[i],										16,		"ScalableSEI: max_bitrate_layer"											) );
-			RNOK	( pcWriteIf->writeCode( m_max_bitrate_decoded_picture[i],										16,		"ScalableSEI: max_bitrate_decoded_picture"						) );
-			RNOK	( pcWriteIf->writeCode( m_max_bitrate_calc_window[i],							16,		"ScalableSEI: max_bitrate_calc_window"											) );
+			RNOK	( pcWriteIf->writeCode( m_mMx_bitrate_layer[i],										16,		"ScalableSEI: mMx_bitrate_layer"											) );
+			RNOK	( pcWriteIf->writeCode( m_mMx_bitrate_decoded_picture[i],										16,		"ScalableSEI: mMx_bitrate_decoded_picture"						) );
+			RNOK	( pcWriteIf->writeCode( m_mMx_bitrate_calc_window[i],							16,		"ScalableSEI: mMx_bitrate_calc_window"											) );
 //JVT-S036  end
 		}
 		if ( m_frm_rate_info_present_flag[i] )
@@ -1300,8 +1300,8 @@ JVT-S036  */
 
 		if ( m_frm_size_info_present_flag[i] )
 		{
-			RNOK	( pcWriteIf->writeUvlc( m_frm_width_in_mbs_minus1[i],							"ScalableSEI: frm_width_in_mbs_minus1"								) );
-			RNOK	( pcWriteIf->writeUvlc( m_frm_height_in_mbs_minus1[i],						"ScalableSEI: frm_height_in_mbs_minus1"							) );
+			RNOK	( pcWriteIf->writeUvlc( m_frm_width_in_mbs_mMnus1[i],							"ScalableSEI: frm_width_in_mbs_mMnus1"								) );
+			RNOK	( pcWriteIf->writeUvlc( m_frm_height_in_mbs_mMnus1[i],						"ScalableSEI: frm_height_in_mbs_mMnus1"							) );
 		}
 		else
 		{//JVT-S036 
@@ -1336,38 +1336,38 @@ JVT-S036  */
 			RNOK	( pcWriteIf->writeCode( m_iroi_slice_division_type[i],		2,		"ScalableSEI:iroi_slice_division_type" ) );
 			if( m_iroi_slice_division_type[i] == 0 )
 			{
-				RNOK	( pcWriteIf->writeUvlc( m_grid_slice_width_in_mbs_minus1[i],    "ScalableSEI:grid_slice_width_in_mbs_minus1" ) );
-				RNOK	( pcWriteIf->writeUvlc( m_grid_slice_height_in_mbs_minus1[i],    "ScalableSEI:grid_slice_height_in_mbs_minus1" ) );
+				RNOK	( pcWriteIf->writeUvlc( m_grid_slice_width_in_mbs_mMnus1[i],    "ScalableSEI:grid_slice_width_in_mbs_mMnus1" ) );
+				RNOK	( pcWriteIf->writeUvlc( m_grid_slice_height_in_mbs_mMnus1[i],    "ScalableSEI:grid_slice_height_in_mbs_mMnus1" ) );
 			}
 			else if( m_iroi_slice_division_type[i] == 1 )
 			{
-				RNOK	( pcWriteIf->writeUvlc( m_num_slice_minus1[i],		"ScalableSEI:num_slice_minus1" ) );
-				for ( j = 0; j <= m_num_slice_minus1[i]; j++ )
+				RNOK	( pcWriteIf->writeUvlc( m_num_slice_mMnus1[i],		"ScalableSEI:num_slice_mMnus1" ) );
+				for ( j = 0; j <= m_num_slice_mMnus1[i]; j++ )
 				{
 					RNOK	( pcWriteIf->writeUvlc( m_first_mb_in_slice[i][j],				"ScalableSEI: first_mb_in_slice" ) );
-					RNOK	( pcWriteIf->writeUvlc( m_slice_width_in_mbs_minus1[i][j],		"ScalableSEI:slice_width_in_mbs_minus1" ) );
-					RNOK	( pcWriteIf->writeUvlc( m_slice_height_in_mbs_minus1[i][j],		"ScalableSEI:slice_height_in_mbs_minus1" ) );
+					RNOK	( pcWriteIf->writeUvlc( m_slice_width_in_mbs_mMnus1[i][j],		"ScalableSEI:slice_width_in_mbs_mMnus1" ) );
+					RNOK	( pcWriteIf->writeUvlc( m_slice_height_in_mbs_mMnus1[i][j],		"ScalableSEI:slice_height_in_mbs_mMnus1" ) );
 				}
 			}
       // JVT-S054 (REPLACE): Typo error
 			//else if ( m_iroi_slice_division_type[1] == 2 )
 			else if ( m_iroi_slice_division_type[i] == 2 )
 			{
-				RNOK	( pcWriteIf->writeUvlc( m_num_slice_minus1[i],		"ScalableSEI:num_slice_minus1" ) );
+				RNOK	( pcWriteIf->writeUvlc( m_num_slice_mMnus1[i],		"ScalableSEI:num_slice_mMnus1" ) );
     		// JVT-S054 (REPLACE) ->
         /*
-				UInt uiFrameHeightInMb = m_slice_height_in_mbs_minus1[i][j] + 1;
-				UInt uiFrameWidthInMb  = m_slice_width_in_mbs_minus1[i][j] + 1;
+				UInt uiFrameHeightInMb = m_slice_height_in_mbs_mMnus1[i][j] + 1;
+				UInt uiFrameWidthInMb  = m_slice_width_in_mbs_mMnus1[i][j] + 1;
 				UInt uiPicSizeInMbs = uiFrameHeightInMb * uiFrameWidthInMb;
 				for ( j = 0; j < uiPicSizeInMbs; j++ )
 				{
 					RNOK	( pcWriteIf->writeUvlc( m_slice_id[i][j],		"ScalableSEI:slice_id"		   ) );
 				}
         */
-				UInt uiFrameHeightInMb = m_slice_height_in_mbs_minus1[i][j] + 1;
-				UInt uiFrameWidthInMb  = m_slice_width_in_mbs_minus1[i][j] + 1;
+				UInt uiFrameHeightInMb = m_slice_height_in_mbs_mMnus1[i][j] + 1;
+				UInt uiFrameWidthInMb  = m_slice_width_in_mbs_mMnus1[i][j] + 1;
 				UInt uiPicSizeInMbs = uiFrameHeightInMb * uiFrameWidthInMb;
-			  UInt uiWriteBits = (UInt) ceil( log( (double) (m_num_slice_minus1[i] + 1) ) / log(2.) );
+			  UInt uiWriteBits = (UInt) ceil( log( (double) (m_num_slice_mMnus1[i] + 1) ) / log(2.) );
 				if (uiWriteBits == 0)
 					uiWriteBits = 1;
 				for ( j = 0; j < uiPicSizeInMbs; j++ )
@@ -1384,7 +1384,7 @@ JVT-S036  */
 // BUG_FIX liuhui{
 		    for( j = 0; j < m_num_directly_dependent_layers[i]; j++ )
 		    {
-		      RNOK( pcWriteIf->writeUvlc (m_directly_dependent_layer_id_delta_minus1[i][j],      "ScalableSEI: directly_dependent_layers_id_delta"		) );  //JVT-S036 
+		      RNOK( pcWriteIf->writeUvlc (m_directly_dependent_layer_id_delta_mMnus1[i][j],      "ScalableSEI: directly_dependent_layers_id_delta"		) );  //JVT-S036 
 		    }
 // BUG_FIX liuhui}
 		}
@@ -1397,14 +1397,14 @@ JVT-S036  */
 		{
 
 // BUG_FIX liuhui{
-			RNOK	( pcWriteIf->writeUvlc ( m_num_init_seq_parameter_set_minus1[i],	"ScalableSEI: num_init_seq_parameter_set_minus1"			) );
-			for( j = 0; j <= m_num_init_seq_parameter_set_minus1[i]; j++ )
+			RNOK	( pcWriteIf->writeUvlc ( m_num_init_seq_parameter_set_mMnus1[i],	"ScalableSEI: num_init_seq_parameter_set_mMnus1"			) );
+			for( j = 0; j <= m_num_init_seq_parameter_set_mMnus1[i]; j++ )
 			{
 			  RNOK( pcWriteIf->writeUvlc( m_init_seq_parameter_set_id_delta[i][j],  "ScalableSEI: init_seq_parameter_set_id_delta"				    ) );
 			}
 
-			RNOK    ( pcWriteIf->writeUvlc ( m_num_init_pic_parameter_set_minus1[i],	"ScalableSEI: num_init_pic_parameter_set_minus1"			) );
-			for( j = 0; j <= m_num_init_pic_parameter_set_minus1[i]; j++ )
+			RNOK    ( pcWriteIf->writeUvlc ( m_num_init_pic_parameter_set_mMnus1[i],	"ScalableSEI: num_init_pic_parameter_set_mMnus1"			) );
+			for( j = 0; j <= m_num_init_pic_parameter_set_mMnus1[i]; j++ )
 			{
 			  RNOK ( pcWriteIf->writeUvlc ( m_init_pic_parameter_set_id_delta[i][j],"ScalableSEI: init_pic_parameter_set_id_delta"				    ) );
 			}
@@ -1424,9 +1424,9 @@ SEI::ScalableSei::read ( HeaderSymbolReadIf *pcReadIf )
   UInt i, j=0;
   UInt rl;//JVT-S036  
 
-	RNOK	( pcReadIf->getUvlc( m_num_layers_minus1 ,																""	) );
+	RNOK	( pcReadIf->getUvlc( m_num_layers_mMnus1 ,																""	) );
 
-	for ( i = 0; i <= m_num_layers_minus1; i++ )
+	for ( i = 0; i <= m_num_layers_mMnus1; i++ )
 	{
 		RNOK	( pcReadIf->getCode( m_layer_id[i],																	8,			""	) );
 	//JVT-S036  start
@@ -1485,9 +1485,9 @@ JVT-S036  */
 		{
 			RNOK	( pcReadIf->getCode( m_avg_bitrate[i],														16,		""	) );
 	//JVT-S036  start
-			RNOK	( pcReadIf->getCode( m_max_bitrate_layer[i],														16,		""	) );
-			RNOK	( pcReadIf->getCode( m_max_bitrate_decoded_picture[i],														16,		""	) );
-			RNOK	( pcReadIf->getCode( m_max_bitrate_calc_window[i],											16,		""	) );
+			RNOK	( pcReadIf->getCode( m_mMx_bitrate_layer[i],														16,		""	) );
+			RNOK	( pcReadIf->getCode( m_mMx_bitrate_decoded_picture[i],														16,		""	) );
+			RNOK	( pcReadIf->getCode( m_mMx_bitrate_calc_window[i],											16,		""	) );
 	//JVT-S036  end
 		}
 
@@ -1506,15 +1506,15 @@ JVT-S036  */
 
 		if( m_frm_size_info_present_flag[i] )
 		{
-			RNOK	( pcReadIf->getUvlc( m_frm_width_in_mbs_minus1[i],											""	) );
-			RNOK	( pcReadIf->getUvlc( m_frm_height_in_mbs_minus1[i],											""	) );
+			RNOK	( pcReadIf->getUvlc( m_frm_width_in_mbs_mMnus1[i],											""	) );
+			RNOK	( pcReadIf->getUvlc( m_frm_height_in_mbs_mMnus1[i],											""	) );
 		}
 		else
 		{//JVT-S036  
 			RNOK	( pcReadIf->getUvlc( m_frm_size_info_src_layer_id_delta[i],							""  ) );
 			rl = m_layer_id[i] - m_frm_size_info_src_layer_id_delta[i];
-			m_frm_width_in_mbs_minus1[i] = m_frm_width_in_mbs_minus1[rl];
-			m_frm_width_in_mbs_minus1[i] = m_frm_width_in_mbs_minus1[rl];
+			m_frm_width_in_mbs_mMnus1[i] = m_frm_width_in_mbs_mMnus1[rl];
+			m_frm_width_in_mbs_mMnus1[i] = m_frm_width_in_mbs_mMnus1[rl];
 		}
 
 		if( m_sub_region_layer_flag[i] )
@@ -1555,47 +1555,47 @@ JVT-S036  */
 			RNOK	( pcReadIf->getCode( m_iroi_slice_division_type[i],		2,		"ScalableSEI:iroi_slice_division_type" ) );
 			if( m_iroi_slice_division_type[i] == 0 )
 			{
-				RNOK	( pcReadIf->getUvlc( m_grid_slice_width_in_mbs_minus1[i],    "ScalableSEI:grid_slice_width_in_mbs_minus1" ) );
-				RNOK	( pcReadIf->getUvlc( m_grid_slice_height_in_mbs_minus1[i],    "ScalableSEI:grid_slice_height_in_mbs_minus1" ) );
+				RNOK	( pcReadIf->getUvlc( m_grid_slice_width_in_mbs_mMnus1[i],    "ScalableSEI:grid_slice_width_in_mbs_mMnus1" ) );
+				RNOK	( pcReadIf->getUvlc( m_grid_slice_height_in_mbs_mMnus1[i],    "ScalableSEI:grid_slice_height_in_mbs_mMnus1" ) );
 			}
 			else if( m_iroi_slice_division_type[i] == 1 )
 			{
-				RNOK	( pcReadIf->getUvlc( m_num_slice_minus1[i],		"ScalableSEI:num_slice_minus1" ) );
+				RNOK	( pcReadIf->getUvlc( m_num_slice_mMnus1[i],		"ScalableSEI:num_slice_mMnus1" ) );
     		// JVT-S054 (ADD) ->
 				if ( m_first_mb_in_slice[i] != NULL )
 					free( m_first_mb_in_slice[i] );
-				m_first_mb_in_slice[i] = (UInt*)malloc( m_num_slice_minus1[i]*sizeof(UInt) );
-				if ( m_slice_width_in_mbs_minus1[i] != NULL )
-					free( m_slice_width_in_mbs_minus1[i] );
-				m_slice_width_in_mbs_minus1[i] = (UInt*)malloc( m_num_slice_minus1[i]*sizeof(UInt) );
-				if ( m_slice_height_in_mbs_minus1[i] != NULL )
-					free( m_slice_height_in_mbs_minus1[i] );
-				m_slice_height_in_mbs_minus1[i] = (UInt*)malloc( m_num_slice_minus1[i]*sizeof(UInt) );
+				m_first_mb_in_slice[i] = (UInt*)malloc( m_num_slice_mMnus1[i]*sizeof(UInt) );
+				if ( m_slice_width_in_mbs_mMnus1[i] != NULL )
+					free( m_slice_width_in_mbs_mMnus1[i] );
+				m_slice_width_in_mbs_mMnus1[i] = (UInt*)malloc( m_num_slice_mMnus1[i]*sizeof(UInt) );
+				if ( m_slice_height_in_mbs_mMnus1[i] != NULL )
+					free( m_slice_height_in_mbs_mMnus1[i] );
+				m_slice_height_in_mbs_mMnus1[i] = (UInt*)malloc( m_num_slice_mMnus1[i]*sizeof(UInt) );
     		// JVT-S054 (ADD) <-
-				for ( j = 0; j <= m_num_slice_minus1[i]; j++ )
+				for ( j = 0; j <= m_num_slice_mMnus1[i]; j++ )
 				{
 					RNOK	( pcReadIf->getUvlc( m_first_mb_in_slice[i][j],				"ScalableSEI: first_mb_in_slice" ) );
-					RNOK	( pcReadIf->getUvlc( m_slice_width_in_mbs_minus1[i][j],		"ScalableSEI:slice_width_in_mbs_minus1" ) );
-					RNOK	( pcReadIf->getUvlc( m_slice_height_in_mbs_minus1[i][j],		"ScalableSEI:slice_height_in_mbs_minus1" ) );
+					RNOK	( pcReadIf->getUvlc( m_slice_width_in_mbs_mMnus1[i][j],		"ScalableSEI:slice_width_in_mbs_mMnus1" ) );
+					RNOK	( pcReadIf->getUvlc( m_slice_height_in_mbs_mMnus1[i][j],		"ScalableSEI:slice_height_in_mbs_mMnus1" ) );
 				}
 			}
 			else if ( m_iroi_slice_division_type[i] == 2 )
 			{
     		// JVT-S054 (REPLACE) ->
-				RNOK	( pcReadIf->getUvlc( m_num_slice_minus1[i],		"ScalableSEI:num_slice_minus1" ) );
+				RNOK	( pcReadIf->getUvlc( m_num_slice_mMnus1[i],		"ScalableSEI:num_slice_mMnus1" ) );
         /*
-				UInt uiFrameHeightInMb = m_slice_height_in_mbs_minus1[i][j] + 1;
-				UInt uiFrameWidthInMb  = m_slice_width_in_mbs_minus1[i][j] + 1;
+				UInt uiFrameHeightInMb = m_slice_height_in_mbs_mMnus1[i][j] + 1;
+				UInt uiFrameWidthInMb  = m_slice_width_in_mbs_mMnus1[i][j] + 1;
 				UInt uiPicSizeInMbs = uiFrameHeightInMb * uiFrameWidthInMb;
 				for ( j = 0; j < uiPicSizeInMbs; j++ )
 				{
 					RNOK	( pcReadIf->getUvlc( m_slice_id[i][j],		"ScalableSEI:slice_id"		   ) );
 				}
         */
-				UInt uiFrameHeightInMb = m_slice_height_in_mbs_minus1[i][j] + 1;
-				UInt uiFrameWidthInMb  = m_slice_width_in_mbs_minus1[i][j] + 1;
+				UInt uiFrameHeightInMb = m_slice_height_in_mbs_mMnus1[i][j] + 1;
+				UInt uiFrameWidthInMb  = m_slice_width_in_mbs_mMnus1[i][j] + 1;
 				UInt uiPicSizeInMbs = uiFrameHeightInMb * uiFrameWidthInMb;
-			  UInt uiReadBits = (UInt)ceil( log( (double) (m_num_slice_minus1[i] + 1) ) / log(2.) );
+			  UInt uiReadBits = (UInt)ceil( log( (double) (m_num_slice_mMnus1[i] + 1) ) / log(2.) );
 				if (uiReadBits == 0)
 					uiReadBits = 1;
 				if ( m_slice_id[i] != NULL )
@@ -1616,7 +1616,7 @@ JVT-S036  */
 // BUG_FIX liuhui{
 			for( j = 0; j < m_num_directly_dependent_layers[i]; j++ )
 			{
-				RNOK  ( pcReadIf->getUvlc( m_directly_dependent_layer_id_delta_minus1[i][j],				""  ) );//JVT-S036 
+				RNOK  ( pcReadIf->getUvlc( m_directly_dependent_layer_id_delta_mMnus1[i][j],				""  ) );//JVT-S036 
 			}
 // BUG_FIX liuhui}
 		}
@@ -1627,20 +1627,20 @@ JVT-S036  */
 			m_num_directly_dependent_layers[i] = m_num_directly_dependent_layers[rl];
 			for( j = 0; j < m_num_directly_dependent_layers[i]; j++ )
 			{
-				m_directly_dependent_layer_id_delta_minus1[i][j] = m_directly_dependent_layer_id_delta_minus1[rl][j];
+				m_directly_dependent_layer_id_delta_mMnus1[i][j] = m_directly_dependent_layer_id_delta_mMnus1[rl][j];
 			}
 		}
 
 		if( m_init_parameter_sets_info_present_flag[i] )
 		{
 // BUG_FIX liuhui{
-			RNOK    ( pcReadIf->getUvlc( m_num_init_seq_parameter_set_minus1[i],                        ""  ) );
-			for( j = 0; j <= m_num_init_seq_parameter_set_minus1[i]; j++ )
+			RNOK    ( pcReadIf->getUvlc( m_num_init_seq_parameter_set_mMnus1[i],                        ""  ) );
+			for( j = 0; j <= m_num_init_seq_parameter_set_mMnus1[i]; j++ )
 			{
 			    RNOK	( pcReadIf->getUvlc( m_init_seq_parameter_set_id_delta[i][j],					""	) );
 			}
-			RNOK	( pcReadIf->getUvlc( m_num_init_pic_parameter_set_minus1[i],						""	) );
-			for( j = 0; j <= m_num_init_pic_parameter_set_minus1[i]; j++ )
+			RNOK	( pcReadIf->getUvlc( m_num_init_pic_parameter_set_mMnus1[i],						""	) );
+			for( j = 0; j <= m_num_init_pic_parameter_set_mMnus1[i]; j++ )
 			{
 				RNOK	( pcReadIf->getUvlc( m_init_pic_parameter_set_id_delta[i][j],					""	) );
 			}
@@ -1650,13 +1650,13 @@ JVT-S036  */
 		{//JVT-S036 
 			RNOK	( pcReadIf->getUvlc( m_init_parameter_sets_info_src_layer_id_delta[i],		"" ) );
 			rl = m_layer_id[i] - m_init_parameter_sets_info_src_layer_id_delta[i];
-			m_num_init_seq_parameter_set_minus1[i] = m_num_init_seq_parameter_set_minus1[rl];
-			for( j = 0; j <= m_num_init_seq_parameter_set_minus1[i]; j++ )
+			m_num_init_seq_parameter_set_mMnus1[i] = m_num_init_seq_parameter_set_mMnus1[rl];
+			for( j = 0; j <= m_num_init_seq_parameter_set_mMnus1[i]; j++ )
 			{
 			    m_init_seq_parameter_set_id_delta[i][j] = m_init_seq_parameter_set_id_delta[rl][j];
 			}
-			m_num_init_pic_parameter_set_minus1[i] = m_num_init_pic_parameter_set_minus1[rl];
-			for( j = 0; j <= m_num_init_pic_parameter_set_minus1[i]; j++ )
+			m_num_init_pic_parameter_set_mMnus1[i] = m_num_init_pic_parameter_set_mMnus1[rl];
+			for( j = 0; j <= m_num_init_pic_parameter_set_mMnus1[i]; j++ )
 			{
 				m_init_pic_parameter_set_id_delta[i][j] = m_init_pic_parameter_set_id_delta[rl][j];
 			}
@@ -1714,7 +1714,7 @@ SEI::SubPicSei::read( HeaderSymbolReadIf *pcReadIf )
 
 SEI::MotionSEI::MotionSEI     ()
  : SEIMessage                     ( MOTION_SEI ),
- m_num_slice_groups_in_set_minus1(0),
+ m_num_slice_groups_in_set_mMnus1(0),
  m_exact_sample_value_match_flag(true),
  m_pan_scan_rect_flag(false)
 {
@@ -1736,9 +1736,9 @@ ErrVal
 SEI::MotionSEI::write( HeaderSymbolWriteIf* pcWriteIf )
 {
 
-  RNOK  ( pcWriteIf->writeUvlc( m_num_slice_groups_in_set_minus1,               "Motion Constrainted SEI: Num_slice_groups_in_set_minus1"   ) );
+  RNOK  ( pcWriteIf->writeUvlc( m_num_slice_groups_in_set_mMnus1,               "Motion Constrainted SEI: Num_slice_groups_in_set_mMnus1"   ) );
 
-  for(UInt i = 0; i <= m_num_slice_groups_in_set_minus1; i++)
+  for(UInt i = 0; i <= m_num_slice_groups_in_set_mMnus1; i++)
   {    
     RNOK  ( pcWriteIf->writeUvlc( m_slice_group_id[ i ],               "Motion Constrainted SEI: slice_group_id[ i ]"   ) );
   }
@@ -1753,9 +1753,9 @@ SEI::MotionSEI::write( HeaderSymbolWriteIf* pcWriteIf )
 ErrVal
 SEI::MotionSEI::read ( HeaderSymbolReadIf* pcReadIf )
 {
-  RNOK  ( pcReadIf->getUvlc( m_num_slice_groups_in_set_minus1,               "Motion Constrainted SEI: Num_slice_groups_in_set_minus1"   ) );
+  RNOK  ( pcReadIf->getUvlc( m_num_slice_groups_in_set_mMnus1,               "Motion Constrainted SEI: Num_slice_groups_in_set_mMnus1"   ) );
 
-  for(UInt i = 0; i <= m_num_slice_groups_in_set_minus1; i++)
+  for(UInt i = 0; i <= m_num_slice_groups_in_set_mMnus1; i++)
   {    
     RNOK  ( pcReadIf->getUvlc( m_slice_group_id[ i ],               "Motion Constrainted SEI: slice_group_id[ i ]"   ) );
   }
@@ -1996,7 +1996,7 @@ SEI::ScalableSeiDependencyChange::write( HeaderSymbolWriteIf *pcWriteIf )
   UInt i, j;
 
 	ROF( m_uiNumLayersMinus1+1 );
-	RNOK		( pcWriteIf->writeUvlc(m_uiNumLayersMinus1,													"ScalableSeiDependencyChange: num_layers_minus1"											) );
+	RNOK		( pcWriteIf->writeUvlc(m_uiNumLayersMinus1,													"ScalableSeiDependencyChange: num_layers_mMnus1"											) );
 	for( i = 0; i <= m_uiNumLayersMinus1; i++ )
 	{
 		RNOK	( pcWriteIf->writeCode( m_auiLayerId[i],												8,		"ScalableSeiDependencyChange: layer_id"															) );
@@ -2005,10 +2005,10 @@ SEI::ScalableSeiDependencyChange::write( HeaderSymbolWriteIf *pcWriteIf )
 		{
 	       RNOK		( pcWriteIf->writeUvlc(m_auiNumDirectDependentLayers[i],													"ScalableSeiDependencyChange: num_directly_dependent_layers"											) );
 	       for ( j = 0; j < m_auiNumDirectDependentLayers[i]; j++)
-	            RNOK( pcWriteIf->writeUvlc(m_auiDirectDependentLayerIdDeltaMinus1[i][j],													"ScalableSeiDependencyChange: directly_dependent_layer_id_delta_minus1"											) );
+	            RNOK( pcWriteIf->writeUvlc(m_auiDirectDependentLayerIdDeltaMinus1[i][j],													"ScalableSeiDependencyChange: directly_dependent_layer_id_delta_mMnus1"											) );
 		}
 		else
-	            RNOK	( pcWriteIf->writeUvlc(m_auiLayerDependencyInfoSrcLayerIdDeltaMinus1[i],													"ScalableSeiDependencyChange: layer_dependency_info_src_layer_id_delta_minus1"											) );
+	            RNOK	( pcWriteIf->writeUvlc(m_auiLayerDependencyInfoSrcLayerIdDeltaMinus1[i],													"ScalableSeiDependencyChange: layer_dependency_info_src_layer_id_delta_mMnus1"											) );
 	}
 	return Err::m_nOK;
 }
@@ -2018,7 +2018,7 @@ SEI::ScalableSeiDependencyChange::read ( HeaderSymbolReadIf *pcReadIf )
 {
   UInt i, j;
 
-	RNOK		( pcReadIf->getUvlc(m_uiNumLayersMinus1,													"ScalableSeiDependencyChange: num_layers_minus1"											) );
+	RNOK		( pcReadIf->getUvlc(m_uiNumLayersMinus1,													"ScalableSeiDependencyChange: num_layers_mMnus1"											) );
 	for( i = 0; i <= m_uiNumLayersMinus1; i++ )
 	{
 		RNOK	( pcReadIf->getCode( m_auiLayerId[i],												8,		"ScalableSeiDependencyChange: layer_id"															) );
@@ -2027,10 +2027,10 @@ SEI::ScalableSeiDependencyChange::read ( HeaderSymbolReadIf *pcReadIf )
 		{
 	       RNOK		( pcReadIf->getUvlc(m_auiNumDirectDependentLayers[i],													"ScalableSeiDependencyChange: num_directly_dependent_layers"											) );
 	       for ( j = 0; j < m_auiNumDirectDependentLayers[i]; j++)
-	            RNOK		( pcReadIf->getUvlc(m_auiDirectDependentLayerIdDeltaMinus1[i][j],													"ScalableSeiDependencyChange: directly_dependent_layer_id_delta_minus1"											) );
+	            RNOK		( pcReadIf->getUvlc(m_auiDirectDependentLayerIdDeltaMinus1[i][j],													"ScalableSeiDependencyChange: directly_dependent_layer_id_delta_mMnus1"											) );
 		}
 		else
-	            RNOK		( pcReadIf->getUvlc(m_auiLayerDependencyInfoSrcLayerIdDeltaMinus1[i],													"ScalableSeiDependencyChange: layer_dependency_info_src_layer_id_delta_minus1"											) );
+	            RNOK		( pcReadIf->getUvlc(m_auiLayerDependencyInfoSrcLayerIdDeltaMinus1[i],													"ScalableSeiDependencyChange: layer_dependency_info_src_layer_id_delta_mMnus1"											) );
 	}
 	return Err::m_nOK;
 }

@@ -1,0 +1,19 @@
+objects/ResizeParameters.d.o: \
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../src/lib/H264AVCCommonLib/ResizeParameters.cpp \
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/ResizeParameters.h \
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/Typedefs.h \
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/H264AVCCommonIf.h \
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/Macros.h \
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/MemList.h \
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/MemIf.h \
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/MemCont.h \
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/MemAccessor.h
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../src/lib/H264AVCCommonLib/ResizeParameters.cpp :
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/ResizeParameters.h :
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/Typedefs.h :
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/H264AVCCommonIf.h :
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/Macros.h :
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/MemList.h :
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/MemIf.h :
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/MemCont.h :
+ /home/isi/mmortaheb/MVC/jmvc/JMVC/H264Extension/build/linux/lib/H264AVCCommonLib/../../../../include/MemAccessor.h :

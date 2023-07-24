@@ -514,8 +514,8 @@ H264AVCEncoder::xWriteScalableSEI( ExtBinDataAccessor* pcExtBinDataAccessor )
 		LayerParameters& rcLayer = m_pcCodingParameter->getLayerParameters ( i );
 		UInt uiTotalTempLevel = rcLayer.getDecompositionStages () - rcLayer.getNotCodedMCTFStages();
 // *LMH(20060203): Fix Bug due to underflow (Replace)
-		//UInt uiMinTempLevel   = ( !bH264AVCCompatible ||bSubSeq ) ? 0: max( 0, uiTotalTempLevel - 1 );
-		UInt uiMinTempLevel   = ( !bH264AVCCompatible ||bSubSeq ) ? 0: max( 0, (Int)uiTotalTempLevel - 1 );
+		//UInt uiMinTempLevel   = ( !bH264AVCCompatible ||bSubSeq ) ? 0: mMx( 0, uiTotalTempLevel - 1 );
+		UInt uiMinTempLevel   = ( !bH264AVCCompatible ||bSubSeq ) ? 0: mMx( 0, (Int)uiTotalTempLevel - 1 );
 		UInt uiActTempLevel   = uiTotalTempLevel - uiMinTempLevel + 1;
 		UInt uiTotalFGSLevel  = (UInt)rcLayer.getNumFGSLayers () + 1;
 		uiLayerNum += uiActTempLevel * uiTotalFGSLevel;
@@ -545,8 +545,8 @@ H264AVCEncoder::xWriteScalableSEI( ExtBinDataAccessor* pcExtBinDataAccessor )
 		Bool bH264AVCCompatible = ( uiCurrLayer == 0 && m_pcCodingParameter->getBaseLayerMode() > 0 );
 		Bool bSubSeq            = ( uiCurrLayer == 0 && m_pcCodingParameter->getBaseLayerMode() > 1 );
 // *LMH(20060203): Fix Bug due to underflow (Replace)
-		//UInt uiMinTempLevel     = ( !bH264AVCCompatible ||bSubSeq ) ? 0: max(0,uiTotalTempLevel - 2);
-		UInt uiMinTempLevel     = ( !bH264AVCCompatible ||bSubSeq ) ? 0: max(0, (Int)uiTotalTempLevel - 2);
+		//UInt uiMinTempLevel     = ( !bH264AVCCompatible ||bSubSeq ) ? 0: mMx(0,uiTotalTempLevel - 2);
+		UInt uiMinTempLevel     = ( !bH264AVCCompatible ||bSubSeq ) ? 0: mMx(0, (Int)uiTotalTempLevel - 2);
 
 		for ( UInt uiCurrTempLevel = 0; uiCurrTempLevel < uiTotalTempLevel; uiCurrTempLevel++ )
 		{
@@ -832,10 +832,10 @@ H264AVCEncoder::xWriteScalableSEI( ExtBinDataAccessor* pcExtBinDataAccessor )
 						  LayerParameters& rcBaseLayer = m_pcCodingParameter->getLayerParameters ( uiBaseLayerId );
 						  UInt uiBaseFGSLayers = (UInt)( rcBaseLayer.getNumFGSLayers() );
 						  UInt uiBaseQualityLevel = rcLayer.getBaseQualityLevel();
-						  uiBaseQualityLevel = min( uiBaseQualityLevel, uiBaseFGSLayers );
+						  uiBaseQualityLevel = mMn( uiBaseQualityLevel, uiBaseFGSLayers );
 						  if( uiBaseLayerId == 0 && m_pcCodingParameter->getBaseLayerMode() == 1 ) // AVC-COMPATIBLE
 						  {
-						    UInt uiBaseTempLevel = max( 0, rcBaseLayer.getDecompositionStages() - rcBaseLayer.getNotCodedMCTFStages() - 1 );
+						    UInt uiBaseTempLevel = mMx( 0, rcBaseLayer.getDecompositionStages() - rcBaseLayer.getNotCodedMCTFStages() - 1 );
 							if( uiCurrTempLevel-uiMinTempLevel >= uiBaseTempLevel )
 							{
 							  if( MSYS_UINT_MAX != getScalableLayerId( uiBaseLayerId, uiCurrTempLevel, uiBaseQualityLevel ) )
@@ -872,10 +872,10 @@ H264AVCEncoder::xWriteScalableSEI( ExtBinDataAccessor* pcExtBinDataAccessor )
 						LayerParameters& rcBaseLayer = m_pcCodingParameter->getLayerParameters ( uiBaseLayerId );
 						UInt uiBaseFGSLayers = (UInt)( rcBaseLayer.getNumFGSLayers() );
 						UInt uiBaseQualityLevel = rcLayer.getBaseQualityLevel();
-						uiBaseQualityLevel = min( uiBaseQualityLevel, uiBaseFGSLayers );
+						uiBaseQualityLevel = mMn( uiBaseQualityLevel, uiBaseFGSLayers );
 						if( uiBaseLayerId == 0 && m_pcCodingParameter->getBaseLayerMode() == 1 ) //AVC-COMPATIBLE
 						{
-						  Int iBaseTempLevel = max( 0, (Int)( rcBaseLayer.getDecompositionStages() - rcBaseLayer.getNotCodedMCTFStages() ) - 1 );
+						  Int iBaseTempLevel = mMx( 0, (Int)( rcBaseLayer.getDecompositionStages() - rcBaseLayer.getNotCodedMCTFStages() ) - 1 );
 						  uiDelta = uiNumScalableLayer - getScalableLayerId( uiBaseLayerId, (UInt)iBaseTempLevel, (UInt)uiBaseQualityLevel );
 						}
 						else
@@ -961,7 +961,7 @@ H264AVCEncoder::xWriteScalableSEICGSSNR( ExtBinDataAccessor* pcExtBinDataAccesso
 
 		LayerParameters& rcLayer = m_pcCodingParameter->getLayerParameters ( i );
 		UInt uiTotalTempLevel = rcLayer.getDecompositionStages () - rcLayer.getNotCodedMCTFStages();
-		UInt uiMinTempLevel   = ( !bH264AVCCompatible ||bSubSeq ) ? 0: max( 0, (Int)uiTotalTempLevel - 1 );
+		UInt uiMinTempLevel   = ( !bH264AVCCompatible ||bSubSeq ) ? 0: mMx( 0, (Int)uiTotalTempLevel - 1 );
 		UInt uiActTempLevel   = uiTotalTempLevel - uiMinTempLevel + 1;
 		//UInt uiTotalFGSLevel  = (UInt)rcLayer.getNumFGSLayers () + 1; //mwi. variable not used.
 		uiLayerNum += uiActTempLevel;
@@ -989,7 +989,7 @@ H264AVCEncoder::xWriteScalableSEICGSSNR( ExtBinDataAccessor* pcExtBinDataAccesso
 		//UInt uiTotalFGSLevel = (UInt)rcLayer.getNumFGSLayers () + 1;//mwi. variable not used.
 		Bool bH264AVCCompatible = ( uiCurrLayer == 0 && m_pcCodingParameter->getBaseLayerMode() > 0 );
 		Bool bSubSeq            = ( uiCurrLayer == 0 && m_pcCodingParameter->getBaseLayerMode() > 1 );
-		UInt uiMinTempLevel     = ( !bH264AVCCompatible ||bSubSeq ) ? 0: max(0, (Int)uiTotalTempLevel - 2);
+		UInt uiMinTempLevel     = ( !bH264AVCCompatible ||bSubSeq ) ? 0: mMx(0, (Int)uiTotalTempLevel - 2);
 
 		for ( UInt uiCurrTempLevel = 0; uiCurrTempLevel < uiTotalTempLevel; uiCurrTempLevel++ )
 		{
@@ -1194,7 +1194,7 @@ H264AVCEncoder::xWriteScalableSEICGSSNR( ExtBinDataAccessor* pcExtBinDataAccesso
               if( rcLayer.getLayerCGSSNR() == 0 && m_pcCodingParameter->getBaseLayerMode() == 1 ) // AVC-COMPATIBLE
 						  {
                 LayerParameters& rcBaseLayer = m_pcCodingParameter->getLayerParameters ( 0 );
-						    UInt uiBaseTempLevel = max( 0, rcBaseLayer.getDecompositionStages() - rcBaseLayer.getNotCodedMCTFStages() - 1 );
+						    UInt uiBaseTempLevel = mMx( 0, rcBaseLayer.getDecompositionStages() - rcBaseLayer.getNotCodedMCTFStages() - 1 );
 							if( uiCurrTempLevel-uiMinTempLevel >= uiBaseTempLevel )
 							{
                 uiDelta = uiNumScalableLayer - getScalableLayerId( rcLayer.getLayerCGSSNR(), uiCurrTempLevel, rcLayer.getQualityLevelCGSSNR()-1 );
@@ -1234,10 +1234,10 @@ H264AVCEncoder::xWriteScalableSEICGSSNR( ExtBinDataAccessor* pcExtBinDataAccesso
 						  LayerParameters& rcBaseLayer = m_pcCodingParameter->getLayerParameters ( uiBaseLayerId );
 						  //UInt uiBaseFGSLayers = (UInt)( rcBaseLayer.getNumFGSLayers() );
 						  UInt uiBaseQualityLevel = rcLayer.getBaseQualityLevelCGSSNR();
-						  //uiBaseQualityLevel = min( uiBaseQualityLevel, uiBaseFGSLayers );
+						  //uiBaseQualityLevel = mMn( uiBaseQualityLevel, uiBaseFGSLayers );
 						  if( uiBaseLayerCGSSNR == 0 && m_pcCodingParameter->getBaseLayerMode() == 1 ) // AVC-COMPATIBLE
 						  {
-						    UInt uiBaseTempLevel = max( 0, rcBaseLayer.getDecompositionStages() - rcBaseLayer.getNotCodedMCTFStages() - 1 );
+						    UInt uiBaseTempLevel = mMx( 0, rcBaseLayer.getDecompositionStages() - rcBaseLayer.getNotCodedMCTFStages() - 1 );
 							if( uiCurrTempLevel-uiMinTempLevel >= uiBaseTempLevel )
 							{
 							  if( MSYS_UINT_MAX != getScalableLayerId( uiBaseLayerCGSSNR, uiCurrTempLevel, uiBaseQualityLevel ) )
@@ -1275,10 +1275,10 @@ H264AVCEncoder::xWriteScalableSEICGSSNR( ExtBinDataAccessor* pcExtBinDataAccesso
 						LayerParameters& rcBaseLayer = m_pcCodingParameter->getLayerParameters ( uiBaseLayerId );
 						//UInt uiBaseFGSLayers = (UInt)( rcBaseLayer.getNumFGSLayers() );
 						UInt uiBaseQualityLevel = rcLayer.getBaseQualityLevelCGSSNR();
-						//uiBaseQualityLevel = min( uiBaseQualityLevel, uiBaseFGSLayers );
+						//uiBaseQualityLevel = mMn( uiBaseQualityLevel, uiBaseFGSLayers );
 						if( uiBaseLayerCGSSNR == 0 && m_pcCodingParameter->getBaseLayerMode() == 1 ) //AVC-COMPATIBLE
 						{
-						  Int iBaseTempLevel = max( 0, (Int)( rcBaseLayer.getDecompositionStages() - rcBaseLayer.getNotCodedMCTFStages() ) - 1 );
+						  Int iBaseTempLevel = mMx( 0, (Int)( rcBaseLayer.getDecompositionStages() - rcBaseLayer.getNotCodedMCTFStages() ) - 1 );
 						  uiDelta = uiNumScalableLayer - getScalableLayerId( uiBaseLayerCGSSNR, (UInt)iBaseTempLevel, (UInt)uiBaseQualityLevel );
 						}
 						else
@@ -1678,9 +1678,9 @@ H264AVCEncoder::xInitParameterSets()
   UInt uiIndex;
 
 
-  //===== determine values for POC calculation =====
+  //===== determMne values for POC calculation =====
   UInt uiMaxResolutionStages  = m_pcCodingParameter->getDecompositionStages();  
-  UInt uiRequiredPocBits      = max( 4, 1 + (Int)ceil( log10( 1.0 + ( 1 << uiMaxResolutionStages ) ) / log10( 2.0 ) ) );
+  UInt uiRequiredPocBits      = mMx( 4, 1 + (Int)ceil( log10( 1.0 + ( 1 << uiMaxResolutionStages ) ) / log10( 2.0 ) ) );
 
 
   //===== loop over layers =====
@@ -1694,7 +1694,7 @@ H264AVCEncoder::xInitParameterSets()
     UInt              uiOutFreq           = (UInt)ceil( rcLayerParameters.getOutputFrameRate() );
     //UInt              uiMvRange           = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange() / 4;
 	UInt              uiMvRange           = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange()*4 ;    
-    UInt              uiDPBSize           = ( 1 << max( 1, rcLayerParameters.getDecompositionStages() ) );
+    UInt              uiDPBSize           = ( 1 << mMx( 1, rcLayerParameters.getDecompositionStages() ) );
     UInt              uiNumRefPic         = uiDPBSize; 
 	UInt              uiLevelIdc          = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, uiDPBSize, 1 );
     UInt              uiCropLeft          = 0;
@@ -1749,7 +1749,7 @@ H264AVCEncoder::xInitParameterSets()
     pcSPS->setLevelIdc                            ( uiLevelIdc );
     pcSPS->setSeqScalingMatrixPresentFlag         ( rcLayerParameters.getAdaptiveTransform() > 1 );
     pcSPS->setLog2MaxFrameNum                     ( MAX_FRAME_NUM_LOG2 );
-    pcSPS->setLog2MaxPicOrderCntLsb               ( min( 15, uiRequiredPocBits + 2 ) );  // HS: decoder robustness -> value increased by 2
+    pcSPS->setLog2MaxPicOrderCntLsb               ( mMn( 15, uiRequiredPocBits + 2 ) );  // HS: decoder robustness -> value increased by 2
     pcSPS->setNumRefFrames                        ( uiNumRefPic );
     pcSPS->setRequiredFrameNumUpdateBehaviourFlag ( true );
     pcSPS->setFrameWidthInMbs                     ( uiMbX );
@@ -1782,7 +1782,7 @@ H264AVCEncoder::xInitParameterSets()
     pcPPSHP->setNumRefIdxActive( LIST_1               , m_pcCodingParameter->getNumRefFrames() );
     // heiko.schwarz@hhi.fhg.de: ensures that the PPS QP will be in the valid range (specified QP can be outside that range to force smaller/higher lambdas)
     //pcPPSHP->setPicInitQp                             ( (Int)rcLayerParameters.getBaseQpResidual() );
-    pcPPSHP->setPicInitQp                             ( min( 51, max( 0, (Int)rcLayerParameters.getBaseQpResidual() ) ) );
+    pcPPSHP->setPicInitQp                             ( mMn( 51, mMx( 0, (Int)rcLayerParameters.getBaseQpResidual() ) ) );
     pcPPSHP->setChomaQpIndexOffset                    ( 0 );
     pcPPSHP->setDeblockingFilterParametersPresentFlag ( ! m_pcCodingParameter->getLoopFilterParams().isDefault() );
     pcPPSHP->setConstrainedIntraPredFlag              ( true );
@@ -1857,7 +1857,7 @@ H264AVCEncoder::xInitParameterSets()
     UInt              uiOutFreq           = (UInt)ceil( rcLayerParameters.getOutputFrameRate() );
     //UInt              uiMvRange           = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange() / 4;
 	UInt              uiMvRange           = m_pcCodingParameter->getMotionVectorSearchParams().getSearchRange()*4 ;    
-    UInt              uiDPBSize           = ( 1 << max( 1, rcLayerParameters.getDecompositionStages() ) );
+    UInt              uiDPBSize           = ( 1 << mMx( 1, rcLayerParameters.getDecompositionStages() ) );
     UInt              uiNumRefPic         = uiDPBSize; 
 	UInt              uiLevelIdc          = SequenceParameterSet::getLevelIdc( uiMbY, uiMbX, uiOutFreq, uiMvRange, uiDPBSize, 1 );
     
@@ -1901,7 +1901,7 @@ H264AVCEncoder::xInitParameterSets()
     pcSPS->setLevelIdc                            ( uiLevelIdc );
     pcSPS->setSeqScalingMatrixPresentFlag         ( rcLayerParameters.getAdaptiveTransform() > 1 );
     pcSPS->setLog2MaxFrameNum                     ( MAX_FRAME_NUM_LOG2 );
-    pcSPS->setLog2MaxPicOrderCntLsb               ( min( 15, uiRequiredPocBits + 2 ) );  // HS: decoder robustness -> value increased by 2
+    pcSPS->setLog2MaxPicOrderCntLsb               ( mMn( 15, uiRequiredPocBits + 2 ) );  // HS: decoder robustness -> value increased by 2
     pcSPS->setNumRefFrames                        ( uiNumRefPic );
     pcSPS->setRequiredFrameNumUpdateBehaviourFlag ( true );
     pcSPS->setFrameWidthInMbs                     ( uiMbX );
@@ -1933,7 +1933,7 @@ H264AVCEncoder::xInitParameterSets()
     pcPPSHP->setNumRefIdxActive( LIST_1               , m_pcCodingParameter->getNumRefFrames() );
     // heiko.schwarz@hhi.fhg.de: ensures that the PPS QP will be in the valid range (specified QP can be outside that range to force smaller/higher lambdas)
     //pcPPSHP->setPicInitQp                             ( (Int)rcLayerParameters.getBaseQpResidual() );
-    pcPPSHP->setPicInitQp                             ( min( 51, max( 0, (Int)rcLayerParameters.getBaseQpResidual() ) ) );
+    pcPPSHP->setPicInitQp                             ( mMn( 51, mMx( 0, (Int)rcLayerParameters.getBaseQpResidual() ) ) );
     pcPPSHP->setChomaQpIndexOffset                    ( 0 );
     pcPPSHP->setDeblockingFilterParametersPresentFlag ( ! m_pcCodingParameter->getLoopFilterParams().isDefault() );
     pcPPSHP->setConstrainedIntraPredFlag              ( true );

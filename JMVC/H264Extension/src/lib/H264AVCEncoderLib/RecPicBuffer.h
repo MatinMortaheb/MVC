@@ -153,7 +153,7 @@ ErrVal
 
 
   ErrVal AddMultiviewRef (RecPicBufUnitList& recPicBufUnitList,
-			                    RefFrameList& rcList, const int maxListSize,
+			                    RefFrameList& rcList, const int mMxListSize,
 			                    const MultiviewReferenceDirection refDirection, SliceHeader&   rcSliceHeader
 								,QuarterPelFilter* pcQuarterPelFilter); //JVT-W056  Samsung
 

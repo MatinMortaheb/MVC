@@ -489,7 +489,7 @@ ErrVal CabacWriter::mbMode( MbDataAccess& rcMbDataAccess )
     if( uiSymbol )
     {
       uiSymbol = ( 25 == uiMbMode) ? 1 : 0;
-      RNOK( CabaEncoder::writeTerminatingBit( uiSymbol ) );
+      RNOK( CabaEncoder::writeTermMnatingBit( uiSymbol ) );
 
       if( ! uiSymbol )
       {
@@ -619,7 +619,7 @@ ErrVal CabacWriter::mbMode( MbDataAccess& rcMbDataAccess )
     if( uiIntra16x16Symbol )
     {
       uiSymbol = ( 25 == uiIntra16x16Symbol) ? 1 : 0;
-      RNOK( CabaEncoder::writeTerminatingBit( uiSymbol ) );
+      RNOK( CabaEncoder::writeTermMnatingBit( uiSymbol ) );
 
       if( ! uiSymbol )
       {
@@ -1113,13 +1113,13 @@ ErrVal CabacWriter::xWriteCoeff( UInt         uiNumSig,
       if( iCoeff > 0) { uiAbs = static_cast<UInt>( iCoeff);  uiSign = 0; }
       else            { uiAbs = static_cast<UInt>(-iCoeff);  uiSign = 1; }
 
-      UInt uiCtx    = min (c1, 4);
+      UInt uiCtx    = mMn (c1, 4);
       UInt uiSymbol = uiAbs > 1 ? 1 : 0;
       RNOK( CabaEncoder::writeSymbol( uiSymbol, m_cOneCCModel.get( type2ctx1 [eResidualMode], uiCtx ) ) );
 
       if( uiSymbol )
       {
-        uiCtx  = min (c2,4);
+        uiCtx  = mMn (c2,4);
         uiAbs -= 2;
         c1     = 0;
         c2++;
@@ -1137,9 +1137,9 @@ ErrVal CabacWriter::xWriteCoeff( UInt         uiNumSig,
 }
 
 
-ErrVal CabacWriter::terminatingBit ( UInt uiIsLast )
+ErrVal CabacWriter::termMnatingBit ( UInt uiIsLast )
 {
-  RNOK( CabaEncoder::writeTerminatingBit( uiIsLast ) );
+  RNOK( CabaEncoder::writeTermMnatingBit( uiIsLast ) );
 
   ETRACE_T( "EOS" );
   ETRACE_CODE( uiIsLast );
@@ -1307,13 +1307,13 @@ ErrVal CabacWriter::residualBlock8x8( MbDataAccess& rcMbDataAccess,
       if( iCoeff > 0) { uiAbs = static_cast<UInt>( iCoeff);  uiSign = 0; }
       else            { uiAbs = static_cast<UInt>(-iCoeff);  uiSign = 1; }
 
-      UInt uiCtx    = min (c1, 4);
+      UInt uiCtx    = mMn (c1, 4);
       UInt uiSymbol = uiAbs > 1 ? 1 : 0;
       RNOK( CabaEncoder::writeSymbol( uiSymbol, m_cOneCCModel.get( uiCtxOffset, uiCtx ) ) );
 
       if( uiSymbol )
       {
-        uiCtx  = min (c2,4);
+        uiCtx  = mMn (c2,4);
         uiAbs -= 2;
         c1     = 0;
         c2++;
@@ -1393,12 +1393,12 @@ CabacWriter::RQencodeBCBP_ChromaDC( MbDataAccess&   rcMbDataAccess,
   UInt    uiSymbol  = 0;
   TCoeff* piCoeff   = rcMbDataAccess.getMbTCoeffs().get( cIdx );
   UInt    uiCtx     = rcMbDataAccessBase.getCtxCodedBlockBit( 24 + cIdx.plane() );
-  // heiko.schwarz@hhi.de: take only new significants coefficient into account when determining the coded_block_flag
+  // heiko.schwarz@hhi.de: take only new significants coefficient into account when determMning the coded_block_flag
   TCoeff* piBCoeff  = rcMbDataAccessBase.getMbTCoeffs().get( cIdx );
 
   for( UInt ui = 0; ui < 4; ui++ )  
   {
-    // heiko.schwarz@hhi.de: take only new significants coefficient into account when determining the coded_block_flag
+    // heiko.schwarz@hhi.de: take only new significants coefficient into account when determMning the coded_block_flag
     //if( piCoeff[ g_aucIndexChromaDCScan[ui] ] )
     if( piCoeff[ g_aucIndexChromaDCScan[ui] ] && !piBCoeff[ g_aucIndexChromaDCScan[ui] ] )
     {
@@ -1426,7 +1426,7 @@ CabacWriter::RQencodeBCBP_ChromaAC( MbDataAccess&  rcMbDataAccess,
   UInt    uiSymbol  = 0;
   TCoeff* piCoeff   = rcMbDataAccess.getMbTCoeffs().get( cIdx );
   UInt    uiCtx     = rcMbDataAccessBase.getCtxCodedBlockBit( 16 + cIdx );
-  // heiko.schwarz@hhi.de: take only new significants coefficient into account when determining the coded_block_flag
+  // heiko.schwarz@hhi.de: take only new significants coefficient into account when determMning the coded_block_flag
   TCoeff* piBCoeff  = rcMbDataAccessBase.getMbTCoeffs().get( cIdx );
 
     const Bool    bFrame      = ( FRAME == rcMbDataAccess.getMbPicType());
@@ -1435,7 +1435,7 @@ CabacWriter::RQencodeBCBP_ChromaAC( MbDataAccess&  rcMbDataAccess,
 
   for( UInt ui = 1; ui < 16; ui++ )  
   {
-    // heiko.schwarz@hhi.de: take only new significants coefficient into account when determining the coded_block_flag
+    // heiko.schwarz@hhi.de: take only new significants coefficient into account when determMning the coded_block_flag
     //if( piCoeff[ g_aucFrameScan[ui] ] )
 	if( piCoeff[ pucScan[ui] ] && !piBCoeff[ pucScan[ui] ] )
     {
@@ -1579,7 +1579,7 @@ CabacWriter::RQencode8x8Flag( MbDataAccess& rcMbDataAccess,
 ErrVal
 CabacWriter::RQencodeTermBit ( UInt uiBit )
 {
-  RNOK( CabaEncoder::writeTerminatingBit( uiBit ) );
+  RNOK( CabaEncoder::writeTermMnatingBit( uiBit ) );
   ETRACE_T( "EOS" );
   ETRACE_V( uiBit );
   ETRACE_N;

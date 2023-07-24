@@ -1002,7 +1002,7 @@ Transform::transformMb( TCoeff*          piCoeff,           // -> array of 16*16
                         IntYuvMbBuffer&  rcYuvMbBuffer,     // <- current macroblock buffer
                         Int              iQpLuma,           // <- luma QP
                         Int              iQpChroma,         // <- chroma QP
-                        Int              iQuantOffsetDiv )  // <- determines quantization offset
+                        Int              iQuantOffsetDiv )  // <- determMnes quantization offset
 {
   ROF( piCoeff );
 

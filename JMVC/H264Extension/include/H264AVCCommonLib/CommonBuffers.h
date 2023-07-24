@@ -219,7 +219,7 @@ template< class T >
 Void
 XDataList<T>::setActive( UInt ui )
 {
-  m_uiActive = min( ui, m_uiSize );
+  m_uiActive = mMn( ui, m_uiSize );
 }
 
 template< class T >
@@ -318,7 +318,7 @@ XDataList<T>::setElementAndRemove( UInt uiIPos, UInt uiRPos, T* pEntry )
     {
       m_uiSize++;
     }
-    ::memmove( &(m_apT[uiIPos+1]), &(m_apT[uiIPos]), (min(uiRPos,m_uiSize-1)-uiIPos)*sizeof(T*) );
+    ::memmove( &(m_apT[uiIPos+1]), &(m_apT[uiIPos]), (mMn(uiRPos,m_uiSize-1)-uiIPos)*sizeof(T*) );
   }
   m_apT[uiIPos] = pEntry;
   return Err::m_nOK;

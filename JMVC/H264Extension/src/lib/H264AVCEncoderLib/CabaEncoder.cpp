@@ -340,7 +340,7 @@ ErrVal CabaEncoder::writeEPSymbol( UInt uiSymbol )
 }
 
 
-ErrVal CabaEncoder::writeTerminatingBit( UInt uiBit )
+ErrVal CabaEncoder::writeTermMnatingBit( UInt uiBit )
 {
   ETRACE_V(g_nSymbolCounter[g_nLayer]++);
   ETRACE_T ("  ");

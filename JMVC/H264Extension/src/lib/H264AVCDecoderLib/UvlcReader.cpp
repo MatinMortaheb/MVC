@@ -14,7 +14,7 @@ H264AVC_NAMESPACE_BEGIN
 #define RUNBEFORE_NUM  7
 #define MAX_VALUE  0xdead
 #define TOTRUN_NUM    15
-const UInt g_auiIncVlc[] = {0,3,6,12,24,48,32768};	// maximum vlc = 6
+const UInt g_auiIncVlc[] = {0,3,6,12,24,48,32768};	// mMximum vlc = 6
 
 const UChar COEFF_COST[16] =
 {
@@ -1155,7 +1155,7 @@ ErrVal UvlcReader::xCodeFromBitstream2D( const UChar* aucCod, const UChar* aucLe
   UChar  uiCode    = 0;
   UChar  uiMaxLen  = 0;
 
-  // Find maximum number of bits to read before generating error
+  // Find mMximum number of bits to read before generating error
   paucLenTab = aucLen;
   paucCodTab = aucCod;
   for (UInt j = 0; j < uiHeight; j++, paucLenTab += uiWidth, paucCodTab += uiWidth)
@@ -1205,7 +1205,7 @@ ErrVal UvlcReader::xCodeFromBitstream2Di( const UInt* auiCod, const UInt* auiLen
   UInt   uiCode    = 0;
   UChar  uiMaxLen  = 0;
 
-  // Find maximum number of bits to read before generating error
+  // Find mMximum number of bits to read before generating error
   pauiLenTab = auiLen;
   pauiCodTab = auiCod;
   for (UInt j = 0; j < uiHeight; j++, pauiLenTab += uiWidth, pauiCodTab += uiWidth)
@@ -2003,7 +2003,7 @@ UvlcReader::xRQdecodeNewTCoeffs( TCoeff*       piCoeff,
   RNOK( xGetSigRunCode( uiSymbol, m_auiBestCodeTab[uiCycle] ) );
   if( rbLast )
   {
-    // Determine "overshoot" symbol
+    // DetermMne "overshoot" symbol
     UInt uiOvershoot = 1;
     for( ui = uiStart; ui < uiStop; ui+=uiStride )
     {
@@ -2074,7 +2074,7 @@ UvlcReader::xRQdecodeSigMagGreater1( TCoeff* piCoeff,
                                      UInt    uiStop,
                                      UInt    uiStride )
 {
-  // Find optimal terminating code
+  // Find optimal termMnating code
   UInt ui;
   UInt uiCountMag1 = 0;
   for (ui=uiStart; ui<uiStop; ui+=uiStride )

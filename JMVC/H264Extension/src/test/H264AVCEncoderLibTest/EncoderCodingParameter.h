@@ -479,7 +479,7 @@ ErrVal EncoderCodingParameter::init( Int     argc,
 	if( m_uiMVCmode && m_uiPdsEnable )
 	{
 		m_uiPdsBlockSize = m_uiFrameWidth/16;
-		UInt uiViewNum = (UInt)SpsMVC.m_num_views_minus_1+1;
+		UInt uiViewNum = (UInt)SpsMVC.m_num_views_mMnus_1+1;
 		UInt uiRefNum = m_uiNumRefFrames;
 	  m_ppuiPdsInitialDelayMinus2L0Anc = new UInt* [uiViewNum];
 		m_ppuiPdsInitialDelayMinus2L1Anc = new UInt* [uiViewNum];
@@ -694,7 +694,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
   int cur_view_id=0, view_id, view_cnt=-1;
   int cur_level_id,level_cnt=-1;
-  int num_of_ops=0,num_target_views_minus1,num_views_minus1,temporal_id,view_idx;
+  int num_of_ops=0,num_target_views_mMnus1,num_views_mMnus1,temporal_id,view_idx;
   int ref_idx,num_of_refs,temp;
   //int vcOrder;
   CodingParameter::SpsMVC.setNumViewsMinus1(0);
@@ -895,40 +895,40 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
     }
 
-	if (acTags[0] == "NumApplicableOpsMinus1" && CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1!=NULL)
+	if (acTags[0] == "NumApplicableOpsMinus1" && CodingParameter::SpsMVC.m_ui_num_applicable_ops_mMnus1!=NULL)
     {
       AOF((num_of_ops=atoi(acTags[1].c_str()))>=0); 
       AOF(num_of_ops<=1023); // hard-coded
-      CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]=num_of_ops;
+      CodingParameter::SpsMVC.m_ui_num_applicable_ops_mMnus1[level_cnt]=num_of_ops;
 	  CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_2D(num_of_ops,level_cnt);      
 	}
 
 	if (acTags[0] == "ApplicableOpTemporalId" && CodingParameter::SpsMVC.m_ui_applicable_op_temporal_id!=NULL)
     {
-      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);
+      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_mMnus1[level_cnt]);
       temporal_id=atoi(acTags[2].c_str());
       CodingParameter::SpsMVC.m_ui_applicable_op_temporal_id[level_cnt][ref_idx]=temporal_id;
     }
 
-	if (acTags[0] == "ApplicableOpNumTargetViewsMinus1"&& CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_minus1!=NULL)
+	if (acTags[0] == "ApplicableOpNumTargetViewsMinus1"&& CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_mMnus1!=NULL)
     {
-      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);
-      num_target_views_minus1=atoi(acTags[2].c_str());
-      CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_minus1[level_cnt][ref_idx]=num_target_views_minus1;
-	  CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_3D(num_of_ops,num_target_views_minus1,level_cnt,ref_idx);   
+      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_mMnus1[level_cnt]);
+      num_target_views_mMnus1=atoi(acTags[2].c_str());
+      CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_mMnus1[level_cnt][ref_idx]=num_target_views_mMnus1;
+	  CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_3D(num_of_ops,num_target_views_mMnus1,level_cnt,ref_idx);   
     }
 
-	if (acTags[0] == "ApplicableOpNumViewsMinus1" && CodingParameter::SpsMVC.m_ui_applicable_op_num_views_minus1!=NULL)
+	if (acTags[0] == "ApplicableOpNumViewsMinus1" && CodingParameter::SpsMVC.m_ui_applicable_op_num_views_mMnus1!=NULL)
     {
-      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);
-      num_views_minus1=atoi(acTags[2].c_str());
-      CodingParameter::SpsMVC.m_ui_applicable_op_num_views_minus1[level_cnt][ref_idx]=num_views_minus1;
+      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_mMnus1[level_cnt]);
+      num_views_mMnus1=atoi(acTags[2].c_str());
+      CodingParameter::SpsMVC.m_ui_applicable_op_num_views_mMnus1[level_cnt][ref_idx]=num_views_mMnus1;
     }
 
 	if (acTags[0] == "ApplicableOpTargetViewId" && CodingParameter::SpsMVC.m_ui_applicable_op_target_view_id!=NULL)
     {
-      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[level_cnt]);      
-      AOF((view_idx=atoi(acTags[2].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_minus1[level_cnt][ref_idx]);            
+      AOF((ref_idx=atoi(acTags[1].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_num_applicable_ops_mMnus1[level_cnt]);      
+      AOF((view_idx=atoi(acTags[2].c_str()))<= (int)CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_mMnus1[level_cnt][ref_idx]);            
       CodingParameter::SpsMVC.m_ui_applicable_op_target_view_id[level_cnt][ref_idx][view_idx]=atoi(acTags[3].c_str());
 	     
 	}
@@ -980,12 +980,12 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
 
 		CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory(CodingParameter::SpsMVC.getNumLevelValuesSignalledMinus1());
 		CodingParameter::SpsMVC.m_ui_level_idc[0]=0;
-		CodingParameter::SpsMVC.m_ui_num_applicable_ops_minus1[0]=0;
+		CodingParameter::SpsMVC.m_ui_num_applicable_ops_mMnus1[0]=0;
 	    CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_2D(0,0);      
 		CodingParameter::SpsMVC.m_ui_applicable_op_temporal_id[0][0]=0;
-		CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_minus1[0][0]=(temp_num_views=CodingParameter::SpsMVC.getNumViewMinus1());
+		CodingParameter::SpsMVC.m_ui_applicable_op_num_target_views_mMnus1[0][0]=(temp_num_views=CodingParameter::SpsMVC.getNumViewMinus1());
 		CodingParameter::SpsMVC.initViewSPSMemory_num_level_related_memory_3D(0,temp_num_views,0,0);   
-		CodingParameter::SpsMVC.m_ui_applicable_op_num_views_minus1[0][0]=temp_num_views;
+		CodingParameter::SpsMVC.m_ui_applicable_op_num_views_mMnus1[0][0]=temp_num_views;
 		for (int k=0;k<=(int)temp_num_views;k++)
 			CodingParameter::SpsMVC.m_ui_applicable_op_target_view_id[0][0][k]=order[k];	
 
@@ -1001,9 +1001,9 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
       }
 
 
-      printf( "SPS: num_views_minus_1: %d\n",CodingParameter::SpsMVC.m_num_views_minus_1 ); // ue(v)
+      printf( "SPS: num_views_mMnus_1: %d\n",CodingParameter::SpsMVC.m_num_views_mMnus_1 ); // ue(v)
 
-      for (i=0;i<= CodingParameter::SpsMVC.m_num_views_minus_1; i++)
+      for (i=0;i<= CodingParameter::SpsMVC.m_num_views_mMnus_1; i++)
       {
         //vcOrder = CodingParameter::SpsMVC.m_uiViewCodingOrder[i];       
 
@@ -1016,7 +1016,7 @@ EncoderCodingParameter::xReadFromFile  ( std::string&    rcFilename,
           printf("SPS: anchor_ref_l1[%d][%d]: %d\n",  i, j, CodingParameter::SpsMVC.m_anchor_ref_list1[i][j] );
       }
 
-      for (i=0;i<= CodingParameter::SpsMVC.m_num_views_minus_1; i++)
+      for (i=0;i<= CodingParameter::SpsMVC.m_num_views_mMnus_1; i++)
       {
         //vcOrder = CodingParameter::SpsMVC.m_uiViewCodingOrder[i];       
 

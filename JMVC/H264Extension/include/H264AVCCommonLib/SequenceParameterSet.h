@@ -22,7 +22,7 @@ class H264AVCCOMMONLIB_API SpsMvcExtension
 public:
 
   SpsMvcExtension()//  add initialization for the construction 
-: m_num_views_minus_1         ( 0    )
+: m_num_views_mMnus_1         ( 0    )
 , m_num_anchor_refs_list0     ( NULL ) 
 , m_num_anchor_refs_list1     ( NULL )
 , m_num_non_anchor_refs_list0 ( NULL ) 
@@ -33,12 +33,12 @@ public:
 , m_non_anchor_ref_list1      ( NULL )
 , m_uiViewCodingOrder         ( NULL ) // name ?
 , m_bInitDone                 ( false)
-, m_num_level_values_signalled_minus1 (0)
+, m_num_level_values_signalled_mMnus1 (0)
 , m_ui_level_idc (NULL)
-, m_ui_num_applicable_ops_minus1 (NULL)
+, m_ui_num_applicable_ops_mMnus1 (NULL)
 , m_ui_applicable_op_temporal_id (NULL)
-, m_ui_applicable_op_num_target_views_minus1 (NULL)
-, m_ui_applicable_op_num_views_minus1 (NULL)
+, m_ui_applicable_op_num_target_views_mMnus1 (NULL)
+, m_ui_applicable_op_num_views_mMnus1 (NULL)
 , m_ui_applicable_op_target_view_id (NULL)
 
   {
@@ -53,34 +53,34 @@ public:
   Bool  getInitDone() {return m_bInitDone;}
   Void  setInitDone(Bool b) { m_bInitDone = b;}
 
-  int getNumViewMinus1() const { return (int)m_num_views_minus_1;}
-  Void setNumViewsMinus1(UInt num_views) {m_num_views_minus_1=(int)num_views;}
+  int getNumViewMinus1() const { return (int)m_num_views_mMnus_1;}
+  Void setNumViewsMinus1(UInt num_views) {m_num_views_mMnus_1=(int)num_views;}
 
-  int getNumLevelValuesSignalledMinus1() const { return (int)m_num_level_values_signalled_minus1;}
-  Void setNumLevelValuesSignalledMinus1(UInt num_level_values_minus1) {m_num_level_values_signalled_minus1=(int)num_level_values_minus1;}
+  int getNumLevelValuesSignalledMinus1() const { return (int)m_num_level_values_signalled_mMnus1;}
+  Void setNumLevelValuesSignalledMinus1(UInt num_level_values_mMnus1) {m_num_level_values_signalled_mMnus1=(int)num_level_values_mMnus1;}
 
  UInt getViewCodingOrderIdxFromAViewId(UInt view_number)
  {
 	UInt *ViewCodingOrder=this->getViewCodingOrder();
 
-	for (int i=0; i<= m_num_views_minus_1; i++)
+	for (int i=0; i<= m_num_views_mMnus_1; i++)
 		if (view_number == ViewCodingOrder[i])
 			return i;
 	return 0;
 
  }
 
-  Void initViewSPSMemory_num_refs_for_lists(UInt num_views_minus1)
+  Void initViewSPSMemory_num_refs_for_lists(UInt num_views_mMnus1)
   { 
-    m_num_anchor_refs_list0 = new int[num_views_minus1+1]; // ue(v)
-    m_num_anchor_refs_list1 = new int[num_views_minus1+1]; // ue(v) 
-    m_num_non_anchor_refs_list0 = new int[num_views_minus1+1]; // ue(v)
-    m_num_non_anchor_refs_list1 = new int[num_views_minus1+1]; // ue(v)
+    m_num_anchor_refs_list0 = new int[num_views_mMnus1+1]; // ue(v)
+    m_num_anchor_refs_list1 = new int[num_views_mMnus1+1]; // ue(v) 
+    m_num_non_anchor_refs_list0 = new int[num_views_mMnus1+1]; // ue(v)
+    m_num_non_anchor_refs_list1 = new int[num_views_mMnus1+1]; // ue(v)
           
     //JVT-V054
-    m_uiViewCodingOrder = new UInt[num_views_minus1+1];
+    m_uiViewCodingOrder = new UInt[num_views_mMnus1+1];
 
-    for (int i=0;i<(int)num_views_minus1+1;i++)
+    for (int i=0;i<(int)num_views_mMnus1+1;i++)
     {
       m_num_anchor_refs_list0[i]=0;
       m_num_anchor_refs_list1[i]=0;
@@ -104,19 +104,19 @@ public:
 
  
 
-  Void initViewSPSMemory_num_level_related_memory(UInt num_level_values_signalled_minus1)
+  Void initViewSPSMemory_num_level_related_memory(UInt num_level_values_signalled_mMnus1)
   { 
-	m_ui_level_idc = new UInt[num_level_values_signalled_minus1+1];
-	m_ui_num_applicable_ops_minus1 = new UInt[num_level_values_signalled_minus1+1];
-	m_ui_applicable_op_temporal_id = new UInt*[num_level_values_signalled_minus1+1];
-	m_ui_applicable_op_num_target_views_minus1 = new UInt*[num_level_values_signalled_minus1+1];
-	m_ui_applicable_op_num_views_minus1 = new UInt*[num_level_values_signalled_minus1+1];
-	m_ui_applicable_op_target_view_id = new UInt**[num_level_values_signalled_minus1+1];
+	m_ui_level_idc = new UInt[num_level_values_signalled_mMnus1+1];
+	m_ui_num_applicable_ops_mMnus1 = new UInt[num_level_values_signalled_mMnus1+1];
+	m_ui_applicable_op_temporal_id = new UInt*[num_level_values_signalled_mMnus1+1];
+	m_ui_applicable_op_num_target_views_mMnus1 = new UInt*[num_level_values_signalled_mMnus1+1];
+	m_ui_applicable_op_num_views_mMnus1 = new UInt*[num_level_values_signalled_mMnus1+1];
+	m_ui_applicable_op_target_view_id = new UInt**[num_level_values_signalled_mMnus1+1];
 
-    for (int i=0;i<=(int)num_level_values_signalled_minus1;i++)
+    for (int i=0;i<=(int)num_level_values_signalled_mMnus1;i++)
     {
       m_ui_level_idc[i]=0;
-      m_ui_num_applicable_ops_minus1[i]=0;      
+      m_ui_num_applicable_ops_mMnus1[i]=0;      
     }
   }
 
@@ -124,20 +124,20 @@ public:
   {
 	  
     delete [] m_ui_level_idc;
-    delete [] m_ui_num_applicable_ops_minus1;
+    delete [] m_ui_num_applicable_ops_mMnus1;
 	delete [] m_ui_applicable_op_temporal_id;
-	delete [] m_ui_applicable_op_num_target_views_minus1;
-	delete [] m_ui_applicable_op_num_views_minus1; 
+	delete [] m_ui_applicable_op_num_target_views_mMnus1;
+	delete [] m_ui_applicable_op_num_views_mMnus1; 
 	delete [] m_ui_applicable_op_target_view_id; 
     
   }
 
-  Void initViewSPSMemory_num_level_related_memory_2D(UInt num_applicable_ops_minus1,int i)
+  Void initViewSPSMemory_num_level_related_memory_2D(UInt num_applicable_ops_mMnus1,int i)
   {
 
-	  m_ui_applicable_op_temporal_id[i] = new UInt[num_applicable_ops_minus1+1];
-	  m_ui_applicable_op_num_target_views_minus1[i] = new UInt[num_applicable_ops_minus1+1];
-	  m_ui_applicable_op_num_views_minus1[i] = new UInt[num_applicable_ops_minus1+1];
+	  m_ui_applicable_op_temporal_id[i] = new UInt[num_applicable_ops_mMnus1+1];
+	  m_ui_applicable_op_num_target_views_mMnus1[i] = new UInt[num_applicable_ops_mMnus1+1];
+	  m_ui_applicable_op_num_views_mMnus1[i] = new UInt[num_applicable_ops_mMnus1+1];
 
   }
 
@@ -146,18 +146,18 @@ public:
 	  for (int i=0; i<=this->getNumLevelValuesSignalledMinus1(); i++)
 	  {
 		delete [] m_ui_applicable_op_temporal_id[i];
-		delete [] m_ui_applicable_op_num_target_views_minus1[i];
-		delete [] m_ui_applicable_op_num_views_minus1[i];
+		delete [] m_ui_applicable_op_num_target_views_mMnus1[i];
+		delete [] m_ui_applicable_op_num_views_mMnus1[i];
 
 	  }
   }
 
-  Void initViewSPSMemory_num_level_related_memory_3D(UInt num_applicable_ops_minus1, UInt applicable_op_num_target_views_minus1,int i, int j)
+  Void initViewSPSMemory_num_level_related_memory_3D(UInt num_applicable_ops_mMnus1, UInt applicable_op_num_target_views_mMnus1,int i, int j)
   {
 
 	  
-	  m_ui_applicable_op_target_view_id[i] = new UInt*[num_applicable_ops_minus1+1];
-	  m_ui_applicable_op_target_view_id[i][j] = new UInt[applicable_op_num_target_views_minus1+1];	
+	  m_ui_applicable_op_target_view_id[i] = new UInt*[num_applicable_ops_mMnus1+1];
+	  m_ui_applicable_op_target_view_id[i][j] = new UInt[applicable_op_num_target_views_mMnus1+1];	
 	 
 
   }
@@ -168,7 +168,7 @@ public:
 
 	  for (int i=0;i<=num_i; i++) 
 	  {
-		for (int j=0; j<= (int)this->m_ui_num_applicable_ops_minus1[i]; j++)
+		for (int j=0; j<= (int)this->m_ui_num_applicable_ops_mMnus1[i]; j++)
 	  		delete [] m_ui_applicable_op_target_view_id[i][j];
 
 		delete [] m_ui_applicable_op_target_view_id[i];	
@@ -179,18 +179,18 @@ public:
 
 
 
-  Void initViewSPSMemory_ref_for_lists(UInt num_views_minus1,int i, int j, int k)
+  Void initViewSPSMemory_ref_for_lists(UInt num_views_mMnus1,int i, int j, int k)
   // i : view-idx, j: list0/1 , k:anchor/non-anchor
   {
 	i = this->getViewCodingOrderIdxFromAViewId(i);
     if(!m_bInitDone)
     {
-      m_anchor_ref_list0 = new UInt*[num_views_minus1+1];
-      m_non_anchor_ref_list0 = new UInt*[num_views_minus1+1];
-      m_anchor_ref_list1 = new UInt*[num_views_minus1+1];
-      m_non_anchor_ref_list1 = new UInt*[num_views_minus1+1];
+      m_anchor_ref_list0 = new UInt*[num_views_mMnus1+1];
+      m_non_anchor_ref_list0 = new UInt*[num_views_mMnus1+1];
+      m_anchor_ref_list1 = new UInt*[num_views_mMnus1+1];
+      m_non_anchor_ref_list1 = new UInt*[num_views_mMnus1+1];
       
-      for (UInt n = 0; n <= num_views_minus1; n++)
+      for (UInt n = 0; n <= num_views_mMnus1; n++)
       {
         m_anchor_ref_list0[n] = NULL;
         m_non_anchor_ref_list0[n] = NULL;
@@ -240,7 +240,7 @@ public:
   Void setNumAnchorRefsForListX(int i, int list_no, UInt value) 
   { 
 	  i = this->getViewCodingOrderIdxFromAViewId(i);
-	  AOF(i<= this->m_num_views_minus_1 && i >=0)
+	  AOF(i<= this->m_num_views_mMnus_1 && i >=0)
       if (list_no==0)
         m_num_anchor_refs_list0[i]=value;
       else if (list_no==1)
@@ -249,7 +249,7 @@ public:
   UInt getNumAnchorRefsForListX(int view,int list_no) 
   {
 	int i = this->getViewCodingOrderIdxFromAViewId(view); 
-    AOF(i<= this->m_num_views_minus_1 && i >=0)
+    AOF(i<= this->m_num_views_mMnus_1 && i >=0)
       if (list_no==0)
         return (UInt)m_num_anchor_refs_list0[i];
     AOF( list_no==1 )
@@ -258,7 +258,7 @@ public:
   Void setNumNonAnchorRefsForListX(int i, int list_no, UInt value) 
   { 
 	i = this->getViewCodingOrderIdxFromAViewId(i);
-    AOF(i<= this->m_num_views_minus_1 && i >=0)
+    AOF(i<= this->m_num_views_mMnus_1 && i >=0)
       if (list_no==0)
         m_num_non_anchor_refs_list0[i]=value;
       else if (list_no==1)
@@ -267,7 +267,7 @@ public:
   UInt getNumNonAnchorRefsForListX(int view,int list_no) 
   {
 	int i=this->getViewCodingOrderIdxFromAViewId(view);
-    AOF(i<= this->m_num_views_minus_1 && i >=0)
+    AOF(i<= this->m_num_views_mMnus_1 && i >=0)
       if (list_no==0)
         return (UInt)m_num_non_anchor_refs_list0[i];
     AOF( list_no==1 )
@@ -277,7 +277,7 @@ public:
   Void setAnchorRefForListX(int i,int j, int list_no, UInt value)
   {
 	  i = this->getViewCodingOrderIdxFromAViewId(i);
-	  AOF(i<= this->m_num_views_minus_1 && i >=0)
+	  AOF(i<= this->m_num_views_mMnus_1 && i >=0)
 		
 	  if (list_no==0) {
 		AOF(j<m_num_anchor_refs_list0[i] && j >=0)		
@@ -292,7 +292,7 @@ public:
   {
 
 	int i=this->getViewCodingOrderIdxFromAViewId(view);
-	AOF(i<= this->m_num_views_minus_1 && i >=0)
+	AOF(i<= this->m_num_views_mMnus_1 && i >=0)
       if (list_no==0){
         AOF(j<m_num_anchor_refs_list0[i] && j >=0)	
           return m_anchor_ref_list0[i][j];
@@ -307,7 +307,7 @@ public:
   Void setNonAnchorRefForListX(int i,int j, int list_no, UInt value)
   {
 	  i = this->getViewCodingOrderIdxFromAViewId(i);
-	  AOF(i<= this->m_num_views_minus_1 && i >=0)
+	  AOF(i<= this->m_num_views_mMnus_1 && i >=0)
 	  AOF(list_no==0 || list_no==1)
 		
       if (list_no==0) {
@@ -322,7 +322,7 @@ public:
   UInt getNonAnchorRefForListX(int view,int j, int list_no) 
   {
 	int i=this->getViewCodingOrderIdxFromAViewId((UInt)view);
-    AOF(i<= this->m_num_views_minus_1 && i >=0)
+    AOF(i<= this->m_num_views_mMnus_1 && i >=0)
 	
       if (list_no==0){
         AOF(j<m_num_non_anchor_refs_list0[i] && j >=0)	
@@ -374,7 +374,7 @@ public:
  }
   
 
-  int			m_num_views_minus_1; // ue(v)
+  int			m_num_views_mMnus_1; // ue(v)
   int			*m_num_anchor_refs_list0; // ue(v)
   int			*m_num_anchor_refs_list1; // ue(v)
   int			*m_num_non_anchor_refs_list0; // ue(v)
@@ -387,13 +387,13 @@ public:
   //JVT-V054
   UInt                  *m_uiViewCodingOrder;
   Bool                   m_bInitDone;
-  int			m_num_level_values_signalled_minus1; // ue(v)
+  int			m_num_level_values_signalled_mMnus1; // ue(v)
   UInt			*m_ui_level_idc; // u(8)
-  UInt			*m_ui_num_applicable_ops_minus1; // ue(v)
+  UInt			*m_ui_num_applicable_ops_mMnus1; // ue(v)
   UInt			**m_ui_applicable_op_temporal_id; // u(3)
-  UInt			**m_ui_applicable_op_num_target_views_minus1; // ue(v)
+  UInt			**m_ui_applicable_op_num_target_views_mMnus1; // ue(v)
   UInt			***m_ui_applicable_op_target_view_id; // ue(v)
-  UInt			**m_ui_applicable_op_num_views_minus1; // ue(v)
+  UInt			**m_ui_applicable_op_num_views_mMnus1; // ue(v)
 
 
 };

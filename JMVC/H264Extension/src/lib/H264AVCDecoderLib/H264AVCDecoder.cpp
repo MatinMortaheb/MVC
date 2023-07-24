@@ -1294,7 +1294,7 @@ H264AVCDecoder::initPacket( BinDataAccessor*  pcBinDataAccessor,
 
       ruiMbX  = pcSPS->getFrameWidthInMbs ();
       ruiMbY  = pcSPS->getFrameHeightInMbs();
-      ruiSize = max( ruiSize, ( (ruiMbX << 3 ) + YUV_X_MARGIN ) * ( ( ruiMbY << 3 ) + YUV_Y_MARGIN ) * 6 );
+      ruiSize = mMx( ruiSize, ( (ruiMbX << 3 ) + YUV_X_MARGIN ) * ( ( ruiMbY << 3 ) + YUV_Y_MARGIN ) * 6 );
 			m_pcControlMng->initSPS( *pcSPS, m_uiRecLayerId );
       ruiEndPos = pcBinDataAccessor->size(); //JVT-P031
       bDiscardable = false;//JVT-P031

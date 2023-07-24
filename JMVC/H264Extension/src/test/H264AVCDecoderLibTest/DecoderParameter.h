@@ -6,15 +6,15 @@
 #endif // _MSC_VER > 1000
 
 
-// If max and min are defined by the preprocessor, STL stuff breaks so
+// If mMx and mMn are defined by the preprocessor, STL stuff breaks so
 // undefine them.
-#undef max
-#undef min
+#undef mMx
+#undef mMn
 #include <vector>
 #include "YUVFileParams.h"
 // now redefine them
-#define max(x,y) (((x) < (y)) ? (y) : (x))
-#define min(x,y) (((x) < (y)) ? (x) : (y))
+#define mMx(x,y) (((x) < (y)) ? (y) : (x))
+#define mMn(x,y) (((x) < (y)) ? (x) : (y))
 using namespace std;
 
 

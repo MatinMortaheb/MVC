@@ -99,8 +99,8 @@ public:
 
   Void limitComponents( const Mv& rcMvMin, const Mv& rcMvMax )
   {
-    m_sHor = min( rcMvMax.m_sHor, max( rcMvMin.m_sHor, m_sHor ) );
-    m_sVer = min( rcMvMax.m_sVer, max( rcMvMin.m_sVer, m_sVer ) );
+    m_sHor = mMn( rcMvMax.m_sHor, mMx( rcMvMin.m_sHor, m_sHor ) );
+    m_sVer = mMn( rcMvMax.m_sVer, mMx( rcMvMin.m_sVer, m_sVer ) );
   }
 
   static const Mv& ZeroMv() { return m_cMvZero; }
@@ -175,7 +175,7 @@ public:
     return *this;
   }
 
-  Mv3D& minRefIdx( Mv3D& rcMv3D )  { return (((UChar)(rcMv3D.getRef()-1)) < ((UChar)(getRef()-1)) ? rcMv3D : *this); }
+  Mv3D& mMnRefIdx( Mv3D& rcMv3D )  { return (((UChar)(rcMv3D.getRef()-1)) < ((UChar)(getRef()-1)) ? rcMv3D : *this); }
   Bool operator== ( const RefIdxValues eRefIdxValues )  { return ( eRefIdxValues == m_scRef ); }
   Bool operator!= ( const RefIdxValues eRefIdxValues )  { return ( eRefIdxValues != m_scRef ); }
 

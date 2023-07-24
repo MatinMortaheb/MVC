@@ -338,8 +338,8 @@ ErrVal FrameMng::initSlice( SliceHeader *rcSH , UInt NumOfViewsInTheStream)
 
   m_iMaxEntriesinDPB = rcSH->getSPS().getMaxDPBSize(mvcScaleFactor);
 #if REDUCE_MAX_FRM_DPB 
-  //m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
-  m_iMaxEntriesinDPB = min ( m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+  //m_iMaxEntriesinDPB = mMn ( mvcScaleFactor*m_iMaxEntriesinDPB , (mMx(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+  m_iMaxEntriesinDPB = mMn ( m_iMaxEntriesinDPB , (mMx(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
 #endif
   
   printf("MaxNumRefFrames=%d NumViews=%d dec DPB-size=%d\n",m_uiNumRefFrames,Num_Views,	m_iMaxEntriesinDPB);
@@ -383,14 +383,14 @@ ErrVal FrameMng::initSPS( const SequenceParameterSet& rcSPS )
 	UInt mvcScaleFactor = Num_Views > 1 ? 2 : 1;
 
 	m_iMaxEntriesinDPB = rcSPS.getMaxDPBSize(mvcScaleFactor);
-	//m_iMaxEntriesinDPB = min ( mvcScaleFactor*m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
-	m_iMaxEntriesinDPB = min ( m_iMaxEntriesinDPB , (max(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+	//m_iMaxEntriesinDPB = mMn ( mvcScaleFactor*m_iMaxEntriesinDPB , (mMx(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
+	m_iMaxEntriesinDPB = mMn ( m_iMaxEntriesinDPB , (mMx(1,(UInt)ceil((double)log((double)Num_Views)/log(2.)))*16) );
 	
 
   }
   else
   {
-    m_iMaxEntriesinDPB= min( 48, rcSPS.getMaxDPBSize(1) + 3 );
+    m_iMaxEntriesinDPB= mMn( 48, rcSPS.getMaxDPBSize(1) + 3 );
   }
 
   if( ! m_iMaxEntriesinDPB )
@@ -1509,7 +1509,7 @@ ErrVal FrameMng::xSetOutputListMVC( FrameUnit* pcFrameUnit, UInt uiNumOfViews )
 
   for (UInt i = 0; i < uiNumOfViews; i++ )
   {
-      //===== get minimum POC for output =====
+      //===== get mMnimum POC for output =====
       Int     iMinPOCtoOuput = MSYS_INT_MAX;
       FUIter  iter;
       for( iter = m_cNonRefList.begin(); iter != m_cNonRefList.end(); iter++ )
@@ -1572,7 +1572,7 @@ ErrVal FrameMng::xSetOutputListMVC( FrameUnit* pcFrameUnit, const SliceHeader& r
 
   for (UInt i = 0; i < uiNumOfViews; i++ )
   {
-      //===== get minimum POC for output =====
+      //===== get mMnimum POC for output =====
       Int     iMinPOCtoOuput = MSYS_INT_MAX;
       FUIter  iter;
       for( iter = m_cNonRefList.begin(); iter != m_cNonRefList.end(); iter++ )

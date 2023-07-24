@@ -1431,10 +1431,10 @@ Void QuarterPelFilter::xUpdInterpBlnr(Int* pucDest, XPel* pucSrc, Int iDestStrid
     {
       Int iTemp1[2], iTemp2;
       int i, j;
-      sx1 = max(0, x + 1 - (int)uiSizeX);
-      sx2 = min(2, x + 1);
-      sy1 = max(0, y + 1 - (int)uiSizeY);
-      sy2 = min(2, y + 1);
+      sx1 = mMx(0, x + 1 - (int)uiSizeX);
+      sx2 = mMn(2, x + 1);
+      sy1 = mMx(0, y + 1 - (int)uiSizeY);
+      sy2 = mMn(2, y + 1);
 
       for(i = sy1; i < sy2; i++)
       {
@@ -1473,10 +1473,10 @@ Void QuarterPelFilter::xUpdInterp4Tap(Int* pucDest, XPel* pucSrc, Int iDestStrid
     {
       Int iTemp1[4], iTemp2;
       int i, j;
-      sx1 = max(0, x + 1 - (int)uiSizeX);
-      sx2 = min(4, x + 1);
-      sy1 = max(0, y + 1 - (int)uiSizeY);
-      sy2 = min(4, y + 1);
+      sx1 = mMx(0, x + 1 - (int)uiSizeX);
+      sx2 = mMn(4, x + 1);
+      sy1 = mMx(0, y + 1 - (int)uiSizeY);
+      sy2 = mMn(4, y + 1);
 
       for(i = sy1; i < sy2; i++)
       {
@@ -1519,10 +1519,10 @@ Void QuarterPelFilter::xUpdInterpChroma( Int* pucDest, Int iDestStride, XPel* pu
     {
       Int iTemp1[2], iTemp2;
       int i, j;
-      sx1 = max(0, x + 1 - (int)iSizeX);
-      sx2 = min(2, x + 1);
-      sy1 = max(0, y + 1 - (int)iSizeY);
-      sy2 = min(2, y + 1);
+      sx1 = mMx(0, x + 1 - (int)iSizeX);
+      sx2 = mMn(2, x + 1);
+      sy1 = mMx(0, y + 1 - (int)iSizeY);
+      sy2 = mMn(2, y + 1);
 
       for(i = sy1; i < sy2; i++)
       {
@@ -1563,7 +1563,7 @@ Void QuarterPelFilter::weightOnEnergy(UShort *usWeight, XPel* pucSrc, Int iSrcSt
     bitsShift ++;
 
   iSSD                                = ( iSSD + (1 << (bitsShift-1)) ) >> bitsShift;
-  *usWeight                           = (UShort) max( 0, min( 16, 20 - iSSD ) );
+  *usWeight                           = (UShort) mMx( 0, mMn( 16, 20 - iSSD ) );
 }
 
 H264AVC_NAMESPACE_END

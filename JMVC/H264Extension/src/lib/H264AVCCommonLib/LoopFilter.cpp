@@ -1518,7 +1518,7 @@ ErrVal LoopFilter::xSetLF_INTERLACEFieldLists( RefFrameList& rcTopFieldList, Ref
     rcBotFieldList.reset();
 
     ROTRS( NULL == pcRefFrameList, Err::m_nOK );
-    Int iMaxEntries = min( pcRefFrameList->getSize(), pcRefFrameList->getActive());
+    Int iMaxEntries = mMn( pcRefFrameList->getSize(), pcRefFrameList->getActive());
 
     for( Int iFrmIdx = 0; iFrmIdx < iMaxEntries; iFrmIdx++ )
     {

@@ -160,7 +160,7 @@ void print_usage_and_exit( int test, char* name, const char* message = 0 )
     fprintf (   stderr, "            4: upsampling (JVT-O041: AVC 6-tap (1/2 pel) + bilinear 1/4 pel)\n" );
     fprintf (   stderr, "  t       : number of temporal downsampling stages (default: 0)\n" );
     fprintf (   stderr, "  skip    : number of frames to skip at start (default: 0)\n" );
-    fprintf (   stderr, "  frms    : number of frames wanted in output file (default: max)\n" );
+    fprintf (   stderr, "  frms    : number of frames wanted in output file (default: mMx)\n" );
     fprintf (   stderr, "\n-------------------------- OVERLOADED --------------------------\n\n" );
     fprintf (   stderr, " -crop  <type> <parameters>\n");
     fprintf (   stderr, "   type   : 0: Sequence level,    1: Picture level\n");
@@ -201,9 +201,9 @@ void updateCropParametersFromFile(ResizeParameters * rp, FILE * crop_file, int m
   }
   
   print_usage_and_exit ((rp->m_iPosX&1||rp->m_iPosY&1||rp->m_iOutWidth&1||rp->m_iOutHeight&1), name, "Crop parameters must be event values");
-  print_usage_and_exit (((method==2)&&((rp->m_iOutWidth != min(rp->m_iInWidth, rp->m_iGlobWidth))||(rp->m_iOutHeight != min(rp->m_iInHeight, rp->m_iGlobHeight)))), name, "Crop dimensions must be the same as the minimal dimensions");
-  print_usage_and_exit ((rp->m_iOutWidth>max(rp->m_iInWidth,rp->m_iGlobWidth)||rp->m_iOutHeight>max(rp->m_iInHeight,rp->m_iGlobHeight)||rp->m_iOutWidth<min(rp->m_iInWidth,rp->m_iGlobWidth)||rp->m_iOutHeight<min(rp->m_iInHeight,rp->m_iGlobHeight)),name,"wrong crop window size");
-  print_usage_and_exit (!((rp->m_iPosX+rp->m_iOutWidth)<=max(rp->m_iInWidth,rp->m_iGlobWidth)&&(rp->m_iPosY+rp->m_iOutHeight)<=max(rp->m_iInHeight,rp->m_iGlobHeight)),name,"wrong crop window size and origin");
+  print_usage_and_exit (((method==2)&&((rp->m_iOutWidth != mMn(rp->m_iInWidth, rp->m_iGlobWidth))||(rp->m_iOutHeight != mMn(rp->m_iInHeight, rp->m_iGlobHeight)))), name, "Crop dimensions must be the same as the mMnimal dimensions");
+  print_usage_and_exit ((rp->m_iOutWidth>mMx(rp->m_iInWidth,rp->m_iGlobWidth)||rp->m_iOutHeight>mMx(rp->m_iInHeight,rp->m_iGlobHeight)||rp->m_iOutWidth<mMn(rp->m_iInWidth,rp->m_iGlobWidth)||rp->m_iOutHeight<mMn(rp->m_iInHeight,rp->m_iGlobHeight)),name,"wrong crop window size");
+  print_usage_and_exit (!((rp->m_iPosX+rp->m_iOutWidth)<=mMx(rp->m_iInWidth,rp->m_iGlobWidth)&&(rp->m_iPosY+rp->m_iOutHeight)<=mMx(rp->m_iInHeight,rp->m_iGlobHeight)),name,"wrong crop window size and origin");
 }
 
 
@@ -292,9 +292,9 @@ int main(int argc, char *argv[])
         rp->m_iOutHeight  = atoi  ( argv[i] );
         i++;
         print_usage_and_exit ((rp->m_iPosX&1||rp->m_iPosY&1||rp->m_iOutWidth&1||rp->m_iOutHeight&1), argv[0], "Crop parameters must be event values");
-        print_usage_and_exit (((method==2)&&((rp->m_iOutWidth != min(rp->m_iInWidth, rp->m_iGlobWidth))||(rp->m_iOutHeight != min(rp->m_iInHeight, rp->m_iGlobHeight)))), argv[0], "Crop dimensions must be the same as the minimal dimensions");
-        print_usage_and_exit ((rp->m_iOutWidth>max(rp->m_iInWidth,rp->m_iGlobWidth)||rp->m_iOutHeight>max(rp->m_iInHeight,rp->m_iGlobHeight)||rp->m_iOutWidth<min(rp->m_iInWidth,rp->m_iGlobWidth)||rp->m_iOutHeight<min(rp->m_iInHeight,rp->m_iGlobHeight)),argv[0],"wrong crop window size");
-        print_usage_and_exit (!((rp->m_iPosX+rp->m_iOutWidth)<=max(rp->m_iInWidth,rp->m_iGlobWidth)&&(rp->m_iPosY+rp->m_iOutHeight)<=max(rp->m_iInHeight,rp->m_iGlobHeight)),argv[0],"wrong crop window size and origin");
+        print_usage_and_exit (((method==2)&&((rp->m_iOutWidth != mMn(rp->m_iInWidth, rp->m_iGlobWidth))||(rp->m_iOutHeight != mMn(rp->m_iInHeight, rp->m_iGlobHeight)))), argv[0], "Crop dimensions must be the same as the mMnimal dimensions");
+        print_usage_and_exit ((rp->m_iOutWidth>mMx(rp->m_iInWidth,rp->m_iGlobWidth)||rp->m_iOutHeight>mMx(rp->m_iInHeight,rp->m_iGlobHeight)||rp->m_iOutWidth<mMn(rp->m_iInWidth,rp->m_iGlobWidth)||rp->m_iOutHeight<mMn(rp->m_iInHeight,rp->m_iGlobHeight)),argv[0],"wrong crop window size");
+        print_usage_and_exit (!((rp->m_iPosX+rp->m_iOutWidth)<=mMx(rp->m_iInWidth,rp->m_iGlobWidth)&&(rp->m_iPosY+rp->m_iOutHeight)<=mMx(rp->m_iInHeight,rp->m_iGlobHeight)),argv[0],"wrong crop window size and origin");
       }
       else
       {
@@ -401,17 +401,17 @@ int main(int argc, char *argv[])
   
   if (!crop_init)
   {
-    rp->m_iOutWidth = max(rp->m_iInWidth,rp->m_iGlobWidth);
-    rp->m_iOutHeight = max(rp->m_iInHeight,rp->m_iGlobHeight);
+    rp->m_iOutWidth = mMx(rp->m_iInWidth,rp->m_iGlobWidth);
+    rp->m_iOutHeight = mMx(rp->m_iInHeight,rp->m_iGlobHeight);
   }
   
   if (method == 2)
   {
     if (!crop_init)
     {
-      rp->m_iOutWidth = min(rp->m_iInWidth,rp->m_iGlobWidth);
-      rp->m_iOutHeight = min(rp->m_iInHeight,rp->m_iGlobHeight);
-      fprintf( stderr, "\nCrop parameters set to default 0,0,min_width,min_height\n");
+      rp->m_iOutWidth = mMn(rp->m_iInWidth,rp->m_iGlobWidth);
+      rp->m_iOutHeight = mMn(rp->m_iInHeight,rp->m_iGlobHeight);
+      fprintf( stderr, "\nCrop parameters set to default 0,0,mMn_width,mMn_height\n");
     }
   }
   
@@ -449,7 +449,7 @@ int main(int argc, char *argv[])
       {
         updateCropParametersFromFile(rp, crop_file, method, argv[0]);
       }
-      if ((rp->m_iOutWidth==min(rp->m_iInWidth, rp->m_iGlobWidth))&&(rp->m_iOutHeight==min(rp->m_iInHeight, rp->m_iGlobHeight)))
+      if ((rp->m_iOutWidth==mMn(rp->m_iInWidth, rp->m_iGlobWidth))&&(rp->m_iOutHeight==mMn(rp->m_iInHeight, rp->m_iGlobHeight)))
       {
         resample = false;
       }

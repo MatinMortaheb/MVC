@@ -332,7 +332,7 @@ ErrVal MbParser::read( MbDataAccess&  rcMbDataAccess,
   }
   m_bPrevIsSkipped = ! bIsCoded;
 
-  //===== terminating bits =====
+  //===== termMnating bits =====
   rbEndOfSlice = m_pcMbSymbolReadIf->isEndOfSlice();
 
   return Err::m_nOK;
